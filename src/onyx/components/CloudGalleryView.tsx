@@ -69,12 +69,24 @@ export function CloudGalleryView({
     return () => window.removeEventListener("onyx:s4-update", handleUpdate);
   }, []);
 
-  const allImages = useMemo(() => {
-    return listS4Images(currentUser, isAdmin ? folderFilter : "my");
-  }, [currentUser, isAdmin, folderFilter, refreshTrigger]);
+  const [allImages, setAllImages] = useState<S4CloudImage[]>([]);
+  const [stats, setStats] = useState({ count: 0, totalBytes: 0, formattedSize: "0 MB", folder: "" });
 
-  const stats = useMemo(() => {
-    return getS4StorageStats(currentUser, isAdmin ? folderFilter : "my");
+  useEffect(() => {
+    let isMounted = true;
+    const fetchCloudData = async () => {
+      const f = isAdmin ? folderFilter : "my";
+      const [images, newStats] = await Promise.all([
+        listS4Images(currentUser, f),
+        getS4StorageStats(currentUser, f)
+      ]);
+      if (isMounted) {
+        setAllImages(images);
+        setStats(newStats);
+      }
+    };
+    void fetchCloudData();
+    return () => { isMounted = false; };
   }, [currentUser, isAdmin, folderFilter, refreshTrigger]);
 
   const filteredImages = useMemo(() => {
@@ -105,9 +117,9 @@ export function CloudGalleryView({
     setSelectedIds([]);
   };
 
-  const handleDeleteSingle = (image: S4CloudImage) => {
+  const handleDeleteSingle = async (image: S4CloudImage) => {
     if (confirm(`Bild „${image.filename}“ wirklich aus deinem Cloud-Ordner löschen?`)) {
-      const ok = deleteS4Image(image.id);
+      const ok = await deleteS4Image(image.id);
       if (ok) {
         setSelectedIds((prev) => prev.filter((id) => id !== image.id));
         if (previewImage?.id === image.id) setPreviewImage(null);
@@ -116,10 +128,10 @@ export function CloudGalleryView({
     }
   };
 
-  const handleDeleteBatch = () => {
+  const handleDeleteBatch = async () => {
     if (selectedIds.length === 0) return;
     if (confirm(`${selectedIds.length} Bilder wirklich aus dem Cloud-Ordner löschen?`)) {
-      const count = deleteBatchS4Images(selectedIds);
+      const count = await deleteBatchS4Images(selectedIds);
       setSelectedIds([]);
       toast.success(`${count} Bilder erfolgreich gelöscht`);
     }

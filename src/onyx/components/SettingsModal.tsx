@@ -232,14 +232,44 @@ export function SettingsModal({
 
         <Section title="Cloud-Synchronisation & Backup">
           <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-3.5 space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pb-2">
               <span className="text-xs text-zinc-400">Cloud-Speicher:</span>
               <span className="text-xs font-semibold px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
                 🟢 Verbunden & Aktiv
               </span>
             </div>
 
-            <div className="flex items-center justify-between pt-1 border-t border-white/[0.06]">
+            <Row label="Mega S4 Access Key">
+              <input
+                type="text"
+                className="field-input text-xs font-mono"
+                value={settings.s4AccessKey || ""}
+                onChange={(e) => onChange({ s4AccessKey: e.target.value })}
+                placeholder="AKIA..."
+              />
+            </Row>
+
+            <Row label="Mega S4 Secret Key">
+              <input
+                type="password"
+                className="field-input text-xs font-mono"
+                value={settings.s4SecretKey || ""}
+                onChange={(e) => onChange({ s4SecretKey: e.target.value })}
+                placeholder="••••••••••••••••••••••••"
+              />
+            </Row>
+
+            <Row label="Mega S4 Region">
+              <input
+                type="text"
+                className="field-input text-xs"
+                value={settings.s4Region || "eu-central-1"}
+                onChange={(e) => onChange({ s4Region: e.target.value })}
+                placeholder="eu-central-1"
+              />
+            </Row>
+
+            <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
               <div className="space-y-0.5">
                 <span className="text-xs font-medium text-zinc-200">Automatische Cloud-Sicherung</span>
                 <p className="text-[11px] text-zinc-400">

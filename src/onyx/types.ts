@@ -71,6 +71,7 @@ export interface ApiSettings {
   s4Bucket: string;
   s4AccessKey?: string | undefined;
   s4SecretKey?: string | undefined;
+  s4Region?: string | undefined;
   s4AutoSave: boolean;
 }
 
