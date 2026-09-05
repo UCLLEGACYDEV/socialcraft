@@ -17,6 +17,7 @@ import {
   Upload,
   User,
   UserCheck,
+  Wand2,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -26,6 +27,7 @@ import {
   assembleClonePrompt,
 } from "../defaults";
 import { generateImageUnified, makeId, mockGenerateImage } from "../mock-api";
+import { analyzePersonaPhoto, type PersonaAnalysisProgress } from "../persona-analyzer";
 import { LS, readLS, usePersistentState } from "../storage";
 import type { AiCloneProfile, ApiSettings, ClonePlacement } from "../types";
 import { cn } from "@/lib/utils";
@@ -72,6 +74,11 @@ export function AiCloneView({
   const [testImageLoading, setTestImageLoading] = useState(false);
   const [testImages, setTestImages] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
+
+  // KI-Foto-Analysator State
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState<PersonaAnalysisProgress | null>(null);
+  const [lastAnalysisSummary, setLastAnalysisSummary] = useState<string[] | null>(null);
 
   // Active profile
   const fallbackProfile: AiCloneProfile = DEFAULT_CLONE_PROFILES[0]!;
@@ -121,10 +128,11 @@ export function AiCloneView({
       referenceImages: [],
       genderAge: "Mann/Frau, ca. 30 Jahre",
       hairFace: "Kurze dunkle Haare, markante Züge, fokussierter Blick",
+      tattoosFeatures: "Keine auffälligen Narben, reine Hautstruktur",
       wardrobe: "Schwarzer minimalistischer Pullover",
       lightingLook: "Dramatisches Seitenlicht, dunkles Studio",
       framingCamera: "Close-up Porträt, 85mm Linse",
-      negativePrompt: "Kein Grinsen, kein Cartoon, keine Verzerrungen",
+      negativePrompt: "Keine Pickel, keine Hautunreinheiten, kein Grinsen, kein Cartoon, keine Verzerrungen",
       customPrefix: "",
       placement: "hook_closing",
       updatedAt: new Date().toISOString(),
@@ -132,6 +140,47 @@ export function AiCloneView({
     setProfiles((prev) => [newProfile, ...prev]);
     setActiveId(newId);
     toast.success("Neues Profil angelegt");
+  };
+
+  // KI-Foto-Analysator Handler
+  const handleAnalyzePhoto = async (customImg?: string) => {
+    const targetImg = customImg || activeProfile.avatarUrl || activeProfile.referenceImages?.[0];
+    if (!targetImg) {
+      toast.error("Bitte lade zuerst ein Referenzfoto hoch.");
+      fileInputRef.current?.click();
+      return;
+    }
+
+    setIsAnalyzing(true);
+    setAnalysisProgress({ step: 1, totalSteps: 5, label: "Initialisiere Vision-Analyse…", percent: 15 });
+
+    const settings = readLS<ApiSettings>(LS.apiSettings, DEFAULT_API_SETTINGS);
+    try {
+      const res = await analyzePersonaPhoto(targetImg, {
+        apiKey: settings?.kieApiKey,
+        onProgress: (p) => setAnalysisProgress(p),
+      });
+
+      patchProfile({
+        genderAge: res.genderAge,
+        hairFace: res.hairFace,
+        tattoosFeatures: res.tattoosFeatures,
+        wardrobe: res.wardrobe,
+        lightingLook: res.lightingLook,
+        framingCamera: res.framingCamera,
+        negativePrompt: res.negativePrompt,
+        customPrefix: res.customPrefix,
+      });
+
+      setLastAnalysisSummary(res.analysisSummary);
+      toast.success("KI-Foto-Analyse abgeschlossen! Tattoos, Garderobe & Licht synchronisiert (Haut bereinigt).");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Fehler bei der KI-Foto-Analyse";
+      toast.error(msg);
+    } finally {
+      setIsAnalyzing(false);
+      setAnalysisProgress(null);
+    }
   };
 
   // Delete profile
@@ -375,6 +424,21 @@ export function AiCloneView({
                 className="field-input text-xs"
               />
             </div>
+
+            <div>
+              <label className="text-[11px] font-medium text-zinc-400 block mb-1 flex items-center gap-1">
+                <Sparkles className="h-3 w-3 text-orange-400" /> Tattoos, Körperschmuck & Feinheiten
+              </label>
+              <input
+                value={activeProfile.tattoosFeatures || ""}
+                onChange={(e) => patchProfile({ tattoosFeatures: e.target.value })}
+                placeholder="z. B. Geometrisches Unterarm-Tattoo, Siegelring, definierte Kieferkontur, reine Haut"
+                className="field-input text-xs"
+              />
+              <span className="text-[10px] text-zinc-500 mt-0.5 block">
+                Permanente Erkennungsmerkmale (Tattoos, Piercings, Brille). Temporäre Makel (Pickel) werden automatisch herausgefiltert.
+              </span>
+            </div>
           </div>
 
           {/* Section 2: Look, Styling & Beleuchtung */}
@@ -555,6 +619,84 @@ export function AiCloneView({
                 <Plus className="h-5 w-5 text-orange-400" />
                 <span className="text-[10px] font-medium">Hinzufügen</span>
               </button>
+            </div>
+
+            {/* ── KI-Foto-Analysator Box (Persona Vision) ─────────── */}
+            <div className="rounded-xl border border-orange-500/30 bg-gradient-to-b from-orange-500/10 via-[#16121b] to-[#110F17] p-4 space-y-3 shadow-[0_0_25px_-8px_rgba(255,77,23,0.3)]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-orange-500/20 text-orange-400">
+                    <Sparkles className="h-3.5 w-3.5" />
+                  </span>
+                  <div>
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-white">KI-Foto-Analysator</h4>
+                    <p className="text-[10px] text-zinc-400">Scannt Tattoos, Haare, Garderobe & Licht – filtert Pickel automatisch heraus</p>
+                  </div>
+                </div>
+                <span className="rounded-full border border-orange-500/40 bg-orange-500/15 px-2 py-0.5 text-[10px] font-semibold text-orange-400">
+                  Vision AI
+                </span>
+              </div>
+
+              {/* Scan trigger button */}
+              <button
+                type="button"
+                disabled={isAnalyzing || (!activeProfile.avatarUrl && (!activeProfile.referenceImages || activeProfile.referenceImages.length === 0))}
+                onClick={() => handleAnalyzePhoto()}
+                className={cn(
+                  "w-full flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-xs font-semibold transition-all shadow-md",
+                  isAnalyzing
+                    ? "bg-orange-500/30 text-orange-200 cursor-not-allowed border border-orange-500/40"
+                    : (!activeProfile.avatarUrl && (!activeProfile.referenceImages || activeProfile.referenceImages.length === 0))
+                      ? "border border-white/10 bg-white/5 text-zinc-500 cursor-not-allowed"
+                      : "cryptox-orange-btn hover:shadow-[0_0_20px_-3px_rgba(255,77,23,0.6)] cursor-pointer"
+                )}
+              >
+                {isAnalyzing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin text-orange-300" />
+                    <span>{analysisProgress?.label || "Analysiere Feinheiten…"}</span>
+                  </>
+                ) : (
+                  <>
+                    <Wand2 className="h-4 w-4" />
+                    <span>Foto mit KI analysieren & Prompt zuschneiden</span>
+                  </>
+                )}
+              </button>
+
+              {/* Active Scanning Progress Bar */}
+              {isAnalyzing && analysisProgress && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-[11px] text-zinc-300 font-mono">
+                    <span className="truncate max-w-[240px]">Schritt {analysisProgress.step}/5: {analysisProgress.label}</span>
+                    <span className="text-orange-400 font-bold">{analysisProgress.percent}%</span>
+                  </div>
+                  <div className="h-2 w-full overflow-hidden rounded-full bg-black/60 border border-white/10">
+                    <div
+                      className="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-orange-400 transition-all duration-300 rounded-full shadow-[0_0_10px_rgba(255,77,23,0.8)]"
+                      style={{ width: `${analysisProgress.percent}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Analysis Results Summary */}
+              {lastAnalysisSummary && !isAnalyzing && (
+                <div className="rounded-lg border border-white/10 bg-black/40 p-3 space-y-1.5 text-[11px]">
+                  <div className="text-[10px] font-semibold uppercase tracking-wider text-orange-400 flex items-center gap-1.5">
+                    <Check className="h-3 w-3 text-emerald-400" /> Letzter Analyse-Befund übernommen:
+                  </div>
+                  <ul className="space-y-1 text-zinc-300">
+                    {lastAnalysisSummary.map((item, i) => (
+                      <li key={i} className="flex items-start gap-1.5 leading-tight">
+                        <span className="text-orange-400 mt-0.5">•</span>
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </div>
 

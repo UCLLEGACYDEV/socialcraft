@@ -1,4 +1,5 @@
 import { fetchKieCredits, generateNanoBananaImage, type KieModel } from "./kie-api";
+import { ANCHORED_KIE_API_KEY } from "./defaults";
 import type { ApiSettings, CreditStatus, ImageProvider, SlideContent, SlideRole } from "./types";
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -126,19 +127,20 @@ export async function generateImageUnified(params: GenerateImageParams): Promise
 }> {
   const { slideNumber, prompt, settings, referenceImages, aspectRatio = "4:5", signal, onProgress } = params;
 
-  // If user has a KIE.AI key and provider is kie-ai (or default), use real Nano-Banana 2 API!
-  const hasKieKey = Boolean(settings?.kieApiKey?.trim());
+  // Determine effective API key: settings input or anchored fallback
+  const effectiveKey = (settings?.kieApiKey?.trim() || ANCHORED_KIE_API_KEY).trim();
+  const hasKieKey = Boolean(effectiveKey);
   const useKieAi = hasKieKey && (settings?.provider === "kie-ai" || settings?.provider === "mock" || !settings?.provider);
 
-  if (useKieAi && settings?.kieApiKey) {
+  if (useKieAi && effectiveKey) {
     try {
       const result = await generateNanoBananaImage({
-        model: (settings.kieModel || "nano-banana-2") as KieModel,
-        apiKey: settings.kieApiKey,
+        model: (settings?.kieModel || "nano-banana-2") as KieModel,
+        apiKey: effectiveKey,
         prompt: prompt || `Instagram 4:5 Carousel Slide ${slideNumber}, dark aesthetic, cinematic rim light, professional branding`,
         ...(referenceImages && referenceImages.length > 0 ? { imageInput: referenceImages } : {}),
         aspectRatio: aspectRatio,
-        resolution: settings.kieResolution || "1K",
+        resolution: settings?.kieResolution || "1K",
         outputFormat: "jpg",
         ...(signal !== undefined ? { signal } : {}),
         ...(onProgress !== undefined ? { onProgress } : {}),
@@ -187,7 +189,7 @@ export async function mockGenerateImage(slideNumber: number, signal?: AbortSigna
 }
 
 export async function getLiveCredits(settings?: ApiSettings): Promise<CreditStatus> {
-  const key = settings?.kieApiKey?.trim();
+  const key = (settings?.kieApiKey?.trim() || ANCHORED_KIE_API_KEY).trim();
   if (key) {
     const liveKie = await fetchKieCredits(key);
     return {
@@ -199,7 +201,7 @@ export async function getLiveCredits(settings?: ApiSettings): Promise<CreditStat
 
   return {
     loading: false,
-    kie: { credits: 1000, formatted: "1.000 cr", success: true },
+    kie: { credits: 0, formatted: "Key hinterlegen", success: false },
     ai33: { credits: 210, formatted: "210 cr", success: true },
   };
 }

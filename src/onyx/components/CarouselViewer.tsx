@@ -1,4 +1,4 @@
-import { Download, RotateCcw, Sparkles, X } from "lucide-react";
+import { ArrowLeft, Download, RotateCcw, Sparkles, X } from "lucide-react";
 import type { ApiSettings, BrandKit, SlideContent } from "../types";
 
 interface CarouselViewerProps {
@@ -48,9 +48,11 @@ export function CarouselViewer({
           <button
             type="button"
             onClick={onReset}
-            className="flex items-center gap-1.5 rounded-full border border-white/[0.1] bg-white/[0.03] px-3.5 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/[0.08] hover:text-white transition-colors"
+            className="flex items-center gap-1.5 rounded-full border border-orange-500/40 bg-orange-500/10 px-4 py-2 text-xs font-semibold text-orange-300 hover:bg-orange-500/20 hover:text-white transition-colors shadow-sm cursor-pointer"
+            title="Zurück zum Karussell-Generator / Thema ändern"
           >
-            <RotateCcw className="h-3.5 w-3.5" /> Neues Karussell
+            <ArrowLeft className="h-3.5 w-3.5 text-orange-400" />
+            <span>Zurück zum Generator</span>
           </button>
           {isGeneratingImages ? (
             <button

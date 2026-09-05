@@ -151,6 +151,7 @@ export interface AiCloneProfile {
   referenceImages: string[];
   genderAge: string;
   hairFace: string;
+  tattoosFeatures?: string;
   wardrobe: string;
   lightingLook: string;
   framingCamera: string;

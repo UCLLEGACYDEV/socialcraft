@@ -1,5 +1,6 @@
 import { useState } from "react";
 import {
+  ArrowLeft,
   ArrowRight,
   Check,
   Cpu,
@@ -40,6 +41,7 @@ interface StudioCarouselWorkspaceProps {
   onOpenBrandKit: () => void;
   onOpenSettings?: () => void;
   currentUser?: User | null;
+  onNavigateLanding?: () => void;
 }
 
 // 4 Psychologische Hook-Typen mit echten Generierungs-Modifikatoren
@@ -162,6 +164,17 @@ export function StudioCarouselWorkspace({
       <div className="cryptox-card p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
+            {onNavigateLanding && (
+              <button
+                type="button"
+                onClick={onNavigateLanding}
+                className="mr-1 inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white hover:bg-white/[0.1] hover:border-white/20 transition-all cursor-pointer shadow-sm"
+                title="Zurück zum Dashboard / Landing"
+              >
+                <ArrowLeft className="h-3.5 w-3.5 text-orange-400" />
+                <span>Startseite</span>
+              </button>
+            )}
             <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-[#FF3B00] to-[#FFA149] text-white shadow-[0_0_15px_#FF4D17]">
               <Sparkles className="h-4 w-4" />
             </span>

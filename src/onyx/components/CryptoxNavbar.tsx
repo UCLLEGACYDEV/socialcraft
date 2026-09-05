@@ -107,11 +107,11 @@ export function CryptoxNavbar({
             <button
               type="button"
               onClick={onNavigateLanding}
-              className="hidden lg:inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-all"
-              title="Zurück zur Hauptseite"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[0.1] hover:border-white/20 transition-all cursor-pointer shadow-sm"
+              title="Zurück zur Startseite / Dashboard"
             >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Startseite</span>
+              <ArrowLeft className="h-3.5 w-3.5 text-orange-400" />
+              <span className="hidden sm:inline">Startseite</span>
             </button>
           )}
         </div>

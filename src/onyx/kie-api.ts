@@ -14,6 +14,7 @@
  */
 
 import type { CreditBalanceInfo } from "./types";
+import { ANCHORED_KIE_API_KEY } from "./defaults";
 
 export interface KieCreditResult extends CreditBalanceInfo {
   error?: string;
@@ -93,8 +94,8 @@ const KIE_BASE_URL = "https://api.kie.ai/api/v1";
  * 1. Fetch live credit balance from KIE.AI
  * GET https://api.kie.ai/api/v1/chat/credit
  */
-export async function fetchKieCredits(apiKey: string): Promise<KieCreditResult> {
-  const cleanKey = apiKey?.trim();
+export async function fetchKieCredits(apiKey?: string): Promise<KieCreditResult> {
+  const cleanKey = (apiKey?.trim() || ANCHORED_KIE_API_KEY).trim();
   if (!cleanKey) {
     return {
       credits: 0,
@@ -166,7 +167,7 @@ export async function fetchKieCredits(apiKey: string): Promise<KieCreditResult> 
  * 2. Create Generation Task on Engine
  */
 export async function createNanoBananaTask(params: NanoBananaTaskParams): Promise<string> {
-  const cleanKey = params.apiKey?.trim();
+  const cleanKey = (params.apiKey?.trim() || ANCHORED_KIE_API_KEY).trim();
   if (!cleanKey) {
     throw new Error("API-Key fehlt. Bitte im Admin-Bereich hinterlegen.");
   }

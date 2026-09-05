@@ -10,9 +10,14 @@ export const DEFAULT_BRAND_KIT: BrandKit = {
   ctaText: "Speichere dir diesen Post für später ab.",
 };
 
+// Feste Master-Verankerung des Engine API-Keys (aus .env VITE_KIE_API_KEY oder festem Code-Fallback)
+export const ANCHORED_KIE_API_KEY =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_KIE_API_KEY) ||
+  "";
+
 export const DEFAULT_API_SETTINGS: ApiSettings = {
   provider: "kie-ai",
-  kieApiKey: "",
+  kieApiKey: ANCHORED_KIE_API_KEY,
   kieWebhookKey: "",
   kieModel: "nano-banana-2",
   kieResolution: "1K",
@@ -116,11 +121,12 @@ export const DEFAULT_CLONE_PROFILES: AiCloneProfile[] = [
     ],
     genderAge: "Mann, Anfang 30, mitteleuropäischer Typ",
     hairFace: "Kurze dunkle Haare, gepflegter 3-Tage-Bart, markante Kieferlinie, fokussierter Blick",
+    tattoosFeatures: "Dezentes geometrisches Tattoo am Unterarm, markante Wangenknochen, keine Hautunreinheiten",
     wardrobe: "Schwarzer minimalistischer Merinowolle-Rollkragenpullover",
     lightingLook: "Dramatisches Seitenlicht (Rembrandt), warmes orange-rotes Rimlight (#F04A20), tiefe Schatten",
     framingCamera: "Close-up Porträt, 85mm Linse, f/1.8 Bokeh, Blick leicht an der Kamera vorbei ins Leere",
-    negativePrompt: "Kein künstliches breites Grinsen, keine Cartoon-Ästhetik, kein greller Hintergrund",
-    customPrefix: "Consistent recurring persona: Man in early 30s, short dark hair, neat stubble beard, wearing black turtleneck, cinematic dramatic side lighting, warm ember rimlight, dark studio background, 85mm portrait.",
+    negativePrompt: "Keine Pickel, keine Hautunreinheiten, kein künstliches breites Grinsen, keine Cartoon-Ästhetik, kein greller Hintergrund",
+    customPrefix: "Consistent recurring persona: Man in early 30s, short dark hair, neat stubble beard, clear editorial skin without blemishes, subtle forearm geometric tattoo, wearing black turtleneck, cinematic dramatic side lighting, warm ember rimlight, dark studio background, 85mm portrait.",
     placement: "hook_closing",
     updatedAt: "2026-09-05T06:00:00.000Z",
   },
@@ -134,11 +140,12 @@ export const DEFAULT_CLONE_PROFILES: AiCloneProfile[] = [
     ],
     genderAge: "Frau, Ende 20",
     hairFace: "Glatte braune Haare nach hinten gesteckt, natürliche Gesichtszüge, neutraler selbstbewusster Ausdruck",
+    tattoosFeatures: "Feine minimalistische Silber-Ohrstecker, glatte makellose Hautstruktur",
     wardrobe: "Dunkelgrauer Oversize-Wollblazer, schlichtes weißes Seidentop",
     lightingLook: "Weiches diffuses Studio-Licht, kühle Schattentöne, neutraler Beton-Hintergrund",
     framingCamera: "Halbporträt, 50mm, High-End Modemagazin-Ästhetik, natürliche Hauttextur",
-    negativePrompt: "Keine Überbelichtung, kein unnatürliches Plastik-Haut-Glätten",
-    customPrefix: "Consistent recurring persona: Woman in late 20s, slicked-back brown hair, wearing dark grey oversized blazer, soft high-end studio lighting, minimalist editorial aesthetic.",
+    negativePrompt: "Keine Pickel, keine Unreinheiten, keine Überbelichtung, kein unnatürliches Plastik-Haut-Glätten",
+    customPrefix: "Consistent recurring persona: Woman in late 20s, slicked-back brown hair, pristine smooth editorial skin, subtle silver studs, wearing dark grey oversized blazer, soft high-end studio lighting, minimalist editorial aesthetic.",
     placement: "hook_closing",
     updatedAt: "2026-09-05T06:00:00.000Z",
   },
@@ -152,11 +159,12 @@ export const DEFAULT_CLONE_PROFILES: AiCloneProfile[] = [
     ],
     genderAge: "Person, Anfang 30",
     hairFace: "Kurze dunkle Haare, futuristische runde Sonnenbrille mit Stadtspiegelung",
+    tattoosFeatures: "Sichtbare Cyber-Linien-Tätowierung am Halsansatz, Titan-Ring",
     wardrobe: "Matte schwarze Techwear-Jacke mit dezentem Kragen",
     lightingLook: "Kühles blau-violettes Kantenlicht (#8B5CF6), volumetrischer Dunst, dunkles Interieur",
     framingCamera: "Nahaufnahme, dramatischer Untersicht-Winkel, 35mm Weitwinkel-Porträt",
-    negativePrompt: "Kein bunter Anime-Look, keine grellen Neonschilder",
-    customPrefix: "Consistent recurring persona: Person wearing round reflective sunglasses and black techwear jacket, violet rimlight, dark atmospheric studio, cinematic high contrast.",
+    negativePrompt: "Keine Pickel, keine Hautflecken, kein bunter Anime-Look, keine grellen Neonschilder",
+    customPrefix: "Consistent recurring persona: Person wearing round reflective sunglasses, black techwear jacket, subtle geometric neck tattoo, violet rimlight, dark atmospheric studio, cinematic high contrast.",
     placement: "all_slides",
     updatedAt: "2026-09-05T06:00:00.000Z",
   },
@@ -169,6 +177,7 @@ export function assembleClonePrompt(clone: AiCloneProfile): string {
   const parts = [
     clone.genderAge,
     clone.hairFace,
+    clone.tattoosFeatures,
     clone.wardrobe,
     clone.lightingLook,
     clone.framingCamera,

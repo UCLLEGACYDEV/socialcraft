@@ -843,6 +843,7 @@ function OnyxStudio() {
                 onOpenBrandKit={() => setShowBrandKit(true)}
                 onOpenSettings={() => setShowSettings(true)}
                 currentUser={currentUser}
+                onNavigateLanding={() => setCurrentView("landing")}
               />
             ) : (
               <div className="pt-4">
