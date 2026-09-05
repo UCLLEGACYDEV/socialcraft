@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Loader2, Play, Sparkles, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Cpu, Loader2, Play, Sparkles, X } from "lucide-react";
 import { parseBlock } from "../parse-prompt-block";
 import { mockNameTopic } from "../mock-api";
-import type { ParsedCarousel, SeriesJob, JobStatus } from "../types";
+import type { ApiSettings, ParsedCarousel, SeriesJob, JobStatus } from "../types";
 import { SlideCard } from "./SlideCard";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +35,8 @@ interface SeriesQueueProps {
   onEditSlide: (jobId: string, slideId: string) => void;
   onRerollSlide: (jobId: string, slideId: string) => void;
   onDownloadSlide: (jobId: string, slideId: string) => void;
+  settings: ApiSettings;
+  onChangeSettings: (patch: Partial<ApiSettings>) => void;
 }
 
 export function SeriesQueue({
@@ -48,6 +50,8 @@ export function SeriesQueue({
   onEditSlide,
   onRerollSlide,
   onDownloadSlide,
+  settings,
+  onChangeSettings,
 }: SeriesQueueProps) {
   const [text, setText] = useState("");
   const [titles, setTitles] = useState<Record<number, string>>({});
@@ -103,6 +107,80 @@ export function SeriesQueue({
               <Play className="h-3.5 w-3.5" /> Queue starten
             </button>
           )}
+        </div>
+
+        {/* ── Model & Resolution Selector ─────────────────────────── */}
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 space-y-3">
+          <div className="flex items-center gap-2 text-xs font-bold text-white/70 uppercase tracking-wider">
+            <Cpu className="h-3.5 w-3.5 text-[#FF6A1F]" />
+            <span>Render-Engine für diese Serie</span>
+          </div>
+
+          {/* Model Buttons */}
+          <div className="space-y-1.5">
+            <span className="text-[10px] text-white/40 uppercase font-semibold tracking-wider">Modell</span>
+            <div className="flex flex-wrap gap-1.5">
+              {([
+                { id: "nano-banana-2", label: "Nano-Banana 2" },
+                { id: "nano-banana-pro", label: "Nano-Banana Pro" },
+                { id: "gpt-image-2-text-to-image", label: "GPT Image 2" },
+              ] as const).map((m) => (
+                <button
+                  key={m.id}
+                  type="button"
+                  onClick={() => onChangeSettings({ kieModel: m.id })}
+                  className={cn(
+                    "rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all",
+                    settings.kieModel === m.id
+                      ? "border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF6A1F] shadow-[0_0_12px_-4px_#FF4D17]"
+                      : "border-white/10 bg-white/[0.03] text-white/60 hover:text-white hover:border-white/20",
+                  )}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Resolution — only for Nano-Banana models */}
+          {settings.kieModel !== "gpt-image-2-text-to-image" && (
+            <div className="space-y-1.5">
+              <span className="text-[10px] text-white/40 uppercase font-semibold tracking-wider">Auflösung</span>
+              <div className="flex gap-1.5">
+                {(["1K", "2K", "4K"] as const).map((res) => (
+                  <button
+                    key={res}
+                    type="button"
+                    onClick={() => onChangeSettings({ kieResolution: res })}
+                    className={cn(
+                      "flex-1 rounded-xl border py-1.5 text-xs font-bold transition-all",
+                      settings.kieResolution === res
+                        ? "border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF6A1F]"
+                        : "border-white/10 bg-white/[0.03] text-white/60 hover:text-white",
+                    )}
+                  >
+                    {res}
+                    <span className="ml-1 text-[9px] opacity-60">
+                      {res === "1K" ? "(Schnell)" : res === "2K" ? "(HD)" : "(Ultra)"}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Status badge */}
+          <div className="flex items-center gap-2 pt-1">
+            <div className={cn(
+              "h-2 w-2 rounded-full",
+              settings.kieApiKey?.trim() ? "bg-emerald-400 shadow-[0_0_6px_#34d399]" : "bg-white/20"
+            )} />
+            <span className="text-[11px] text-white/50">
+              {settings.kieApiKey?.trim()
+                ? `KIE.AI verbunden · ${settings.kieModel} · ${settings.kieModel !== "gpt-image-2-text-to-image" ? settings.kieResolution : "Auto-Size"}`
+                : "Kein KIE.AI Key — Serie läuft im Demo-Modus"}
+            </span>
+          </div>
         </div>
 
         <textarea

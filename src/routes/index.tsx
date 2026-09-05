@@ -392,7 +392,7 @@ function OnyxStudio() {
         for (const slide of job.slides) {
           if (queueAbortRef.current) break;
           updateJobSlide(id, slide.id, { isGeneratingImage: true });
-          const res = await mockGenerateImage(slide.slideNumber);
+          const res = await generateImageUnified({ slideNumber: slide.id ? slide.slideNumber : 1, prompt: slide.visualPrompt, settings });
           done += 1;
           updateJobSlide(id, slide.id, { imageUrl: res.imageUrl, isGeneratingImage: false });
           updateJob(id, { slidesDone: done });
@@ -617,7 +617,8 @@ function OnyxStudio() {
               onRerollSlide={(jobId, slideId) => {
                 void (async () => {
                   updateJobSlide(jobId, slideId, { isGeneratingImage: true });
-                  const res = await mockGenerateImage(1);
+                  const slide = queue.find((j) => j.id === jobId)?.slides?.find((s) => s.id === slideId);
+                  const res = await generateImageUnified({ slideNumber: slide?.slideNumber ?? 1, ...(slide?.visualPrompt ? { prompt: slide.visualPrompt } : {}), settings });
                   updateJobSlide(jobId, slideId, {
                     imageUrl: `${res.imageUrl}&v=${Date.now()}`,
                     isGeneratingImage: false,
@@ -625,6 +626,8 @@ function OnyxStudio() {
                 })();
               }}
               onDownloadSlide={(jobId, slideId) => void downloadFromJob(jobId, slideId)}
+              settings={settings}
+              onChangeSettings={patchSettings}
             />
           )}
 
