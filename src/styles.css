@@ -170,27 +170,31 @@
 }
 
 @utility glass-card {
-  background-color: oklch(1 0 0 / 4%);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  backdrop-filter: blur(14px);
-  transition:
-    border-color 200ms ease,
-    box-shadow 200ms ease;
+  background: rgba(16, 14, 20, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  backdrop-filter: blur(24px);
+  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  transition: all 250ms ease;
+
+  &:hover {
+    border-color: rgba(255, 85, 25, 0.35);
+    box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.9), 0 0 25px -8px rgba(255, 77, 23, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  }
 }
 
 @utility glass-card-hero {
-  background-color: oklch(1 0 0 / 5%);
-  border: 1px solid oklch(1 0 0 / 10%);
-  border-radius: var(--radius-2xl);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 24px 70px -34px oklch(0.635 0.208 34 / 60%);
+  background: rgba(12, 10, 16, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  backdrop-filter: blur(32px);
+  box-shadow: 0 35px 100px -20px rgba(0, 0, 0, 0.95), 0 0 45px -12px rgba(255, 77, 23, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.16);
 }
 
 /* Warm rim glow used on hover for cards and slide tiles. */
 @utility ember-glow {
-  border-color: oklch(0.635 0.208 34 / 45%);
-  box-shadow: 0 0 0 1px oklch(0.635 0.208 34 / 18%), 0 18px 50px -26px oklch(0.635 0.208 34 / 70%);
+  border-color: rgba(255, 85, 25, 0.45);
+  box-shadow: 0 0 0 1px rgba(255, 85, 25, 0.2), 0 20px 60px -20px rgba(255, 77, 23, 0.4);
 }
 
 /* Centered pill navigation like the reference header. */
@@ -199,10 +203,10 @@
   align-items: center;
   gap: 0.125rem;
   border-radius: 9999px;
-  border: 1px solid oklch(1 0 0 / 10%);
-  background-color: oklch(1 0 0 / 5%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background-color: rgba(20, 16, 24, 0.65);
   padding: 0.25rem;
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(20px);
 }
 
 @utility mono-label {
@@ -216,20 +220,21 @@
 
 @utility field-input {
   width: 100%;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border);
-  background-color: oklch(1 0 0 / 3.5%);
-  padding: 0.6rem 0.85rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background-color: rgba(14, 12, 18, 0.65);
+  padding: 0.65rem 0.95rem;
   font-family: var(--font-sans);
   font-size: 0.875rem;
   line-height: 1.5;
-  color: var(--color-foreground);
+  color: #FFFFFF;
   outline: none;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
 
   &:focus {
-    border-color: oklch(0.635 0.208 34 / 60%);
-    box-shadow: 0 0 0 1px oklch(0.635 0.208 34 / 40%);
+    border-color: rgba(255, 85, 25, 0.55);
+    background-color: rgba(20, 16, 26, 0.85);
+    box-shadow: 0 0 0 1px rgba(255, 85, 25, 0.25), 0 0 25px -5px rgba(255, 77, 23, 0.3);
   }
 }
 

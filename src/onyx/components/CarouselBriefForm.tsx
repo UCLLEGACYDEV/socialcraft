@@ -47,20 +47,20 @@ export function CarouselBriefForm({
         : "Ausführlicher Deep-Dive · Ideal für Step-by-Step Guides & Stories";
 
   return (
-    <div className="glass-card-hero space-y-6 p-5 sm:p-7">
+    <div className="cryptox-card-elevated relative overflow-hidden space-y-6 p-5 sm:p-7 border border-white/[0.12]">
       {/* ── Chat / Prompt Input Bar ───────────────────────────────── */}
       <section className="space-y-2.5">
         <div className="flex items-center justify-between">
-          <label htmlFor="topic-chat-input" className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            <Sparkles className="h-3.5 w-3.5 text-primary-bright" />
+          <label htmlFor="topic-chat-input" className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+            <Sparkles className="h-4 w-4 text-orange-400" />
             Karussell-Prompt & Thema
           </label>
-          <span className="hidden text-[11px] text-muted-foreground sm:inline-block">
-            Tipp: <kbd className="rounded bg-foreground/10 px-1.5 py-0.5 font-mono text-[10px] text-foreground">Strg</kbd> + <kbd className="rounded bg-foreground/10 px-1.5 py-0.5 font-mono text-[10px] text-foreground">Enter</kbd> zum Starten
+          <span className="hidden text-[11px] text-zinc-500 sm:inline-block">
+            Tipp: <kbd className="rounded bg-white/[0.08] px-1.5 py-0.5 font-mono text-[10px] text-zinc-300">Strg</kbd> + <kbd className="rounded bg-white/[0.08] px-1.5 py-0.5 font-mono text-[10px] text-zinc-300">Enter</kbd> zum Starten
           </span>
         </div>
 
-        <div className="relative rounded-2xl border border-border/80 bg-foreground/[0.03] p-3.5 transition-all duration-200 focus-within:border-primary/60 focus-within:bg-foreground/[0.04] focus-within:shadow-[0_0_35px_-10px_var(--primary)]">
+        <div className="relative rounded-2xl border border-white/[0.1] bg-[#0E0C13]/90 p-4 transition-all duration-200 focus-within:border-orange-500/60 focus-within:shadow-[0_0_35px_-10px_rgba(255,77,23,0.3)]">
           <textarea
             id="topic-chat-input"
             rows={3}
@@ -73,19 +73,19 @@ export function CarouselBriefForm({
               }
             }}
             placeholder="Worüber möchtest du ein Karussell erstellen? Beschreibe deine Idee, Stichpunkte oder füge deinen Entwurf ein…"
-            className="w-full resize-none bg-transparent text-sm sm:text-base leading-relaxed text-foreground placeholder:text-muted-foreground/60 outline-none"
+            className="w-full resize-none bg-transparent text-sm sm:text-base leading-relaxed text-white placeholder:text-zinc-500 outline-none"
           />
 
           {/* Quick suggestions if empty */}
           {!values.topic && (
-            <div className="flex flex-wrap items-center gap-1.5 pt-2 pb-1 border-t border-border/40">
-              <span className="text-[11px] font-medium text-muted-foreground">Vorschläge:</span>
+            <div className="flex flex-wrap items-center gap-1.5 pt-2 pb-1 border-t border-white/[0.08]">
+              <span className="text-[11px] font-medium text-zinc-400">Vorschläge:</span>
               {SUGGESTED_TOPICS.map((sug) => (
                 <button
                   key={sug}
                   type="button"
                   onClick={() => onChange({ topic: sug })}
-                  className="rounded-full border border-border bg-foreground/[0.04] px-2.5 py-0.5 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-foreground"
+                  className="rounded-full border border-white/[0.08] bg-white/[0.03] px-2.5 py-0.5 text-xs text-zinc-400 transition-colors hover:border-orange-500/50 hover:bg-orange-500/10 hover:text-white"
                 >
                   {sug}
                 </button>
@@ -94,14 +94,14 @@ export function CarouselBriefForm({
           )}
 
           {/* Chat input footer bar */}
-          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-3">
+          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.08] pt-3">
             <div className="flex flex-1 items-center gap-2 min-w-56">
-              <Users className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <Users className="h-3.5 w-3.5 text-zinc-500 shrink-0" />
               <input
                 value={values.audience}
                 onChange={(e) => onChange({ audience: e.target.value })}
                 placeholder="Zielgruppe (optional, z. B. Gründer:innen)"
-                className="w-full bg-transparent text-xs text-foreground placeholder:text-muted-foreground/60 outline-none"
+                className="w-full bg-transparent text-xs text-white placeholder:text-zinc-500 outline-none"
               />
             </div>
 
@@ -110,11 +110,11 @@ export function CarouselBriefForm({
                 type="button"
                 onClick={onSubmit}
                 disabled={isGenerating || !values.topic.trim()}
-                className="inline-flex items-center gap-2 rounded-full bg-primary py-1.5 pl-4 pr-1.5 text-xs font-semibold text-primary-foreground shadow-[0_8px_24px_-8px_var(--primary)] transition-all hover:bg-primary-bright disabled:cursor-not-allowed disabled:opacity-40"
+                className="cryptox-orange-btn !py-1.5 !pl-4 !pr-2 text-xs font-semibold disabled:opacity-40"
               >
                 <span>{isGenerating ? "Erzeuge…" : `${values.slideCount} Slides generieren`}</span>
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-foreground/20">
-                  <ArrowRight className="h-3.5 w-3.5" />
+                <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20">
+                  <ArrowRight className="h-3 w-3" />
                 </span>
               </button>
             </div>
@@ -123,14 +123,14 @@ export function CarouselBriefForm({
       </section>
 
       {/* ── Slide Count Slider Section ───────────────────────────── */}
-      <section className="rounded-2xl border border-border/70 bg-foreground/[0.02] p-4 sm:p-5 space-y-4">
+      <section className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 sm:p-5 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="space-y-0.5">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 Karussell-Umfang
               </span>
-              <span className="rounded-full border border-primary/40 bg-primary/15 px-2.5 py-0.5 text-xs font-bold text-primary-bright">
+              <span className="rounded-full border border-orange-500/40 bg-orange-500/15 px-2.5 py-0.5 text-xs font-bold text-orange-400">
                 {values.slideCount} {values.slideCount === 1 ? "Slide" : "Slides"}
               </span>
             </div>

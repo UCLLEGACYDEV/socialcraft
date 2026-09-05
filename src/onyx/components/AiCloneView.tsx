@@ -211,43 +211,43 @@ export function AiCloneView({
   return (
     <div className="space-y-6">
       {/* ── Top Header Bar ───────────────────────────────────────── */}
-      <div className="glass-card-hero p-5 sm:p-7 space-y-4">
+      <div className="cryptox-card relative overflow-hidden space-y-5 p-6 sm:p-7 border border-white/[0.08]">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/20 text-primary-bright">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-orange-500/20 text-orange-400 shadow-[0_0_15px_-4px_rgba(255,77,23,0.5)]">
                 <UserCheck className="h-4 w-4" />
               </span>
-              <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+              <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
                 KI Clone & Persona Studio
               </h1>
               <span
                 className={cn(
-                  "rounded-full px-2.5 py-0.5 text-xs font-semibold border",
+                  "rounded-full px-3 py-0.5 text-xs font-semibold border",
                   activeProfile.isActive
-                    ? "border-primary/50 bg-primary/15 text-primary-bright shadow-[0_0_12px_-3px_var(--primary)]"
-                    : "border-border bg-foreground/[0.04] text-muted-foreground",
+                    ? "border-orange-500/50 bg-orange-500/15 text-orange-400 shadow-[0_0_15px_-3px_rgba(255,77,23,0.5)]"
+                    : "border-white/[0.08] bg-white/[0.03] text-zinc-400",
                 )}
               >
                 {activeProfile.isActive ? "Aktiviert für Karussells" : "Inaktiv"}
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl leading-relaxed">
+            <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
               Definiere dein konsistentes Gesicht, Styling und Lichtkonzept. Sobald aktiviert,
               wird die Persona automatisch in deine Karussell-Prompts eingebaut, sodass dein Look auf allen Slides synchron bleibt.
             </p>
           </div>
 
           {/* Quick Actions Header */}
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2.5">
             <button
               type="button"
               onClick={handleToggleActive}
               className={cn(
-                "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-semibold transition-all",
+                "inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all",
                 activeProfile.isActive
-                  ? "bg-primary text-primary-foreground shadow-[0_0_20px_-5px_var(--primary)] hover:bg-primary-bright"
-                  : "border border-border bg-foreground/[0.03] text-muted-foreground hover:bg-foreground/[0.06] hover:text-foreground",
+                  ? "cryptox-orange-btn !py-2 !px-4 text-xs font-semibold"
+                  : "border border-white/[0.1] bg-white/[0.03] text-zinc-300 hover:bg-white/[0.08] hover:text-white",
               )}
             >
               <UserCheck className="h-3.5 w-3.5" />
@@ -257,18 +257,18 @@ export function AiCloneView({
             <button
               type="button"
               onClick={handleCreateProfile}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-border/80 bg-foreground/[0.02] px-3.5 py-2 text-xs font-semibold text-foreground transition-colors hover:bg-foreground/[0.06]"
+              className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.1] bg-white/[0.04] px-4 py-2 text-xs font-semibold text-zinc-200 transition-colors hover:bg-white/[0.08] hover:text-white"
             >
-              <Plus className="h-3.5 w-3.5 text-primary-bright" />
+              <Plus className="h-3.5 w-3.5 text-orange-400" />
               <span>Neues Profil</span>
             </button>
           </div>
         </div>
 
         {/* ── Profiles Navigation Bar ─────────────────────────────── */}
-        <div className="pt-2 border-t border-border/40 flex items-center justify-between gap-3 overflow-x-auto">
+        <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between gap-3 overflow-x-auto">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-muted-foreground shrink-0">Profile:</span>
+            <span className="text-xs font-medium text-zinc-400 shrink-0">Profile:</span>
             {profiles.map((p) => {
               const isSelected = p.id === activeProfile.id;
               return (
@@ -279,22 +279,22 @@ export function AiCloneView({
                   className={cn(
                     "flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-medium transition-all shrink-0",
                     isSelected
-                      ? "border-primary bg-primary/20 text-primary-bright font-semibold shadow-[0_0_15px_-4px_var(--primary)]"
-                      : "border-border bg-foreground/[0.02] text-muted-foreground hover:border-border/80 hover:text-foreground",
+                      ? "border-orange-500/80 bg-orange-500/15 text-orange-400 font-semibold shadow-[0_0_15px_-4px_rgba(255,77,23,0.4)]"
+                      : "border-white/[0.08] bg-white/[0.02] text-zinc-400 hover:border-white/[0.16] hover:text-zinc-200",
                   )}
                 >
                   {p.avatarUrl ? (
                     <img
                       src={p.avatarUrl}
                       alt=""
-                      className="h-4 w-4 rounded-full object-cover border border-border"
+                      className="h-4 w-4 rounded-full object-cover border border-white/20"
                     />
                   ) : (
                     <User className="h-3.5 w-3.5 opacity-60" />
                   )}
                   <span>{p.name}</span>
                   {p.isActive && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-primary-bright animate-pulse" />
+                    <span className="h-1.5 w-1.5 rounded-full bg-orange-400 animate-pulse" />
                   )}
                 </button>
               );
@@ -305,7 +305,7 @@ export function AiCloneView({
             <button
               type="button"
               onClick={() => handleDeleteProfile(activeProfile.id)}
-              className="text-xs text-muted-foreground hover:text-destructive flex items-center gap-1 shrink-0 px-2 py-1"
+              className="text-xs text-zinc-400 hover:text-destructive flex items-center gap-1 shrink-0 px-2.5 py-1 rounded-lg hover:bg-destructive/10"
               title="Aktives Profil löschen"
             >
               <Trash2 className="h-3 w-3" /> Löschen
@@ -319,15 +319,15 @@ export function AiCloneView({
         {/* Left Column: Structured Form & Settings (7 cols) */}
         <div className="space-y-6 lg:col-span-7">
           {/* Section 1: Profil & Identität */}
-          <div className="rounded-2xl border border-border/70 bg-card p-5 space-y-4">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              <User className="h-3.5 w-3.5 text-primary-bright" />
+          <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-4 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)]">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              <User className="h-4 w-4 text-orange-400" />
               1. Identität & Basisdaten
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label className="text-[11px] font-medium text-muted-foreground block mb-1">
+                <label className="text-[11px] font-medium text-zinc-400 block mb-1">
                   Profil-Name
                 </label>
                 <input
@@ -338,7 +338,7 @@ export function AiCloneView({
                 />
               </div>
               <div>
-                <label className="text-[11px] font-medium text-muted-foreground block mb-1">
+                <label className="text-[11px] font-medium text-zinc-400 block mb-1">
                   Geschlecht, Alter & Typ
                 </label>
                 <input
@@ -351,7 +351,7 @@ export function AiCloneView({
             </div>
 
             <div>
-              <label className="text-[11px] font-medium text-muted-foreground block mb-1">
+              <label className="text-[11px] font-medium text-zinc-400 block mb-1">
                 Gesichtszüge, Haare & Bart
               </label>
               <input
@@ -364,15 +364,15 @@ export function AiCloneView({
           </div>
 
           {/* Section 2: Look, Styling & Beleuchtung */}
-          <div className="rounded-2xl border border-border/70 bg-card p-5 space-y-4">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              <SunMedium className="h-3.5 w-3.5 text-primary-bright" />
+          <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-4 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)]">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              <SunMedium className="h-4 w-4 text-orange-400" />
               2. Signatur-Garderobe & Licht-Look
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label className="text-[11px] font-medium text-muted-foreground block mb-1 flex items-center gap-1">
+                <label className="text-[11px] font-medium text-zinc-400 block mb-1 flex items-center gap-1">
                   <Shirt className="h-3 w-3" /> Kleidung & Outfit
                 </label>
                 <input
@@ -383,7 +383,7 @@ export function AiCloneView({
                 />
               </div>
               <div>
-                <label className="text-[11px] font-medium text-muted-foreground block mb-1 flex items-center gap-1">
+                <label className="text-[11px] font-medium text-zinc-400 block mb-1 flex items-center gap-1">
                   <SunMedium className="h-3 w-3" /> Licht & Stimmung
                 </label>
                 <input
@@ -397,7 +397,7 @@ export function AiCloneView({
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label className="text-[11px] font-medium text-muted-foreground block mb-1 flex items-center gap-1">
+                <label className="text-[11px] font-medium text-zinc-400 block mb-1 flex items-center gap-1">
                   <Camera className="h-3 w-3" /> Kamera & Bildausschnitt
                 </label>
                 <input
@@ -408,7 +408,7 @@ export function AiCloneView({
                 />
               </div>
               <div>
-                <label className="text-[11px] font-medium text-muted-foreground block mb-1 flex items-center gap-1">
+                <label className="text-[11px] font-medium text-zinc-400 block mb-1 flex items-center gap-1">
                   <EyeOff className="h-3 w-3" /> Negativer Prompt (vermeiden)
                 </label>
                 <input
@@ -422,12 +422,12 @@ export function AiCloneView({
           </div>
 
           {/* Section 3: Platzierung im Karussell */}
-          <div className="rounded-2xl border border-border/70 bg-card p-5 space-y-3">
-            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              <Layers className="h-3.5 w-3.5 text-primary-bright" />
+          <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-3.5 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)]">
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+              <Layers className="h-4 w-4 text-orange-400" />
               3. Slide-Platzierung in der Serie
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-zinc-400">
               Lege fest, auf welchen Slides deines Karussells diese Persona automatisch eingefügt wird.
             </p>
 
@@ -438,14 +438,14 @@ export function AiCloneView({
                   type="button"
                   onClick={() => patchProfile({ placement: opt.id })}
                   className={cn(
-                    "flex flex-col text-left rounded-xl border p-3 transition-all",
+                    "flex flex-col text-left rounded-xl border p-3.5 transition-all",
                     activeProfile.placement === opt.id
-                      ? "border-primary bg-primary/10 shadow-[0_0_20px_-8px_var(--primary)]"
-                      : "border-border bg-foreground/[0.02] hover:bg-foreground/[0.04]",
+                      ? "border-orange-500/80 bg-orange-500/15 shadow-[0_0_20px_-8px_rgba(255,77,23,0.4)] text-white"
+                      : "border-white/[0.08] bg-white/[0.02] hover:border-white/[0.16] hover:bg-white/[0.04]",
                   )}
                 >
-                  <span className="text-xs font-semibold text-foreground">{opt.label}</span>
-                  <span className="mt-1 text-[11px] text-muted-foreground leading-snug">
+                  <span className="text-xs font-semibold">{opt.label}</span>
+                  <span className="mt-1 text-[11px] text-zinc-400 leading-snug">
                     {opt.desc}
                   </span>
                 </button>
@@ -454,16 +454,16 @@ export function AiCloneView({
           </div>
 
           {/* Section 4: Benutzerdefinierter Prefix-Override */}
-          <div className="rounded-2xl border border-border/70 bg-card p-5 space-y-2.5">
+          <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-3 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)]">
             <div className="flex items-center justify-between">
-              <label htmlFor="clone-custom-prefix" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-primary-bright" />
+              <label htmlFor="clone-custom-prefix" className="text-xs font-semibold uppercase tracking-wider text-zinc-400 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-orange-400" />
                 Prompt-Präfix Direkt-Editor (Englisch empfohlen)
               </label>
               <button
                 type="button"
                 onClick={() => patchProfile({ customPrefix: "" })}
-                className="text-[11px] text-primary-bright hover:underline"
+                className="text-xs text-orange-400 hover:underline"
               >
                 Aus Feldern neu generieren
               </button>
@@ -474,9 +474,9 @@ export function AiCloneView({
               value={activeProfile.customPrefix}
               onChange={(e) => patchProfile({ customPrefix: e.target.value })}
               placeholder={assembledPrompt}
-              className="field-input text-xs leading-relaxed"
+              className="field-input text-xs leading-relaxed font-mono"
             />
-            <p className="text-[11px] text-muted-foreground">
+            <p className="text-[11px] text-zinc-500">
               Wird bei aktiver Persona automatisch jedem Bildprompt im Karussell vorangestellt.
             </p>
           </div>
@@ -485,16 +485,16 @@ export function AiCloneView({
         {/* Right Column: References, Live Preview & Test Lab (5 cols) */}
         <div className="space-y-6 lg:col-span-5">
           {/* Reference Photos & Avatar Upload */}
-          <div className="rounded-2xl border border-border/70 bg-card p-5 space-y-4">
+          <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-4 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)]">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                <ImageIcon className="h-3.5 w-3.5 text-primary-bright" />
+              <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-zinc-400">
+                <ImageIcon className="h-4 w-4 text-orange-400" />
                 Referenzbilder ({activeProfile.referenceImages?.length || 0})
               </div>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="inline-flex items-center gap-1 rounded-full border border-border/80 bg-foreground/[0.04] px-2.5 py-1 text-xs font-medium text-foreground hover:bg-foreground/[0.08]"
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.1] bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-zinc-200 hover:bg-white/[0.08] hover:text-white"
               >
                 <Upload className="h-3 w-3" /> Foto hochladen
               </button>
@@ -509,8 +509,8 @@ export function AiCloneView({
               />
             </div>
 
-            <p className="text-xs text-muted-foreground">
-              Lade deine Fotos hoch. Dienen als visuelle Referenz und zur Generierung von Avataren.
+            <p className="text-xs text-zinc-400">
+              Lade deine Fotos hoch. Dienen als visuelle Referenz und zur Generierung von konsistenten Avataren.
             </p>
 
             {/* Gallery Grid */}
@@ -518,13 +518,13 @@ export function AiCloneView({
               {activeProfile.referenceImages?.map((img, idx) => (
                 <div
                   key={idx}
-                  className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-background"
+                  className="group relative aspect-square overflow-hidden rounded-xl border border-white/[0.1] bg-black/40"
                 >
                   <img src={img} alt="" className="h-full w-full object-cover" />
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(idx)}
-                    className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/70 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive"
+                    className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/80 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive"
                     aria-label="Foto entfernen"
                   >
                     <X className="h-3 w-3" />
@@ -536,31 +536,31 @@ export function AiCloneView({
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-border/80 bg-foreground/[0.02] text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/5 hover:text-foreground"
+                className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-white/[0.15] bg-white/[0.02] text-zinc-400 transition-colors hover:border-orange-500/50 hover:bg-orange-500/5 hover:text-white"
               >
-                <Plus className="h-5 w-5" />
+                <Plus className="h-5 w-5 text-orange-400" />
                 <span className="text-[10px] font-medium">Hinzufügen</span>
               </button>
             </div>
           </div>
 
           {/* Assembled Prompt Live Box */}
-          <div className="rounded-2xl border border-border/70 bg-card p-5 space-y-3">
+          <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-3.5 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)]">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 Zusammengebauter Prompt
               </span>
               <button
                 type="button"
                 onClick={handleCopyPrompt}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-primary-bright hover:underline"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-400 hover:underline"
               >
-                {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
                 <span>{copied ? "Kopiert!" : "Kopieren"}</span>
               </button>
             </div>
 
-            <div className="rounded-xl border border-border/80 bg-foreground/[0.03] p-3 text-xs leading-relaxed text-foreground select-all font-mono">
+            <div className="rounded-xl border border-white/[0.08] bg-black/50 p-3.5 text-xs leading-relaxed text-zinc-200 select-all font-mono">
               {assembledPrompt}
             </div>
 
@@ -570,9 +570,9 @@ export function AiCloneView({
                 <button
                   type="button"
                   onClick={() => onUseInCarousel(assembledPrompt)}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-foreground/[0.04] py-2 text-xs font-semibold text-foreground transition-colors hover:bg-primary/15 hover:text-primary-bright"
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-white/[0.1] bg-white/[0.03] py-2 text-xs font-semibold text-zinc-200 transition-colors hover:bg-orange-500/15 hover:text-orange-400 hover:border-orange-500/40"
                 >
-                  <Layers className="h-3.5 w-3.5 text-primary-bright" />
+                  <Layers className="h-3.5 w-3.5 text-orange-400" />
                   <span>In Karussell</span>
                 </button>
               )}
@@ -581,9 +581,9 @@ export function AiCloneView({
                 <button
                   type="button"
                   onClick={() => onUseInDirectPrompt(assembledPrompt)}
-                  className="flex items-center justify-center gap-1.5 rounded-xl border border-border/80 bg-foreground/[0.04] py-2 text-xs font-semibold text-foreground transition-colors hover:bg-primary/15 hover:text-primary-bright"
+                  className="flex items-center justify-center gap-1.5 rounded-xl border border-white/[0.1] bg-white/[0.03] py-2 text-xs font-semibold text-zinc-200 transition-colors hover:bg-orange-500/15 hover:text-orange-400 hover:border-orange-500/40"
                 >
-                  <ImageIcon className="h-3.5 w-3.5 text-primary-bright" />
+                  <ImageIcon className="h-3.5 w-3.5 text-orange-400" />
                   <span>In Einzelbild</span>
                 </button>
               )}
@@ -591,16 +591,16 @@ export function AiCloneView({
           </div>
 
           {/* Test Render Sandbox */}
-          <div className="rounded-2xl border border-border/70 bg-card p-5 space-y-3">
+          <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-3.5 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)]">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
                 Persona Test-Render
               </span>
               <button
                 type="button"
                 onClick={handleTestRender}
                 disabled={testImageLoading}
-                className="inline-flex items-center gap-1.5 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-[0_4px_12px_-4px_var(--primary)] transition-all hover:bg-primary-bright disabled:opacity-50"
+                className="cryptox-orange-btn !py-1.5 !px-3.5 text-xs font-semibold"
               >
                 {testImageLoading ? (
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -612,20 +612,20 @@ export function AiCloneView({
             </div>
 
             {testImages.length > 0 ? (
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2.5">
                 {testImages.map((src, i) => (
                   <img
                     key={i}
                     src={src}
                     alt=""
-                    className="aspect-[4/5] w-full rounded-xl border border-border object-cover"
+                    className="aspect-[4/5] w-full rounded-xl border border-white/[0.1] object-cover"
                   />
                 ))}
               </div>
             ) : (
-              <div className="flex aspect-video w-full flex-col items-center justify-center rounded-xl border border-dashed border-border/70 bg-foreground/[0.01] p-4 text-center">
-                <Lightbulb className="h-5 w-5 text-muted-foreground/60 mb-1" />
-                <span className="text-xs text-muted-foreground">
+              <div className="flex aspect-video w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/[0.12] bg-white/[0.01] p-4 text-center">
+                <Lightbulb className="h-5 w-5 text-orange-400/70 mb-1.5" />
+                <span className="text-xs text-zinc-400">
                   Noch kein Testbild berechnet. Klicke auf „Testbild generieren“.
                 </span>
               </div>
