@@ -70,7 +70,7 @@ export function CryptoxNavbar({
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
                 <span className="text-lg font-bold tracking-tight text-white font-sans">
-                  Cryptox
+                  Socialcraft
                 </span>
                 <span className="rounded-full border border-primary/40 bg-primary/15 px-1.5 py-0.2 text-[9px] font-bold text-primary-bright uppercase tracking-wider">
                   Studio

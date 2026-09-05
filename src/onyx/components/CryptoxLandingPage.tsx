@@ -12,7 +12,6 @@ import {
   Cpu,
   Eye,
   Flame,
-  Gift,
   Globe,
   Layers,
   Lock,
@@ -44,7 +43,7 @@ export function CryptoxLandingPage({
   onNavigateAdmin,
   onLogout,
 }: CryptoxLandingPageProps) {
-  const [activeTimeframe, setActiveTimeframe] = useState<string>("1D");
+  const [activeSlideFilter, setActiveSlideFilter] = useState<string>("Gesamt");
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
 
   const faqs = [
@@ -79,7 +78,7 @@ export function CryptoxLandingPage({
         <div className="absolute top-[65%] -right-[10%] h-[600px] w-[600px] rounded-full bg-[#FF6A1F]/10 blur-[150px]" />
       </div>
 
-      {/* ── 1. Top Navigation Bar (Cryptox Style) ──────────────────── */}
+      {/* ── 1. Top Navigation Bar (Cryptox Dark Ember Look) ────────── */}
       <header className="sticky top-0 z-50 w-full px-4 pt-4 pb-2 transition-all">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
           {/* Brand Logo */}
@@ -91,7 +90,7 @@ export function CryptoxLandingPage({
               <div className="h-4 w-4 rounded-full border-2 border-white/90 border-t-transparent animate-[spin_8s_linear_infinite]" />
             </div>
             <span className="text-xl font-extrabold tracking-tight text-white font-sans">
-              Cryptox
+              Socialcraft
             </span>
           </div>
 
@@ -101,7 +100,7 @@ export function CryptoxLandingPage({
               href="#hero"
               className="rounded-full bg-[#FF4D17] px-4 py-1.5 text-xs font-semibold text-white shadow-[0_0_18px_-2px_#FF4D17]"
             >
-              Home
+              Startseite
             </a>
             <a
               href="#features"
@@ -113,13 +112,13 @@ export function CryptoxLandingPage({
               href="#why-choose"
               className="rounded-full px-4 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
             >
-              Why choose
+              Vorteile
             </a>
             <a
               href="#testimonials"
               className="rounded-full px-4 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
             >
-              Testimonials
+              Kundenstimmen
             </a>
             <a
               href="#faq"
@@ -194,10 +193,10 @@ export function CryptoxLandingPage({
       {/* ── 2. Hero Section with Fiery Swirl Vortex & 3D Badges ───── */}
       <section id="hero" className="relative z-10 pt-16 pb-20 px-4">
         <div className="mx-auto max-w-5xl text-center relative">
-          {/* Orbiting Satellite Badges (1:1 like screenshot) */}
+          {/* Orbiting Satellite Badges (Social & Content Creation) */}
           <div className="hidden lg:block absolute -left-12 top-10 pointer-events-none">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/80 px-3.5 py-1.5 text-xs font-medium text-white/80 shadow-[0_10px_30px_rgba(0,0,0,0.6)] backdrop-blur-xl animate-[pulse_4s_ease-in-out_infinite]">
-              <span>Bitora</span>
+              <span>Hook Booster</span>
               <div className="h-3 w-3 rounded-full border border-white/40 flex items-center justify-center text-[8px]">
                 ✦
               </div>
@@ -206,7 +205,7 @@ export function CryptoxLandingPage({
 
           <div className="hidden lg:block absolute -left-4 top-28 pointer-events-none">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/80 px-3.5 py-1.5 text-xs font-medium text-white/80 shadow-[0_10px_30px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-              <span>Chainly</span>
+              <span>Viral Storyline</span>
               <div className="h-3 w-3 rounded-full border border-white/40 flex items-center justify-center text-[8px]">
                 ⚙
               </div>
@@ -218,7 +217,7 @@ export function CryptoxLandingPage({
               <div className="h-3 w-3 rounded-full border border-white/40 flex items-center justify-center text-[8px]">
                 ✦
               </div>
-              <span>Conza</span>
+              <span>Nano Banana 2</span>
             </div>
           </div>
 
@@ -227,7 +226,7 @@ export function CryptoxLandingPage({
               <div className="h-3 w-3 rounded-full border border-white/40 flex items-center justify-center text-[8px]">
                 ⚙
               </div>
-              <span>Nexbit</span>
+              <span>KI Persona Lock</span>
             </div>
           </div>
 
@@ -242,13 +241,13 @@ export function CryptoxLandingPage({
               {/* Central Text inside vortex */}
               <div className="relative z-10 max-w-xl px-4">
                 <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15]">
-                  Step Into The Future Of <br />
+                  Tritt ein in die Zukunft des <br />
                   <span className="bg-gradient-to-r from-white via-white/95 to-white/80 bg-clip-text text-transparent">
-                    Social Content
+                    Social Content Designs
                   </span>
                 </h1>
                 <p className="mt-3 text-xs sm:text-sm text-white/70 max-w-md mx-auto leading-relaxed">
-                  AI-optimized carousel workflows with human-grade storytelling & precision design.
+                  KI-optimierte Karussell-Workflows, virales Storytelling und konsistente KI-Personas auf Knopfdruck.
                 </p>
               </div>
             </div>
@@ -261,7 +260,7 @@ export function CryptoxLandingPage({
               onClick={onNavigateStudio}
               className="cryptox-orange-btn inline-flex items-center gap-2.5 rounded-full px-7 py-3 text-sm font-bold shadow-[0_0_30px_rgba(255,77,23,0.5)] hover:scale-105 transition-all"
             >
-              <span>Get Started</span>
+              <span>Jetzt kostenlos starten</span>
               <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[#FF4D17]">
                 <ArrowRight className="h-3 w-3 stroke-[3]" />
               </div>
@@ -269,22 +268,25 @@ export function CryptoxLandingPage({
           </div>
         </div>
 
-        {/* ── 3. 3-Card Showcase Dashboard (1:1 from screenshot) ───── */}
+        {/* ── 3. 3-Card Showcase Dashboard (Content & Carousel Theme) ─ */}
         <div className="mx-auto max-w-6xl mt-14 grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
-          {/* Left Card: Markets */}
+          {/* Left Card: Design Archetypen */}
           <div className="cryptox-card rounded-3xl p-5 border border-white/10 bg-[#120E18]/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-bold text-white tracking-wide">Markets</span>
-              <span className="text-[11px] font-semibold text-[#FF6A1F] hover:underline cursor-pointer">
-                See All
+              <span className="text-xs font-bold text-white tracking-wide">Design-Archetypen</span>
+              <span
+                onClick={onNavigateStudio}
+                className="text-[11px] font-semibold text-[#FF6A1F] hover:underline cursor-pointer"
+              >
+                Alle Stile
               </span>
             </div>
 
             <div className="space-y-3.5">
               {[
-                { symbol: "BTA", change: "+1.8%", price: "$28,659.35", sub: "51.54 BTC", color: "#6366F1" },
-                { symbol: "CHY", change: "+1.8%", price: "$28,659.35", sub: "$14.44 SOL", color: "#FF5722" },
-                { symbol: "NXB", change: "+1.8%", price: "$28,659.35", sub: "$1.44 XRP", color: "#06B6D4" },
+                { symbol: "MIN", name: "Minimalismus Clean", change: "+94% Retention", price: "142.5k", sub: "Trend #1", color: "#6366F1" },
+                { symbol: "HCB", name: "High Contrast Bold", change: "+88% Hook-Rate", price: "284.1k", sub: "Trend #2", color: "#FF5722" },
+                { symbol: "NEO", name: "Neo-Brutalism Dark", change: "+92% Saves", price: "318.9k", sub: "Trend #3", color: "#06B6D4" },
               ].map((item, idx) => (
                 <div
                   key={idx}
@@ -295,16 +297,16 @@ export function CryptoxLandingPage({
                       className="flex h-8 w-8 items-center justify-center rounded-xl text-[10px] font-bold text-white shadow-sm"
                       style={{ backgroundColor: item.color }}
                     >
-                      {item.symbol[0]}
+                      {item.symbol}
                     </div>
                     <div>
-                      <div className="text-xs font-bold text-white">{item.symbol}</div>
+                      <div className="text-xs font-bold text-white">{item.name}</div>
                       <div className="text-[10px] font-medium text-emerald-400">{item.change}</div>
                     </div>
                   </div>
 
                   {/* Micro Sparkline Curve */}
-                  <svg className="h-6 w-20 stroke-white/40 fill-none stroke-[1.5]" viewBox="0 0 80 24">
+                  <svg className="h-6 w-16 stroke-white/40 fill-none stroke-[1.5]" viewBox="0 0 80 24">
                     <path d="M0,18 Q20,5 40,14 T80,8" />
                   </svg>
 
@@ -317,26 +319,26 @@ export function CryptoxLandingPage({
             </div>
           </div>
 
-          {/* Center Card: Elevated Main Balance Graph */}
+          {/* Center Card: Elevated Storyline Retention Curve */}
           <div className="cryptox-card-elevated rounded-3xl p-6 border border-white/15 bg-[#171220]/95 backdrop-blur-2xl shadow-[0_25px_60px_rgba(0,0,0,0.8)] md:-translate-y-4">
             {/* Top Sub-Nav Pills */}
             <div className="flex items-center justify-between mb-4 border-b border-white/[0.06] pb-3">
               <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/60">
-                <span className="rounded-md bg-white/10 px-2 py-0.5 text-white font-semibold">Home</span>
-                <span className="px-1.5 py-0.5 hover:text-white cursor-pointer">Leverage</span>
-                <span className="px-1.5 py-0.5 hover:text-white cursor-pointer">Earn</span>
-                <span className="px-1.5 py-0.5 hover:text-white cursor-pointer">NFT</span>
+                <span className="rounded-md bg-white/10 px-2 py-0.5 text-white font-semibold">Hook</span>
+                <span className="px-1.5 py-0.5 hover:text-white cursor-pointer">Content</span>
+                <span className="px-1.5 py-0.5 hover:text-white cursor-pointer">Visuals</span>
+                <span className="px-1.5 py-0.5 hover:text-white cursor-pointer">Export</span>
               </div>
               <div className="flex items-center gap-2 text-white/60">
-                <Gift className="h-3.5 w-3.5 hover:text-white cursor-pointer" />
+                <Sparkles className="h-3.5 w-3.5 text-amber-400 cursor-pointer" />
                 <Bell className="h-3.5 w-3.5 hover:text-white cursor-pointer" />
               </div>
             </div>
 
-            {/* Large Balance Display */}
+            {/* Large Retention Display */}
             <div className="mb-2">
               <div className="text-2xl sm:text-3xl font-extrabold text-white font-mono tracking-tight">
-                $15,4.75 <span className="text-xs font-normal text-white/50">USD</span>
+                94.8% <span className="text-xs font-normal text-white/50">Hook-Retention</span>
               </div>
             </div>
 
@@ -364,59 +366,65 @@ export function CryptoxLandingPage({
             </div>
 
             <div className="flex items-center justify-between text-xs pt-1">
-              <span className="text-white/60 font-medium">Total Balance</span>
-              <span className="font-mono font-bold text-emerald-400">+$432.49 (+12%)</span>
+              <span className="text-white/60 font-medium">Reichweiten-Zuwachs</span>
+              <span className="font-mono font-bold text-emerald-400">+4.320 Follower (+18%)</span>
             </div>
           </div>
 
-          {/* Right Card: Crypto Exchange */}
+          {/* Right Card: Content Transformer (Prompt to Slides) */}
           <div className="cryptox-card rounded-3xl p-5 border border-white/10 bg-[#120E18]/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-xs font-bold text-white tracking-wide">Crypto Exchange</span>
+              <span className="text-xs font-bold text-white tracking-wide">Content Transformer</span>
               <Maximize2 className="h-3.5 w-3.5 text-white/40 hover:text-white cursor-pointer" />
             </div>
 
             <div className="mb-3">
               <span className="rounded-full bg-white/[0.06] border border-white/10 px-2.5 py-1 text-[10px] font-semibold text-white/80">
-                USDETH <span className="text-white/40 font-normal ml-1">Expires in 24 hrs</span>
+                Nano-Banana 2 <span className="text-white/40 font-normal ml-1">Renderzeit: 1.4s</span>
               </span>
             </div>
 
-            {/* Swap Input Rows */}
+            {/* Transform Rows */}
             <div className="space-y-2">
               <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-2.5">
                 <div className="flex items-center gap-2">
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#6366F1] text-[10px] font-bold">
-                    B
+                    💡
                   </div>
-                  <span className="text-xs font-bold text-white">BTA</span>
+                  <div>
+                    <div className="text-xs font-bold text-white">Prompt-Thema</div>
+                    <div className="text-[10px] text-white/50">10 Growth Hacks 2026</div>
+                  </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xs font-mono font-bold text-white">40.679</div>
-                  <div className="text-[10px] text-white/40">67.143</div>
+                  <div className="text-xs font-mono font-bold text-primary-bright">1 Klick</div>
                 </div>
               </div>
 
-              {/* Swap Button */}
+              {/* Transform Arrow */}
               <div className="flex justify-center -my-1 relative z-10">
                 <button
                   type="button"
-                  className="flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-[#201A29] text-white/80 hover:scale-110 transition-transform"
+                  onClick={onNavigateStudio}
+                  className="flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-[#201A29] text-white/80 hover:scale-110 transition-transform shadow-md"
+                  title="Im Studio öffnen"
                 >
-                  <Repeat className="h-3 w-3" />
+                  <Repeat className="h-3 w-3 text-primary-bright" />
                 </button>
               </div>
 
               <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-2.5">
                 <div className="flex items-center gap-2">
                   <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#FF4D17] text-[10px] font-bold">
-                    N
+                    📸
                   </div>
-                  <span className="text-xs font-bold text-white">NBX</span>
+                  <div>
+                    <div className="text-xs font-bold text-white">Fertige Karussells</div>
+                    <div className="text-[10px] text-emerald-400">7 Slides + ZIP Export</div>
+                  </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-xs font-mono font-bold text-white">1230.365</div>
-                  <div className="text-[10px] text-white/40">90.143</div>
+                  <div className="text-xs font-mono font-bold text-white">4:5 HD</div>
                 </div>
               </div>
             </div>
@@ -424,20 +432,20 @@ export function CryptoxLandingPage({
         </div>
       </section>
 
-      {/* ── 4. Brand & AI Engine Logo Bar (1:1 from screenshot) ───── */}
+      {/* ── 4. Brand & AI Engine Logo Bar ─────────────────────────── */}
       <section className="relative z-10 py-10 border-y border-white/[0.06] bg-black/40 backdrop-blur-md">
         <div className="mx-auto max-w-6xl px-4 text-center">
           <p className="text-xs font-medium text-white/50 tracking-wider mb-6">
-            Simplifying Blockchain Workflows For <strong className="text-white">2,500+ Organizations</strong>
+            Vereinfachte Content-Workflows für <strong className="text-white">2.500+ Creator & Social Media Teams</strong>
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-8 sm:gap-14 opacity-70 grayscale hover:grayscale-0 transition-all duration-300">
-            {["Logoipsum", "Logoipsum", "Logoipsum", "Logoipsum", "Logoipsum"].map((logo, idx) => (
+            {["Instagram", "LinkedIn", "TikTok", "Midjourney", "Claude AI", "OpenAI"].map((brand, idx) => (
               <div key={idx} className="flex items-center gap-2 text-white/80 font-bold text-sm tracking-tight">
                 <div className="h-5 w-5 rounded bg-white/20 flex items-center justify-center text-[10px]">
-                  ❖
+                  ✦
                 </div>
-                <span>{logo}</span>
+                <span>{brand}</span>
               </div>
             ))}
           </div>
@@ -450,24 +458,24 @@ export function CryptoxLandingPage({
           {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto mb-12">
             <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
-              Powerful Features <br />
-              For Smarter Crypto Trading
+              Mächtige Features <br />
+              Für Maximale Social Media Reichweite
             </h2>
             <p className="mt-3 text-xs sm:text-sm text-white/60">
-              AI-optimized sales teams with human-grade decision-making
+              KI-gestützte Storytelling-Algorithmen mit redaktioneller Ästhetik und psychologischer Leserführung
             </p>
           </div>
 
-          {/* Large Waveform Feature Card (1:1 from screenshot) */}
+          {/* Large Waveform Feature Card */}
           <div className="cryptox-card rounded-3xl border border-white/10 bg-[#120E18]/90 p-6 sm:p-10 backdrop-blur-2xl shadow-[0_25px_70px_rgba(0,0,0,0.7)] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Left Col: Copy & CTA */}
             <div className="lg:col-span-5 space-y-4">
               <h3 className="text-2xl sm:text-3xl font-extrabold text-white leading-snug">
-                Tools For Better <br />
-                Cryptocurrency Trading
+                Tools Für Unwiderstehliche <br />
+                Instagram Karussells
               </h3>
               <p className="text-xs text-white/60 leading-relaxed">
-                Smart platforms designed to help you analyze markets and make informed decisions with zero latency.
+                Entwickelt, um die Verweildauer (Dwell Time) zu maximieren, Drop-Offs nach Slide 1 zu stoppen und maximale Saves & Shares zu erzielen.
               </p>
               <div className="pt-2">
                 <button
@@ -475,7 +483,7 @@ export function CryptoxLandingPage({
                   onClick={onNavigateStudio}
                   className="cryptox-orange-btn inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-xs font-bold shadow-[0_0_20px_-2px_#FF4D17]"
                 >
-                  <span>Get Started</span>
+                  <span>Jetzt Karussell erstellen</span>
                   <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               </div>
@@ -509,15 +517,15 @@ export function CryptoxLandingPage({
 
               {/* Timeframe Pill Switcher */}
               <div className="mt-4 flex items-center justify-between border-t border-white/[0.08] pt-3">
-                <div className="flex items-center gap-2 text-[10px] font-semibold">
-                  {["1H", "1D", "1W", "1M", "1Y", "ALL"].map((tf) => (
+                <div className="flex items-center gap-1.5 text-[10px] font-semibold">
+                  {["Slide 1", "Slide 3", "Slide 5", "Slide 7", "Closing", "Gesamt"].map((tf) => (
                     <button
                       key={tf}
                       type="button"
-                      onClick={() => setActiveTimeframe(tf)}
+                      onClick={() => setActiveSlideFilter(tf)}
                       className={cn(
                         "rounded px-2 py-0.5 transition-colors",
-                        activeTimeframe === tf
+                        activeSlideFilter === tf
                           ? "bg-[#FF4D17] text-white font-bold"
                           : "text-white/50 hover:text-white",
                       )}
@@ -528,8 +536,8 @@ export function CryptoxLandingPage({
                 </div>
 
                 <div className="text-right">
-                  <div className="text-[10px] text-white/50">Your balance</div>
-                  <div className="text-xs font-mono font-bold text-white">0.000000 ETH</div>
+                  <div className="text-[10px] text-white/50">Durchleserate</div>
+                  <div className="text-xs font-mono font-bold text-white">94.2% Retention</div>
                 </div>
               </div>
             </div>
@@ -544,10 +552,10 @@ export function CryptoxLandingPage({
           <div className="cryptox-card rounded-3xl p-6 sm:p-8 border border-white/10 bg-[#120E18]/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
             <div className="space-y-3 mb-6">
               {[
-                { name: "Robert Brian", change: "+1.8%", val: "$28,659.35", sub: "51.54 BTC", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=face" },
-                { name: "Courtney Henry", change: "+2.5%", val: "$1,856.20", sub: "125.45 ETH", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&crop=face" },
-                { name: "Cody Fisher", change: "-0.9%", val: "$0.51", sub: "250,000 XRP", avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=120&h=120&fit=crop&crop=face" },
-                { name: "Darlene Robertson", change: "+5.1%", val: "$100.75", sub: "75.00 LTC", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&h=120&fit=crop&crop=face" },
+                { name: "Robert Brian", change: "+18.4% Engagement", val: "51.5k Saves", sub: "Tech & SaaS", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=face" },
+                { name: "Courtney Henry", change: "+24.5% Reichweite", val: "125.4k Views", sub: "Lifestyle", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&crop=face" },
+                { name: "Cody Fisher", change: "+12.9% Klicks", val: "25.0k Shares", sub: "Finanzen", avatar: "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=120&h=120&fit=crop&crop=face" },
+                { name: "Darlene Robertson", change: "+35.1% Follower", val: "75.0k Views", sub: "Coaching", avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&h=120&fit=crop&crop=face" },
               ].map((user, idx) => (
                 <div
                   key={idx}
@@ -571,15 +579,15 @@ export function CryptoxLandingPage({
                 </div>
               ))}
             </div>
-            <h4 className="text-base font-bold text-white">Advanced Charting & Analytics</h4>
+            <h4 className="text-base font-bold text-white">Top Creator & Viral Leaderboard</h4>
             <p className="mt-1 text-xs text-white/60">
-              Echtzeit-Tracking von Follower-Wachstum und Reichweiten für maximale Karussell-Performance.
+              Echtzeit-Tracking von Follower-Wachstum, Verweildauer und Interaktionsraten über alle Karussell-Serien.
             </p>
           </div>
 
           {/* Bento Card 2: Persona Security Shield */}
           <div className="cryptox-card rounded-3xl p-6 sm:p-8 border border-white/10 bg-[#120E18]/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex flex-col justify-between">
-            {/* Concentric Shield Graphic (1:1 from screenshot) */}
+            {/* Concentric Shield Graphic */}
             <div className="my-auto py-6 flex flex-col items-center justify-center">
               <div className="relative flex h-40 w-40 items-center justify-center">
                 {/* Outermost ring */}
@@ -598,15 +606,15 @@ export function CryptoxLandingPage({
                   Face Geometry Locked
                 </span>
                 <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-[11px] text-emerald-400 font-medium">
-                  100% Brand Safe
+                  100% Brand Safe & Konsistent
                 </span>
               </div>
             </div>
 
             <div>
-              <h4 className="text-base font-bold text-white">Smart Risk Management & Persona Guard</h4>
+              <h4 className="text-base font-bold text-white">KI Persona Schutz & Visuelle Marken-Konsistenz</h4>
               <p className="mt-1 text-xs text-white/60">
-                Garantierte visuelle Identität und Markenschutz über alle generierten Folien hinweg.
+                Garantierte Wiedererkennung: Dein Gesicht und deine Brand Identity bleiben über alle Slides, Farben und Blickwinkel hinweg fehlerfrei synchronisiert.
               </p>
             </div>
           </div>
@@ -803,21 +811,21 @@ export function CryptoxLandingPage({
         </div>
       </section>
 
-      {/* ── 11. Footer (Cryptox Style) ────────────────────────────── */}
+      {/* ── 11. Footer ────────────────────────────────────────────── */}
       <footer className="relative z-10 border-t border-white/[0.08] bg-[#0A0710] py-12 px-6">
         <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-white/50">
           <div className="flex items-center gap-2.5">
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-tr from-[#FF3B00] to-[#FFA149]">
               <div className="h-3 w-3 rounded-full border border-white/90 border-t-transparent animate-[spin_8s_linear_infinite]" />
             </div>
-            <span className="font-bold text-white text-sm">Cryptox Socialcraft</span>
+            <span className="font-bold text-white text-sm">Socialcraft Studio</span>
             <span>© 2026 Alle Rechte vorbehalten.</span>
           </div>
 
           <div className="flex items-center gap-6">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
             <a href="#why-choose" className="hover:text-white transition-colors">Vorteile</a>
-            <a href="#testimonials" className="hover:text-white transition-colors">Kunden</a>
+            <a href="#testimonials" className="hover:text-white transition-colors">Kundenstimmen</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
             <button type="button" onClick={onNavigateStudio} className="hover:text-primary-bright transition-colors font-semibold">
               Studio
