@@ -4,9 +4,7 @@ import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 
 import { CryptoxNavbar } from "@/onyx/components/CryptoxNavbar";
-import { CryptoxHero } from "@/onyx/components/CryptoxHero";
-import { CryptoxDashboard } from "@/onyx/components/CryptoxDashboard";
-import { CryptoxBento } from "@/onyx/components/CryptoxBento";
+import { StudioCarouselWorkspace } from "@/onyx/components/StudioCarouselWorkspace";
 import { CarouselViewer } from "@/onyx/components/CarouselViewer";
 import { SeriesQueue } from "@/onyx/components/SeriesQueue";
 import { SettingsModal } from "@/onyx/components/SettingsModal";
@@ -97,6 +95,10 @@ function OnyxStudio() {
 
   const handleAuthSuccess = (user: User) => {
     setCurrentUser(user);
+    setCurrentView("studio");
+    toast.success(`Willkommen im Studio, ${user.name}! 🚀`, {
+      description: "Deine 500 Erstellungs-Credits sind sofort einsatzbereit.",
+    });
   };
 
   const [activeTab, setActiveTab] = usePersistentState<TabKey>(LS.activeTab, "carousel");
@@ -444,40 +446,21 @@ function OnyxStudio() {
         <main className="mx-auto w-full flex-1 p-4 sm:p-6 max-w-[1600px]">
           {activeTab === "carousel" &&
             (slides.length === 0 ? (
-              <>
-                <CryptoxHero
-                  slideCount={brief.slideCount}
-                  modelName={settings.kieModel}
-                  aspectRatio={brandKit.aspectRatio}
-                  isCloneActive={Boolean(brief.useClone)}
-                  onCtaClick={() => {
-                    const el = document.getElementById("studio-dashboard");
-                    el?.scrollIntoView({ behavior: "smooth" });
-                    const input = document.querySelector<HTMLTextAreaElement>("#studio-dashboard textarea");
-                    input?.focus();
-                  }}
-                  ctaLabel={isGeneratingCarousel ? "Läuft…" : "Get Started"}
-                  isLoading={isGeneratingCarousel}
-                />
-                <CryptoxDashboard
-                  brief={brief}
-                  onChangeBrief={patchBrief}
-                  onSubmit={() => void generateCarousel()}
-                  isGenerating={isGeneratingCarousel}
-                  settings={settings}
-                  onChangeSettings={patchSettings}
-                  activeClone={activeClone}
-                  onOpenCloneStudio={() => setActiveTab("ai-clone")}
-                />
-                <CryptoxBento
-                  onStartCarousel={() => {
-                    const el = document.getElementById("studio-dashboard");
-                    el?.scrollIntoView({ behavior: "smooth" });
-                  }}
-                  onOpenPromptHub={() => setActiveTab("prompt-gallery")}
-                  onOpenCloneStudio={() => setActiveTab("ai-clone")}
-                />
-              </>
+              <StudioCarouselWorkspace
+                brief={brief}
+                onChangeBrief={patchBrief}
+                onSubmit={() => void generateCarousel()}
+                isGenerating={isGeneratingCarousel}
+                settings={settings}
+                onChangeSettings={patchSettings}
+                brandKit={brandKit}
+                onChangeBrandKit={patchBrandKit}
+                activeClone={activeClone}
+                onOpenCloneStudio={() => setActiveTab("ai-clone")}
+                onOpenPromptHub={() => setActiveTab("prompt-gallery")}
+                onOpenBrandKit={() => setShowBrandKit(true)}
+                currentUser={currentUser}
+              />
             ) : (
               <div className="pt-4">
                 <CarouselViewer

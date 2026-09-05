@@ -144,7 +144,7 @@ export function SocialcraftParallaxHero({
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#FF4D17] text-[10px] text-white">
               <Flame className="h-3 w-3" />
             </div>
-            <span>Hook Booster ✦</span>
+            <span>Viraler Hook Booster ✦</span>
           </div>
 
           {/* Bottom Left Badge */}
@@ -155,7 +155,7 @@ export function SocialcraftParallaxHero({
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500 text-[10px] text-white">
               <Zap className="h-3 w-3" />
             </div>
-            <span>Viral Storyline ⚙</span>
+            <span>Storyline Optimierer ⚙</span>
           </div>
 
           {/* Top Right Badge */}
@@ -166,7 +166,7 @@ export function SocialcraftParallaxHero({
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] text-white">
               ✦
             </div>
-            <span>Nano Banana 2</span>
+            <span>Nano Banana 2 Engine</span>
           </div>
 
           {/* Bottom Right Badge */}
@@ -177,7 +177,7 @@ export function SocialcraftParallaxHero({
             <div className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-600 text-[10px] text-white">
               <Sparkles className="h-3 w-3" />
             </div>
-            <span>KI Persona Lock</span>
+            <span>Konsistenter KI-Klon</span>
           </div>
         </div>
 
@@ -186,18 +186,18 @@ export function SocialcraftParallaxHero({
           {/* Top Category Capsule */}
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary-bright mb-6 shadow-[0_0_20px_rgba(255,77,23,0.25)]">
             <Sparkles className="h-3.5 w-3.5" />
-            <span>Socialcraft Studio · The New Standard for Instagram Content</span>
+            <span>Socialcraft Studio · Der neue Standard für Instagram Karussells</span>
           </div>
 
           {/* Gradient Display Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-orange-100 to-white/70 leading-[1.1] pb-3">
-            Manage Your Carousels & Analytics In One Place.
+            Erstelle virale Karussells & skaliere deine Reichweite.
           </h1>
 
           {/* Subtitle */}
           <p className="mt-4 text-base sm:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            Socialcraft ist der moderne KI-Karussell-Builder für Content Creator und Agenturen:
-            Virale Hooks, nahtlose KI-Personas und 1-Klick-Exports für Instagram.
+            Socialcraft ist der High-End KI-Karussell-Builder für Creator und Marken:
+            Psychologische Hook-Führung, synchrone KI-Klone und 1-Klick-Exports für Instagram im 4:5-Format.
           </p>
 
           {/* CTA Button with Dual Arrow-Up-Right Animation (2nd Component Style) */}
@@ -250,7 +250,7 @@ export function SocialcraftParallaxHero({
             </div>
             <div>
               <div className="text-xs font-bold text-white">4:5 Hochformat Karussell</div>
-              <div className="text-[11px] text-emerald-400 font-semibold">+94.8% Dwell Time Boost</div>
+              <div className="text-[11px] text-emerald-400 font-semibold">+94.8% Höhere Durchleserate</div>
             </div>
           </div>
 
@@ -262,8 +262,8 @@ export function SocialcraftParallaxHero({
               <Zap className="h-5 w-5" />
             </div>
             <div>
-              <div className="text-xs font-bold text-white">100% Brand Safe Persona</div>
-              <div className="text-[11px] text-white/60">Face Geometry Synchronized</div>
+              <div className="text-xs font-bold text-white">100% Konsistente Persona</div>
+              <div className="text-[11px] text-white/60">Gesichtsgeometrie synchronisiert</div>
             </div>
           </div>
         </div>
