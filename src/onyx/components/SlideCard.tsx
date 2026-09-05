@@ -37,12 +37,12 @@ export function SlideCard({
         />
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center gap-1 px-3 text-center">
-          <span className="font-mono text-4xl font-bold text-foreground/15">
+          <span className="text-4xl font-extrabold tracking-tight text-foreground/25">
             {String(slide.slideNumber).padStart(2, "0")}
           </span>
           <span className="mono-label">{slide.roleLabel}</span>
           {!slide.isGeneratingImage && (
-            <span className="text-[11px] text-muted-foreground/70">noch nicht gerendert</span>
+            <span className="text-xs text-muted-foreground">noch nicht gerendert</span>
           )}
         </div>
       )}
@@ -50,14 +50,14 @@ export function SlideCard({
       {slide.isGeneratingImage && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-background/80 backdrop-blur-sm">
           <Loader2 className="h-6 w-6 animate-spin text-primary-bright" />
-          <span className="font-mono text-[10px] text-muted-foreground">
+          <span className="text-xs font-medium text-muted-foreground">
             {modelName} generiert…
           </span>
           {onCancel && (
             <button
               type="button"
               onClick={onCancel}
-              className="mt-1 flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-[10px] text-muted-foreground hover:text-foreground"
+              className="mt-1 flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground"
             >
               <X className="h-3 w-3" /> Abbrechen
             </button>
@@ -67,11 +67,11 @@ export function SlideCard({
 
       {done && (
         <>
-          <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-background/75 px-2 py-1.5 text-[10px] backdrop-blur-md">
-            <span className="truncate font-mono text-muted-foreground">
+          <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-background/85 px-2.5 py-2 text-xs backdrop-blur-md">
+            <span className="truncate font-medium text-foreground/90">
               {slide.slideNumber} · {slide.roleLabel}
             </span>
-            <span className="flex shrink-0 gap-2">
+            <span className="flex shrink-0 gap-2.5 font-medium">
               <button type="button" onClick={onReroll} className="hover:text-primary-bright">
                 Neu machen
               </button>

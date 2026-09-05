@@ -110,7 +110,7 @@ export function SeriesQueue({
           value={text}
           onChange={(e) => setText(e.target.value)}
           placeholder={"Thema: Disziplin\n\nSlide 1 – Hook\nPrompt text…\n\nSlide 2 – Konzept\nPrompt text…\n\n===\n\nThema: Fokus\nSlide 1 – Hook\n…"}
-          className="field-input font-mono text-[11px] leading-relaxed"
+          className="field-input text-xs sm:text-sm leading-relaxed"
         />
 
         {carouselsWithTitles.length > 0 && (
@@ -138,7 +138,7 @@ export function SeriesQueue({
                   value={c.title}
                   onChange={(e) => setTitles((p) => ({ ...p, [i]: e.target.value }))}
                 />
-                <span className="shrink-0 font-mono text-[11px] text-muted-foreground">
+                <span className="shrink-0 text-xs font-medium text-muted-foreground">
                   {c.slides.length} Slides
                 </span>
                 <button
@@ -189,12 +189,12 @@ export function SeriesQueue({
                   value={job.topic}
                   onChange={(e) => onRenameJob(job.id, e.target.value)}
                 />
-                <span className="shrink-0 font-mono text-[11px] text-muted-foreground">
+                <span className="shrink-0 text-xs font-semibold text-muted-foreground">
                   {job.slidesDone}/{job.slidesTotal}
                 </span>
                 <span
                   className={cn(
-                    "shrink-0 rounded-full px-2 py-0.5 font-mono text-[10px]",
+                    "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold",
                     STATUS_CLASS[job.status],
                   )}
                 >

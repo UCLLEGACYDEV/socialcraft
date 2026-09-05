@@ -40,12 +40,12 @@ export function StudioHero({
             chip.side === "left" ? "left-0 xl:left-8" : "right-0 xl:right-8",
           )}
         >
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20 font-mono text-[10px] font-bold text-primary-bright">
+          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/20 text-xs font-bold text-primary-bright">
             {chip.label.slice(0, 1)}
           </span>
-          <span className="text-[11px] leading-tight">
-            <span className="block font-medium">{chip.label}</span>
-            <span className="block font-mono text-[10px] text-muted-foreground">{chip.value}</span>
+          <span className="text-xs leading-snug">
+            <span className="block font-medium text-muted-foreground">{chip.label}</span>
+            <span className="block font-semibold text-foreground">{chip.value}</span>
           </span>
         </div>
       ))}

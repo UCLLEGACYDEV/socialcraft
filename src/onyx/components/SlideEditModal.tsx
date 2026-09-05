@@ -47,7 +47,7 @@ export function SlideEditModal({ slide, onClose, onSave, onRegenerate }: SlideEd
             <span className="mono-label">Visual Prompt</span>
             <textarea
               rows={7}
-              className="field-input font-mono text-[11px]"
+              className="field-input text-xs sm:text-sm leading-relaxed"
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
             />
@@ -58,14 +58,14 @@ export function SlideEditModal({ slide, onClose, onSave, onRegenerate }: SlideEd
         <button
           type="button"
           onClick={() => onSave(patch)}
-          className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs hover:bg-foreground/[0.06]"
+          className="flex items-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium hover:bg-foreground/[0.06]"
         >
           <Save className="h-3.5 w-3.5" /> Nur Text speichern
         </button>
         <button
           type="button"
           onClick={() => onRegenerate(patch)}
-          className="flex items-center gap-1.5 rounded-full bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-bright"
+          className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-semibold text-primary-foreground hover:bg-primary-bright"
         >
           <RefreshCw className="h-3.5 w-3.5" /> Neu generieren & ersetzen
         </button>
@@ -94,7 +94,7 @@ export function ModalShell({
         style={{ maxHeight }}
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-3">
-          <h2 className="font-mono text-sm font-semibold">{title}</h2>
+          <h2 className="text-sm font-semibold text-foreground">{title}</h2>
           <button
             type="button"
             onClick={onClose}

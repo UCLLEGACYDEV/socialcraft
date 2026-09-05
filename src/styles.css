@@ -78,7 +78,7 @@
   --secondary: oklch(0.235 0.017 45);
   --secondary-foreground: oklch(0.97 0.006 70);
   --muted: oklch(0.228 0.014 45);
-  --muted-foreground: oklch(0.7 0.012 65);
+  --muted-foreground: oklch(0.82 0.012 70);
   --accent: oklch(0.285 0.045 40);
   --accent-foreground: oklch(0.97 0.006 70);
   --destructive: oklch(0.68 0.185 25);
@@ -206,10 +206,10 @@
 }
 
 @utility mono-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
+  font-family: var(--font-sans);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-muted-foreground);
 }
@@ -218,11 +218,19 @@
   width: 100%;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
-  background-color: oklch(1 0 0 / 3%);
-  padding: 0.55rem 0.75rem;
-  font-size: 0.8125rem;
+  background-color: oklch(1 0 0 / 3.5%);
+  padding: 0.6rem 0.85rem;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  line-height: 1.5;
   color: var(--color-foreground);
   outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+
+  &:focus {
+    border-color: oklch(0.635 0.208 34 / 60%);
+    box-shadow: 0 0 0 1px oklch(0.635 0.208 34 / 40%);
+  }
 }
 
 

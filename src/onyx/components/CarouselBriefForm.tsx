@@ -49,7 +49,7 @@ export function CarouselBriefForm({
                 ))}
               </div>
               <div className="mt-2 text-[13px] font-semibold">{tpl.name}</div>
-              <div className="text-[11px] leading-snug text-muted-foreground">{tpl.mood}</div>
+              <div className="text-xs leading-snug text-muted-foreground">{tpl.mood}</div>
             </button>
           ))}
         </div>
@@ -80,7 +80,7 @@ export function CarouselBriefForm({
             <StepBtn onClick={() => onChange({ slideCount: Math.max(1, values.slideCount - 1) })}>
               <Minus className="h-3.5 w-3.5" />
             </StepBtn>
-            <span className="w-8 text-center font-mono text-sm">{values.slideCount}</span>
+            <span className="w-8 text-center text-sm font-bold text-foreground">{values.slideCount}</span>
             <StepBtn onClick={() => onChange({ slideCount: Math.min(10, values.slideCount + 1) })}>
               <Plus className="h-3.5 w-3.5" />
             </StepBtn>
@@ -165,13 +165,13 @@ export function CarouselBriefForm({
           />
           <span className="flex-1">
             <span className="block text-[13px] font-medium">AI Clone verwenden</span>
-            <span className="block text-[11px] text-muted-foreground">
+            <span className="block text-xs text-muted-foreground">
               Dein Gesicht/Stil als wiederkehrendes Motiv in allen Slides
             </span>
           </span>
           <span
             className={cn(
-              "rounded-full px-2 py-0.5 font-mono text-[10px]",
+              "rounded-full px-2.5 py-0.5 text-xs font-semibold",
               values.useClone ? "bg-primary text-primary-foreground" : "bg-foreground/10 text-muted-foreground",
             )}
           >

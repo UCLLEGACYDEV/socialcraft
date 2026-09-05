@@ -25,7 +25,7 @@ export function DirectPromptView() {
         <h1 className="text-lg font-semibold">Einzelbild</h1>
         <textarea
           rows={5}
-          className="field-input font-mono text-[11px]"
+          className="field-input text-xs sm:text-sm leading-relaxed"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           placeholder="Photorealistic 3D marble statue, ember rim light…"
@@ -63,12 +63,12 @@ export function AiCloneView() {
       </p>
       <textarea
         rows={6}
-        className="field-input font-mono text-[11px]"
+        className="field-input text-xs sm:text-sm leading-relaxed"
         value={desc}
         onChange={(e) => setDesc(e.target.value)}
         placeholder="Mann, Ende 30, kurzer Bart, schwarzer Rollkragen, dramatisches Seitenlicht…"
       />
-      <p className="text-[11px] text-muted-foreground">Lokal gespeichert, sobald du weiter tippst.</p>
+      <p className="text-xs text-muted-foreground">Lokal gespeichert, sobald du weiter tippst.</p>
     </div>
   );
 }
@@ -94,10 +94,10 @@ export function PromptGallery() {
             key={p}
             type="button"
             onClick={() => navigator.clipboard?.writeText(p)}
-            className="glass-card hover:ember-glow p-4 text-left font-mono text-[11px] leading-relaxed text-muted-foreground transition-colors hover:text-foreground"
+            className="glass-card hover:ember-glow p-4 text-left text-xs sm:text-sm leading-relaxed text-foreground/90 transition-colors hover:text-foreground"
           >
             {p}
-            <span className="mt-2 block text-[10px] text-primary-bright">Klicken zum Kopieren</span>
+            <span className="mt-2.5 block text-xs font-semibold text-primary-bright">Klicken zum Kopieren</span>
           </button>
         ))}
       </div>
@@ -128,7 +128,7 @@ export function HistoryView({
             <div className="flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <div className="truncate text-sm font-medium">{entry.topic}</div>
-                <div className="font-mono text-[11px] text-muted-foreground">
+                <div className="text-xs text-muted-foreground">
                   {new Date(entry.createdAt).toLocaleString("de-DE")} · {entry.slides.length} Slides
                 </div>
               </div>
@@ -174,7 +174,7 @@ export function McpModalContent() {
         ONYX kann Prompts direkt aus Claude Desktop empfangen. Trage den lokalen Server in deine
         Claude-Konfiguration ein:
       </p>
-      <pre className="overflow-x-auto rounded-lg border border-border bg-foreground/[0.04] p-3 font-mono text-[11px] text-foreground">
+      <pre className="overflow-x-auto rounded-lg border border-border bg-foreground/[0.04] p-3 font-mono text-xs text-foreground">
 {`{
   "mcpServers": {
     "onyx-studio": {

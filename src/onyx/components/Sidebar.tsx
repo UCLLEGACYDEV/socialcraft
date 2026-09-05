@@ -61,12 +61,12 @@ export function Sidebar({
       )}
     >
       <div className="flex h-16 items-center gap-3 px-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/20 font-mono text-sm font-bold text-primary-bright ring-1 ring-primary/40">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/20 text-sm font-bold text-primary-bright ring-1 ring-primary/40">
           O
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <div className="truncate font-mono text-sm font-bold tracking-tight">ONYX Studio</div>
+            <div className="truncate text-sm font-bold tracking-tight text-foreground">ONYX Studio</div>
             <div className="mono-label">Carousel Engine</div>
           </div>
         )}

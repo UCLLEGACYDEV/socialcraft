@@ -60,7 +60,7 @@ export function ContextBar({
             className="flex items-center gap-1.5 text-xs text-muted-foreground"
           >
             <ShieldCheck className="h-4 w-4 text-success" />
-            <span className="font-mono">{historyCount}</span>
+            <span className="font-semibold text-foreground/90">{historyCount}</span>
           </div>
         )}
       </div>

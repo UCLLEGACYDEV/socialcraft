@@ -46,13 +46,13 @@ export function StudioSelect({ value, onChange, options, ariaLabel, className }:
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "flex w-full items-center justify-between gap-2 rounded-full border px-3.5 py-2 text-xs font-medium transition-all duration-200",
+          "flex w-full items-center justify-between gap-2 rounded-full border px-3.5 py-2.5 text-xs sm:text-sm font-medium transition-all duration-200",
           open
             ? "border-primary/50 bg-primary/10 text-foreground shadow-[0_0_24px_-8px_var(--primary)]"
-            : "border-border bg-foreground/[0.04] text-muted-foreground hover:border-primary/40 hover:text-foreground",
+            : "border-border bg-foreground/[0.04] text-foreground/90 hover:border-primary/40 hover:text-foreground",
         )}
       >
-        <span className="truncate font-mono">{selected?.label ?? value}</span>
+        <span className="truncate font-medium">{selected?.label ?? value}</span>
         <ChevronDown
           className={cn(
             "h-3.5 w-3.5 shrink-0 transition-transform duration-200",
@@ -85,16 +85,16 @@ export function StudioSelect({ value, onChange, options, ariaLabel, className }:
                   setOpen(false);
                 }}
                 className={cn(
-                  "flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors",
+                  "flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2 text-left text-xs sm:text-sm transition-colors",
                   active
-                    ? "bg-primary/15 text-primary-bright"
-                    : "text-muted-foreground hover:bg-foreground/[0.05] hover:text-foreground",
+                    ? "bg-primary/15 font-semibold text-primary-bright"
+                    : "text-foreground/80 hover:bg-foreground/[0.06] hover:text-foreground",
                 )}
               >
-                <span className="truncate font-mono">{opt.label}</span>
+                <span className="truncate font-medium">{opt.label}</span>
                 <span className="flex items-center gap-1.5">
                   {opt.hint && (
-                    <span className="text-[10px] uppercase tracking-wide text-muted-foreground/70">
+                    <span className="text-[11px] font-medium tracking-wide text-muted-foreground">
                       {opt.hint}
                     </span>
                   )}

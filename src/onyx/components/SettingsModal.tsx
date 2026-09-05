@@ -37,8 +37,8 @@ export function SettingsModal({
       onClose={onClose}
       footer={
         <div className="flex items-center justify-between">
-          <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            <Lock className="h-3 w-3" /> Lokal im Browser gespeichert
+          <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Lock className="h-3.5 w-3.5" /> Lokal im Browser gespeichert
           </span>
           <button
             type="button"
@@ -141,7 +141,7 @@ export function SettingsModal({
               onChange={(e) => onChange({ geminiApiKey: e.target.value })}
             />
           </Row>
-          <p className="text-[11px] text-muted-foreground">
+          <p className="text-xs text-muted-foreground">
             Wird für Text-Prompts und Imagen 3 verwendet.
           </p>
         </Section>
@@ -183,7 +183,7 @@ export function SettingsModal({
           </div>
         </Section>
 
-        <p className="font-mono text-[11px] text-muted-foreground">ONYX Studio v1.1.1 · Local Build</p>
+        <p className="text-xs text-muted-foreground">ONYX Studio v1.1.1 · Local Build</p>
       </div>
     </ModalShell>
   );
@@ -201,7 +201,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="grid gap-1.5 sm:grid-cols-[140px_1fr] sm:items-center sm:gap-3">
-      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-xs font-semibold text-foreground/80">{label}</span>
       {children}
     </label>
   );
