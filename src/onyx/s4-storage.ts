@@ -28,11 +28,11 @@ export const S4_DEFAULT_BUCKET = "socialgrow";
  * Admins: admins/{userId}
  */
 export function getUserS4Folder(user: User | null): string {
-  if (!user) return "users/guest";
+  if (!user) return "USERCONTENT/users/guest";
   if (user.role === "admin") {
-    return `admins/${user.id}`;
+    return `USERCONTENT/admins/${user.id}`;
   }
-  return `users/${user.id}`;
+  return `USERCONTENT/users/${user.id}`;
 }
 
 /**
@@ -41,7 +41,7 @@ export function getUserS4Folder(user: User | null): string {
 const INITIAL_S4_IMAGES: S4CloudImage[] = [
   {
     id: "s4-img-01",
-    key: "admins/usr-admin-01/2026-09-04_monolith_obsidian.jpg",
+    key: "USERCONTENT/admins/usr-admin-01/2026-09-04_monolith_obsidian.jpg",
     bucket: S4_DEFAULT_BUCKET,
     endpoint: S4_DEFAULT_ENDPOINT,
     url: `https://${S4_DEFAULT_ENDPOINT}/admins/usr-admin-01/2026-09-04_monolith_obsidian.jpg`,
@@ -58,7 +58,7 @@ const INITIAL_S4_IMAGES: S4CloudImage[] = [
   },
   {
     id: "s4-img-02",
-    key: "admins/usr-admin-01/2026-09-04_marble_discipline.jpg",
+    key: "USERCONTENT/admins/usr-admin-01/2026-09-04_marble_discipline.jpg",
     bucket: S4_DEFAULT_BUCKET,
     endpoint: S4_DEFAULT_ENDPOINT,
     url: `https://${S4_DEFAULT_ENDPOINT}/admins/usr-admin-01/2026-09-04_marble_discipline.jpg`,
@@ -75,7 +75,7 @@ const INITIAL_S4_IMAGES: S4CloudImage[] = [
   },
   {
     id: "s4-img-03",
-    key: "admins/usr-admin-01/2026-09-05_series_focus_01.jpg",
+    key: "USERCONTENT/admins/usr-admin-01/2026-09-05_series_focus_01.jpg",
     bucket: S4_DEFAULT_BUCKET,
     endpoint: S4_DEFAULT_ENDPOINT,
     url: `https://${S4_DEFAULT_ENDPOINT}/admins/usr-admin-01/2026-09-05_series_focus_01.jpg`,
@@ -92,7 +92,7 @@ const INITIAL_S4_IMAGES: S4CloudImage[] = [
   },
   {
     id: "s4-img-04",
-    key: "users/usr-creator-02/2026-09-03_viral_hook.jpg",
+    key: "USERCONTENT/users/usr-creator-02/2026-09-03_viral_hook.jpg",
     bucket: S4_DEFAULT_BUCKET,
     endpoint: S4_DEFAULT_ENDPOINT,
     url: `https://${S4_DEFAULT_ENDPOINT}/users/usr-creator-02/2026-09-03_viral_hook.jpg`,
@@ -109,7 +109,7 @@ const INITIAL_S4_IMAGES: S4CloudImage[] = [
   },
   {
     id: "s4-img-05",
-    key: "users/usr-creator-02/2026-09-04_routine_system.jpg",
+    key: "USERCONTENT/users/usr-creator-02/2026-09-04_routine_system.jpg",
     bucket: S4_DEFAULT_BUCKET,
     endpoint: S4_DEFAULT_ENDPOINT,
     url: `https://${S4_DEFAULT_ENDPOINT}/users/usr-creator-02/2026-09-04_routine_system.jpg`,

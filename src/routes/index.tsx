@@ -504,7 +504,7 @@ function OnyxStudio() {
       });
 
       updateJobSlide(jobId, slideId, {
-        imageUrl: `${res.imageUrl}&v=${Date.now()}`,
+        imageUrl: res.imageUrl,
         isGeneratingImage: false,
         renderProgress: 100,
         renderStatus: "done",
@@ -708,7 +708,7 @@ function OnyxStudio() {
         if (jobId) updateJobSlide(jobId, slideId, { isGeneratingImage: true });
         else setSlideFlag(slideId, { isGeneratingImage: true });
         const res = await mockGenerateImage(number);
-        const done = { imageUrl: `${res.imageUrl}&v=${Date.now()}`, isGeneratingImage: false };
+        const done = { imageUrl: res.imageUrl, isGeneratingImage: false };
         if (jobId) updateJobSlide(jobId, slideId, done);
         else setSlideFlag(slideId, done);
       })();
