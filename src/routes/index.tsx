@@ -22,6 +22,7 @@ import { saveImageToS4, ensureUserS4Folder } from "@/onyx/s4-storage";
 import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
 import { AdminDashboard } from "@/onyx/components/AdminDashboard";
 import { AuthModal } from "@/onyx/components/AuthModal";
+import { UserProfileModal } from "@/onyx/components/UserProfileModal";
 import { CreditUpgradeModal } from "@/onyx/components/CreditUpgradeModal";
 import { type User, getStoredCurrentUser, getStoredUsers, saveStoredCurrentUser } from "@/onyx/auth";
 
@@ -91,6 +92,7 @@ function OnyxStudio() {
   );
   const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredCurrentUser());
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<"login" | "register">("login");
 
   const handleLogout = () => {
@@ -280,13 +282,18 @@ function OnyxStudio() {
           });
           setSlideFlag(slide.id, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
           if (settings.s4AutoSave) {
+            const effectiveUser = currentUser || getStoredCurrentUser();
             void saveImageToS4({
               imageUrl: res.imageUrl,
               prompt: slide.visualPrompt,
               category: "carousel",
               aspectRatio: brandKit.aspectRatio,
-              user: currentUser,
+              user: effectiveUser,
               customFilename: `slide_${slide.slideNumber}.jpg`,
+            }).then((cloudImg) => {
+              if (cloudImg) {
+                toast.success(`Slide ${slide.slideNumber} in Mega S4 gesichert ☁️`, { duration: 2500 });
+              }
             });
           }
           if (res.fromRealApi) realNanoCount++;
@@ -336,13 +343,18 @@ function OnyxStudio() {
       });
       setSlideFlag(slideId, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
       if (settings.s4AutoSave) {
+        const effectiveUser = currentUser || getStoredCurrentUser();
         void saveImageToS4({
           imageUrl: res.imageUrl,
           prompt: slide.visualPrompt,
           category: "carousel",
           aspectRatio: brandKit.aspectRatio,
-          user: currentUser,
+          user: effectiveUser,
           customFilename: `slide_${slide.slideNumber}_reroll.jpg`,
+        }).then((cloudImg) => {
+          if (cloudImg) {
+            toast.success(`Slide ${slide.slideNumber} in Mega S4 aktualisiert ☁️`, { duration: 2500 });
+          }
         });
       }
       if (res.fromRealApi) {
@@ -816,6 +828,7 @@ function OnyxStudio() {
             setAuthModalMode(mode);
             setShowAuthModal(true);
           }}
+          onOpenProfile={() => setShowProfileModal(true)}
           onLogout={handleLogout}
           creditStatus={creditStatus}
           onRefreshCredits={() => void refreshCredits()}
@@ -996,6 +1009,15 @@ function OnyxStudio() {
           onChangeSettings={patchSettings}
           creditStatus={creditStatus}
           onRefreshCredits={() => void refreshCredits()}
+        />
+      )}
+
+      {showProfileModal && currentUser && (
+        <UserProfileModal
+          user={currentUser}
+          onClose={() => setShowProfileModal(false)}
+          onUserUpdated={(u) => setCurrentUser(u)}
+          onLogout={handleLogout}
         />
       )}
 

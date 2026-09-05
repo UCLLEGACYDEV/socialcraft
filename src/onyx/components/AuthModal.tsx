@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Eye, EyeOff, Lock, Mail, Shield, Sparkles, User as UserIcon, X, Zap } from "lucide-react";
 import { toast } from "sonner";
+import type { User } from "../auth";
 import {
-  type User,
-  getStoredUsers,
-  saveStoredCurrentUser,
-  saveStoredUsers,
-} from "../auth";
+  DEFAULT_ADMIN_CREDENTIALS,
+  hasSupabaseConfig,
+  registerUser,
+  signInUser,
+} from "../supabase-auth";
 import { cn } from "@/lib/utils";
 
 interface AuthModalProps {
@@ -24,28 +25,29 @@ export function AuthModal({ initialMode = "login", onClose, onSuccess }: AuthMod
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleDemoLogin = (targetEmail: string) => {
-    const users = getStoredUsers();
-    const found = users.find((u) => u.email.toLowerCase() === targetEmail.toLowerCase());
-    if (found) {
-      if (found.status === "suspended") {
-        toast.error("Dieses Konto ist vorübergehend gesperrt.");
-        return;
+  const handleDemoLogin = async (targetEmail: string) => {
+    setLoading(true);
+    try {
+      const defaultPassword =
+        targetEmail === DEFAULT_ADMIN_CREDENTIALS.email
+          ? DEFAULT_ADMIN_CREDENTIALS.password
+          : "Socialcraft123!";
+      const res = await signInUser(targetEmail, defaultPassword);
+      if (res.success && res.user) {
+        toast.success(`Willkommen zurück, ${res.user.name}! (${res.user.role.toUpperCase()})`);
+        onSuccess(res.user);
+        onClose();
+      } else {
+        toast.error(res.error || "Anmeldung fehlgeschlagen.");
       }
-      const updatedUser: User = {
-        ...found,
-        lastLoginAt: new Date().toISOString(),
-      };
-      saveStoredCurrentUser(updatedUser);
-      toast.success(`Willkommen zurück, ${found.name}! (${found.role.toUpperCase()})`);
-      onSuccess(updatedUser);
-      onClose();
-    } else {
-      toast.error("Demo-Benutzer nicht gefunden.");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Fehler");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim()) {
       toast.error("Bitte gib deine E-Mail und dein Passwort ein.");
@@ -53,33 +55,24 @@ export function AuthModal({ initialMode = "login", onClose, onSuccess }: AuthMod
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      const users = getStoredUsers();
-      const found = users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
-
-      if (!found) {
-        toast.error("Kein Konto mit dieser E-Mail gefunden.");
+    try {
+      const res = await signInUser(email, password);
+      if (!res.success || !res.user) {
+        toast.error(res.error || "Kein Konto mit diesen Zugangsdaten gefunden.");
         return;
       }
 
-      if (found.status === "suspended") {
-        toast.error("Dieses Konto ist gesperrt. Bitte wende dich an den Admin.");
-        return;
-      }
-
-      const updatedUser: User = {
-        ...found,
-        lastLoginAt: new Date().toISOString(),
-      };
-      saveStoredCurrentUser(updatedUser);
-      toast.success(`Erfolgreich angemeldet als ${found.name}!`);
-      onSuccess(updatedUser);
+      toast.success(`Erfolgreich angemeldet als ${res.user.name}!`);
+      onSuccess(res.user);
       onClose();
-    }, 450);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Anmeldefehler");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
       toast.error("Bitte gib deinen Namen ein.");
@@ -99,35 +92,21 @@ export function AuthModal({ initialMode = "login", onClose, onSuccess }: AuthMod
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      const users = getStoredUsers();
-      const existing = users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
-      if (existing) {
-        toast.error("Ein Benutzer mit dieser E-Mail existiert bereits.");
+    try {
+      const res = await registerUser(email, password, name.trim());
+      if (!res.success || !res.user) {
+        toast.error(res.error || "Registrierung fehlgeschlagen.");
         return;
       }
 
-      const newUser: User = {
-        id: `usr-${Date.now()}`,
-        name: name.trim(),
-        email: email.trim(),
-        role: "creator",
-        credits: 500, // Welcome gift credits
-        avatarUrl: `https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&h=150&fit=crop&crop=face`,
-        status: "active",
-        createdAt: new Date().toISOString(),
-        lastLoginAt: new Date().toISOString(),
-      };
-
-      const newUsersList = [newUser, ...users];
-      saveStoredUsers(newUsersList);
-      saveStoredCurrentUser(newUser);
-
-      toast.success("Konto erfolgreich erstellt! 500 Willkommens-Credits gutgeschrieben.");
-      onSuccess(newUser);
+      toast.success(`Konto erfolgreich erstellt! Willkommen, ${res.user.name}!`);
+      onSuccess(res.user);
       onClose();
-    }, 500);
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Registrierungsfehler");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

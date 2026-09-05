@@ -1,5 +1,12 @@
 import type { User, UserRole } from "./auth";
-import { DEFAULT_API_SETTINGS } from "./defaults";
+import {
+  DEFAULT_API_SETTINGS,
+  ANCHORED_S4_ACCESS_KEY,
+  ANCHORED_S4_SECRET_KEY,
+  ANCHORED_S4_ENDPOINT,
+  ANCHORED_S4_BUCKET,
+  ANCHORED_S4_REGION,
+} from "./defaults";
 import type { ApiSettings } from "./types";
 
 export interface S4CloudImage {
@@ -20,8 +27,8 @@ export interface S4CloudImage {
   createdAt: string;
 }
 
-export const S4_DEFAULT_ENDPOINT = "socialgrow.s3.g.megas4.com";
-export const S4_DEFAULT_BUCKET = "socialgrow";
+export const S4_DEFAULT_ENDPOINT = ANCHORED_S4_ENDPOINT;
+export const S4_DEFAULT_BUCKET = ANCHORED_S4_BUCKET;
 
 function getSettings(): ApiSettings {
   if (typeof window === "undefined") return DEFAULT_API_SETTINGS;
@@ -33,17 +40,23 @@ function getSettings(): ApiSettings {
   }
 }
 
-/** Build request headers containing cloud storage credentials from local settings */
+/** Build request headers containing cloud storage credentials from local settings or master anchored fallback */
 function getCloudHeaders(): Record<string, string> {
   const settings = getSettings();
+  const accessKey = (settings.s4AccessKey?.trim() || ANCHORED_S4_ACCESS_KEY).trim();
+  const secretKey = (settings.s4SecretKey?.trim() || ANCHORED_S4_SECRET_KEY).trim();
+  const endpoint = (settings.s4Endpoint?.trim() || ANCHORED_S4_ENDPOINT).trim();
+  const bucket = (settings.s4Bucket?.trim() || ANCHORED_S4_BUCKET).trim();
+  const region = (settings.s4Region?.trim() || ANCHORED_S4_REGION).trim();
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  if (settings.s4AccessKey) headers["x-cloud-access-key"] = settings.s4AccessKey;
-  if (settings.s4SecretKey) headers["x-cloud-secret-key"] = settings.s4SecretKey;
-  if (settings.s4Endpoint) headers["x-cloud-endpoint"] = settings.s4Endpoint;
-  if (settings.s4Bucket) headers["x-cloud-bucket"] = settings.s4Bucket;
-  if (settings.s4Region) headers["x-cloud-region"] = settings.s4Region;
+  if (accessKey) headers["x-cloud-access-key"] = accessKey;
+  if (secretKey) headers["x-cloud-secret-key"] = secretKey;
+  if (endpoint) headers["x-cloud-endpoint"] = endpoint;
+  if (bucket) headers["x-cloud-bucket"] = bucket;
+  if (region) headers["x-cloud-region"] = region;
   return headers;
 }
 

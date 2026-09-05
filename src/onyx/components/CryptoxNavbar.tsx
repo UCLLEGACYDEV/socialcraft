@@ -33,6 +33,7 @@ interface CryptoxNavbarProps {
   onNavigateAdmin?: () => void;
   currentUser?: User | null;
   onOpenAuth?: (mode: "login" | "register") => void;
+  onOpenProfile?: () => void;
   onLogout?: () => void;
   creditStatus?: CreditStatus | undefined;
   onRefreshCredits: () => void;
@@ -63,6 +64,7 @@ export function CryptoxNavbar({
   onNavigateAdmin,
   currentUser,
   onOpenAuth,
+  onOpenProfile,
   onLogout,
   creditStatus,
   onRefreshCredits,
@@ -291,6 +293,17 @@ export function CryptoxNavbar({
                 </div>
 
                 <DropdownMenuSeparator className="bg-white/[0.08]" />
+
+                {/* Profile & Credentials Modal */}
+                {onOpenProfile && (
+                  <DropdownMenuItem
+                    onClick={onOpenProfile}
+                    className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-zinc-200 hover:bg-white/[0.06] hover:text-white cursor-pointer transition-colors"
+                  >
+                    <User className="h-4 w-4 text-orange-400" />
+                    <span>Mein Profil & Mega S4 Sync</span>
+                  </DropdownMenuItem>
+                )}
 
                 {/* Quick Navigation Items */}
                 {isAdmin && onNavigateAdmin && (
