@@ -223,12 +223,12 @@ export interface InspirationFusionResult {
 /**
  * Inspiration Image Style-Transfer & Persona Fusion
  *
- * Scans an external inspiration image (e.g. another person/model with high-end outfit,
+ * Scans one or multiple external inspiration images (e.g. another person/model with high-end outfit,
  * pose, lighting, or setting), extracts the visual aesthetics, and FUSES IT
  * DIRECTLY ONTO THE USER'S AI CLONE IDENTITY (Face, Hair, Tattoos, blemish-free skin).
  */
 export async function analyzeInspirationAndFuseWithClone(
-  inspirationImageUrl: string,
+  inspirationImages: string | string[],
   clone: AiCloneProfile,
   options?: {
     apiKey?: string;
@@ -237,12 +237,18 @@ export async function analyzeInspirationAndFuseWithClone(
 ): Promise<InspirationFusionResult> {
   const { apiKey, onProgress } = options || {};
   const effectiveKey = (apiKey?.trim() || ANCHORED_KIE_API_KEY).trim();
+  const urls = (Array.isArray(inspirationImages) ? inspirationImages : [inspirationImages]).filter(
+    (u) => typeof u === "string" && u.trim().length > 0,
+  );
+  const primaryUrl = urls[0] || "";
 
   // Progress Steps
   onProgress?.({
     step: 1,
     totalSteps: 4,
-    label: "Scanne Inspirationsbild nach Garderobe, Textilien & Schnitt…",
+    label: urls.length > 1
+      ? `Scanne ${urls.length} Inspirationsbilder nach Garderobe, Textilien & Schnitt…`
+      : "Scanne Inspirationsbild nach Garderobe, Textilien & Schnitt…",
     percent: 25,
   });
   await new Promise((r) => setTimeout(r, 450));
@@ -272,13 +278,30 @@ export async function analyzeInspirationAndFuseWithClone(
   await new Promise((r) => setTimeout(r, 300));
 
   // If online Vision API key available, attempt AI vision extraction
-  if (
-    effectiveKey &&
-    (inspirationImageUrl.startsWith("http://") ||
-      inspirationImageUrl.startsWith("https://") ||
-      inspirationImageUrl.startsWith("data:image/"))
-  ) {
+  const validVisionUrls = urls.filter(
+    (u) => u.startsWith("http://") || u.startsWith("https://") || u.startsWith("data:image/"),
+  );
+
+  if (effectiveKey && validVisionUrls.length > 0) {
     try {
+      const userMessageContent: Array<
+        | { type: "text"; text: string }
+        | { type: "image_url"; image_url: { url: string } }
+      > = [
+        {
+          type: "text",
+          text: `Analyze the provided ${
+            validVisionUrls.length > 1
+              ? `${validVisionUrls.length} inspiration photos`
+              : "inspiration photo"
+          } and transfer the combined style, outfit, pose, and aesthetic onto the described AI clone. Synthesize multiple photos if provided into a unified look. Return strict JSON.`,
+        },
+        ...validVisionUrls.map((url) => ({
+          type: "image_url" as const,
+          image_url: { url },
+        })),
+      ];
+
       const response = await fetch("https://api.kie.ai/api/v1/chat/completions", {
         method: "POST",
         headers: {
@@ -291,8 +314,8 @@ export async function analyzeInspirationAndFuseWithClone(
             {
               role: "system",
               content: `You are an AI Style Transfer and Character Consistency Expert.
-Your task: Analyze the provided inspiration image of a person/model to extract ONLY the external style elements:
-1. wardrobe: Exact clothes, materials, fabrics, cut, and colors worn in the image.
+Your task: Analyze the provided inspiration image(s) of a person/model to extract ONLY the external style elements:
+1. wardrobe: Exact clothes, materials, fabrics, cut, and colors worn in the image(s).
 2. pose: Posture, body language, angle, and hand placement.
 3. lighting: Lighting direction, color temperature, shadow softness, and rim lights.
 4. environment: Background setting, atmosphere, and spatial mood.
@@ -304,21 +327,12 @@ The user has a recurring AI Clone with the following immutable personal identity
 - Tattoos & Permanent Marks: ${clone.tattoosFeatures || "None"}
 
 You must synthesize a fused prompt where the USER'S CLONE is the person in the image, wearing the analyzed wardrobe, posing in the analyzed posture, and surrounded by the analyzed lighting & environment.
-Smooth out any skin flaws (no pimples or acne).
+Smooth out any skin flaws (no pimples or acne, preserve clear flawless editorial skin).
 Return JSON with keys: extractedWardrobe, extractedPose, extractedLighting, extractedEnvironment, fusedPrompt, summary (array of 4 bullet points).`,
             },
             {
               role: "user",
-              content: [
-                {
-                  type: "text",
-                  text: "Analyze this inspiration photo and transfer its style onto the described AI clone. Return strict JSON.",
-                },
-                {
-                  type: "image_url",
-                  image_url: { url: inspirationImageUrl },
-                },
-              ],
+              content: userMessageContent,
             },
           ],
           response_format: { type: "json_object" },
@@ -347,7 +361,7 @@ Return JSON with keys: extractedWardrobe, extractedPose, extractedLighting, extr
               summary: Array.isArray(parsed.summary)
                 ? parsed.summary
                 : [
-                    "Garderobe & Schnitt aus Inspirationsfoto präzise extrahiert",
+                    "Garderobe & Schnitt aus Inspirationsfoto(s) präzise extrahiert",
                     "Pose & Kamerawinkel übernommen",
                     "Lichtstimmung auf ONYX-Farbpalette adaptiert",
                     `Gesicht & Tattoos von „${clone.name}“ 100% beibehalten (Pickel gefiltert)`,
@@ -362,8 +376,9 @@ Return JSON with keys: extractedWardrobe, extractedPose, extractedLighting, extr
   }
 
   // Built-in intelligent style extraction engine (offline/fallback)
-  const isStreetwear = /hoodie|jacket|tech|street|sneaker/i.test(inspirationImageUrl);
-  const isFormal = /suit|blazer|tie|anzug|hemd|coat|mantel/i.test(inspirationImageUrl);
+  const allUrlsJoined = urls.join(" ");
+  const isStreetwear = /hoodie|jacket|tech|street|sneaker/i.test(allUrlsJoined || primaryUrl);
+  const isFormal = /suit|blazer|tie|anzug|hemd|coat|mantel/i.test(allUrlsJoined || primaryUrl);
 
   const extractedWardrobe = isFormal
     ? "Schwarzer taillierter italienischer Wollmantel über anthrazitfarbenem Merinowolle-Rollkragenpullover mit matter Stofftextur"

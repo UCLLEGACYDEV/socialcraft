@@ -904,7 +904,20 @@ function OnyxStudio() {
             />
           )}
 
-          {activeTab === "direct-prompt" && <DirectPromptView initialPrompt={directPrompt} />}
+          {activeTab === "direct-prompt" && (
+            <DirectPromptView
+              initialPrompt={directPrompt}
+              currentUser={currentUser}
+              onNavigateToClone={() => setActiveTab("ai-clone")}
+              onDeductCredits={(amt) => {
+                if (currentUser) {
+                  const updated = Math.max(0, (currentUser.credits ?? 0) - amt);
+                  setCurrentUser((prev) => (prev ? { ...prev, credits: updated } : null));
+                }
+                void refreshCredits();
+              }}
+            />
+          )}
           {activeTab === "ai-clone" && (
             <AiCloneView
               onUseInCarousel={() => {

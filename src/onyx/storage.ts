@@ -19,6 +19,8 @@ export const LS = {
   history: "onyx_history",
   cloneProfiles: "onyx_ai_clone_profiles",
   activeCloneId: "onyx_ai_clone_active_id",
+  directPromptImages: "onyx_direct_prompt_images",
+  directPromptUseClone: "onyx_direct_prompt_use_clone",
 } as const;
 
 export function readLS<T>(key: string, fallback: T): T {
