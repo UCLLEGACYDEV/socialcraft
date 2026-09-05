@@ -25,8 +25,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
-import FUIHeroWithJelly from "@/components/ui/jelly-animated-hero";
-import { ParallaxComponent } from "@/components/ui/parallax-scrolling";
+import { SocialcraftParallaxHero } from "@/components/ui/socialcraft-parallax-hero";
 import type { User } from "../auth";
 import { cn } from "@/lib/utils";
 
@@ -105,40 +104,32 @@ export function CryptoxLandingPage({
               Startseite
             </a>
             <a
-              href="#jelly-hero"
-              className="rounded-full px-3 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors flex items-center gap-1"
+              href="#showcase"
+              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
             >
-              <Sparkles className="h-3 w-3 text-cyan-400" />
-              <span>Jelly Hero</span>
-            </a>
-            <a
-              href="#parallax"
-              className="rounded-full px-3 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors flex items-center gap-1"
-            >
-              <Layers className="h-3 w-3 text-amber-400" />
-              <span>Parallax</span>
+              Showcase
             </a>
             <a
               href="#features"
-              className="rounded-full px-4 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
+              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
             >
               Features
             </a>
             <a
               href="#why-choose"
-              className="rounded-full px-4 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
+              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
             >
               Vorteile
             </a>
             <a
               href="#testimonials"
-              className="rounded-full px-4 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
+              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
             >
               Kundenstimmen
             </a>
             <a
               href="#faq"
-              className="rounded-full px-4 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
+              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
             >
               FAQ
             </a>
@@ -206,86 +197,20 @@ export function CryptoxLandingPage({
         </div>
       </header>
 
-      {/* ── 2. Hero Section with Fiery Swirl Vortex & 3D Badges ───── */}
-      <section id="hero" className="relative z-10 pt-16 pb-20 px-4">
-        <div className="mx-auto max-w-5xl text-center relative">
-          {/* Orbiting Satellite Badges (Social & Content Creation) */}
-          <div className="hidden lg:block absolute -left-12 top-10 pointer-events-none">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/80 px-3.5 py-1.5 text-xs font-medium text-white/80 shadow-[0_10px_30px_rgba(0,0,0,0.6)] backdrop-blur-xl animate-[pulse_4s_ease-in-out_infinite]">
-              <span>Hook Booster</span>
-              <div className="h-3 w-3 rounded-full border border-white/40 flex items-center justify-center text-[8px]">
-                ✦
-              </div>
-            </div>
-          </div>
+      {/* ── 2. Hero Section: Socialcraft Parallax Hero (2nd Component UI + Parallax) ── */}
+      <section id="hero" className="relative z-10">
+        <SocialcraftParallaxHero
+          onCtaClick={onNavigateStudio}
+          onExploreClick={() => {
+            const el = document.getElementById("showcase");
+            el?.scrollIntoView({ behavior: "smooth" });
+          }}
+        />
+      </section>
 
-          <div className="hidden lg:block absolute -left-4 top-28 pointer-events-none">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/80 px-3.5 py-1.5 text-xs font-medium text-white/80 shadow-[0_10px_30px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-              <span>Viral Storyline</span>
-              <div className="h-3 w-3 rounded-full border border-white/40 flex items-center justify-center text-[8px]">
-                ⚙
-              </div>
-            </div>
-          </div>
-
-          <div className="hidden lg:block absolute -right-8 top-12 pointer-events-none">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/80 px-3.5 py-1.5 text-xs font-medium text-white/80 shadow-[0_10px_30px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-              <div className="h-3 w-3 rounded-full border border-white/40 flex items-center justify-center text-[8px]">
-                ✦
-              </div>
-              <span>Nano Banana 2</span>
-            </div>
-          </div>
-
-          <div className="hidden lg:block absolute -right-16 top-28 pointer-events-none">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/80 px-3.5 py-1.5 text-xs font-medium text-white/80 shadow-[0_10px_30px_rgba(0,0,0,0.6)] backdrop-blur-xl animate-[pulse_5s_ease-in-out_infinite]">
-              <div className="h-3 w-3 rounded-full border border-white/40 flex items-center justify-center text-[8px]">
-                ⚙
-              </div>
-              <span>KI Persona Lock</span>
-            </div>
-          </div>
-
-          {/* Central Fiery Swirl Vortex Portal */}
-          <div className="relative mx-auto mb-8 flex items-center justify-center">
-            <div className="relative h-[320px] w-[320px] sm:h-[420px] sm:w-[420px] rounded-full flex items-center justify-center">
-              {/* Fiery Rings */}
-              <div className="cryptox-vortex-portal absolute inset-0 rounded-full" />
-              <div className="absolute inset-8 rounded-full border border-[#FF6A1F]/30 bg-black/60 backdrop-blur-md" />
-              <div className="absolute inset-16 rounded-full border border-white/10 bg-black/80" />
-
-              {/* Central Text inside vortex */}
-              <div className="relative z-10 max-w-xl px-4">
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15]">
-                  Tritt ein in die Zukunft des <br />
-                  <span className="bg-gradient-to-r from-white via-white/95 to-white/80 bg-clip-text text-transparent">
-                    Social Content Designs
-                  </span>
-                </h1>
-                <p className="mt-3 text-xs sm:text-sm text-white/70 max-w-md mx-auto leading-relaxed">
-                  KI-optimierte Karussell-Workflows, virales Storytelling und konsistente KI-Personas auf Knopfdruck.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Hero CTA Button */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
-            <button
-              type="button"
-              onClick={onNavigateStudio}
-              className="cryptox-orange-btn inline-flex items-center gap-2.5 rounded-full px-7 py-3 text-sm font-bold shadow-[0_0_30px_rgba(255,77,23,0.5)] hover:scale-105 transition-all"
-            >
-              <span>Jetzt kostenlos starten</span>
-              <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[#FF4D17]">
-                <ArrowRight className="h-3 w-3 stroke-[3]" />
-              </div>
-            </button>
-          </div>
-        </div>
-
-        {/* ── 3. 3-Card Showcase Dashboard (Content & Carousel Theme) ─ */}
-        <div className="mx-auto max-w-6xl mt-14 grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
+      {/* ── 3. 3-Card Showcase Dashboard (Content & Carousel Theme) ─ */}
+      <section id="showcase" className="relative z-10 pt-4 pb-14 px-4">
+        <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
           {/* Left Card: Design Archetypen */}
           <div className="cryptox-card rounded-3xl p-5 border border-white/10 bg-[#120E18]/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
             <div className="flex items-center justify-between mb-4">
@@ -468,39 +393,6 @@ export function CryptoxLandingPage({
         </div>
       </section>
 
-      {/* ── 4b. Jelly Animated Hero Showcase ──────────────────────── */}
-      <section id="jelly-hero" className="relative z-10 border-b border-white/[0.06]">
-        <div className="mx-auto max-w-6xl pt-14 pb-4 px-4 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold text-cyan-300 mb-2">
-            <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-            <span>Interactive Fluid UI · Jelly Animated Hero</span>
-          </div>
-          <p className="text-xs text-white/50 max-w-md mx-auto">
-            Dynamisches Video-Hintergrund-Rendering mit schwebendem 3D-Dashboard-Interface.
-          </p>
-        </div>
-        <FUIHeroWithJelly
-          title="Verwalte deinen Content und Reichweiten-Analytics an einem Ort."
-          subtitle="Socialcraft ist die moderne Content-Plattform für virale Instagram-Karussells, visuelles Storytelling und nahtlose KI-Personas."
-          ctaText="Jetzt Studio testen"
-          ctaHref="#studio"
-          onCtaClick={onNavigateStudio}
-        />
-      </section>
-
-      {/* ── 4c. 3D Parallax Scrolling Showcase ─────────────────────── */}
-      <section id="parallax" className="relative z-10 border-b border-white/[0.06]">
-        <div className="mx-auto max-w-6xl pt-16 pb-4 px-4 text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-semibold text-amber-300 mb-2">
-            <Layers className="h-3.5 w-3.5 text-amber-400" />
-            <span>Multi-Layer Parallax Scrolling · GSAP & Lenis Smooth</span>
-          </div>
-          <p className="text-xs text-white/50 max-w-md mx-auto">
-            Scrolle nach unten, um die mehrschichtigen Parallax-Ebenen in Echtzeit zu erleben.
-          </p>
-        </div>
-        <ParallaxComponent title="SOCIALCRAFT" />
-      </section>
 
       {/* ── 5. Powerful Features Section (Waveform Hero Card) ──────── */}
       <section id="features" className="relative z-10 py-20 px-4">
