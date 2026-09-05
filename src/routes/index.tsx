@@ -561,12 +561,20 @@ function OnyxStudio() {
       });
 
       if (settings.s4AutoSave) {
+        const _seriesTopic = (job?.topic ?? "series")
+          .replace(/[^a-zA-Z0-9-_\s]/g, "")
+          .trim()
+          .replace(/\s+/g, "_")
+          .slice(0, 40);
+        const _seriesFolder = `${new Date().toISOString().slice(0, 10)}_${_seriesTopic}_${jobId.slice(0, 6)}`;
         void saveImageToS4({
           imageUrl: res.imageUrl,
           prompt: slide.visualPrompt,
-          category: "series",
+          category: "carousel",
           user: currentUser,
-          customFilename: `${(job?.topic ?? "series").slice(0, 15).replace(/[^a-zA-Z0-9]/g, "_")}_slide_${slide.slideNumber}.jpg`,
+          customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
+          subfolder: `carousels/${_seriesFolder}`,
+          projectName: _seriesFolder,
         });
       }
 
@@ -665,12 +673,20 @@ function OnyxStudio() {
             });
 
             if (settings.s4AutoSave) {
+              const _qSeriesTopic = (job.topic || "series")
+                .replace(/[^a-zA-Z0-9-_\s]/g, "")
+                .trim()
+                .replace(/\s+/g, "_")
+                .slice(0, 40);
+              const _qSeriesFolder = `${new Date().toISOString().slice(0, 10)}_${_qSeriesTopic}_${id.slice(0, 6)}`;
               void saveImageToS4({
                 imageUrl: res.imageUrl,
                 prompt: slide.visualPrompt,
-                category: "series",
+                category: "carousel",
                 user: currentUser,
-                customFilename: `${job.topic.slice(0, 15).replace(/[^a-zA-Z0-9]/g, "_")}_slide_${slide.slideNumber}.jpg`,
+                customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
+                subfolder: `carousels/${_qSeriesFolder}`,
+                projectName: _qSeriesFolder,
               });
             }
 
