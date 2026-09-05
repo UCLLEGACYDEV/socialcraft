@@ -1,3 +1,4 @@
+export type { KieModel } from "./kie-api";
 export type SlideRole =
   | "hook"
   | "concept"

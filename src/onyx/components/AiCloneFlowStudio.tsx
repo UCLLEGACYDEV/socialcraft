@@ -473,7 +473,7 @@ export function AiCloneFlowStudio({
   const handleDownload = (imageUrl: string, title: string) => {
     const a = document.createElement("a");
     a.href = imageUrl;
-    a.download = `klon_${activeClone.name.toLowerCase().replace(/\s+/g, "_")}_${title.toLowerCase().replace(/\s+/g, "_")}.jpg`;
+    a.download = `klon_${(activeClone?.name ?? "clone").toLowerCase().replace(/\s+/g, "_")}_${title.toLowerCase().replace(/\s+/g, "_")}.jpg`;
     a.target = "_blank";
     document.body.appendChild(a);
     a.click();

@@ -239,7 +239,7 @@ export function DirectPromptView({
     let isMounted = true;
     const syncCloudHistory = async () => {
       try {
-        const cloudImages = await listS4Images(currentUser, "my");
+        const cloudImages = await listS4Images(currentUser ?? null, "my");
         const directImages = cloudImages.filter(
           (img) => img.category === "direct-prompt" || img.subfolder === "gallery",
         );
