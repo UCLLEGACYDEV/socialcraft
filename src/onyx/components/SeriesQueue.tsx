@@ -35,6 +35,10 @@ interface SeriesQueueProps {
   onEditSlide: (jobId: string, slideId: string) => void;
   onRerollSlide: (jobId: string, slideId: string) => void;
   onDownloadSlide: (jobId: string, slideId: string) => void;
+  onStartSlide?: ((jobId: string, slideId: string) => void) | undefined;
+  onCancelSlide?: ((jobId: string, slideId: string) => void) | undefined;
+  onRunSelectedSlides?: ((jobId: string, slideIds: string[]) => void) | undefined;
+  onCancelJobSlides?: ((jobId: string) => void) | undefined;
   settings: ApiSettings;
   onChangeSettings: (patch: Partial<ApiSettings>) => void;
 }
@@ -50,12 +54,17 @@ export function SeriesQueue({
   onEditSlide,
   onRerollSlide,
   onDownloadSlide,
+  onStartSlide,
+  onCancelSlide,
+  onRunSelectedSlides,
+  onCancelJobSlides,
   settings,
   onChangeSettings,
 }: SeriesQueueProps) {
   const [text, setText] = useState("");
   const [titles, setTitles] = useState<Record<number, string>>({});
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [selectedSlideIds, setSelectedSlideIds] = useState<Record<string, string[]>>({});
   const [naming, setNaming] = useState(false);
 
   const parsed = useMemo(() => parseBlock(text), [text]);
@@ -79,6 +88,28 @@ export function SeriesQueue({
     setNaming(false);
   };
 
+  const toggleSlideSelect = (jobId: string, slideId: string) => {
+    setSelectedSlideIds((prev) => {
+      const current = prev[jobId] ?? [];
+      const next = current.includes(slideId)
+        ? current.filter((id) => id !== slideId)
+        : [...current, slideId];
+      return { ...prev, [jobId]: next };
+    });
+  };
+
+  const selectAllInJob = (job: SeriesJob) => {
+    if (!job.slides) return;
+    setSelectedSlideIds((prev) => ({
+      ...prev,
+      [job.id]: job.slides!.map((s) => s.id),
+    }));
+  };
+
+  const deselectAllInJob = (jobId: string) => {
+    setSelectedSlideIds((prev) => ({ ...prev, [jobId]: [] }));
+  };
+
   return (
     <div className="space-y-5">
       <div className="cryptox-card relative overflow-hidden space-y-5 p-6 sm:p-7 border border-white/[0.08]">
@@ -93,9 +124,9 @@ export function SeriesQueue({
             <button
               type="button"
               onClick={onStopQueue}
-              className="flex items-center gap-1.5 rounded-full border border-destructive/50 bg-destructive/15 px-4 py-2 text-xs font-semibold text-destructive"
+              className="flex items-center gap-1.5 rounded-full border border-destructive/60 bg-destructive/20 px-4 py-2 text-xs font-bold text-destructive hover:bg-destructive/30 hover:text-white transition-all shadow-[0_0_15px_rgba(239,68,68,0.25)]"
             >
-              <X className="h-3.5 w-3.5" /> Queue stoppen
+              <X className="h-3.5 w-3.5" /> Queue & Slides abbrechen
             </button>
           ) : (
             <button
@@ -274,6 +305,10 @@ export function SeriesQueue({
         )}
         {queue.map((job) => {
           const open = expanded[job.id] ?? false;
+          const selectedIds = selectedSlideIds[job.id] ?? [];
+          const selectedCount = selectedIds.length;
+          const isJobRendering = Boolean(job.slides?.some((s) => s.isGeneratingImage)) || job.status === "rendering";
+
           return (
             <div key={job.id} className="cryptox-card overflow-hidden p-0 border border-white/[0.08]">
               <div className="flex items-center gap-3 p-4">
@@ -286,7 +321,7 @@ export function SeriesQueue({
                   {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                 </button>
                 <input
-                  className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+                  className="min-w-0 flex-1 bg-transparent text-sm outline-none font-medium"
                   value={job.topic}
                   onChange={(e) => onRenameJob(job.id, e.target.value)}
                 />
@@ -323,16 +358,75 @@ export function SeriesQueue({
               )}
 
               {open && job.slides && job.slides.length > 0 && (
-                <div className="grid grid-cols-2 gap-2 border-t border-border p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                  {job.slides.map((slide) => (
-                    <SlideCard
-                      key={slide.id}
-                      slide={slide}
-                      onReroll={() => onRerollSlide(job.id, slide.id)}
-                      onEdit={() => onEditSlide(job.id, slide.id)}
-                      onDownload={() => onDownloadSlide(job.id, slide.id)}
-                    />
-                  ))}
+                <div>
+                  {/* ── Slide Selection & Job Action Toolbar ───────────── */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-t border-white/[0.08] bg-white/[0.02] px-4 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-medium text-zinc-300">
+                        <span className="font-bold text-orange-400">{selectedCount}</span> von {job.slides.length} Slides gewählt
+                      </span>
+                      <div className="flex gap-1 text-[11px]">
+                        <button
+                          type="button"
+                          onClick={() => selectAllInJob(job)}
+                          className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+                        >
+                          Alle
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => deselectAllInJob(job.id)}
+                          className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+                        >
+                          Keine
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {onRunSelectedSlides && (
+                        <button
+                          type="button"
+                          onClick={() => onRunSelectedSlides(job.id, selectedIds)}
+                          disabled={selectedCount === 0 || isJobRendering}
+                          className="flex items-center gap-1.5 rounded-lg border border-orange-500/40 bg-orange-500/15 px-3 py-1.5 text-xs font-semibold text-orange-400 transition-all hover:bg-orange-500/25 hover:text-white disabled:opacity-40 disabled:pointer-events-none shadow-[0_0_12px_rgba(255,77,23,0.15)]"
+                        >
+                          <Play className="h-3 w-3 fill-current" />
+                          Auswahl starten ({selectedCount})
+                        </button>
+                      )}
+
+                      {isJobRendering && onCancelJobSlides && (
+                        <button
+                          type="button"
+                          onClick={() => onCancelJobSlides(job.id)}
+                          className="flex items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs font-semibold text-rose-300 transition-all hover:bg-rose-500/25 hover:text-white shadow-[0_0_12px_rgba(244,63,94,0.15)]"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                          Job abbrechen
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* ── Slide Grid ──────────────────────────────────────── */}
+                  <div className="grid grid-cols-2 gap-2.5 border-t border-border p-3.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                    {job.slides.map((slide) => (
+                      <SlideCard
+                        key={slide.id}
+                        slide={slide}
+                        selectable={true}
+                        isSelected={selectedIds.includes(slide.id)}
+                        onToggleSelect={() => toggleSlideSelect(job.id, slide.id)}
+                        onStartSingle={onStartSlide ? () => onStartSlide(job.id, slide.id) : undefined}
+                        onCancel={slide.isGeneratingImage && onCancelSlide ? () => onCancelSlide(job.id, slide.id) : undefined}
+                        modelName={settings.kieApiKey?.trim() ? settings.kieModel : "Demo"}
+                        onReroll={() => onRerollSlide(job.id, slide.id)}
+                        onEdit={() => onEditSlide(job.id, slide.id)}
+                        onDownload={() => onDownloadSlide(job.id, slide.id)}
+                      />
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

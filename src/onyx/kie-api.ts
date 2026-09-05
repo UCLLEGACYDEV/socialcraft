@@ -235,6 +235,13 @@ export async function createNanoBananaTask(params: NanoBananaTaskParams): Promis
   return json.data.taskId;
 }
 
+export interface KieProgressInfo {
+  state: string;
+  message: string;
+  percent?: number | undefined;
+  costTime?: number | undefined;
+}
+
 /**
  * 3. Poll Task Status until completion
  * GET https://api.kie.ai/api/v1/jobs/recordInfo?taskId={id}
@@ -243,7 +250,7 @@ export async function pollNanoBananaTask(
   taskId: string,
   apiKey: string,
   signal?: AbortSignal,
-  onProgress?: (info: { state: string; message: string; costTime?: number }) => void,
+  onProgress?: (info: KieProgressInfo) => void,
 ): Promise<{ imageUrl: string; costTime?: number }> {
   const cleanKey = apiKey.trim();
   const maxAttempts = 50; // up to ~100s timeout
@@ -272,7 +279,12 @@ export async function pollNanoBananaTask(
 
     if (data.state === "success") {
       const resolvedCostTime = data.costTime != null ? data.costTime : undefined;
-      onProgress?.({ state: "success", message: "Fertig gerendert!", ...(resolvedCostTime !== undefined ? { costTime: resolvedCostTime } : {}) });
+      onProgress?.({
+        state: "success",
+        message: "Fertig gerendert!",
+        percent: 100,
+        ...(resolvedCostTime !== undefined ? { costTime: resolvedCostTime } : {}),
+      });
 
       if (!data.resultJson) {
         throw new Error("KIE.AI meldet Erfolg, lieferte aber keine resultJson");
@@ -298,11 +310,12 @@ export async function pollNanoBananaTask(
       throw new Error(data.failMsg || `KIE.AI Render fehlgeschlagen (Code: ${data.failCode || "unbekannt"})`);
     }
 
-    // state === "waiting"
+    // state === "waiting" - calculate smooth percentage between 20% and 95%
+    const percent = Math.min(95, Math.round(20 + ((attempt + 1) / 25) * 75));
     onProgress?.({
       state: "waiting",
       message: `KIE.AI rendert… (Schritt ${attempt + 1})`,
-
+      percent,
     });
 
     // Wait before next poll
@@ -329,15 +342,15 @@ export async function pollNanoBananaTask(
  */
 export async function generateNanoBananaImage(
   params: NanoBananaTaskParams & {
-    onProgress?: (info: { state: string; message: string; costTime?: number }) => void;
+    onProgress?: (info: KieProgressInfo) => void;
   },
 ): Promise<NanoBananaGenerateResult> {
   const model = params.model || "nano-banana-2";
-  params.onProgress?.({ state: "init", message: `Initialisiere Task auf KIE.AI (${model})…` });
+  params.onProgress?.({ state: "init", message: `Initialisiere Task auf KIE.AI (${model})…`, percent: 5 });
 
   // 1. Create task (model-aware)
   const taskId = await createNanoBananaTask(params);
-  params.onProgress?.({ state: "created", message: `Task #${taskId.slice(0, 8)}… erstellt. Rendert via ${model}…` });
+  params.onProgress?.({ state: "created", message: `Task #${taskId.slice(0, 8)}… erstellt. Rendert via ${model}…`, percent: 18 });
 
   // 2. Poll result
   const { imageUrl, costTime } = await pollNanoBananaTask(taskId, params.apiKey, params.signal, params.onProgress);

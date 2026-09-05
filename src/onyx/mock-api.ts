@@ -89,14 +89,21 @@ export async function mockGenerateCarousel(
   });
 }
 
+export interface GenerateImageProgressInfo {
+  state: string;
+  message: string;
+  percent?: number | undefined;
+  costTime?: number | undefined;
+}
+
 export interface GenerateImageParams {
   slideNumber: number;
-  prompt?: string;
-  settings?: ApiSettings;
+  prompt?: string | undefined;
+  settings?: ApiSettings | undefined;
   referenceImages?: string[] | undefined;
-  aspectRatio?: "4:5" | "1:1";
+  aspectRatio?: "4:5" | "1:1" | undefined;
   signal?: AbortSignal | undefined;
-  onProgress?: ((info: { state: string; message: string }) => void) | undefined;
+  onProgress?: ((info: GenerateImageProgressInfo) => void) | undefined;
 }
 
 // High-resolution fallback visuals for demo mode when no API key is set
@@ -156,10 +163,16 @@ export async function generateImageUnified(params: GenerateImageParams): Promise
     }
   }
 
-  // Fallback demo/mock generation
-  await delay(800 + Math.random() * 400);
+  // Fallback demo/mock generation with simulated progress
+  onProgress?.({ state: "init", message: "Initialisiere Vorschau…", percent: 20 });
+  await delay(200);
   if (signal?.aborted) throw new DOMException("aborted", "AbortError");
 
+  onProgress?.({ state: "rendering", message: "Rendere Bild…", percent: 65 });
+  await delay(400);
+  if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+
+  onProgress?.({ state: "finishing", message: "Fertiggestellt", percent: 100 });
   const fallbackUrl = MOCK_EDITORIAL_IMAGES[(slideNumber - 1) % MOCK_EDITORIAL_IMAGES.length]!;
   return {
     success: true,

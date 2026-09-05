@@ -190,6 +190,7 @@ function OnyxStudio() {
 
   const abortRef = useRef<AbortController | null>(null);
   const queueAbortRef = useRef(false);
+  const slideAbortControllers = useRef<Map<string, AbortController>>(new Map());
 
   const refreshCredits = useCallback(async () => {
     setCreditStatus((prev) =>
@@ -247,7 +248,7 @@ function OnyxStudio() {
     try {
       for (const slide of slides) {
         if (controller.signal.aborted) break;
-        setSlideFlag(slide.id, { isGeneratingImage: true });
+        setSlideFlag(slide.id, { isGeneratingImage: true, renderProgress: 5, renderStatus: "rendering" });
         try {
           const res = await generateImageUnified({
             slideNumber: slide.slideNumber,
@@ -258,11 +259,16 @@ function OnyxStudio() {
               : {}),
             aspectRatio: brandKit.aspectRatio,
             signal: controller.signal,
+            onProgress: (info) => {
+              if (info.percent !== undefined) {
+                setSlideFlag(slide.id, { renderProgress: info.percent });
+              }
+            },
           });
-          setSlideFlag(slide.id, { imageUrl: res.imageUrl, isGeneratingImage: false });
+          setSlideFlag(slide.id, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
           if (res.fromRealApi) realNanoCount++;
         } catch (err: unknown) {
-          setSlideFlag(slide.id, { isGeneratingImage: false });
+          setSlideFlag(slide.id, { isGeneratingImage: false, renderProgress: 0, renderStatus: "error" });
           if (controller.signal.aborted) break;
           const msg = err instanceof Error ? err.message : "Fehler beim Rendern";
           toast.error(`Slide ${slide.slideNumber}: ${msg}`);
@@ -287,7 +293,7 @@ function OnyxStudio() {
   };
 
   const rerollImage = async (slideId: string) => {
-    setSlideFlag(slideId, { isGeneratingImage: true });
+    setSlideFlag(slideId, { isGeneratingImage: true, renderProgress: 5, renderStatus: "rendering" });
     const slide = slides.find((s) => s.id === slideId);
     if (!slide) return;
     try {
@@ -296,11 +302,16 @@ function OnyxStudio() {
         prompt: slide.visualPrompt,
         settings,
         ...(brief.useClone && activeClone?.referenceImages && activeClone.referenceImages.length > 0
-          ? { referenceImages: activeClone.referenceImages }
-          : {}),
+              ? { referenceImages: activeClone.referenceImages }
+              : {}),
         aspectRatio: brandKit.aspectRatio,
+        onProgress: (info) => {
+          if (info.percent !== undefined) {
+            setSlideFlag(slideId, { renderProgress: info.percent });
+          }
+        },
       });
-      setSlideFlag(slideId, { imageUrl: res.imageUrl, isGeneratingImage: false });
+      setSlideFlag(slideId, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
       if (res.fromRealApi) {
         toast.success(`Slide ${slide.slideNumber} via Nano-Banana 2 gerendert!`);
         void refreshCredits();
@@ -308,7 +319,7 @@ function OnyxStudio() {
         toast.success(`Slide ${slide.slideNumber} neu gerendert`);
       }
     } catch (err: unknown) {
-      setSlideFlag(slideId, { isGeneratingImage: false });
+      setSlideFlag(slideId, { isGeneratingImage: false, renderProgress: 0, renderStatus: "error" });
       const msg = err instanceof Error ? err.message : "Fehler beim Rendern";
       toast.error(msg);
       if (msg.includes("401") || msg.includes("API-Key") || msg.includes("402")) {
@@ -377,29 +388,229 @@ function OnyxStudio() {
       ),
     );
 
+  const cancelJobSlide = (jobId: string, slideId: string) => {
+    const key = `${jobId}:${slideId}`;
+    const controller = slideAbortControllers.current.get(key);
+    if (controller) {
+      controller.abort();
+      slideAbortControllers.current.delete(key);
+    }
+    updateJobSlide(jobId, slideId, {
+      isGeneratingImage: false,
+      renderProgress: 0,
+      renderStatus: "cancelled",
+    });
+    toast.info("Slide-Generierung abgebrochen");
+  };
+
+  const cancelJobSlides = (jobId: string) => {
+    const prefix = `${jobId}:`;
+    slideAbortControllers.current.forEach((ctrl, key) => {
+      if (key.startsWith(prefix)) {
+        ctrl.abort();
+        slideAbortControllers.current.delete(key);
+      }
+    });
+
+    setQueue((prev) =>
+      prev.map((j) =>
+        j.id === jobId
+          ? {
+              ...j,
+              status: "cancelled",
+              slides: (j.slides ?? []).map((s) =>
+                s.isGeneratingImage
+                  ? { ...s, isGeneratingImage: false, renderProgress: 0, renderStatus: "cancelled" as const }
+                  : s,
+              ),
+            }
+          : j,
+      ),
+    );
+    toast.info("Job-Generierung abgebrochen");
+  };
+
+  const cancelAllQueue = () => {
+    queueAbortRef.current = true;
+    slideAbortControllers.current.forEach((ctrl) => ctrl.abort());
+    slideAbortControllers.current.clear();
+    setQueue((prev) =>
+      prev.map((j) =>
+        j.status === "rendering"
+          ? {
+              ...j,
+              status: "cancelled",
+              slides: (j.slides ?? []).map((s) =>
+                s.isGeneratingImage
+                  ? { ...s, isGeneratingImage: false, renderProgress: 0, renderStatus: "cancelled" as const }
+                  : s,
+              ),
+            }
+          : j,
+      ),
+    );
+    setIsRunningQueue(false);
+    toast.info("Queue und alle aktiven Slides abgebrochen");
+  };
+
+  const runSingleJobSlide = async (jobId: string, slideId: string) => {
+    const job = queue.find((j) => j.id === jobId);
+    const slide = job?.slides?.find((s) => s.id === slideId);
+    if (!slide) return;
+
+    const key = `${jobId}:${slideId}`;
+    const controller = new AbortController();
+    slideAbortControllers.current.set(key, controller);
+
+    updateJobSlide(jobId, slideId, {
+      isGeneratingImage: true,
+      renderProgress: 5,
+      renderStatus: "rendering",
+    });
+
+    try {
+      const res = await generateImageUnified({
+        slideNumber: slide.slideNumber,
+        prompt: slide.visualPrompt,
+        settings,
+        signal: controller.signal,
+        onProgress: (info) => {
+          if (info.percent !== undefined) {
+            updateJobSlide(jobId, slideId, { renderProgress: info.percent });
+          }
+        },
+      });
+
+      updateJobSlide(jobId, slideId, {
+        imageUrl: `${res.imageUrl}&v=${Date.now()}`,
+        isGeneratingImage: false,
+        renderProgress: 100,
+        renderStatus: "done",
+      });
+
+      setQueue((prev) =>
+        prev.map((j) => {
+          if (j.id !== jobId) return j;
+          const doneCount = (j.slides ?? []).filter((s) => s.id === slideId || Boolean(s.imageUrl)).length;
+          return {
+            ...j,
+            slidesDone: doneCount,
+            ...(doneCount === j.slidesTotal ? { status: "done" } : {}),
+          };
+        }),
+      );
+
+      if (res.fromRealApi) {
+        toast.success(`Slide ${slide.slideNumber} via ${settings.kieModel} gerendert!`);
+        void refreshCredits();
+      } else {
+        toast.success(`Slide ${slide.slideNumber} gerendert`);
+      }
+    } catch (err: unknown) {
+      if (controller.signal.aborted) {
+        updateJobSlide(jobId, slideId, { isGeneratingImage: false, renderProgress: 0, renderStatus: "cancelled" });
+        return;
+      }
+      updateJobSlide(jobId, slideId, { isGeneratingImage: false, renderProgress: 0, renderStatus: "error" });
+      const msg = err instanceof Error ? err.message : "Fehler beim Rendern";
+      toast.error(`Slide ${slide.slideNumber}: ${msg}`);
+      if (msg.includes("401") || msg.includes("API-Key") || msg.includes("402")) {
+        setShowSettings(true);
+      }
+    } finally {
+      slideAbortControllers.current.delete(key);
+    }
+  };
+
+  const runSelectedJobSlides = async (jobId: string, slideIds: string[]) => {
+    if (slideIds.length === 0) return;
+    const job = queue.find((j) => j.id === jobId);
+    if (!job?.slides) return;
+
+    updateJob(jobId, { status: "rendering" });
+
+    for (const slideId of slideIds) {
+      const currentJob = queue.find((j) => j.id === jobId);
+      if (currentJob?.status === "cancelled" || queueAbortRef.current) break;
+      await runSingleJobSlide(jobId, slideId);
+    }
+  };
+
   const runQueue = async () => {
     queueAbortRef.current = false;
     setIsRunningQueue(true);
     try {
-      // Snapshot of ids to process, so state updates don't restart the loop.
-      const ids = queue.filter((j) => j.status === "queued").map((j) => j.id);
+      const ids = queue.filter((j) => j.status === "queued" || j.status === "rendering").map((j) => j.id);
       for (const id of ids) {
         if (queueAbortRef.current) break;
         const job = queue.find((j) => j.id === id);
         if (!job?.slides) continue;
-        updateJob(id, { status: "rendering", slidesDone: 0 });
-        let done = 0;
+        updateJob(id, { status: "rendering" });
+
         for (const slide of job.slides) {
           if (queueAbortRef.current) break;
-          updateJobSlide(id, slide.id, { isGeneratingImage: true });
-          const res = await generateImageUnified({ slideNumber: slide.id ? slide.slideNumber : 1, prompt: slide.visualPrompt, settings });
-          done += 1;
-          updateJobSlide(id, slide.id, { imageUrl: res.imageUrl, isGeneratingImage: false });
-          updateJob(id, { slidesDone: done });
+          // Skip if already rendered
+          if (slide.imageUrl && !slide.isGeneratingImage) continue;
+
+          const key = `${id}:${slide.id}`;
+          const controller = new AbortController();
+          slideAbortControllers.current.set(key, controller);
+
+          updateJobSlide(id, slide.id, {
+            isGeneratingImage: true,
+            renderProgress: 5,
+            renderStatus: "rendering",
+          });
+
+          try {
+            const res = await generateImageUnified({
+              slideNumber: slide.slideNumber,
+              prompt: slide.visualPrompt,
+              settings,
+              signal: controller.signal,
+              onProgress: (info) => {
+                if (info.percent !== undefined) {
+                  updateJobSlide(id, slide.id, { renderProgress: info.percent });
+                }
+              },
+            });
+
+            updateJobSlide(id, slide.id, {
+              imageUrl: res.imageUrl,
+              isGeneratingImage: false,
+              renderProgress: 100,
+              renderStatus: "done",
+            });
+
+            setQueue((prev) =>
+              prev.map((j) => {
+                if (j.id !== id) return j;
+                const count = (j.slides ?? []).filter((s) => s.id === slide.id || Boolean(s.imageUrl)).length;
+                return { ...j, slidesDone: count };
+              }),
+            );
+          } catch (err: unknown) {
+            if (controller.signal.aborted || queueAbortRef.current) {
+              updateJobSlide(id, slide.id, { isGeneratingImage: false, renderProgress: 0, renderStatus: "cancelled" });
+              break;
+            }
+            updateJobSlide(id, slide.id, { isGeneratingImage: false, renderProgress: 0, renderStatus: "error" });
+            const msg = err instanceof Error ? err.message : "Fehler beim Rendern";
+            toast.error(`Slide ${slide.slideNumber}: ${msg}`);
+            if (msg.includes("401") || msg.includes("API-Key") || msg.includes("402")) {
+              setShowSettings(true);
+              break;
+            }
+          } finally {
+            slideAbortControllers.current.delete(key);
+          }
         }
+
+        const freshJob = queue.find((j) => j.id === id);
+        const finalDone = (freshJob?.slides ?? []).filter((s) => Boolean(s.imageUrl)).length;
         updateJob(id, {
-          status: queueAbortRef.current ? "cancelled" : "done",
-          slidesDone: done,
+          status: queueAbortRef.current ? "cancelled" : finalDone >= job.slidesTotal ? "done" : "queued",
+          slidesDone: finalDone,
         });
       }
     } finally {
@@ -608,24 +819,16 @@ function OnyxStudio() {
               isRunning={isRunningQueue}
               onAddJobs={addJobs}
               onRunQueue={() => void runQueue()}
-              onStopQueue={() => {
-                queueAbortRef.current = true;
-              }}
+              onStopQueue={cancelAllQueue}
               onDeleteJob={(id) => setQueue((prev) => prev.filter((j) => j.id !== id))}
               onRenameJob={(id, value) => updateJob(id, { topic: value })}
               onEditSlide={(jobId, slideId) => setEditing({ jobId, slideId })}
-              onRerollSlide={(jobId, slideId) => {
-                void (async () => {
-                  updateJobSlide(jobId, slideId, { isGeneratingImage: true });
-                  const slide = queue.find((j) => j.id === jobId)?.slides?.find((s) => s.id === slideId);
-                  const res = await generateImageUnified({ slideNumber: slide?.slideNumber ?? 1, ...(slide?.visualPrompt ? { prompt: slide.visualPrompt } : {}), settings });
-                  updateJobSlide(jobId, slideId, {
-                    imageUrl: `${res.imageUrl}&v=${Date.now()}`,
-                    isGeneratingImage: false,
-                  });
-                })();
-              }}
+              onRerollSlide={(jobId, slideId) => void runSingleJobSlide(jobId, slideId)}
               onDownloadSlide={(jobId, slideId) => void downloadFromJob(jobId, slideId)}
+              onStartSlide={(jobId, slideId) => void runSingleJobSlide(jobId, slideId)}
+              onCancelSlide={(jobId, slideId) => cancelJobSlide(jobId, slideId)}
+              onRunSelectedSlides={(jobId, slideIds) => void runSelectedJobSlides(jobId, slideIds)}
+              onCancelJobSlides={(jobId) => cancelJobSlides(jobId)}
               settings={settings}
               onChangeSettings={patchSettings}
             />

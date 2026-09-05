@@ -1,33 +1,69 @@
-import { Download, Loader2, Pencil, RefreshCw, X } from "lucide-react";
+import { Check, Download, Loader2, Pencil, Play, RefreshCw, X } from "lucide-react";
 import type { SlideContent } from "../types";
 import { cn } from "@/lib/utils";
 
 interface SlideCardProps {
   slide: SlideContent;
-  modelName?: string;
-  aspectRatio?: string;
+  modelName?: string | undefined;
+  aspectRatio?: string | undefined;
+  selectable?: boolean | undefined;
+  isSelected?: boolean | undefined;
+  onToggleSelect?: (() => void) | undefined;
+  onStartSingle?: (() => void) | undefined;
   onReroll: () => void;
   onEdit: () => void;
   onDownload: () => void;
-  onCancel?: () => void;
+  onCancel?: (() => void) | undefined;
 }
 
 export function SlideCard({
   slide,
   modelName = "mock",
   aspectRatio = "4 / 5",
+  selectable,
+  isSelected,
+  onToggleSelect,
+  onStartSingle,
   onReroll,
   onEdit,
   onDownload,
   onCancel,
 }: SlideCardProps) {
   const done = Boolean(slide.imageUrl) && !slide.isGeneratingImage;
+  const progress = Math.min(100, Math.max(0, slide.renderProgress ?? 0));
+  const isCancelled = slide.renderStatus === "cancelled";
 
   return (
     <div
-      className="group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl shadow-[0_12px_35px_rgba(0,0,0,0.5)] transition-all duration-300 hover:border-orange-500/40 hover:shadow-[0_20px_50px_-10px_rgba(255,77,23,0.2)]"
+      className={cn(
+        "group relative overflow-hidden rounded-2xl border bg-[#110F17]/85 backdrop-blur-xl transition-all duration-300",
+        isSelected
+          ? "border-[#FF4D17] ring-2 ring-[#FF4D17]/60 shadow-[0_0_25px_rgba(255,77,23,0.35)]"
+          : "border-white/[0.08] shadow-[0_12px_35px_rgba(0,0,0,0.5)] hover:border-orange-500/40 hover:shadow-[0_20px_50px_-10px_rgba(255,77,23,0.2)]",
+      )}
       style={{ aspectRatio }}
     >
+      {/* ── Top-Left Select Checkbox ─────────────────────────────────── */}
+      {selectable && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSelect?.();
+          }}
+          className={cn(
+            "absolute left-2.5 top-2.5 z-20 flex h-6 w-6 items-center justify-center rounded-lg border transition-all duration-200",
+            isSelected
+              ? "border-[#FF4D17] bg-[#FF4D17] text-white shadow-[0_0_10px_#FF4D17]"
+              : "border-white/30 bg-black/60 text-transparent hover:border-white/60 hover:bg-black/80",
+          )}
+          aria-label={isSelected ? "Slide abwählen" : "Slide auswählen"}
+        >
+          <Check className={cn("h-3.5 w-3.5 stroke-[3]", isSelected ? "text-white" : "opacity-0")} />
+        </button>
+      )}
+
+      {/* ── Slide Visual or Placeholder ─────────────────────────────── */}
       {done && slide.imageUrl ? (
         <img
           src={slide.imageUrl}
@@ -41,23 +77,65 @@ export function SlideCard({
             {String(slide.slideNumber).padStart(2, "0")}
           </span>
           <span className="mono-label text-zinc-400">{slide.roleLabel}</span>
-          {!slide.isGeneratingImage && (
+
+          {isCancelled && (
+            <span className="rounded-full bg-rose-500/15 border border-rose-500/30 px-2 py-0.5 text-[10px] font-semibold text-rose-400">
+              Abgebrochen
+            </span>
+          )}
+
+          {!slide.isGeneratingImage && !isCancelled && (
             <span className="text-[11px] text-zinc-500">noch nicht gerendert</span>
+          )}
+
+          {/* Quick Start Single Slide Button */}
+          {!slide.isGeneratingImage && onStartSingle && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onStartSingle();
+              }}
+              className="mt-2 flex items-center gap-1 rounded-full border border-orange-500/40 bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-400 transition-all hover:bg-orange-500/30 hover:text-white"
+            >
+              <Play className="h-3 w-3 fill-current" />
+              {isCancelled ? "Wiederholen" : "Starten"}
+            </button>
           )}
         </div>
       )}
 
+      {/* ── Active Generating Overlay with Percentage ─────────────────── */}
       {slide.isGeneratingImage && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2.5 bg-black/85 backdrop-blur-md">
-          <Loader2 className="h-6 w-6 animate-spin text-orange-400" />
-          <span className="text-xs font-semibold text-zinc-300">
-            {modelName} generiert…
-          </span>
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-2.5 bg-black/85 backdrop-blur-md p-3 text-center">
+          <Loader2 className="h-7 w-7 animate-spin text-[#FF6A1F]" />
+
+          {/* Percent Badge */}
+          <div className="flex items-baseline gap-0.5">
+            <span className="text-2xl font-black tracking-tight text-white">{progress}</span>
+            <span className="text-xs font-bold text-[#FF6A1F]">%</span>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="w-full max-w-[130px] space-y-1">
+            <div className="h-1.5 w-full overflow-hidden rounded-full bg-white/10">
+              <div
+                className="h-full bg-gradient-to-r from-[#FF4D17] to-[#FFA043] transition-all duration-300 shadow-[0_0_8px_#FF4D17]"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+            <p className="truncate text-[10px] text-zinc-400">{modelName} rendert…</p>
+          </div>
+
+          {/* Individual Cancel Button */}
           {onCancel && (
             <button
               type="button"
-              onClick={onCancel}
-              className="mt-1 flex items-center gap-1 rounded-full border border-white/20 bg-white/5 px-3 py-1 text-xs text-zinc-400 hover:text-white hover:bg-white/10"
+              onClick={(e) => {
+                e.stopPropagation();
+                onCancel();
+              }}
+              className="mt-1 flex items-center gap-1 rounded-full border border-rose-500/40 bg-rose-500/15 px-3 py-1 text-[11px] font-semibold text-rose-300 transition-all hover:bg-rose-500/30 hover:text-white shadow-[0_0_10px_rgba(244,63,94,0.2)]"
             >
               <X className="h-3 w-3" /> Abbrechen
             </button>
@@ -65,9 +143,10 @@ export function SlideCard({
         </div>
       )}
 
+      {/* ── Completed Actions Bar & Hover Overlay ─────────────────────── */}
       {done && (
         <>
-          <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-[#0D0C12]/90 border-t border-white/[0.08] px-3 py-2 text-xs backdrop-blur-md">
+          <div className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-between gap-2 bg-[#0D0C12]/90 border-t border-white/[0.08] px-3 py-2 text-xs backdrop-blur-md">
             <span className="truncate font-semibold text-zinc-200">
               {slide.slideNumber} · {slide.roleLabel}
             </span>
@@ -81,7 +160,7 @@ export function SlideCard({
             </span>
           </div>
 
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-2.5 bg-black/75 opacity-0 backdrop-blur-[2px] transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
+          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center gap-2.5 bg-black/75 opacity-0 backdrop-blur-[2px] transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
             <IconAction onClick={onDownload} label="Download" tone="light">
               <Download className="h-4 w-4" />
             </IconAction>

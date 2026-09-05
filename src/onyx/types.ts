@@ -32,6 +32,8 @@ export interface SlideContent {
   visualPrompt: string;
   imageUrl?: string;
   isGeneratingImage?: boolean;
+  renderProgress?: number | undefined;
+  renderStatus?: "idle" | "rendering" | "done" | "error" | "cancelled" | undefined;
 }
 
 export interface BrandKit {
