@@ -40,6 +40,7 @@ import {
 import { LS, readLS, usePersistentState } from "../storage";
 import type { AiCloneProfile, ApiSettings, ClonePlacement } from "../types";
 import type { User as AuthUser } from "../auth";
+import { AiCloneFlowStudio } from "./AiCloneFlowStudio";
 import { DirectPromptView } from "./DirectPromptView";
 import { cn } from "@/lib/utils";
 
@@ -521,10 +522,10 @@ export function AiCloneView({
       </div>
 
       {studioMode === "flow" ? (
-        <DirectPromptView
+        <AiCloneFlowStudio
           currentUser={currentUser}
           onDeductCredits={onDeductCredits}
-          onNavigateToClone={() => setStudioMode("dna")}
+          onOpenDetailedDna={() => setStudioMode("dna")}
         />
       ) : (
         /* ── Main 2-Column Studio Grid ────────────────────────────── */
