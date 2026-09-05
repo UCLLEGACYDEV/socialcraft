@@ -24,6 +24,7 @@ import {
   getS4StorageStats,
   listS4Images,
   saveImageToS4,
+  ensureUserS4Folder,
   type S4CloudImage,
 } from "../s4-storage";
 import { downloadCloudImage, exportS4ImagesAsZip } from "../export-zip";
@@ -59,8 +60,20 @@ export function CloudGalleryView({
   const [uploadPrompt, setUploadPrompt] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isZipping, setIsZipping] = useState(false);
+  const [isSyncingFolder, setIsSyncingFolder] = useState(false);
 
   const isAdmin = currentUser?.role === "admin";
+
+  // Automatically ensure the user's cloud folder exists (especially for active admin!)
+  useEffect(() => {
+    if (currentUser) {
+      void ensureUserS4Folder(currentUser).then((res) => {
+        if (res.success) {
+          console.log(`[CloudGalleryView] Cloud folder ready: ${res.folder}`);
+        }
+      });
+    }
+  }, [currentUser]);
 
   // Reload when cloud storage changes
   useEffect(() => {
@@ -88,6 +101,22 @@ export function CloudGalleryView({
     void fetchCloudData();
     return () => { isMounted = false; };
   }, [currentUser, isAdmin, folderFilter, refreshTrigger]);
+
+  const handleSyncCloudFolder = async () => {
+    setIsSyncingFolder(true);
+    toast.info("Prüfe & erstelle Cloud-Ordner im Speicher...");
+    try {
+      const res = await ensureUserS4Folder(currentUser);
+      if (res.success) {
+        toast.success(`Cloud-Ordner „${res.folder}“ erfolgreich im Speicher bereitgestellt!`);
+        setRefreshTrigger((p) => p + 1);
+      } else {
+        toast.error(`Hinweis zum Cloud-Ordner: ${res.error || "Bitte Cloud-Schlüssel in den Einstellungen prüfen."}`);
+      }
+    } finally {
+      setIsSyncingFolder(false);
+    }
+  };
 
   const filteredImages = useMemo(() => {
     return allImages.filter((img) => {
@@ -276,8 +305,18 @@ export function CloudGalleryView({
                 <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
                   <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-black/40 px-3 py-1 font-semibold text-xs text-orange-400">
                     <Folder className="h-3.5 w-3.5 text-orange-400" />
-                    Ordner: {currentFolderName}
+                    Ordner: {stats.folder || (currentUser?.role === "admin" ? `USERCONTENT/admins/${currentUser.id}` : `USERCONTENT/users/${currentUser?.id || "guest"}`)}
                   </span>
+                  <button
+                    type="button"
+                    onClick={handleSyncCloudFolder}
+                    disabled={isSyncingFolder}
+                    className="inline-flex items-center gap-1 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-1 text-[11px] font-medium text-emerald-400 transition-colors disabled:opacity-50 cursor-pointer"
+                    title="Ordner im Cloud-Speicher prüfen & anlegen"
+                  >
+                    <RefreshCw className={cn("h-3 w-3", isSyncingFolder && "animate-spin")} />
+                    <span>{isSyncingFolder ? "Synchronisiere..." : "Ordner im Speicher anlegen"}</span>
+                  </button>
                   <span className="text-xs text-zinc-400">
                     {stats.count} {stats.count === 1 ? "Bild" : "Bilder"} gespeichert ({stats.formattedSize})
                   </span>

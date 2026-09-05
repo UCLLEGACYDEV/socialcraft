@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { ModalShell } from "./SlideEditModal";
 import { StudioSelect } from "./StudioSelect";
 import { fetchKieCredits, type KieCreditResult } from "../kie-api";
+import { testCloudConnection, ensureUserS4Folder } from "../s4-storage";
+import { getStoredCurrentUser } from "../auth";
 import type { ApiSettings, ImageProvider } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -233,13 +235,18 @@ export function SettingsModal({
         <Section title="Cloud-Synchronisation & Backup">
           <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-3.5 space-y-3">
             <div className="flex items-center justify-between pb-2">
-              <span className="text-xs text-zinc-400">Cloud-Speicher:</span>
-              <span className="text-xs font-semibold px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-                🟢 Verbunden & Aktiv
+              <span className="text-xs text-zinc-400">Cloud-Speicher Status:</span>
+              <span className={cn(
+                "text-xs font-semibold px-2 py-0.5 rounded-full border",
+                settings.s4AccessKey && settings.s4SecretKey
+                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                  : "border-zinc-500/30 bg-zinc-500/10 text-zinc-400"
+              )}>
+                {settings.s4AccessKey && settings.s4SecretKey ? "🟢 Bereit" : "⚪ Schlüssel erforderlich"}
               </span>
             </div>
 
-            <Row label="Mega S4 Access Key">
+            <Row label="Cloud Access Key">
               <input
                 type="text"
                 className="field-input text-xs font-mono"
@@ -249,7 +256,7 @@ export function SettingsModal({
               />
             </Row>
 
-            <Row label="Mega S4 Secret Key">
+            <Row label="Cloud Secret Key">
               <input
                 type="password"
                 className="field-input text-xs font-mono"
@@ -259,7 +266,7 @@ export function SettingsModal({
               />
             </Row>
 
-            <Row label="Mega S4 Region">
+            <Row label="Cloud Region">
               <input
                 type="text"
                 className="field-input text-xs"
@@ -268,6 +275,37 @@ export function SettingsModal({
                 placeholder="eu-central-1"
               />
             </Row>
+
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-[11px] text-zinc-500">
+                Ordner-Struktur: USERCONTENT/admins/... bzw. USERCONTENT/users/...
+              </span>
+              <button
+                type="button"
+                onClick={async () => {
+                  if (!settings.s4AccessKey || !settings.s4SecretKey) {
+                    toast.error("Bitte gib zuerst Access Key & Secret Key an.");
+                    return;
+                  }
+                  toast.info("Prüfe Cloud-Verbindung & erstelle Ordner...");
+                  const testRes = await testCloudConnection();
+                  if (!testRes.success) {
+                    toast.error(`Verbindung fehlgeschlagen: ${testRes.message}`);
+                    return;
+                  }
+                  const user = getStoredCurrentUser();
+                  const folderRes = await ensureUserS4Folder(user);
+                  if (folderRes.success) {
+                    toast.success(`Cloud-Verbindung aktiv! Ordner „${folderRes.folder}“ im Cloud-Speicher bereit.`);
+                  } else {
+                    toast.warning(`Verbunden, aber Ordner-Hinweis: ${folderRes.error || "unbekannt"}`);
+                  }
+                }}
+                className="rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-1 text-xs font-medium text-zinc-200 transition-colors"
+              >
+                Verbindung & Ordner prüfen
+              </button>
+            </div>
 
             <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
               <div className="space-y-0.5">

@@ -18,7 +18,7 @@ import {
   PromptGallery,
 } from "@/onyx/components/SimpleViews";
 import { CloudGalleryView } from "@/onyx/components/CloudGalleryView";
-import { saveImageToS4 } from "@/onyx/s4-storage";
+import { saveImageToS4, ensureUserS4Folder } from "@/onyx/s4-storage";
 import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
 import { AdminDashboard } from "@/onyx/components/AdminDashboard";
 import { AuthModal } from "@/onyx/components/AuthModal";
@@ -153,6 +153,17 @@ function OnyxStudio() {
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
     }
   }, [currentView]);
+
+  // Ensure user's cloud storage folder exists in the background (especially when admin is active!)
+  useEffect(() => {
+    if (currentUser) {
+      void ensureUserS4Folder(currentUser).then((res) => {
+        if (res.success) {
+          console.log(`[CloudStorage] User folder verified/created: ${res.folder}`);
+        }
+      });
+    }
+  }, [currentUser]);
 
   const [activeTab, setActiveTab] = usePersistentState<TabKey>(LS.activeTab, "carousel");
   const [collapsed, setCollapsed] = usePersistentState<boolean>(LS.sidebarCollapsed, false);

@@ -44,8 +44,14 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+import { handleCloudApiRequest } from "./server/cloud-api-router";
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    const cloudResponse = await handleCloudApiRequest(request);
+    if (cloudResponse) {
+      return cloudResponse;
+    }
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
