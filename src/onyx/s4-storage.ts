@@ -39,9 +39,18 @@ function getS3Client(): S3Client | null {
   if (!settings.s4AccessKey || !settings.s4SecretKey) {
     return null; 
   }
+  
+  // The SDK automatically prepends the bucket name if forcePathStyle is false.
+  // If the endpoint already contains the bucket (e.g. socialgrow.s3.g.megas4.com), we need to strip it.
+  const rawEndpoint = settings.s4Endpoint || S4_DEFAULT_ENDPOINT;
+  const bucket = settings.s4Bucket || S4_DEFAULT_BUCKET;
+  const baseEndpoint = rawEndpoint.startsWith(`${bucket}.`) 
+    ? rawEndpoint.replace(`${bucket}.`, "") 
+    : rawEndpoint;
+
   return new S3Client({
     region: settings.s4Region || "eu-central-1",
-    endpoint: `https://${settings.s4Endpoint || S4_DEFAULT_ENDPOINT}`,
+    endpoint: `https://${baseEndpoint}`,
     credentials: {
       accessKeyId: settings.s4AccessKey,
       secretAccessKey: settings.s4SecretKey,
