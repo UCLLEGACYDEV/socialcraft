@@ -555,9 +555,15 @@ export function CloudGalleryView({
                       onClick={() => setPreviewImage(img)}
                     >
                       <img
-                        src={img.displayUrl}
+                        src={img.displayUrl || img.url}
                         alt={img.filename}
                         loading="lazy"
+                        onError={(e) => {
+                          const proxy = `/api/cloud/file?key=${encodeURIComponent(img.key)}`;
+                          if (e.currentTarget.src !== proxy) {
+                            e.currentTarget.src = proxy;
+                          }
+                        }}
                         className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
 
@@ -651,8 +657,14 @@ export function CloudGalleryView({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5 items-center">
               <div className="rounded-2xl overflow-hidden border border-white/10 bg-black/50 aspect-[4/5] flex items-center justify-center">
                 <img
-                  src={previewImage.displayUrl}
+                  src={previewImage.displayUrl || previewImage.url}
                   alt={previewImage.filename}
+                  onError={(e) => {
+                    const proxy = `/api/cloud/file?key=${encodeURIComponent(previewImage.key)}`;
+                    if (e.currentTarget.src !== proxy) {
+                      e.currentTarget.src = proxy;
+                    }
+                  }}
                   className="max-h-full max-w-full object-contain"
                 />
               </div>

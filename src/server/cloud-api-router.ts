@@ -5,6 +5,7 @@ import {
   listCloudObjects,
   deleteCloudObjects,
   testCloudConnection,
+  getCloudFileObject,
 } from "./cloud-storage";
 
 const corsHeaders = {
@@ -166,6 +167,39 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Verbindungstest fehlgeschlagen";
       return jsonResponse({ success: false, message: msg }, 500);
+    }
+  }
+
+  // 6. Stream / Proxy File directly from S4 (with CORS & caching headers)
+  if (endpoint === "file" && request.method === "GET") {
+    try {
+      const key = url.searchParams.get("key");
+      if (!key) {
+        return new Response("Key parameter missing", { status: 400 });
+      }
+
+      const cfg = extractConfigFromRequest(request);
+      if (!cfg) {
+        return new Response("Cloud credentials missing", { status: 401 });
+      }
+
+      const fileObj = await getCloudFileObject(cfg, key);
+      if (!fileObj) {
+        return new Response("Object not found", { status: 404 });
+      }
+
+      return new Response(fileObj.buffer, {
+        status: 200,
+        headers: {
+          "Content-Type": fileObj.contentType,
+          "Content-Length": String(fileObj.contentLength),
+          "Cache-Control": "public, max-age=86400",
+          ...corsHeaders,
+        },
+      });
+    } catch (err: unknown) {
+      console.error("[CloudAPI] file error:", err);
+      return new Response("Error streaming file", { status: 500 });
     }
   }
 

@@ -1,11 +1,13 @@
 import {
   S3Client,
   PutObjectCommand,
+  GetObjectCommand,
   ListObjectsV2Command,
   DeleteObjectCommand,
   DeleteObjectsCommand,
   HeadBucketCommand,
 } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export interface CloudStorageConfig {
   endpoint: string;
@@ -216,17 +218,30 @@ export async function uploadCloudImage(
     })
   );
 
-  const publicUrl = `https://${cfg.endpoint}/${params.key}`;
+  let downloadUrl = `/api/cloud/file?key=${encodeURIComponent(params.key)}`;
+  try {
+    downloadUrl = await getSignedUrl(
+      s3,
+      new GetObjectCommand({
+        Bucket: cfg.bucket,
+        Key: params.key,
+      }),
+      { expiresIn: 604800 }
+    );
+  } catch (err) {
+    console.warn("[CloudStorage] Failed to presign uploaded URL, using proxy:", err);
+  }
+
   return {
     success: true,
-    url: publicUrl,
+    url: downloadUrl,
     key: params.key,
     size: imageBuffer.length,
   };
 }
 
 /**
- * Lists all objects for a given prefix in the bucket
+ * Lists all objects for a given prefix in the bucket with pre-signed URLs
  */
 export async function listCloudObjects(
   cfg: CloudStorageConfig,
@@ -237,6 +252,7 @@ export async function listCloudObjects(
     size: number;
     lastModified: string;
     url: string;
+    proxyUrl: string;
     filename: string;
   }>
 > {
@@ -249,27 +265,83 @@ export async function listCloudObjects(
     })
   );
 
-  const objects = (res.Contents || [])
-    .filter((obj) => {
-      if (!obj.Key) return false;
-      // Filter out directory markers and hidden metadata markers
-      if (obj.Key.endsWith("/")) return false;
-      if (obj.Key.endsWith("/.folder_meta.json")) return false;
-      return true;
-    })
-    .map((obj) => {
+  const rawContents = (res.Contents || []).filter((obj) => {
+    if (!obj.Key) return false;
+    // Filter out directory markers and hidden metadata markers
+    if (obj.Key.endsWith("/")) return false;
+    if (obj.Key.endsWith("/.folder_meta.json")) return false;
+    return true;
+  });
+
+  const objects = await Promise.all(
+    rawContents.map(async (obj) => {
       const key = obj.Key!;
       const filename = key.split("/").pop() || key;
+      const proxyUrl = `/api/cloud/file?key=${encodeURIComponent(key)}`;
+      let downloadUrl = proxyUrl;
+      try {
+        downloadUrl = await getSignedUrl(
+          s3,
+          new GetObjectCommand({
+            Bucket: cfg.bucket,
+            Key: key,
+          }),
+          { expiresIn: 604800 }
+        );
+      } catch (err) {
+        console.warn(`[CloudStorage] Failed to presign URL for ${key}:`, err);
+      }
+
       return {
         key,
         size: obj.Size || 0,
         lastModified: obj.LastModified?.toISOString() || new Date().toISOString(),
-        url: `https://${cfg.endpoint}/${key}`,
+        url: downloadUrl,
+        proxyUrl,
         filename,
       };
-    });
+    })
+  );
 
   return objects;
+}
+
+/**
+ * Fetches the binary content of a cloud object from S3 / Mega S4
+ */
+export async function getCloudFileObject(
+  cfg: CloudStorageConfig,
+  key: string
+): Promise<{ buffer: Buffer; contentType: string; contentLength: number } | null> {
+  const s3 = buildS3Client(cfg);
+  try {
+    const res = await s3.send(
+      new GetObjectCommand({
+        Bucket: cfg.bucket,
+        Key: key,
+      })
+    );
+    if (!res.Body) return null;
+    const byteArray = await (res.Body as any).transformToByteArray();
+    const contentType =
+      res.ContentType ||
+      (key.endsWith(".png")
+        ? "image/png"
+        : key.endsWith(".webp")
+          ? "image/webp"
+          : key.endsWith(".svg")
+            ? "image/svg+xml"
+            : "image/jpeg");
+
+    return {
+      buffer: Buffer.from(byteArray),
+      contentType,
+      contentLength: res.ContentLength || byteArray.length,
+    };
+  } catch (err) {
+    console.warn(`[CloudStorage] GetObject error for key "${key}":`, err);
+    return null;
+  }
 }
 
 /**
