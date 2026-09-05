@@ -1,19 +1,30 @@
 import {
   ArrowLeft,
   Coins,
-  Cpu,
+  ChevronDown,
   Layers,
   LogOut,
   Palette,
+  Plus,
   RefreshCw,
   Settings,
   Shield,
   Sparkles,
   User as UserIcon,
+  Image as ImageIcon,
+  Cloud,
 } from "lucide-react";
 import type { CreditStatus, TabKey } from "../types";
 import type { User } from "../auth";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface CryptoxNavbarProps {
   activeTab: TabKey;
@@ -31,12 +42,17 @@ interface CryptoxNavbarProps {
   onOpenMcp: () => void;
 }
 
-const NAV_TABS: { key: TabKey; label: string }[] = [
+// Group 1: Creation Tools
+const CREATION_TABS: { key: TabKey; label: string }[] = [
   { key: "carousel", label: "Karussell" },
   { key: "bulk", label: "Serie" },
+  { key: "direct-prompt", label: "Einzelbild" },
+];
+
+// Group 2: Library & Workspaces
+const LIBRARY_TABS: { key: TabKey; label: string }[] = [
   { key: "prompt-gallery", label: "Prompt Hub" },
   { key: "ai-clone", label: "KI Clone" },
-  { key: "direct-prompt", label: "Einzelbild" },
   { key: "history", label: "Galerie" },
 ];
 
@@ -53,31 +69,37 @@ export function CryptoxNavbar({
   onOpenCreditsUpgrade,
   onOpenBrandKit,
   onOpenSettings,
-  onOpenMcp,
 }: CryptoxNavbarProps) {
+  const isAdmin = currentUser?.role === "admin";
+
+  // Clean credit count without noisy provider text
+  const creditDisplay = creditStatus?.kie.success
+    ? `${creditStatus.kie.credits.toLocaleString()} cr`
+    : currentUser
+    ? `${currentUser.credits.toLocaleString()} cr`
+    : creditStatus?.kie.formatted ?? "Credits";
+
   return (
-    <header className="sticky top-0 z-50 w-full px-4 pt-4 pb-2 transition-all">
-      <div className="mx-auto flex max-w-[1500px] items-center justify-between gap-3">
-        {/* ── Left: Brand Logo & Landing Link ──────────────────── */}
-        <div className="flex items-center gap-2.5">
+    <header className="sticky top-0 z-50 w-full px-4 pt-3 pb-2 transition-all">
+      <div className="mx-auto flex max-w-[1550px] items-center justify-between gap-3">
+        {/* ── Left: Brand & Navigation Back ────────────────────────── */}
+        <div className="flex items-center gap-2 sm:gap-3">
           <div
             onClick={onNavigateLanding ?? (() => onNavigate("carousel"))}
             className="flex items-center gap-2.5 cursor-pointer select-none group"
             title="Zurück zur Startseite"
           >
             {/* Swirl logo icon */}
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-tr from-[#FF3B00] via-[#FF6A1F] to-[#FFA149] shadow-[0_0_24px_-4px_#FF4D17] transition-transform duration-300 group-hover:scale-105">
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-[#FF3B00] via-[#FF6A1F] to-[#FFA149] shadow-[0_0_20px_-2px_#FF4D17] transition-transform duration-300 group-hover:scale-105">
               <div className="h-4 w-4 rounded-full border-2 border-white/90 border-t-transparent animate-[spin_8s_linear_infinite]" />
             </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="text-lg font-bold tracking-tight text-white font-sans">
-                  Socialcraft
-                </span>
-                <span className="rounded-full border border-primary/40 bg-primary/15 px-1.5 py-0.2 text-[9px] font-bold text-primary-bright uppercase tracking-wider">
-                  Studio
-                </span>
-              </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-base sm:text-lg font-bold tracking-tight text-white font-sans">
+                Socialcraft
+              </span>
+              <span className="rounded-md border border-primary/40 bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold text-primary-bright uppercase tracking-wider">
+                Studio
+              </span>
             </div>
           </div>
 
@@ -85,74 +107,94 @@ export function CryptoxNavbar({
             <button
               type="button"
               onClick={onNavigateLanding}
-              className="hidden lg:flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] font-medium text-white/60 hover:text-white hover:bg-white/[0.08] transition-all ml-1"
+              className="hidden lg:inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-zinc-400 hover:text-white hover:bg-white/[0.08] transition-all"
+              title="Zurück zur Hauptseite"
             >
-              <ArrowLeft className="h-3 w-3" />
+              <ArrowLeft className="h-3.5 w-3.5" />
               <span>Startseite</span>
             </button>
           )}
         </div>
 
-        {/* ── Center: Floating Pill Navigation ──────────────────── */}
-        <nav className="flex items-center gap-1 rounded-full border border-white/10 bg-[#120F17]/80 p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-          {NAV_TABS.map((tab) => {
-            const isActive = activeTab === tab.key;
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => onNavigate(tab.key)}
-                className={cn(
-                  "relative rounded-full px-3.5 sm:px-4 py-2 text-xs font-semibold transition-all duration-200",
-                  isActive
-                    ? "bg-[#FF4D17] text-white shadow-[0_0_22px_-2px_#FF4D17]"
-                    : "text-white/70 hover:text-white hover:bg-white/[0.06]",
-                )}
-              >
-                {tab.label}
-              </button>
-            );
-          })}
+        {/* ── Center: Grouped Studio Navigation ────────────────────── */}
+        <nav className="hidden md:flex items-center rounded-full border border-white/10 bg-[#120F17]/90 p-1 shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+          {/* Creation Group */}
+          <div className="flex items-center gap-0.5">
+            {CREATION_TABS.map((tab) => {
+              const isActive = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => onNavigate(tab.key)}
+                  className={cn(
+                    "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer",
+                    isActive
+                      ? "bg-[#FF4D17] text-white shadow-[0_0_18px_-2px_#FF4D17]"
+                      : "text-zinc-400 hover:text-white hover:bg-white/[0.06]",
+                  )}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Elegant Divider */}
+          <div className="h-3.5 w-[1px] bg-white/15 mx-1.5" />
+
+          {/* Library / Workspace Group */}
+          <div className="flex items-center gap-0.5">
+            {LIBRARY_TABS.map((tab) => {
+              const isActive = activeTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => onNavigate(tab.key)}
+                  className={cn(
+                    "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer",
+                    isActive
+                      ? "bg-[#FF4D17] text-white shadow-[0_0_18px_-2px_#FF4D17]"
+                      : "text-zinc-400 hover:text-white hover:bg-white/[0.06]",
+                  )}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
         </nav>
 
-        {/* ── Right: Quick Controls, Credits & User Profile ─────── */}
-        <div className="flex items-center gap-2">
-          {/* Universal Admin Button */}
-          {onNavigateAdmin && (
+        {/* ── Right: Consolidated Actions & User Hub ───────────────── */}
+        <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* Direct Admin Pill (when admin) */}
+          {isAdmin && onNavigateAdmin && (
             <button
               type="button"
               onClick={onNavigateAdmin}
-              className={cn(
-                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all shadow-[0_0_15px_-4px_#FF4D17]",
-                currentUser?.role === "admin"
-                  ? "border-primary/50 bg-primary/20 text-primary-bright hover:bg-primary/30"
-                  : "border-white/15 bg-white/[0.04] text-white/80 hover:text-white hover:border-primary/40 hover:bg-primary/10",
-              )}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-primary/50 bg-primary/20 hover:bg-primary/30 px-3 py-1.5 text-xs font-bold text-primary-bright shadow-[0_0_15px_-3px_#FF4D17] transition-all cursor-pointer"
               title="Admin Dashboard öffnen"
             >
               <Shield className="h-3.5 w-3.5 text-[#FF6A1F]" />
-              <span>{currentUser?.role === "admin" ? "Admin" : "Admin-Bereich"}</span>
+              <span>Admin</span>
             </button>
           )}
 
-          {/* Interactive Credits Pill & Instant Upgrade Trigger */}
-          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] p-1 pl-3 text-xs font-medium text-white/80 backdrop-blur-xl hover:border-white/20 transition-colors shadow-[0_10px_25px_-5px_rgba(0,0,0,0.5)]">
+          {/* Credits Pill (clean & compact, no provider noise) */}
+          <div className="flex items-center rounded-xl border border-white/10 bg-white/[0.04] p-1 pl-3 text-xs font-medium text-white/90 backdrop-blur-xl hover:border-white/20 transition-all shadow-sm">
             <div
               onClick={onRefreshCredits}
-              className="flex items-center gap-1.5 cursor-pointer hover:text-white"
-              title="Klicken zum Aktualisieren vom KIE.AI Server"
+              className="flex items-center gap-1.5 cursor-pointer hover:text-white mr-1.5"
+              title="Klicken zum Aktualisieren"
             >
               <Coins className="h-3.5 w-3.5 text-[#FF6A1F]" />
-              <span className="font-semibold text-white font-mono">
-                {creditStatus?.kie.success
-                  ? `${creditStatus.kie.formatted} (KIE.AI)`
-                  : currentUser
-                  ? `${currentUser.credits.toLocaleString()} cr`
-                  : creditStatus?.kie.formatted ?? "Guthaben abrufen"}
+              <span className="font-semibold text-white font-mono tracking-tight">
+                {creditDisplay}
               </span>
               <RefreshCw
                 className={cn(
-                  "h-3 w-3 text-white/40 hover:text-white transition-colors",
+                  "h-3 w-3 text-zinc-500 hover:text-white transition-colors",
                   creditStatus?.loading && "animate-spin text-[#FFA149]",
                 )}
               />
@@ -161,63 +203,150 @@ export function CryptoxNavbar({
               <button
                 type="button"
                 onClick={onOpenCreditsUpgrade}
-                className="flex items-center gap-1 rounded-full bg-[#FF4D17] hover:bg-[#FF6A1F] text-white px-2.5 py-1 text-[11px] font-bold shadow-[0_0_12px_#FF4D17] transition-all cursor-pointer"
-                title="Credits aufladen & KIE.AI verwalten"
+                className="flex items-center gap-1 rounded-lg bg-[#FF4D17] hover:bg-[#FF6A1F] text-white px-2.5 py-1 text-[11px] font-bold shadow-[0_0_10px_rgba(255,77,23,0.4)] transition-all cursor-pointer"
+                title="Credits aufladen"
               >
-                <span>+ Aufladen</span>
+                <Plus className="h-3 w-3" />
+                <span className="hidden sm:inline">Aufladen</span>
               </button>
             )}
           </div>
 
-          {/* Brand Kit */}
-          <button
-            type="button"
-            onClick={onOpenBrandKit}
-            className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-2 text-xs font-semibold text-white/80 backdrop-blur-xl transition-all hover:bg-white/[0.08] hover:text-white"
-          >
-            <Palette className="h-3.5 w-3.5 text-primary-bright" />
-            <span>Brand Kit</span>
-          </button>
+          {/* Tools Cluster: Brand Kit & Settings */}
+          <div className="flex items-center rounded-xl border border-white/10 bg-white/[0.03] p-0.5 backdrop-blur-xl">
+            <button
+              type="button"
+              onClick={onOpenBrandKit}
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+              title="Brand Kit & Design System"
+            >
+              <Palette className="h-3.5 w-3.5 text-orange-400" />
+              <span className="hidden xl:inline">Brand Kit</span>
+            </button>
+            <div className="h-3.5 w-[1px] bg-white/10 my-auto" />
+            <button
+              type="button"
+              onClick={onOpenSettings}
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
+              title="Einstellungen"
+              aria-label="Einstellungen"
+            >
+              <Settings className="h-3.5 w-3.5" />
+            </button>
+          </div>
 
-          {/* Settings */}
-          <button
-            type="button"
-            onClick={onOpenSettings}
-            className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/[0.03] text-white/80 backdrop-blur-xl transition-all hover:bg-white/[0.08] hover:text-white"
-            aria-label="Einstellungen"
-            title="API & Studio Einstellungen"
-          >
-            <Settings className="h-4 w-4" />
-          </button>
-
-          {/* User Auth Profile or Login Trigger */}
+          {/* User Profile & Account Dropdown */}
           {currentUser ? (
-            <div className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] py-1 pl-1 pr-2.5 backdrop-blur-xl">
-              <img
-                src={currentUser.avatarUrl}
-                alt={currentUser.name}
-                className="h-7 w-7 rounded-full object-cover border border-white/20"
-              />
-              <span className="hidden xl:inline text-xs font-semibold text-white max-w-[100px] truncate">
-                {currentUser.name.split(" ")[0]}
-              </span>
-              {onLogout && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
                 <button
                   type="button"
-                  onClick={onLogout}
-                  className="text-white/40 hover:text-red-400 ml-1 transition-colors"
-                  title="Abmelden"
+                  className={cn(
+                    "flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] p-1 pr-2.5 backdrop-blur-xl hover:border-white/20 transition-all cursor-pointer select-none",
+                    isAdmin && "border-primary/40 shadow-[0_0_12px_rgba(255,77,23,0.15)]"
+                  )}
                 >
-                  <LogOut className="h-3.5 w-3.5" />
+                  <img
+                    src={currentUser.avatarUrl}
+                    alt={currentUser.name}
+                    className="h-7 w-7 rounded-lg object-cover border border-white/20"
+                  />
+                  <div className="hidden lg:flex flex-col text-left">
+                    <span className="text-xs font-semibold text-white leading-none max-w-[100px] truncate">
+                      {currentUser.name.split(" ")[0]}
+                    </span>
+                    <span className="text-[10px] text-zinc-400 capitalize leading-tight">
+                      {currentUser.role}
+                    </span>
+                  </div>
+                  <ChevronDown className="h-3.5 w-3.5 text-zinc-400" />
                 </button>
-              )}
-            </div>
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent
+                align="end"
+                sideOffset={8}
+                className="w-64 rounded-2xl border border-white/10 bg-[#120F1C]/95 p-2 text-zinc-200 shadow-2xl backdrop-blur-2xl"
+              >
+                {/* Header Profile Info */}
+                <div className="flex items-center gap-3 p-2.5 bg-white/[0.02] rounded-xl border border-white/[0.06] mb-1">
+                  <img
+                    src={currentUser.avatarUrl}
+                    alt={currentUser.name}
+                    className="h-9 w-9 rounded-xl object-cover border border-white/20"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-bold text-white truncate">{currentUser.name}</p>
+                    <p className="text-[11px] text-zinc-400 truncate">{currentUser.email}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="inline-flex items-center gap-1 rounded-full border border-orange-500/30 bg-orange-500/10 px-2 py-0.2 text-[9px] font-bold text-orange-400 uppercase">
+                        {currentUser.role}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-[9px] text-emerald-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                        Cloud aktiv
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <DropdownMenuSeparator className="bg-white/[0.08]" />
+
+                {/* Quick Navigation Items */}
+                {isAdmin && onNavigateAdmin && (
+                  <DropdownMenuItem
+                    onClick={onNavigateAdmin}
+                    className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-orange-400 hover:bg-orange-500/15 hover:text-white cursor-pointer transition-colors"
+                  >
+                    <Shield className="h-4 w-4" />
+                    <span>Admin Dashboard</span>
+                  </DropdownMenuItem>
+                )}
+
+                <DropdownMenuItem
+                  onClick={() => onNavigate("history")}
+                  className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-zinc-300 hover:bg-white/[0.06] hover:text-white cursor-pointer transition-colors"
+                >
+                  <Cloud className="h-4 w-4 text-[#FF6A1F]" />
+                  <span>Cloud-Galerie & Ordner</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={onOpenBrandKit}
+                  className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-zinc-300 hover:bg-white/[0.06] hover:text-white cursor-pointer transition-colors"
+                >
+                  <Palette className="h-4 w-4 text-orange-400" />
+                  <span>Brand Kit anpassen</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={onOpenSettings}
+                  className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-zinc-300 hover:bg-white/[0.06] hover:text-white cursor-pointer transition-colors"
+                >
+                  <Settings className="h-4 w-4 text-zinc-400" />
+                  <span>Studio & API Einstellungen</span>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator className="bg-white/[0.08]" />
+
+                {/* Logout */}
+                {onLogout && (
+                  <DropdownMenuItem
+                    onClick={onLogout}
+                    className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 cursor-pointer transition-colors"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    <span>Abmelden</span>
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             onOpenAuth && (
               <button
                 type="button"
                 onClick={() => onOpenAuth("login")}
-                className="rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs font-semibold text-white/80 hover:text-white hover:bg-white/[0.08] transition-all"
+                className="rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs font-semibold text-white/80 hover:text-white hover:bg-white/[0.08] transition-all cursor-pointer"
               >
                 Anmelden
               </button>

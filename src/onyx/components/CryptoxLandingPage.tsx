@@ -25,10 +25,18 @@ import {
   Star,
   Users,
   Zap,
+  LogOut,
 } from "lucide-react";
 import { SocialcraftParallaxHero } from "@/components/ui/socialcraft-parallax-hero";
 import type { User } from "../auth";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface CryptoxLandingPageProps {
   currentUser: User | null;
@@ -150,71 +158,113 @@ export function CryptoxLandingPage({
 
           {/* Right Action Buttons */}
           <div className="flex items-center gap-2.5">
-            {/* Universal Admin Button */}
-            <button
-              type="button"
-              onClick={onNavigateAdmin}
-              className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary-bright hover:bg-primary/25 transition-all shadow-[0_0_15px_-4px_#FF4D17] cursor-pointer"
-              title="Admin Dashboard öffnen"
-            >
-              <Shield className="h-3.5 w-3.5" />
-              <span>Admin-Bereich</span>
-            </button>
-
-            {/* Credits Upgrade Button */}
-            {onOpenCreditsUpgrade && (
-              <button
-                type="button"
-                onClick={onOpenCreditsUpgrade}
-                className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/80 hover:text-white hover:bg-white/[0.08] transition-all cursor-pointer"
-                title="Credits aufladen & upgraden"
-              >
-                <Coins className="h-3.5 w-3.5 text-[#FF6A1F]" />
-                <span>Credits aufladen</span>
-              </button>
-            )}
-
             {currentUser ? (
               <div className="flex items-center gap-2">
+                {/* Primary Studio Action */}
                 <button
                   type="button"
                   onClick={onNavigateStudio}
-                  className="cryptox-orange-btn rounded-full px-4 py-1.5 text-xs font-semibold"
+                  className="cryptox-orange-btn rounded-xl px-4 py-2 text-xs font-bold shadow-[0_0_15px_-2px_#FF4D17] flex items-center gap-1.5 cursor-pointer transition-transform hover:scale-[1.02]"
                 >
-                  Zum Studio 🚀
+                  <span>Zum Studio</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
-                <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] py-1 px-2.5 backdrop-blur-xl">
-                  <img
-                    src={currentUser.avatarUrl}
-                    alt={currentUser.name}
-                    className="h-6 w-6 rounded-full object-cover border border-white/20"
-                  />
-                  <span className="hidden sm:inline text-xs font-medium text-white/90">
-                    {currentUser.name}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={onLogout}
-                    className="text-xs text-white/40 hover:text-red-400 ml-1 transition-colors"
-                    title="Abmelden"
+
+                {/* User Account Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      type="button"
+                      className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] p-1 pr-2.5 backdrop-blur-xl hover:border-white/20 transition-all cursor-pointer select-none"
+                    >
+                      <img
+                        src={currentUser.avatarUrl}
+                        alt={currentUser.name}
+                        className="h-7 w-7 rounded-lg object-cover border border-white/20"
+                      />
+                      <div className="hidden sm:flex flex-col text-left">
+                        <span className="text-xs font-semibold text-white leading-none max-w-[120px] truncate">
+                          {currentUser.name}
+                        </span>
+                        <span className="text-[10px] text-zinc-400 capitalize leading-tight">
+                          {currentUser.role === "admin" ? "Administrator" : currentUser.role}
+                        </span>
+                      </div>
+                      <ChevronDown className="h-3.5 w-3.5 text-zinc-400" />
+                    </button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent
+                    align="end"
+                    sideOffset={8}
+                    className="w-64 rounded-2xl border border-white/10 bg-[#120F1C]/95 p-2 text-zinc-200 shadow-2xl backdrop-blur-2xl"
                   >
-                    ✕
-                  </button>
-                </div>
+                    {/* Header Info */}
+                    <div className="flex items-center gap-3 p-2.5 bg-white/[0.02] rounded-xl border border-white/[0.06] mb-1">
+                      <img
+                        src={currentUser.avatarUrl}
+                        alt={currentUser.name}
+                        className="h-9 w-9 rounded-xl object-cover border border-white/20"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-white truncate">{currentUser.name}</p>
+                        <p className="text-[11px] text-zinc-400 truncate">{currentUser.email}</p>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="inline-flex items-center gap-1 rounded-full border border-orange-500/30 bg-orange-500/10 px-2 py-0.2 text-[9px] font-bold text-orange-400 uppercase">
+                            {currentUser.role}
+                          </span>
+                          <span className="text-[10px] font-mono text-zinc-300">
+                            {currentUser.credits.toLocaleString()} cr
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <DropdownMenuSeparator className="bg-white/[0.08]" />
+
+                    <DropdownMenuItem
+                      onClick={onNavigateStudio}
+                      className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-white hover:bg-orange-500/15 cursor-pointer transition-colors"
+                    >
+                      <Sparkles className="h-4 w-4 text-[#FF6A1F]" />
+                      <span>Zum Studio wechseln</span>
+                    </DropdownMenuItem>
+
+                    {currentUser.role === "admin" && (
+                      <DropdownMenuItem
+                        onClick={onNavigateAdmin}
+                        className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-orange-400 hover:bg-orange-500/15 hover:text-white cursor-pointer transition-colors"
+                      >
+                        <Shield className="h-4 w-4" />
+                        <span>Admin Dashboard</span>
+                      </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenuSeparator className="bg-white/[0.08]" />
+
+                    <DropdownMenuItem
+                      onClick={onLogout}
+                      className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 cursor-pointer transition-colors"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Abmelden</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => onOpenAuth("login")}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs font-semibold text-white/80 hover:text-white hover:bg-white/[0.08] transition-all cursor-pointer"
+                  className="rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold text-white/80 hover:text-white hover:bg-white/[0.08] transition-all cursor-pointer"
                 >
                   Anmelden
                 </button>
                 <button
                   type="button"
                   onClick={() => onOpenAuth("register")}
-                  className="cryptox-orange-btn rounded-full px-4 py-1.5 text-xs font-semibold shadow-[0_0_20px_-3px_#FF4D17] cursor-pointer"
+                  className="cryptox-orange-btn rounded-xl px-4 py-2 text-xs font-semibold shadow-[0_0_20px_-3px_#FF4D17] cursor-pointer"
                 >
                   Registrieren
                 </button>
