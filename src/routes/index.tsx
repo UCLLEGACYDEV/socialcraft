@@ -269,7 +269,7 @@ function OnyxStudio() {
           });
           setSlideFlag(slide.id, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
           if (settings.s4AutoSave) {
-            saveImageToS4({
+            void saveImageToS4({
               imageUrl: res.imageUrl,
               prompt: slide.visualPrompt,
               category: "carousel",
@@ -325,7 +325,7 @@ function OnyxStudio() {
       });
       setSlideFlag(slideId, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
       if (settings.s4AutoSave) {
-        saveImageToS4({
+        void saveImageToS4({
           imageUrl: res.imageUrl,
           prompt: slide.visualPrompt,
           category: "carousel",
@@ -511,7 +511,7 @@ function OnyxStudio() {
       });
 
       if (settings.s4AutoSave) {
-        saveImageToS4({
+        void saveImageToS4({
           imageUrl: res.imageUrl,
           prompt: slide.visualPrompt,
           category: "series",
@@ -615,7 +615,7 @@ function OnyxStudio() {
             });
 
             if (settings.s4AutoSave) {
-              saveImageToS4({
+              void saveImageToS4({
                 imageUrl: res.imageUrl,
                 prompt: slide.visualPrompt,
                 category: "series",

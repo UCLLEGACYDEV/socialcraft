@@ -179,10 +179,10 @@ export function CloudGalleryView({
     }
   };
 
-  const handleManualUpload = (e: React.FormEvent) => {
+  const handleManualUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!uploadUrl.trim()) return;
-    saveImageToS4({
+    await saveImageToS4({
       imageUrl: uploadUrl.trim(),
       prompt: uploadPrompt.trim() || "Manuell hinzugefügtes Bild",
       category: "upload",
