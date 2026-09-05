@@ -371,13 +371,18 @@ function OnyxStudio() {
       setSlideFlag(slideId, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
       if (settings.s4AutoSave) {
         const effectiveUser = currentUser || getStoredCurrentUser();
+        const cleanTopic = (brief.topic || "karussell").replace(/[^a-zA-Z0-9-_\s]/g, "").trim().replace(/\s+/g, "_") || "karussell";
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const carouselFolder = `${dateStr}_${cleanTopic}`;
         void saveImageToS4({
           imageUrl: res.imageUrl,
           prompt: slide.visualPrompt,
           category: "carousel",
           aspectRatio: brandKit.aspectRatio,
           user: effectiveUser,
-          customFilename: `slide_${slide.slideNumber}_reroll.jpg`,
+          customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
+          subfolder: `carousels/${carouselFolder}`,
+          projectName: carouselFolder,
         }).then((cloudImg) => {
           if (cloudImg) {
             toast.success(`Slide ${slide.slideNumber} in Cloud aktualisiert ☁️`, { duration: 2500 });

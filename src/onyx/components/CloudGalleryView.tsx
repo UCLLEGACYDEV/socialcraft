@@ -216,7 +216,7 @@ export function CloudGalleryView({
     const gallery: S4CloudImage[] = [];
 
     for (const img of filteredImages) {
-      if (img.subfolder === "carousels" || img.category === "carousel") {
+      if (img.subfolder === "carousels" || img.category === "carousel" || img.category === "series") {
         const proj = img.projectName || "Standard Karussell-Projekt";
         if (!carousels[proj]) carousels[proj] = [];
         carousels[proj].push(img);

@@ -16,6 +16,7 @@ export interface S4CloudImage {
   endpoint: string;         
   url: string;              
   displayUrl: string;       
+  proxyUrl?: string;
   filename: string;
   subfolder?: string;
   projectName?: string;
@@ -43,7 +44,7 @@ function getSettings(): ApiSettings {
 }
 
 /** Build request headers containing cloud storage credentials from local settings or master anchored fallback */
-function getCloudHeaders(): Record<string, string> {
+export function getCloudHeaders(): Record<string, string> {
   const settings = getSettings();
   const accessKey = (settings.s4AccessKey?.trim() || ANCHORED_S4_ACCESS_KEY).trim();
   const secretKey = (settings.s4SecretKey?.trim() || ANCHORED_S4_SECRET_KEY).trim();
@@ -218,6 +219,7 @@ export async function listS4Images(
         endpoint,
         url: obj.url,
         displayUrl: obj.url,
+        proxyUrl: (obj as any).proxyUrl,
         filename,
         subfolder,
         projectName,
@@ -269,7 +271,7 @@ export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4Clou
   let targetFolder = `${userRoot}/gallery`;
   if (subfolder) {
     targetFolder = `${userRoot}/${subfolder.replace(/^\/+|\/+$/g, "")}`;
-  } else if (category === "carousel") {
+  } else if (category === "carousel" || category === "series") {
     const cleanProject = (projectName || "current_carousel")
       .replace(/[^a-zA-Z0-9-_\s]/g, "")
       .trim()
@@ -337,6 +339,7 @@ export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4Clou
       endpoint,
       url: data.url,
       displayUrl: data.url,
+      proxyUrl: `/api/cloud/file?key=${encodeURIComponent(data.key)}`,
       filename,
       subfolder: subfolder || category,
       projectName,

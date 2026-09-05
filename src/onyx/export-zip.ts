@@ -38,9 +38,15 @@ export async function exportCarouselAsZip(slides: SlideContent[], topic: string)
   return withImages.length;
 }
 
-export async function downloadCloudImage(image: { filename: string; displayUrl: string }) {
+import { getCloudHeaders } from "./s4-storage";
+
+export async function downloadCloudImage(image: { filename: string; displayUrl: string; proxyUrl?: string }) {
   try {
-    const res = await fetch(image.displayUrl);
+    const downloadUrl = image.proxyUrl || image.displayUrl;
+    const res = await fetch(downloadUrl, {
+      headers: image.proxyUrl ? getCloudHeaders() : undefined,
+    });
+    if (!res.ok) throw new Error("Fetch failed");
     const blob = await res.blob();
     saveAs(blob, image.filename || "bild.jpg");
   } catch {
@@ -56,7 +62,7 @@ export async function downloadCloudImage(image: { filename: string; displayUrl: 
 }
 
 export async function exportS4ImagesAsZip(
-  images: { filename: string; displayUrl: string }[],
+  images: { filename: string; displayUrl: string; proxyUrl?: string }[],
   folderName = "Mein_Cloud_Ordner",
 ) {
   if (images.length === 0) return 0;
@@ -67,7 +73,11 @@ export async function exportS4ImagesAsZip(
     const item = images[i];
     if (!item?.displayUrl) continue;
     try {
-      const res = await fetch(item.displayUrl);
+      const downloadUrl = item.proxyUrl || item.displayUrl;
+      const res = await fetch(downloadUrl, {
+        headers: item.proxyUrl ? getCloudHeaders() : undefined,
+      });
+      if (!res.ok) throw new Error("Fetch failed");
       const blob = await res.blob();
       zip.file(item.filename || `Bild_${i + 1}.jpg`, blob);
       addedCount++;
