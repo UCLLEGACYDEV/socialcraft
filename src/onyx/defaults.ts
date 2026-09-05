@@ -13,7 +13,7 @@ export const DEFAULT_BRAND_KIT: BrandKit = {
 // Feste Master-Verankerung des Engine API-Keys (aus .env VITE_KIE_API_KEY oder festem Code-Fallback)
 export const ANCHORED_KIE_API_KEY =
   (typeof import.meta !== "undefined" && import.meta.env?.VITE_KIE_API_KEY) ||
-  "";
+  "4029b7b2ebc1d6e0609bf6559172e335";
 
 // Feste Verankerung des Mega S4 Cloud-Speichers
 export const ANCHORED_S4_ACCESS_KEY =

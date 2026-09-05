@@ -248,11 +248,11 @@ export interface KieProgressInfo {
  */
 export async function pollNanoBananaTask(
   taskId: string,
-  apiKey: string,
+  apiKey?: string,
   signal?: AbortSignal,
   onProgress?: (info: KieProgressInfo) => void,
 ): Promise<{ imageUrl: string; costTime?: number }> {
-  const cleanKey = apiKey.trim();
+  const cleanKey = (apiKey?.trim() || ANCHORED_KIE_API_KEY).trim();
   const maxAttempts = 50; // up to ~100s timeout
   const pollIntervalMs = 2000;
 
