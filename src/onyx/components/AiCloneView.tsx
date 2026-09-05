@@ -17,6 +17,8 @@ import {
   Upload,
   User,
   UserCheck,
+  ArrowRight,
+  Palette,
   Wand2,
   X,
 } from "lucide-react";
@@ -27,10 +29,42 @@ import {
   assembleClonePrompt,
 } from "../defaults";
 import { generateImageUnified, makeId, mockGenerateImage } from "../mock-api";
-import { analyzePersonaPhoto, type PersonaAnalysisProgress } from "../persona-analyzer";
+import {
+  analyzeInspirationAndFuseWithClone,
+  analyzePersonaPhoto,
+  type InspirationFusionResult,
+  type PersonaAnalysisProgress,
+} from "../persona-analyzer";
 import { LS, readLS, usePersistentState } from "../storage";
 import type { AiCloneProfile, ApiSettings, ClonePlacement } from "../types";
 import { cn } from "@/lib/utils";
+
+const INSPIRATION_PRESETS = [
+  {
+    title: "Italienischer Wollmantel",
+    subtitle: "Dunkler Mantel & Penthouse",
+    desc: "Schwarzer taillierter Mantel, anthrazit Rollkragen, Penthouse bei Nacht",
+    url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=600&q=80",
+  },
+  {
+    title: "Cyberpunk Techwear",
+    subtitle: "Tech-Bomberjacke & Rimlight",
+    desc: "Mattschwarze Techwear-Jacke, futuristischer Kragen, violettes Kantenlicht",
+    url: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=600&q=80",
+  },
+  {
+    title: "Editorial Blazer",
+    subtitle: "Oversize-Wollblazer & Studio",
+    desc: "Dunkelgrauer Blazer, weiches Studio-Licht, cleanes Editorial",
+    url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&q=80",
+  },
+  {
+    title: "Lederjacke & Ember-Rim",
+    subtitle: "Biker-Leder & warmes Licht",
+    desc: "Schwarze strukturierte Lederjacke, intensives orangenes Seitenlicht",
+    url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&q=80",
+  },
+];
 
 interface AiCloneViewProps {
   onUseInCarousel?: (clonePrompt: string) => void;
@@ -79,6 +113,13 @@ export function AiCloneView({
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisProgress, setAnalysisProgress] = useState<PersonaAnalysisProgress | null>(null);
   const [lastAnalysisSummary, setLastAnalysisSummary] = useState<string[] | null>(null);
+
+  // Inspirations- & Style-Fusion State
+  const inspirationInputRef = useRef<HTMLInputElement>(null);
+  const [inspirationImage, setInspirationImage] = useState<string>("");
+  const [isFusingInspiration, setIsFusingInspiration] = useState(false);
+  const [fusionProgress, setFusionProgress] = useState<PersonaAnalysisProgress | null>(null);
+  const [fusionResult, setFusionResult] = useState<InspirationFusionResult | null>(null);
 
   // Active profile
   const fallbackProfile: AiCloneProfile = DEFAULT_CLONE_PROFILES[0]!;
@@ -181,6 +222,63 @@ export function AiCloneView({
       setIsAnalyzing(false);
       setAnalysisProgress(null);
     }
+  };
+
+  // Inspirations-Foto Upload Handler
+  const handleInspirationUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setInspirationImage(event.target.result as string);
+        toast.success("Inspirationsfoto geladen! Klicke jetzt auf 'Stil auf Klon übertragen'.");
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Inspirations-Stil analysieren & auf Klon fusionieren
+  const handleRunInspirationFusion = async (customUrl?: string) => {
+    const targetUrl = customUrl || inspirationImage;
+    if (!targetUrl) {
+      toast.error("Bitte wähle zuerst ein Inspirationsfoto aus oder lade ein Foto hoch.");
+      inspirationInputRef.current?.click();
+      return;
+    }
+
+    setIsFusingInspiration(true);
+    setFusionProgress({ step: 1, totalSteps: 4, label: "Scanne Inspirationsbild nach Garderobe & Schnitt…", percent: 25 });
+
+    const settings = readLS<ApiSettings>(LS.apiSettings, DEFAULT_API_SETTINGS);
+    try {
+      const result = await analyzeInspirationAndFuseWithClone(targetUrl, activeProfile, {
+        apiKey: settings?.kieApiKey,
+        onProgress: (p) => setFusionProgress(p),
+      });
+
+      setFusionResult(result);
+      toast.success(`Inspirations-Stil erfolgreich auf ${activeProfile.name} übertragen!`);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Fehler bei der Style-Fusion";
+      toast.error(msg);
+    } finally {
+      setIsFusingInspiration(false);
+      setFusionProgress(null);
+    }
+  };
+
+  // Fusion-Ergebnis direkt auf das Klon-Profil anwenden
+  const handleApplyFusionToProfile = () => {
+    if (!fusionResult) return;
+    patchProfile({
+      wardrobe: fusionResult.extractedWardrobe,
+      lightingLook: fusionResult.extractedLighting,
+      framingCamera: fusionResult.extractedPose,
+      negativePrompt: fusionResult.negativePrompt,
+      customPrefix: fusionResult.fusedPrompt,
+    });
+    toast.success(`Garderobe & Licht-Look direkt in Klon „${activeProfile.name}“ gespeichert!`);
   };
 
   // Delete profile
@@ -497,6 +595,227 @@ export function AiCloneView({
                 />
               </div>
             </div>
+          </div>
+
+          {/* ── Section 2.5: Inspirations-Foto & Style-Transfer (Stil auf Klon übertragen) ── */}
+          <div className="cryptox-card relative overflow-hidden rounded-2xl border border-orange-500/40 bg-gradient-to-b from-[#181220] via-[#120E19] to-[#0D0914] p-5 sm:p-6 space-y-4 shadow-[0_15px_60px_-10px_rgba(255,77,23,0.25)]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-white">
+                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-orange-500/20 text-orange-400">
+                  <Wand2 className="h-3.5 w-3.5" />
+                </span>
+                <span>Inspirations- & Style-Transfer (Stil auf Klon übertragen)</span>
+              </div>
+              <span className="rounded-full border border-orange-500/40 bg-orange-500/15 px-2.5 py-0.5 text-[10px] font-bold text-orange-400">
+                Persona Fusion AI
+              </span>
+            </div>
+
+            <p className="text-xs text-zinc-300 leading-relaxed">
+              Lade ein <strong>Inspirationsfoto einer anderen Person oder eines Models</strong> hoch (z.&nbsp;B. von Instagram oder Pinterest).
+              Die KI analysiert <strong>Kleidung, Schnitt, Pose und Licht</strong> und passt den Prompt maßgeschneidert an&nbsp;–
+              <strong>aber DEIN KI-Klon</strong> (<span className="text-orange-400 font-semibold">{activeProfile.name}</span> mit seinem echten Gesicht, Haaren &amp; Tattoos) bleibt die Hauptfigur!
+            </p>
+
+            {/* Inspiration Presets & Upload */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-medium text-zinc-400">Inspirations-Vorlagen oder eigenes Foto:</span>
+                <button
+                  type="button"
+                  onClick={() => inspirationInputRef.current?.click()}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-orange-500/40 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-300 hover:bg-orange-500/20 hover:text-white transition-all cursor-pointer"
+                >
+                  <Upload className="h-3 w-3" /> Eigenes Foto hochladen
+                </button>
+                <input
+                  ref={inspirationInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleInspirationUpload}
+                  className="hidden"
+                />
+              </div>
+
+              {/* Preset Cards Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {INSPIRATION_PRESETS.map((preset, idx) => {
+                  const isSelected = inspirationImage === preset.url;
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setInspirationImage(preset.url)}
+                      className={cn(
+                        "group relative flex flex-col rounded-xl border p-2 text-left transition-all overflow-hidden cursor-pointer",
+                        isSelected
+                          ? "border-orange-500 bg-orange-500/15 shadow-[0_0_15px_-3px_rgba(255,77,23,0.5)]"
+                          : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]"
+                      )}
+                    >
+                      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg mb-1.5 bg-black/40">
+                        <img
+                          src={preset.url}
+                          alt={preset.title}
+                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        {isSelected && (
+                          <div className="absolute inset-0 bg-orange-500/25 flex items-center justify-center">
+                            <span className="flex h-5 w-5 items-center justify-center rounded-full bg-orange-500 text-white">
+                              <Check className="h-3 w-3" />
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <span className="text-[11px] font-bold text-white truncate">{preset.title}</span>
+                      <span className="text-[9px] text-zinc-400 truncate">{preset.subtitle}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Custom Inspiration Upload Preview (if uploaded) */}
+            {inspirationImage && !INSPIRATION_PRESETS.some((p) => p.url === inspirationImage) && (
+              <div className="flex items-center gap-3 p-2.5 rounded-xl border border-orange-500/40 bg-orange-500/10">
+                <img
+                  src={inspirationImage}
+                  alt="Eigenes Inspirationsfoto"
+                  className="h-12 w-12 rounded-lg object-cover border border-white/20"
+                />
+                <div className="flex-1 min-w-0 text-xs">
+                  <p className="font-semibold text-white truncate">Dein hochgeladenes Inspirationsfoto</p>
+                  <p className="text-[11px] text-zinc-400">Bereit für die KI-Stil- &amp; Garderoben-Analyse</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setInspirationImage("")}
+                  className="text-zinc-400 hover:text-destructive p-1"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Run Fusion Button */}
+            <button
+              type="button"
+              disabled={isFusingInspiration || !inspirationImage}
+              onClick={() => handleRunInspirationFusion()}
+              className={cn(
+                "w-full flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-xs font-semibold transition-all shadow-md",
+                isFusingInspiration
+                  ? "bg-orange-500/30 text-orange-200 cursor-not-allowed border border-orange-500/40"
+                  : !inspirationImage
+                    ? "border border-white/10 bg-white/5 text-zinc-500 cursor-not-allowed"
+                    : "cryptox-orange-btn hover:shadow-[0_0_25px_-3px_rgba(255,77,23,0.7)] cursor-pointer"
+              )}
+            >
+              {isFusingInspiration ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin text-orange-300" />
+                  <span>{fusionProgress?.label || "Übertrage Stil auf Klon…"}</span>
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4" />
+                  <span>Inspirations-Stil analysieren &amp; auf {activeProfile.name} übertragen</span>
+                </>
+              )}
+            </button>
+
+            {/* Fusion Progress Bar */}
+            {isFusingInspiration && fusionProgress && (
+              <div className="space-y-1.5 pt-1">
+                <div className="flex items-center justify-between text-[11px] text-zinc-300 font-mono">
+                  <span>Schritt {fusionProgress.step}/4: {fusionProgress.label}</span>
+                  <span className="text-orange-400 font-bold">{fusionProgress.percent}%</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-black/60 border border-white/10">
+                  <div
+                    className="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-orange-400 transition-all duration-300 rounded-full shadow-[0_0_10px_rgba(255,77,23,0.8)]"
+                    style={{ width: `${fusionProgress.percent}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Fusion Results Display */}
+            {fusionResult && !isFusingInspiration && (
+              <div className="rounded-xl border border-emerald-500/40 bg-emerald-500/[0.06] p-4 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-emerald-400" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-white">
+                      Stil erfolgreich auf {activeProfile.name} fusioniert!
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-emerald-400">Identität gesichert</span>
+                </div>
+
+                {/* Attributes breakdown */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                  <div className="rounded-lg bg-black/50 p-2 border border-white/10">
+                    <span className="text-[10px] text-orange-400 font-semibold block">👤 Identität (Dein Klon)</span>
+                    <span className="text-zinc-200">{activeProfile.name}: {activeProfile.hairFace}</span>
+                  </div>
+                  <div className="rounded-lg bg-black/50 p-2 border border-white/10">
+                    <span className="text-[10px] text-amber-400 font-semibold block">🧥 Garderobe (Aus Inspiration)</span>
+                    <span className="text-zinc-200">{fusionResult.extractedWardrobe}</span>
+                  </div>
+                  <div className="rounded-lg bg-black/50 p-2 border border-white/10">
+                    <span className="text-[10px] text-cyan-400 font-semibold block">📸 Pose &amp; Bildausschnitt</span>
+                    <span className="text-zinc-200">{fusionResult.extractedPose}</span>
+                  </div>
+                  <div className="rounded-lg bg-black/50 p-2 border border-white/10">
+                    <span className="text-[10px] text-purple-400 font-semibold block">💡 Licht &amp; Ambiente</span>
+                    <span className="text-zinc-200">{fusionResult.extractedLighting}</span>
+                  </div>
+                </div>
+
+                {/* Fused Prompt Box */}
+                <div className="space-y-1">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-zinc-400">
+                    Maßgeschneiderter Fusions-Prompt:
+                  </span>
+                  <div className="rounded-lg bg-black/60 p-2.5 font-mono text-[11px] text-zinc-200 leading-relaxed select-all border border-white/10">
+                    {fusionResult.fusedPrompt}
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleApplyFusionToProfile}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-orange-500 py-1.5 px-3 text-xs font-semibold text-white shadow-sm hover:bg-orange-600 transition-colors cursor-pointer"
+                  >
+                    <Check className="h-3.5 w-3.5" /> Auf Klon-Profil anwenden
+                  </button>
+
+                  {onUseInCarousel && (
+                    <button
+                      type="button"
+                      onClick={() => onUseInCarousel(fusionResult.fusedPrompt)}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-white/20 bg-white/5 py-1.5 px-3 text-xs font-semibold text-zinc-200 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <Layers className="h-3.5 w-3.5 text-orange-400" /> In Karussell übernehmen
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      void navigator.clipboard.writeText(fusionResult.fusedPrompt);
+                      toast.success("Fusions-Prompt in Zwischenablage kopiert!");
+                    }}
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 py-1.5 px-2.5 text-xs font-semibold text-zinc-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <Copy className="h-3 w-3" /> Kopieren
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Section 3: Platzierung im Karussell */}
