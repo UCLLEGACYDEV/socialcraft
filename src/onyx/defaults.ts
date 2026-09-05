@@ -24,6 +24,9 @@ export const DEFAULT_API_SETTINGS: ApiSettings = {
   llmProvider: "gemini",
   openaiApiKey: "",
   anthropicApiKey: "",
+  s4Endpoint: "socialgrow.s3.g.megas4.com",
+  s4Bucket: "socialgrow",
+  s4AutoSave: true,
 };
 
 export const DEFAULT_BRIEF: BriefValues = {

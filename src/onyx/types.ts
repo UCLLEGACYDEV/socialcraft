@@ -67,6 +67,11 @@ export interface ApiSettings {
   llmProvider: CarouselLlmProvider;
   openaiApiKey: string;
   anthropicApiKey: string;
+  s4Endpoint: string;
+  s4Bucket: string;
+  s4AccessKey?: string | undefined;
+  s4SecretKey?: string | undefined;
+  s4AutoSave: boolean;
 }
 
 export type JobStatus =

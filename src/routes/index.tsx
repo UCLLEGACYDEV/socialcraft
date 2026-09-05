@@ -17,6 +17,8 @@ import {
   McpModalContent,
   PromptGallery,
 } from "@/onyx/components/SimpleViews";
+import { CloudGalleryView } from "@/onyx/components/CloudGalleryView";
+import { saveImageToS4 } from "@/onyx/s4-storage";
 import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
 import { AdminDashboard } from "@/onyx/components/AdminDashboard";
 import { AuthModal } from "@/onyx/components/AuthModal";
@@ -266,6 +268,16 @@ function OnyxStudio() {
             },
           });
           setSlideFlag(slide.id, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
+          if (settings.s4AutoSave) {
+            saveImageToS4({
+              imageUrl: res.imageUrl,
+              prompt: slide.visualPrompt,
+              category: "carousel",
+              aspectRatio: brandKit.aspectRatio,
+              user: currentUser,
+              customFilename: `slide_${slide.slideNumber}.jpg`,
+            });
+          }
           if (res.fromRealApi) realNanoCount++;
         } catch (err: unknown) {
           setSlideFlag(slide.id, { isGeneratingImage: false, renderProgress: 0, renderStatus: "error" });
@@ -312,6 +324,16 @@ function OnyxStudio() {
         },
       });
       setSlideFlag(slideId, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
+      if (settings.s4AutoSave) {
+        saveImageToS4({
+          imageUrl: res.imageUrl,
+          prompt: slide.visualPrompt,
+          category: "carousel",
+          aspectRatio: brandKit.aspectRatio,
+          user: currentUser,
+          customFilename: `slide_${slide.slideNumber}_reroll.jpg`,
+        });
+      }
       if (res.fromRealApi) {
         toast.success(`Slide ${slide.slideNumber} via Nano-Banana 2 gerendert!`);
         void refreshCredits();
@@ -488,6 +510,16 @@ function OnyxStudio() {
         renderStatus: "done",
       });
 
+      if (settings.s4AutoSave) {
+        saveImageToS4({
+          imageUrl: res.imageUrl,
+          prompt: slide.visualPrompt,
+          category: "series",
+          user: currentUser,
+          customFilename: `${(job?.topic ?? "series").slice(0, 15).replace(/[^a-zA-Z0-9]/g, "_")}_slide_${slide.slideNumber}.jpg`,
+        });
+      }
+
       setQueue((prev) =>
         prev.map((j) => {
           if (j.id !== jobId) return j;
@@ -581,6 +613,16 @@ function OnyxStudio() {
               renderProgress: 100,
               renderStatus: "done",
             });
+
+            if (settings.s4AutoSave) {
+              saveImageToS4({
+                imageUrl: res.imageUrl,
+                prompt: slide.visualPrompt,
+                category: "series",
+                user: currentUser,
+                customFilename: `${job.topic.slice(0, 15).replace(/[^a-zA-Z0-9]/g, "_")}_slide_${slide.slideNumber}.jpg`,
+              });
+            }
 
             setQueue((prev) =>
               prev.map((j) => {
@@ -864,14 +906,25 @@ function OnyxStudio() {
             />
           )}
           {activeTab === "history" && (
-            <HistoryView
-              entries={history}
-              onOpen={(entry) => {
+            <CloudGalleryView
+              currentUser={currentUser}
+              historyEntries={history}
+              onOpenHistory={(entry) => {
                 setSlides(entry.slides);
                 setTopic(entry.topic);
                 setActiveTab("carousel");
               }}
-              onDelete={(id) => setHistory((prev) => prev.filter((e) => e.id !== id))}
+              onDeleteHistory={(id) => setHistory((prev) => prev.filter((e) => e.id !== id))}
+              onUseInCarousel={(imageUrl, prompt) => {
+                patchBrief({ topic: prompt });
+                setActiveTab("carousel");
+                toast.success("Bild ins Karussell geladen!");
+              }}
+              onUseInDirectPrompt={(prompt) => {
+                setDirectPrompt(prompt);
+                setActiveTab("direct-prompt");
+                toast.success("Prompt ins Einzelbild übernommen!");
+              }}
             />
           )}
         </main>
