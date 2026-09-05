@@ -42,16 +42,16 @@ export const DEFAULT_ADMIN_CREDENTIALS = {
  */
 function mapProfileToUser(profile: Record<string, any>, fallbackEmail: string): User {
   return {
-    id: profile.id,
-    name: profile.name || "Creator",
-    email: profile.email || fallbackEmail,
-    role: (profile.role as UserRole) || "creator",
-    credits: typeof profile.credits === "number" ? profile.credits : 1000,
-    avatarUrl: profile.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
-    status: profile.status === "suspended" ? "suspended" : "active",
-    company: profile.company || "Socialcraft Studio",
-    createdAt: profile.created_at || new Date().toISOString(),
-    lastLoginAt: profile.last_login_at || new Date().toISOString(),
+    id: profile['id'],
+    name: profile['name'] || "Creator",
+    email: profile['email'] || fallbackEmail,
+    role: (profile['role'] as UserRole) || "creator",
+    credits: typeof profile['credits'] === "number" ? profile['credits'] : 1000,
+    avatarUrl: profile['avatar_url'] || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    status: profile['status'] === "suspended" ? "suspended" : "active",
+    company: profile['company'] || "Socialcraft Studio",
+    createdAt: profile['created_at'] || new Date().toISOString(),
+    lastLoginAt: profile['last_login_at'] || new Date().toISOString(),
   };
 }
 
