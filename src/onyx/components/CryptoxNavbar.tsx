@@ -96,9 +96,13 @@ export function CryptoxNavbar({
             className="flex items-center gap-2.5 cursor-pointer select-none group"
             title="Socialcraft Studio Workspace"
           >
-            {/* Swirl logo icon */}
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-[#FF3B00] via-[#FF6A1F] to-[#FFA149] shadow-[0_0_20px_-2px_#FF4D17] transition-transform duration-300 group-hover:scale-105">
-              <div className="h-4 w-4 rounded-full border-2 border-white/90 border-t-transparent animate-[spin_8s_linear_infinite]" />
+            {/* Socialcraft Brand Logo Icon */}
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl overflow-hidden shadow-[0_0_20px_-2px_rgba(255,77,23,0.5)] transition-transform duration-300 group-hover:scale-105 border border-[#FF4D17]/40 bg-black/60 shrink-0">
+              <img
+                src="/images/socialcraft-logo.png"
+                alt="Socialcraft Logo"
+                className="h-full w-full object-cover"
+              />
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-base sm:text-lg font-bold tracking-tight text-white font-sans">

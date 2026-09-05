@@ -235,8 +235,12 @@ export function AdminDashboard({
             className="flex items-center gap-3 cursor-pointer group"
             title="Zurück zum Studio"
           >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-tr from-[#FF3B00] to-[#FFA149] shadow-[0_0_20px_-3px_#FF4D17] transition-transform group-hover:scale-105">
-              <Shield className="h-4 w-4 text-white" />
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl overflow-hidden shadow-[0_0_20px_-3px_rgba(255,77,23,0.5)] transition-transform group-hover:scale-105 border border-[#FF4D17]/40 bg-black/60 shrink-0">
+              <img
+                src="/images/socialcraft-logo.png"
+                alt="Socialcraft Logo"
+                className="h-full w-full object-cover"
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">

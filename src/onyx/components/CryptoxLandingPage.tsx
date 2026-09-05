@@ -102,8 +102,12 @@ export function CryptoxLandingPage({
             onClick={onNavigateStudio}
             className="flex items-center gap-2.5 cursor-pointer select-none group"
           >
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-tr from-[#FF3B00] via-[#FF6A1F] to-[#FFA149] shadow-[0_0_24px_-4px_#FF4D17] transition-transform duration-300 group-hover:scale-105">
-              <div className="h-4 w-4 rounded-full border-2 border-white/90 border-t-transparent animate-[spin_8s_linear_infinite]" />
+            <div className="relative flex h-9 w-9 items-center justify-center rounded-xl overflow-hidden shadow-[0_0_24px_-4px_rgba(255,77,23,0.6)] transition-transform duration-300 group-hover:scale-105 border border-[#FF4D17]/40 bg-black/60 shrink-0">
+              <img
+                src="/images/socialcraft-logo.png"
+                alt="Socialcraft Logo"
+                className="h-full w-full object-cover"
+              />
             </div>
             <span className="text-xl font-extrabold tracking-tight text-white font-sans">
               Socialcraft
@@ -834,8 +838,12 @@ export function CryptoxLandingPage({
       <footer className="relative z-10 border-t border-white/[0.08] bg-[#0A0710] py-12 px-6">
         <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-6 text-xs text-white/50">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-tr from-[#FF3B00] to-[#FFA149]">
-              <div className="h-3 w-3 rounded-full border border-white/90 border-t-transparent animate-[spin_8s_linear_infinite]" />
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg overflow-hidden border border-[#FF4D17]/40 bg-black/60 shadow-[0_0_15px_rgba(255,77,23,0.4)] shrink-0">
+              <img
+                src="/images/socialcraft-logo.png"
+                alt="Socialcraft Logo"
+                className="h-full w-full object-cover"
+              />
             </div>
             <span className="font-bold text-white text-sm">Socialcraft Studio</span>
             <span>© 2026 Alle Rechte vorbehalten.</span>
