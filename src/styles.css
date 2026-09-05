@@ -233,4 +233,138 @@
   }
 }
 
+/* ── Cryptox 1:1 Design Utilities ────────────────────────────── */
+
+@keyframes cryptox-swirl-spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes cryptox-pulse-glow {
+  0%, 100% { opacity: 0.88; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.03); }
+}
+
+@utility cryptox-vortex-portal {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  width: 58rem;
+  height: 58rem;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 0;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: conic-gradient(
+      from 160deg at 50% 50%,
+      rgba(255, 60, 0, 0.95) 0deg,
+      rgba(255, 120, 20, 0.9) 65deg,
+      rgba(255, 170, 40, 0.7) 120deg,
+      rgba(80, 15, 0, 0.4) 180deg,
+      rgba(20, 5, 0, 0.1) 230deg,
+      rgba(255, 60, 0, 0.95) 360deg
+    );
+    filter: blur(38px);
+    mask-image: radial-gradient(circle at center, transparent 38%, black 42%, black 64%, transparent 74%);
+    -webkit-mask-image: radial-gradient(circle at center, transparent 38%, black 42%, black 64%, transparent 74%);
+    animation: cryptox-swirl-spin 36s linear infinite, cryptox-pulse-glow 8s ease-in-out infinite;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 32rem;
+    height: 32rem;
+    border-radius: 9999px;
+    background: radial-gradient(circle at center, rgba(255, 80, 0, 0.35) 0%, rgba(255, 50, 0, 0.1) 45%, transparent 70%);
+    filter: blur(48px);
+  }
+}
+
+@utility cryptox-card {
+  background: rgba(16, 14, 20, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 28px;
+  backdrop-filter: blur(28px);
+  box-shadow: 0 30px 80px -25px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
+  transition: all 250ms ease;
+
+  &:hover {
+    border-color: rgba(255, 85, 25, 0.35);
+    box-shadow: 0 35px 90px -20px rgba(0, 0, 0, 0.9), 0 0 30px -10px rgba(255, 77, 23, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+  }
+}
+
+@utility cryptox-card-elevated {
+  background: rgba(12, 10, 16, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 28px;
+  backdrop-filter: blur(32px);
+  box-shadow: 0 35px 100px -20px rgba(0, 0, 0, 0.95), 0 0 45px -12px rgba(255, 77, 23, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.16);
+}
+
+@utility cryptox-satellite-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  background: rgba(20, 16, 24, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(20px);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.85);
+  box-shadow: 0 14px 35px -8px rgba(0, 0, 0, 0.6);
+  transition: all 200ms ease;
+
+  &:hover {
+    border-color: rgba(255, 77, 23, 0.4);
+    color: #ffffff;
+    background: rgba(30, 22, 34, 0.8);
+    box-shadow: 0 18px 45px -10px rgba(255, 77, 23, 0.25);
+  }
+}
+
+@utility cryptox-orange-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  background: linear-gradient(135deg, #FF4D17 0%, #FF6825 100%);
+  color: #FFFFFF;
+  font-weight: 600;
+  border-radius: 9999px;
+  padding: 0.75rem 1.6rem;
+  box-shadow: 0 12px 35px -6px rgba(255, 77, 23, 0.65);
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background: linear-gradient(135deg, #FF5E2E 0%, #FF7838 100%);
+    box-shadow: 0 16px 45px -6px rgba(255, 77, 23, 0.85);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+
 

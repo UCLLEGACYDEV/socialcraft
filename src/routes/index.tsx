@@ -3,15 +3,15 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 
-import { Sidebar } from "@/onyx/components/Sidebar";
-import { ContextBar } from "@/onyx/components/ContextBar";
-import { CarouselBriefForm } from "@/onyx/components/CarouselBriefForm";
+import { CryptoxNavbar } from "@/onyx/components/CryptoxNavbar";
+import { CryptoxHero } from "@/onyx/components/CryptoxHero";
+import { CryptoxDashboard } from "@/onyx/components/CryptoxDashboard";
+import { CryptoxBento } from "@/onyx/components/CryptoxBento";
 import { CarouselViewer } from "@/onyx/components/CarouselViewer";
 import { SeriesQueue } from "@/onyx/components/SeriesQueue";
 import { SettingsModal } from "@/onyx/components/SettingsModal";
 import { BrandKitModal } from "@/onyx/components/BrandKitModal";
 import { SlideEditModal, ModalShell } from "@/onyx/components/SlideEditModal";
-import { StudioHero } from "@/onyx/components/StudioHero";
 import {
   AiCloneView,
   DirectPromptView,
@@ -342,71 +342,83 @@ function OnyxStudio() {
   };
 
   return (
-    <div className="flex min-h-screen bg-background text-foreground">
-      <Sidebar
-        active={activeTab}
-        collapsed={collapsed}
-        onToggleCollapsed={() => setCollapsed((c) => !c)}
-        onNavigate={setActiveTab}
-        brandKit={brandKit}
-        {...(creditStatus ? { creditStatus } : {})}
-        onRefreshCredits={() => void refreshCredits()}
-        onOpenBrandKit={() => setShowBrandKit(true)}
-        onOpenSettings={() => setShowSettings(true)}
-        onOpenMcp={() => setShowMcp(true)}
-      />
+    <div className="min-h-screen bg-[#060509] text-foreground relative overflow-x-hidden selection:bg-[#FF4D17] selection:text-white">
+      {/* Background ambient glow matching screenshot */}
+      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[80rem] h-[50rem] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,77,23,0.18)_0%,rgba(255,50,0,0.06)_45%,transparent_70%)] blur-[90px]" />
+        <div className="absolute top-[45%] -right-40 w-[45rem] h-[45rem] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,90,20,0.12)_0%,transparent_65%)] blur-[100px]" />
+        <div className="absolute bottom-0 left-10 w-[40rem] h-[30rem] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,60,0,0.08)_0%,transparent_60%)] blur-[90px]" />
+      </div>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <ContextBar
-          view={activeTab}
+      <div className="relative z-10 flex min-h-screen flex-col">
+        {/* Floating Top Navbar */}
+        <CryptoxNavbar
+          activeTab={activeTab}
           onNavigate={setActiveTab}
-          settings={settings}
-          onUpdateSettings={patchSettings}
-          historyCount={motifs.length}
-          seriesProgress={seriesProgress}
-          onGotoSeries={() => setActiveTab("bulk")}
+          creditStatus={creditStatus}
+          onRefreshCredits={() => void refreshCredits()}
+          onOpenBrandKit={() => setShowBrandKit(true)}
+          onOpenSettings={() => setShowSettings(true)}
+          onOpenMcp={() => setShowMcp(true)}
         />
 
-        <main className="mx-auto w-full max-w-[1600px] flex-1 p-4 sm:p-6">
+        <main className="mx-auto w-full flex-1 p-4 sm:p-6 max-w-[1600px]">
           {activeTab === "carousel" &&
             (slides.length === 0 ? (
-              <div className="relative">
-                <StudioHero
-                  eyebrow="Carousel Engine"
-                  title={["Vom Gedanken zur", "fertigen Slide-Serie"]}
-                  subtitle="Thema rein, Zielgruppe dazu — ONYX schreibt Hook, Aufbau und Bildprompts für dein komplettes Karussell."
-                  ctaLabel={isGeneratingCarousel ? "Läuft…" : `${brief.slideCount} Prompts erzeugen`}
-                  onCta={() => void generateCarousel()}
-                  ctaDisabled={isGeneratingCarousel || !brief.topic.trim()}
-                  chips={heroChips}
+              <>
+                <CryptoxHero
+                  slideCount={brief.slideCount}
+                  modelName={settings.kieModel}
+                  aspectRatio={brandKit.aspectRatio}
+                  isCloneActive={Boolean(brief.useClone)}
+                  onCtaClick={() => {
+                    const el = document.getElementById("studio-dashboard");
+                    el?.scrollIntoView({ behavior: "smooth" });
+                    const input = document.querySelector<HTMLTextAreaElement>("#studio-dashboard textarea");
+                    input?.focus();
+                  }}
+                  ctaLabel={isGeneratingCarousel ? "Läuft…" : "Get Started"}
+                  isLoading={isGeneratingCarousel}
                 />
-                <CarouselBriefForm
-                  values={brief}
-                  onChange={patchBrief}
+                <CryptoxDashboard
+                  brief={brief}
+                  onChangeBrief={patchBrief}
                   onSubmit={() => void generateCarousel()}
-                  onCancel={() => setIsGeneratingCarousel(false)}
                   isGenerating={isGeneratingCarousel}
-                  keySaved={Boolean(brief.apiKey)}
+                  settings={settings}
+                  onChangeSettings={patchSettings}
+                  activeClone={activeClone}
+                  onOpenCloneStudio={() => setActiveTab("ai-clone")}
+                />
+                <CryptoxBento
+                  onStartCarousel={() => {
+                    const el = document.getElementById("studio-dashboard");
+                    el?.scrollIntoView({ behavior: "smooth" });
+                  }}
+                  onOpenPromptHub={() => setActiveTab("prompt-gallery")}
+                  onOpenCloneStudio={() => setActiveTab("ai-clone")}
+                />
+              </>
+            ) : (
+              <div className="pt-4">
+                <CarouselViewer
+                  slides={slides}
+                  topic={topic}
+                  isGeneratingImages={isGeneratingImages}
+                  onGenerateImages={() => void generateAllImages()}
+                  onCancelGeneration={() => abortRef.current?.abort()}
+                  onRerollImage={(id) => void rerollImage(id)}
+                  onEditSlide={(id) => setEditing({ slideId: id })}
+                  onDownloadSingle={(id) => {
+                    const slide = slides.find((s) => s.id === id);
+                    if (slide) void downloadSlide(slide);
+                  }}
+                  onExportZip={() => void exportZip()}
+                  onReset={resetCarousel}
+                  settings={settings}
+                  brandKit={brandKit}
                 />
               </div>
-            ) : (
-              <CarouselViewer
-                slides={slides}
-                topic={topic}
-                isGeneratingImages={isGeneratingImages}
-                onGenerateImages={() => void generateAllImages()}
-                onCancelGeneration={() => abortRef.current?.abort()}
-                onRerollImage={(id) => void rerollImage(id)}
-                onEditSlide={(id) => setEditing({ slideId: id })}
-                onDownloadSingle={(id) => {
-                  const slide = slides.find((s) => s.id === id);
-                  if (slide) void downloadSlide(slide);
-                }}
-                onExportZip={() => void exportZip()}
-                onReset={resetCarousel}
-                settings={settings}
-                brandKit={brandKit}
-              />
             ))}
 
           {activeTab === "bulk" && (
