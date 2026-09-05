@@ -303,7 +303,7 @@ function OnyxStudio() {
               projectName: carouselFolder,
             }).then((cloudImg) => {
               if (cloudImg) {
-                toast.success(`Slide ${slide.slideNumber} in Mega S4 gesichert ☁️`, { duration: 2500 });
+                toast.success(`Slide ${slide.slideNumber} in Cloud gesichert ☁️`, { duration: 2500 });
               }
             });
           }
@@ -380,7 +380,7 @@ function OnyxStudio() {
           customFilename: `slide_${slide.slideNumber}_reroll.jpg`,
         }).then((cloudImg) => {
           if (cloudImg) {
-            toast.success(`Slide ${slide.slideNumber} in Mega S4 aktualisiert ☁️`, { duration: 2500 });
+            toast.success(`Slide ${slide.slideNumber} in Cloud aktualisiert ☁️`, { duration: 2500 });
           }
         });
       }
@@ -931,6 +931,11 @@ function OnyxStudio() {
               initialPrompt={directPrompt}
               currentUser={currentUser}
               onNavigateToClone={() => setActiveTab("ai-clone")}
+              onUseInCarousel={(imageUrl, promptText) => {
+                patchBrief({ topic: promptText });
+                setActiveTab("carousel");
+                toast.success("Einzelbild ins Karussell übertragen!");
+              }}
               onDeductCredits={(amt) => {
                 if (currentUser) {
                   const updated = Math.max(0, (currentUser.credits ?? 0) - amt);

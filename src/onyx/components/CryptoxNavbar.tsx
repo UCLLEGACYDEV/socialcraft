@@ -300,7 +300,7 @@ export function CryptoxNavbar({
                     className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-zinc-200 hover:bg-white/[0.06] hover:text-white cursor-pointer transition-colors"
                   >
                     <UserIcon className="h-4 w-4 text-orange-400" />
-                    <span>Mein Profil & Mega S4 Sync</span>
+                    <span>Mein Profil & Cloud-Sync</span>
                   </DropdownMenuItem>
                 )}
 

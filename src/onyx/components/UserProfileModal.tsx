@@ -50,15 +50,15 @@ export function UserProfileModal({
 
   const handleTestCloud = async () => {
     setTestingCloud(true);
-    setCloudStatus("Teste Verbindung zu Mega S4…");
+    setCloudStatus("Teste Verbindung zum Cloud-Speicher…");
     try {
       const res = await testCloudConnection();
       if (res.success) {
         setCloudStatus(`Verbunden! Bucket: socialgrow (${cloudFolder})`);
-        toast.success("Mega S4 Cloud-Speicher erreichbar & Ordner verifiziert!");
+        toast.success("Cloud-Speicher erreichbar & Ordner verifiziert!");
       } else {
         setCloudStatus(`Verbindungsfehler: ${res.message}`);
-        toast.error(`S4 Fehler: ${res.message}`);
+        toast.error(`Cloud Fehler: ${res.message}`);
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Fehler";
@@ -169,13 +169,13 @@ export function UserProfileModal({
           </div>
         </div>
 
-        {/* Mega S4 Cloud-Speicher Übersicht */}
+        {/* Cloud-Speicher Übersicht */}
         <div className="rounded-xl border border-white/[0.08] bg-black/40 p-4 space-y-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Cloud className="h-4 w-4 text-orange-400" />
               <span className="text-xs font-bold uppercase tracking-wider text-white">
-                Mega S4 Cloud-Sync (Bucket: socialgrow)
+                Cloud-Speicher Sync (Bucket: socialgrow)
               </span>
             </div>
             <button
