@@ -100,7 +100,7 @@ export async function fetchKieCredits(apiKey: string): Promise<KieCreditResult> 
       credits: 0,
       formatted: "Kein Key",
       success: false,
-      error: "Kein KIE.AI API-Key hinterlegt",
+      error: "Kein Master API-Key hinterlegt",
     };
   }
 
@@ -152,7 +152,7 @@ export async function fetchKieCredits(apiKey: string): Promise<KieCreditResult> 
       code: json.code,
     };
   } catch (err: unknown) {
-    const errMsg = err instanceof Error ? err.message : "Netzwerkfehler beim Abruf der KIE.AI Credits";
+    const errMsg = err instanceof Error ? err.message : "Netzwerkfehler beim Abruf der Engine-Credits";
     return {
       credits: 0,
       formatted: "Offline / Fehler",
@@ -163,13 +163,12 @@ export async function fetchKieCredits(apiKey: string): Promise<KieCreditResult> 
 }
 
 /**
- * 2. Create Generation Task on KIE.AI for nano-banana-2
- * POST https://api.kie.ai/api/v1/jobs/createTask
+ * 2. Create Generation Task on Engine
  */
 export async function createNanoBananaTask(params: NanoBananaTaskParams): Promise<string> {
   const cleanKey = params.apiKey?.trim();
   if (!cleanKey) {
-    throw new Error("KIE.AI API-Key fehlt. Bitte in den Einstellungen hinterlegen.");
+    throw new Error("API-Key fehlt. Bitte im Admin-Bereich hinterlegen.");
   }
 
   const model = params.model || "nano-banana-2";
@@ -224,12 +223,12 @@ export async function createNanoBananaTask(params: NanoBananaTaskParams): Promis
 
   if (json.code !== 200 || !json.data?.taskId) {
     if (json.code === 401) {
-      throw new Error("KIE.AI Fehler 401: Ungültiger API-Key. Bitte prüfe deinen Key auf kie.ai/api-key.");
+      throw new Error("Fehler 401: Engine-Authentifizierung fehlgeschlagen.");
     }
     if (json.code === 402) {
-      throw new Error("KIE.AI Fehler 402: Unzureichendes KIE.AI Guthaben. Bitte Credits aufladen.");
+      throw new Error("Fehler 402: Zentrales Engine-Kontingent aufgebraucht.");
     }
-    throw new Error(json.msg || `KIE.AI Task-Erstellung fehlgeschlagen (Code: ${json.code})`);
+    throw new Error(json.msg || `Task-Erstellung fehlgeschlagen (Code: ${json.code})`);
   }
 
   return json.data.taskId;
@@ -287,14 +286,14 @@ export async function pollNanoBananaTask(
       });
 
       if (!data.resultJson) {
-        throw new Error("KIE.AI meldet Erfolg, lieferte aber keine resultJson");
+        throw new Error("Render-Server meldete Erfolg, lieferte aber keine Bilddaten");
       }
 
       try {
         const parsed = JSON.parse(data.resultJson) as { resultUrls?: string[] };
         const firstUrl = parsed.resultUrls?.[0];
         if (!firstUrl) {
-          throw new Error("Keine Bild-URL in KIE.AI Ergebnis gefunden");
+          throw new Error("Keine Bild-URL im Ergebnis gefunden");
         }
         return {
           imageUrl: firstUrl,
@@ -302,19 +301,19 @@ export async function pollNanoBananaTask(
         };
       } catch (err: unknown) {
         if (err instanceof Error) throw err;
-        throw new Error("Fehler beim Parsen der KIE.AI Bilddaten");
+        throw new Error("Fehler beim Verarbeiten der Bilddaten");
       }
     }
 
     if (data.state === "fail") {
-      throw new Error(data.failMsg || `KIE.AI Render fehlgeschlagen (Code: ${data.failCode || "unbekannt"})`);
+      throw new Error(data.failMsg || `Render fehlgeschlagen (Code: ${data.failCode || "unbekannt"})`);
     }
 
     // state === "waiting" - calculate smooth percentage between 20% and 95%
     const percent = Math.min(95, Math.round(20 + ((attempt + 1) / 25) * 75));
     onProgress?.({
       state: "waiting",
-      message: `KIE.AI rendert… (Schritt ${attempt + 1})`,
+      message: `ONYX Engine rendert… (Schritt ${attempt + 1})`,
       percent,
     });
 
@@ -334,7 +333,7 @@ export async function pollNanoBananaTask(
     });
   }
 
-  throw new Error(`KIE.AI Zeitüberschreitung beim Rendern (Timeout nach 100s)`);
+  throw new Error(`Zeitüberschreitung beim Rendern (Timeout nach 100s)`);
 }
 
 /**
@@ -346,11 +345,11 @@ export async function generateNanoBananaImage(
   },
 ): Promise<NanoBananaGenerateResult> {
   const model = params.model || "nano-banana-2";
-  params.onProgress?.({ state: "init", message: `Initialisiere Task auf KIE.AI (${model})…`, percent: 5 });
+  params.onProgress?.({ state: "init", message: "Initialisiere ONYX Ultra Pipeline…", percent: 5 });
 
   // 1. Create task (model-aware)
   const taskId = await createNanoBananaTask(params);
-  params.onProgress?.({ state: "created", message: `Task #${taskId.slice(0, 8)}… erstellt. Rendert via ${model}…`, percent: 18 });
+  params.onProgress?.({ state: "created", message: "Slide wird gerendert…", percent: 18 });
 
   // 2. Poll result
   const { imageUrl, costTime } = await pollNanoBananaTask(taskId, params.apiKey, params.signal, params.onProgress);

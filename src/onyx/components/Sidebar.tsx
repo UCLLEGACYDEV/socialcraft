@@ -115,15 +115,9 @@ export function Sidebar({
             </div>
             <div className="mt-2 space-y-1.5 text-xs">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground font-medium">KIE</span>
+                <span className="text-muted-foreground font-medium">Studio Engine</span>
                 <span className={cn("font-semibold", lowCredits ? "text-warning" : "text-foreground")}>
                   {creditStatus.kie.formatted}
-                </span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-muted-foreground font-medium">ai33</span>
-                <span className={cn("font-semibold", lowCredits ? "text-warning" : "text-foreground")}>
-                  {creditStatus.ai33.formatted}
                 </span>
               </div>
             </div>

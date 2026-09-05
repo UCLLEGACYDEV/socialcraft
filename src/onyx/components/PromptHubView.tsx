@@ -1,9 +1,7 @@
 import { useMemo, useState } from "react";
 import {
-  ArrowUpRight,
   Check,
   Copy,
-  ExternalLink,
   Flame,
   Image as ImageIcon,
   Layers,
@@ -151,17 +149,7 @@ export function PromptHubView({
               </span>
             </div>
             <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
-              Kuratierte AI-Art- & Bild-Prompts direkt aus der Community von{" "}
-              <a
-                href="https://www.bananaprompts.xyz/explore"
-                target="_blank"
-                rel="noreferrer"
-                className="text-orange-400 hover:underline inline-flex items-center gap-1 font-medium"
-              >
-                bananaprompts.xyz/explore
-                <ExternalLink className="h-3 w-3" />
-              </a>
-              . Filtere nach Look & Stil, kopiere Prompts oder übertrage sie direkt in deine Slide-Generierung.
+              Kuratierte AI-Art- & Bild-Prompts. Filtere nach Look & Stil, kopiere Prompts oder übertrage sie direkt in deine Slide-Generierung.
             </p>
           </div>
 
@@ -179,16 +167,6 @@ export function PromptHubView({
               )}
               <span>Live aktualisieren</span>
             </button>
-
-            <a
-              href="https://www.bananaprompts.xyz/explore"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.1] bg-white/[0.04] px-4 py-2 text-xs font-semibold text-zinc-300 transition-colors hover:bg-white/[0.08] hover:text-white"
-            >
-              <span>Original öffnen</span>
-              <ArrowUpRight className="h-3.5 w-3.5" />
-            </a>
           </div>
         </div>
 

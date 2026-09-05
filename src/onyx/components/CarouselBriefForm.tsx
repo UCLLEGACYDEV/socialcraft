@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowRight, Check, KeyRound, Minus, Plus, Sparkles, UserCheck, Users, X } from "lucide-react";
 import { DESIGN_TEMPLATES, LLM_PROVIDERS } from "../defaults";
+import { getStoredCurrentUser } from "../auth";
 import type { BriefValues, CarouselLlmProvider } from "../types";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
@@ -37,6 +38,8 @@ export function CarouselBriefForm({
   keySaved,
 }: CarouselBriefFormProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const currentUser = getStoredCurrentUser();
+  const isAdmin = currentUser?.role === "admin";
   const providerMeta = LLM_PROVIDERS.find((p) => p.id === values.provider) ?? LLM_PROVIDERS[0];
 
   const slideTip =
@@ -257,72 +260,14 @@ export function CarouselBriefForm({
         </Field>
       </section>
 
-      {/* ── Text Engine & AI Clone ───────────────────────────────── */}
-      <section className="space-y-3 pt-1 border-t border-border/50">
-        <div className="flex items-center justify-between">
-          <span className="mono-label">Text-Engine & Provider</span>
-          <button
-            type="button"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-xs text-muted-foreground hover:text-primary-bright"
-          >
-            {showAdvanced ? "Weniger Details" : "API-Optionen anzeigen"}
-          </button>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {LLM_PROVIDERS.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => onChange({ provider: p.id as CarouselLlmProvider })}
-              className={cn(
-                "rounded-full border px-4 py-1.5 text-xs font-medium transition-colors",
-                values.provider === p.id
-                  ? "border-primary bg-primary/20 text-primary-bright font-semibold shadow-[0_0_15px_-4px_var(--primary)]"
-                  : "border-border text-muted-foreground hover:text-foreground hover:border-border/80",
-              )}
-            >
-              {p.label}
-            </button>
-          ))}
-        </div>
-
-        {showAdvanced && (
-          <div className="flex items-center gap-2 pt-1">
-            <div className="relative flex-1">
-              <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="password"
-                className="field-input pl-9"
-                value={values.apiKey}
-                onChange={(e) => onChange({ apiKey: e.target.value })}
-                placeholder="API-Key (optional — Demo läuft ohne)"
-              />
-            </div>
-            {keySaved ? (
-              <span className="flex items-center gap-1 text-xs text-success">
-                <Check className="h-3.5 w-3.5" /> gespeichert
-              </span>
-            ) : (
-              <a
-                href={providerMeta?.url}
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs text-primary-bright hover:underline"
-              >
-                Key holen ↗
-              </a>
-            )}
-          </div>
-        )}
-
+      {/* ── AI Persona & Optional Engine Settings ─────────────── */}
+      <section className="space-y-3 pt-2 border-t border-border/50">
         {/* AI Clone Toggle */}
         <button
           type="button"
           onClick={() => onChange({ useClone: !values.useClone })}
           className={cn(
-            "flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors",
+            "flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors cursor-pointer",
             values.useClone
               ? "border-primary bg-primary/15 shadow-[0_0_30px_-12px_var(--primary)]"
               : "border-border bg-foreground/[0.02] hover:bg-foreground/[0.04]",
@@ -332,9 +277,9 @@ export function CarouselBriefForm({
             className={cn("h-4 w-4", values.useClone ? "text-primary-bright" : "text-muted-foreground")}
           />
           <span className="flex-1">
-            <span className="block text-xs font-medium text-foreground">AI Clone verwenden</span>
+            <span className="block text-xs font-medium text-foreground">AI Clone / Persona verwenden</span>
             <span className="block text-xs text-muted-foreground">
-              Dein Gesicht/Stil als wiederkehrendes Motiv in allen Slides
+              Dein Gesicht als wiederkehrendes Motiv in allen Slides
             </span>
           </span>
           <span
@@ -346,6 +291,59 @@ export function CarouselBriefForm({
             {values.useClone ? "AN" : "AUS"}
           </span>
         </button>
+
+        {/* Optional Collapsible for Advanced LLM Settings (Admin only) */}
+        {isAdmin && (
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="text-[11px] text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors cursor-pointer"
+            >
+              <span>{showAdvanced ? "▾ Weniger Optionen" : "▸ Eigene Text-Engine wählen (Admin)"}</span>
+            </button>
+
+            {showAdvanced && (
+              <div className="mt-2 space-y-2.5 rounded-xl border border-border/60 bg-foreground/[0.02] p-3 animate-in fade-in duration-150">
+                <span className="mono-label block text-[10px]">Text-Engine & Provider</span>
+                <div className="flex flex-wrap gap-1.5">
+                  {LLM_PROVIDERS.map((p) => (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => onChange({ provider: p.id as CarouselLlmProvider })}
+                      className={cn(
+                        "rounded-full border px-3 py-1 text-xs font-medium transition-colors cursor-pointer",
+                        values.provider === p.id
+                          ? "border-primary bg-primary/20 text-primary-bright font-semibold shadow-[0_0_15px_-4px_var(--primary)]"
+                          : "border-border text-muted-foreground hover:text-foreground hover:border-border/80",
+                      )}
+                    >
+                      {p.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-2 pt-1">
+                  <div className="relative flex-1">
+                    <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="password"
+                      className="field-input pl-9 text-xs"
+                      value={values.apiKey}
+                      onChange={(e) => onChange({ apiKey: e.target.value })}
+                      placeholder="API-Key (optional — läuft auch ohne)"
+                    />
+                  </div>
+                  {keySaved && (
+                    <span className="flex items-center gap-1 text-xs text-success">
+                      <Check className="h-3.5 w-3.5" /> gespeichert
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </section>
 
       {isGenerating && (

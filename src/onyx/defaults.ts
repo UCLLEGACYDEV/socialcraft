@@ -11,7 +11,7 @@ export const DEFAULT_BRAND_KIT: BrandKit = {
 };
 
 export const DEFAULT_API_SETTINGS: ApiSettings = {
-  provider: "mock",
+  provider: "kie-ai",
   kieApiKey: "",
   kieWebhookKey: "",
   kieModel: "nano-banana-2",
@@ -26,8 +26,8 @@ export const DEFAULT_API_SETTINGS: ApiSettings = {
   anthropicApiKey: "",
   s4Endpoint: "socialgrow.s3.g.megas4.com",
   s4Bucket: "socialgrow",
-  s4AccessKey: "AKIAPMXGIG3XMUCRBNIX7YA4JKJ2D3P4KQ5FLAPDX4OW",
-  s4SecretKey: "uUQ1e7Eov9Pm0BlVqXyzGB8sD5qoMfED68PbN5oz",
+  s4AccessKey: "",
+  s4SecretKey: "",
   s4Region: "eu-central-1",
   s4AutoSave: true,
 };

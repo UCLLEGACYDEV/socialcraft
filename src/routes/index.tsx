@@ -544,7 +544,7 @@ function OnyxStudio() {
       );
 
       if (res.fromRealApi) {
-        toast.success(`Slide ${slide.slideNumber} via ${settings.kieModel} gerendert!`);
+        toast.success(`Slide ${slide.slideNumber} via ONYX Ultra gerendert!`);
         void refreshCredits();
       } else {
         toast.success(`Slide ${slide.slideNumber} gerendert`);
@@ -674,7 +674,7 @@ function OnyxStudio() {
   const heroChips = useMemo(
     () => [
       { label: "Slides", value: String(brief.slideCount), side: "left" as const, top: "6rem" },
-      { label: "Modell", value: settings.kieModel, side: "right" as const, top: "6rem" },
+      { label: "Engine", value: "ONYX Ultra", side: "right" as const, top: "6rem" },
       { label: "Motive", value: `${motifs.length} gemerkt`, side: "left" as const, top: "11rem" },
       {
         label: "Format",
@@ -683,7 +683,7 @@ function OnyxStudio() {
         top: "11rem",
       },
     ],
-    [brief.slideCount, settings.kieModel, motifs.length, brandKit.aspectRatio],
+    [brief.slideCount, motifs.length, brandKit.aspectRatio],
   );
 
   const seriesProgress = useMemo(() => {

@@ -14,10 +14,10 @@ interface ContextBarProps {
   onGotoSeries: () => void;
 }
 
-const KIE_MODELS: ApiSettings["kieModel"][] = [
-  "nano-banana-2",
-  "nano-banana-2-lite",
-  "nano-banana-pro",
+const ENGINE_MODELS: { value: ApiSettings["kieModel"]; label: string }[] = [
+  { value: "nano-banana-2", label: "ONYX Ultra 2 (Standard)" },
+  { value: "nano-banana-2-lite", label: "ONYX Turbo (Schnell)" },
+  { value: "nano-banana-pro", label: "ONYX Pro (High-End)" },
 ];
 const RESOLUTIONS: ApiSettings["kieResolution"][] = ["1K", "2K", "4K"];
 
@@ -89,9 +89,9 @@ export function ContextBar({
             <StudioSelect
               value={settings.kieModel}
               onChange={(v) => onUpdateSettings({ kieModel: v as ApiSettings["kieModel"] })}
-              options={KIE_MODELS.map((m) => ({ value: m, label: m }))}
+              options={ENGINE_MODELS}
               ariaLabel="Bildmodell"
-              className="w-44"
+              className="w-48"
             />
             <StudioSelect
               value={settings.kieResolution}

@@ -5,15 +5,11 @@ import {
   Check,
   CheckCircle2,
   Coins,
-  Cpu,
   Crown,
-  ExternalLink,
   Flame,
   HelpCircle,
-  Key,
   Layers,
   Percent,
-  RefreshCw,
   Shield,
   Sparkles,
   Tag,
@@ -24,7 +20,6 @@ import {
 import { ModalShell } from "./SlideEditModal";
 import { type User, getStoredUsers, saveStoredCurrentUser, saveStoredUsers } from "../auth";
 import { Slider } from "@/components/ui/slider";
-import { fetchKieCredits, type KieCreditResult } from "../kie-api";
 import type { ApiSettings, CreditStatus } from "../types";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -113,16 +108,11 @@ export function CreditUpgradeModal({
   creditStatus,
   onRefreshCredits,
 }: CreditUpgradeModalProps) {
-  const [activeTab, setActiveTab] = useState<"packages" | "kie" | "calculator" | "pricing">("packages");
+  const [activeTab, setActiveTab] = useState<"packages" | "calculator" | "pricing">("packages");
   const [promoCodeInput, setPromoCodeInput] = useState("");
   const [redeemedCodes, setRedeemedCodes] = useState<string[]>([]);
   const [carouselCount, setCarouselCount] = useState<number>(20);
   const [purchasingId, setPurchasingId] = useState<string | null>(null);
-
-  // KIE.AI Live Platform Key State
-  const [kieKeyDraft, setKieKeyDraft] = useState(settings?.kieApiKey || "");
-  const [isTestingKie, setIsTestingKie] = useState(false);
-  const [localKieStatus, setLocalKieStatus] = useState<KieCreditResult | null>(null);
 
   const currentCredits = currentUser?.credits ?? 4320;
 
@@ -149,60 +139,33 @@ export function CreditUpgradeModal({
     }, 600);
   };
 
-  const handleRedeemPromoCode = (e: React.FormEvent) => {
+  const handleRedeemPromo = (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanCode = promoCodeInput.trim().toUpperCase();
-    if (!cleanCode) return;
+    const code = promoCodeInput.trim().toUpperCase();
+    if (!code) return;
 
-    if (redeemedCodes.includes(cleanCode)) {
-      toast.error("Dieser Gutscheincode wurde bereits eingelöst.");
+    if (redeemedCodes.includes(code)) {
+      toast.error("Dieser Code wurde in dieser Sitzung bereits eingelöst.");
       return;
     }
 
-    const reward = PROMO_CODES[cleanCode];
-    if (reward) {
-      const newBalance = currentCredits + reward.credits;
-      setRedeemedCodes((prev) => [...prev, cleanCode]);
-      setPromoCodeInput("");
-
+    const promo = PROMO_CODES[code];
+    if (promo) {
+      const newBalance = currentCredits + promo.credits;
       if (currentUser) {
         const updatedUser: User = { ...currentUser, credits: newBalance };
         saveStoredCurrentUser(updatedUser);
         const allUsers = getStoredUsers().map((u) => (u.id === currentUser.id ? updatedUser : u));
         saveStoredUsers(allUsers);
       }
-
+      setRedeemedCodes((prev) => [...prev, code]);
+      setPromoCodeInput("");
       onCreditsUpdated(newBalance);
-      toast.success(`Gutscheincode „${cleanCode}“ eingelöst! 🎁`, {
-        description: `+${reward.credits.toLocaleString()} Credits hinzugefügt (${reward.label}).`,
+      toast.success(`Code ${code} eingelöst! 🎁`, {
+        description: `+${promo.credits.toLocaleString()} Credits hinzugefügt (${promo.label})`,
       });
     } else {
       toast.error("Ungültiger Gutscheincode. Bitte teste: CREATOR2026 oder SOCIALCRAFT");
-    }
-  };
-
-  const handleSaveAndTestKie = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleanKey = kieKeyDraft.trim();
-    if (!cleanKey) {
-      toast.error("Bitte einen KIE.AI API-Key eingeben.");
-      return;
-    }
-    setIsTestingKie(true);
-    try {
-      const res = await fetchKieCredits(cleanKey);
-      setLocalKieStatus(res);
-      if (res.success) {
-        onChangeSettings?.({ kieApiKey: cleanKey, provider: "kie-ai" });
-        onRefreshCredits?.();
-        toast.success(`KIE.AI Plattform verbunden: ${res.formatted} verfügbar! 🚀`, {
-          description: "Nano-Banana 2 API ist einsatzbereit.",
-        });
-      } else {
-        toast.error(`KIE.AI Fehler: ${res.error || "Ungültiger Key"}`);
-      }
-    } finally {
-      setIsTestingKie(false);
     }
   };
 
@@ -220,15 +183,9 @@ export function CreditUpgradeModal({
     recommendedPackage = CREDIT_PACKAGES[1]!;
   }
 
-  const effectiveKieCredits = localKieStatus?.success
-    ? localKieStatus.formatted
-    : creditStatus?.kie.success
-    ? creditStatus.kie.formatted
-    : null;
-
   return (
     <ModalShell
-      title="Credits & KIE.AI Upgrade-Center"
+      title="Credits & Guthaben aufladen"
       onClose={onClose}
       maxHeight="88vh"
       maxWidth="max-w-4xl"
@@ -256,17 +213,14 @@ export function CreditUpgradeModal({
           </div>
 
           <div className="flex items-center gap-2">
-            {/* Live KIE.AI status badge */}
+            {/* Engine status badge */}
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs flex items-center gap-2">
-              <Cpu className="h-3.5 w-3.5 text-[#FF6A1F]" />
+              <Zap className="h-3.5 w-3.5 text-[#FF6A1F]" />
               <div>
-                <div className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">KIE.AI Plattform</div>
-                <div className="font-mono font-bold text-white">
-                  {effectiveKieCredits ? (
-                    <span className="text-emerald-400">🟢 {effectiveKieCredits}</span>
-                  ) : (
-                    <span className="text-amber-400">⚡ Key prüfen</span>
-                  )}
+                <div className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">Engine Status</div>
+                <div className="font-mono font-bold text-white flex items-center gap-1.5">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-emerald-400">ONYX Ultra Pipeline</span>
                 </div>
               </div>
             </div>
@@ -301,19 +255,6 @@ export function CreditUpgradeModal({
               )}
             >
               Credit-Pakete (1-Klick)
-            </button>
-            <button
-              type="button"
-              onClick={() => setActiveTab("kie")}
-              className={cn(
-                "rounded-full px-4 py-1.5 text-xs font-semibold transition-all flex items-center gap-1.5",
-                activeTab === "kie"
-                  ? "bg-[#FF4D17] text-white shadow-[0_0_15px_#FF4D17]"
-                  : "text-white/60 hover:text-white",
-              )}
-            >
-              <Cpu className="h-3 w-3" />
-              <span>KIE.AI Plattform</span>
             </button>
             <button
               type="button"
@@ -439,100 +380,7 @@ export function CreditUpgradeModal({
           </div>
         )}
 
-        {/* ── Tab 2: KIE.AI Live Platform Integration ─────────────────── */}
-        {activeTab === "kie" && (
-          <div className="space-y-5 animate-in fade-in-50 duration-200">
-            <div className="rounded-2xl border border-orange-500/30 bg-orange-500/[0.04] p-5">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500/20 text-[#FFA149]">
-                      <Cpu className="h-4 w-4" />
-                    </span>
-                    <h3 className="text-sm font-bold text-white">Offizielle KIE.AI Plattform-Verbindung</h3>
-                  </div>
-                  <p className="text-xs text-white/60 mt-1">
-                    Live-Verbindung zum Nano-Banana 2 API-Server. Frag dein echtes KIE.AI Guthaben direkt von <code className="text-orange-300 font-mono">api.kie.ai</code> ab.
-                  </p>
-                </div>
-
-                <div className="rounded-xl border border-white/10 bg-black/40 px-4 py-2 text-right">
-                  <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider block">
-                    Guthaben auf api.kie.ai
-                  </span>
-                  <span className="text-xl font-black font-mono text-white">
-                    {effectiveKieCredits || "Nicht verbunden"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* API Key Form */}
-            <form onSubmit={handleSaveAndTestKie} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-white/80 mb-1.5 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5">
-                    <Key className="h-3.5 w-3.5 text-[#FF6A1F]" />
-                    <span>KIE.AI API-Key (Bearer Token)</span>
-                  </span>
-                  <a
-                    href="https://kie.ai/api-key"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-[11px] text-orange-400 hover:text-orange-300 underline"
-                  >
-                    <span>API-Key bei kie.ai abrufen</span>
-                    <ExternalLink className="h-3 w-3" />
-                  </a>
-                </label>
-                <input
-                  type="password"
-                  value={kieKeyDraft}
-                  onChange={(e) => setKieKeyDraft(e.target.value)}
-                  placeholder="Bearer Token (z.B. kie_...)"
-                  className="field-input font-mono text-xs w-full py-2.5 px-3.5"
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-                <button
-                  type="submit"
-                  disabled={isTestingKie}
-                  className="cryptox-orange-btn !py-2 !px-5 text-xs font-bold flex items-center gap-2 disabled:opacity-50"
-                >
-                  <RefreshCw className={cn("h-3.5 w-3.5", isTestingKie && "animate-spin")} />
-                  <span>{isTestingKie ? "Prüfe KIE.AI Server…" : "Key speichern & Guthaben von KIE.AI abrufen"}</span>
-                </button>
-
-                <span className="text-xs text-white/50 flex items-center gap-1">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
-                  <span>Endpunkte: createTask · recordInfo · credit</span>
-                </span>
-              </div>
-            </form>
-
-            {/* Platform Specs */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
-                <span className="text-white/40 block text-[10px] uppercase font-bold tracking-wider">Modell-Name</span>
-                <span className="font-mono font-bold text-white text-sm">nano-banana-2</span>
-                <p className="text-[11px] text-white/50 mt-1">Exakte Modell-ID für photorealistische 4:5 Instagram Slides.</p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
-                <span className="text-white/40 block text-[10px] uppercase font-bold tracking-wider">Auflösung</span>
-                <span className="font-mono font-bold text-white text-sm">1K / 2K / 4K</span>
-                <p className="text-[11px] text-white/50 mt-1">Standard 1K rendert in ~1.4s, 2K & 4K für hochauflösenden Print.</p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-white/[0.02] p-3.5">
-                <span className="text-white/40 block text-[10px] uppercase font-bold tracking-wider">Seitenverhältnis</span>
-                <span className="font-mono font-bold text-white text-sm">4:5 (Portrait)</span>
-                <p className="text-[11px] text-white/50 mt-1">Maximale Screen-Fläche im Instagram-Feed ohne Randbeschnitt.</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ── Tab 3: Interactive Calculator ──────────────────────────── */}
+        {/* ── Tab 2: Interactive Calculator ──────────────────────────── */}
         {activeTab === "calculator" && (
           <div className="space-y-6 animate-in fade-in-50 duration-200">
             <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 sm:p-6 space-y-6">

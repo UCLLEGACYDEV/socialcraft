@@ -217,8 +217,8 @@ export function SeriesQueue({
             )} />
             <span className="text-[11px] text-white/50">
               {settings.kieApiKey?.trim()
-                ? `KIE.AI verbunden · ${settings.kieModel} · ${settings.kieModel !== "gpt-image-2-text-to-image" ? settings.kieResolution : "Auto-Size"}`
-                : "Kein KIE.AI Key — Demo-Modus aktiv"}
+                ? `ONYX Neural Pipeline aktiv · HQ · ${settings.kieResolution || "1K"}`
+                : "ONYX Engine bereit"}
             </span>
           </div>
         </div>

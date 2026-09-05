@@ -51,6 +51,7 @@ export function CryptoxDashboard({
   onOpenCloneStudio,
 }: CryptoxDashboardProps) {
   const [activeCenterTab, setActiveCenterTab] = useState<"prompt" | "audience">("prompt");
+  const [showAdvancedEngines, setShowAdvancedEngines] = useState(false);
 
   return (
     <div id="studio-dashboard" className="mx-auto w-full max-w-[1400px] px-4 pb-16">
@@ -306,71 +307,37 @@ export function CryptoxDashboard({
           </button>
         </div>
 
-        {/* ── RIGHT CARD: "Crypto Exchange" Style (Engine & Persona) ── */}
+        {/* ── RIGHT CARD: "Autopilot & Persona" (Zero-Config) ── */}
         <div className="cryptox-card p-6 flex flex-col justify-between space-y-5 lg:col-span-4">
           <div className="space-y-4">
-            {/* Header: Crypto Exchange style */}
+            {/* Header: Clean title */}
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
               <span className="text-base font-bold text-white tracking-wide">
-                Studio Engine & Clone
+                KI-Autopilot & Persona
               </span>
               <Cpu className="h-4 w-4 text-[#FF6A1F]" />
             </div>
 
-            {/* Exchange Section 1: Model & LLM Provider */}
-            <div className="space-y-2 rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3.5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-white/70">Bild-Modell</span>
-                <span className="font-bold text-white">{settings.kieModel}</span>
-              </div>
-              <div className="flex gap-1.5 flex-wrap">
-                {(["nano-banana-2", "nano-banana-pro", "gpt-image-2-text-to-image"] as const).map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => onChangeSettings({ kieModel: m })}
-                    className={cn(
-                      "flex-1 rounded-xl border py-1.5 text-xs font-semibold transition-colors min-w-fit px-2",
-                      settings.kieModel === m
-                        ? "border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF6A1F]"
-                        : "border-white/10 bg-white/[0.03] text-white/60 hover:text-white",
-                    )}
-                  >
-                    {m === "nano-banana-2" ? "Nano-Banana 2" : m === "nano-banana-pro" ? "Nano-Banana Pro" : "GPT Image 2"}
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex items-center justify-center py-1">
-                <span className="flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/[0.05] text-white/60">
-                  <ArrowUpDown className="h-3 w-3" />
+            {/* Zero-Config Autopilot Banner */}
+            <div className="space-y-2 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4">
+              <div className="flex items-center gap-2">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                </span>
+                <span className="text-xs font-bold text-white uppercase tracking-wider">
+                  Autopilot: Bereit
+                </span>
+                <span className="ml-auto rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                  Zero-Config
                 </span>
               </div>
-
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-white/70">Text-Engine</span>
-                <span className="font-bold text-white uppercase">{brief.provider}</span>
-              </div>
-              <div className="flex gap-1.5">
-                {LLM_PROVIDERS.map((p) => (
-                  <button
-                    key={p.id}
-                    type="button"
-                    onClick={() => onChangeBrief({ provider: p.id })}
-                    className={cn(
-                      "flex-1 rounded-xl border py-1.5 text-xs font-semibold transition-colors",
-                      brief.provider === p.id
-                        ? "border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF6A1F]"
-                        : "border-white/10 bg-white/[0.03] text-white/60 hover:text-white",
-                    )}
-                  >
-                    {p.label}
-                  </button>
-                ))}
-              </div>
+              <p className="text-[11px] text-zinc-400 leading-relaxed pt-1">
+                Optimale Bildqualität, visuelle Kontraste und Copywriting-Formeln sind standardmäßig vorkonfiguriert. Du musst nichts manuell einrichten.
+              </p>
             </div>
 
-            {/* Exchange Section 2: AI Clone Switcher */}
+            {/* AI Clone Switcher */}
             <div
               onClick={() => onChangeBrief({ useClone: !brief.useClone })}
               className={cn(
@@ -394,10 +361,10 @@ export function CryptoxDashboard({
                 )}
                 <div>
                   <span className="text-xs font-bold text-white block">
-                    {activeClone ? activeClone.name : "AI Persona"}
+                    {activeClone ? activeClone.name : "AI Persona / Eigenes Gesicht"}
                   </span>
                   <span className="text-[10px] text-white/50">
-                    {brief.useClone ? "In Slide-Prompts aktiv" : "Klicken zum Aktivieren"}
+                    {brief.useClone ? "Wiederkehrendes Gesicht aktiv" : "Klicken für konsistentes Gesicht"}
                   </span>
                 </div>
               </div>
@@ -412,6 +379,76 @@ export function CryptoxDashboard({
               >
                 {brief.useClone ? "AN" : "AUS"}
               </div>
+            </div>
+
+            {/* Cloud Auto-Sync Indicator */}
+            <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2 text-zinc-300">
+                <span className="text-emerald-400">☁️</span>
+                <span className="text-[11px] font-medium">Cloud-Galerie Sicherung</span>
+              </div>
+              <span className="text-[10px] font-semibold text-emerald-400">
+                Aktiv & Verbunden
+              </span>
+            </div>
+
+            {/* Optional Collapsible for Advanced Devs */}
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={() => setShowAdvancedEngines(!showAdvancedEngines)}
+                className="text-[11px] text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
+              >
+                {showAdvancedEngines ? "▾ Manuelle Modell-Wahl verbergen" : "▸ Manuelle Modell-Wahl (Optional)"}
+              </button>
+
+              {showAdvancedEngines && (
+                <div className="mt-2 space-y-3 rounded-2xl border border-white/[0.06] bg-black/40 p-3 text-xs animate-in fade-in duration-200">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-white/70">Bild-Modell</span>
+                    <span className="font-bold text-white">{settings.kieModel}</span>
+                  </div>
+                  <div className="flex gap-1.5 flex-wrap">
+                    {(["nano-banana-2", "nano-banana-pro", "gpt-image-2-text-to-image"] as const).map((m) => (
+                      <button
+                        key={m}
+                        type="button"
+                        onClick={() => onChangeSettings({ kieModel: m })}
+                        className={cn(
+                          "flex-1 rounded-xl border py-1 text-[11px] font-semibold transition-colors min-w-fit px-2 cursor-pointer",
+                          settings.kieModel === m
+                            ? "border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF6A1F]"
+                            : "border-white/10 bg-white/[0.03] text-white/60 hover:text-white",
+                        )}
+                      >
+                        {m === "nano-banana-2" ? "Nano-Banana 2" : m === "nano-banana-pro" ? "Nano-Banana Pro" : "GPT Image 2"}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-between pt-1 border-t border-white/[0.06]">
+                    <span className="font-medium text-white/70">Text-Engine</span>
+                    <span className="font-bold text-white uppercase">{brief.provider}</span>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {LLM_PROVIDERS.map((p) => (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => onChangeBrief({ provider: p.id })}
+                        className={cn(
+                          "flex-1 rounded-xl border py-1 text-[11px] font-semibold transition-colors cursor-pointer",
+                          brief.provider === p.id
+                            ? "border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF6A1F]"
+                            : "border-white/10 bg-white/[0.03] text-white/60 hover:text-white",
+                        )}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

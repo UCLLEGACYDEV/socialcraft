@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lock, Trash2, ExternalLink, RefreshCw } from "lucide-react";
+import { Lock, Trash2, RefreshCw, ChevronDown, ChevronUp, Cloud, Sparkles, CheckCircle2, Shield } from "lucide-react";
 import { toast } from "sonner";
 import { ModalShell } from "./SlideEditModal";
 import { StudioSelect } from "./StudioSelect";
@@ -9,11 +9,11 @@ import { getStoredCurrentUser } from "../auth";
 import type { ApiSettings, ImageProvider } from "../types";
 import { cn } from "@/lib/utils";
 
-const PROVIDERS: { id: ImageProvider; label: string }[] = [
-  { id: "kie-ai", label: "KIE.AI (Nano-Banana 2)" },
-  { id: "ai33-pro", label: "ai33.pro" },
-  { id: "gemini-imagen", label: "Google Imagen" },
-  { id: "mock", label: "Studio Preset (Demo)" },
+const PROVIDERS: { id: ImageProvider; label: string; tag: string }[] = [
+  { id: "kie-ai", label: "ONYX Ultra Engine (HQ)", tag: "Empfohlen" },
+  { id: "ai33-pro", label: "FLUX / SDXL Pro", tag: "HD" },
+  { id: "gemini-imagen", label: "Google Imagen", tag: "Schnell" },
+  { id: "mock", label: "Studio Preset", tag: "Demo" },
 ];
 
 const AI33_MODELS = ["flux-pro", "flux-dev", "sdxl-turbo", "midjourney-proxy", "imagen-3"];
@@ -36,28 +36,23 @@ export function SettingsModal({
   onCreditsUpdated,
 }: SettingsModalProps) {
   const [confirmClear, setConfirmClear] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [isTestingKie, setIsTestingKie] = useState(false);
   const [kieStatus, setKieStatus] = useState<KieCreditResult | null>(null);
 
+  const currentUser = getStoredCurrentUser();
+
   const testKieBalance = async () => {
-    if (!settings.kieApiKey?.trim()) {
-      toast.error("Bitte zuerst einen KIE.AI API-Key eingeben.");
-      return;
-    }
     setIsTestingKie(true);
     try {
-      const res = await fetchKieCredits(settings.kieApiKey);
+      const res = await fetchKieCredits(settings.kieApiKey || "");
       setKieStatus(res);
       if (res.success) {
-        toast.success(`KIE.AI verbunden: ${res.formatted} verfügbar!`, {
-          description: "Nano-Banana 2 Engine ist jetzt scharf geschaltet.",
-        });
+        toast.success(`ONYX Engine verbunden: Pipeline einsatzbereit!`);
         onChange({ provider: "kie-ai" });
         onCreditsUpdated?.();
       } else {
-        toast.error(`KIE.AI Fehler: ${res.error || "Verbindung fehlgeschlagen"}`, {
-          description: "Bitte API-Key auf kie.ai/api-key überprüfen.",
-        });
+        toast.error(`Engine Status: ${res.error || "Verbindung fehlgeschlagen"}`);
       }
     } finally {
       setIsTestingKie(false);
@@ -66,18 +61,18 @@ export function SettingsModal({
 
   return (
     <ModalShell
-      title="Studio Einstellungen & API-Keys"
+      title="Studio Einstellungen"
       onClose={onClose}
-      maxHeight="84vh"
+      maxHeight="86vh"
       footer={
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between w-full">
           <span className="flex items-center gap-1.5 text-xs text-zinc-400">
-            <Lock className="h-3.5 w-3.5 text-orange-400" /> Alle Keys lokal & verschlüsselt im Browser
+            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" /> Alles vorkonfiguriert & einsatzbereit
           </span>
           <button
             type="button"
             onClick={onClose}
-            className="cryptox-orange-btn !py-2 !px-5 text-xs font-semibold"
+            className="cryptox-orange-btn !py-2 !px-5 text-xs font-semibold cursor-pointer"
           >
             Fertig & Schließen
           </button>
@@ -85,233 +80,78 @@ export function SettingsModal({
       }
     >
       <div className="space-y-6">
-        <Section title="Bild-Anbieter / Rendering Engine">
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {PROVIDERS.map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => onChange({ provider: p.id })}
-                className={cn(
-                  "rounded-xl border px-3 py-2.5 text-xs font-semibold transition-all",
-                  settings.provider === p.id
-                    ? "border-orange-500/80 bg-orange-500/15 text-orange-400 shadow-[0_0_20px_-5px_rgba(255,77,23,0.4)]"
-                    : "border-white/[0.08] bg-white/[0.02] text-zinc-400 hover:text-zinc-200 hover:border-white/[0.16]",
-                )}
-              >
-                {p.label}
-              </button>
-            ))}
-          </div>
-        </Section>
-
-        <Section title="KIE.AI (Nano-Banana 2 Engine)">
-          <Row label="API Key">
-            <input
-              type="password"
-              className="field-input"
-              value={settings.kieApiKey}
-              onChange={(e) => onChange({ kieApiKey: e.target.value })}
-              placeholder="Bearer Token von kie.ai/api-key"
-            />
-          </Row>
-
-          {/* Live Credit Status & Test Action */}
-          <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 space-y-2.5">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-zinc-400">Live KIE.AI Plattform-Guthaben:</span>
-              {kieStatus ? (
-                <span
+        {/* ── 1. KI-Engine & Rendering ─────────────────────────────────── */}
+        <Section title="KI-Engine & Bildqualität">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {PROVIDERS.map((p) => {
+              const isSelected = settings.provider === p.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => onChange({ provider: p.id })}
                   className={cn(
-                    "text-xs font-mono font-semibold px-2 py-0.5 rounded-full border",
-                    kieStatus.success
-                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                      : "border-red-500/30 bg-red-500/10 text-red-400",
+                    "flex items-center justify-between p-3 rounded-xl border text-left transition-all cursor-pointer",
+                    isSelected
+                      ? "border-orange-500/80 bg-orange-500/15 text-white shadow-[0_0_20px_-5px_rgba(255,77,23,0.35)]"
+                      : "border-white/[0.08] bg-white/[0.02] text-zinc-300 hover:text-white hover:border-white/[0.16]",
                   )}
                 >
-                  {kieStatus.success ? `🟢 ${kieStatus.formatted}` : `🔴 ${kieStatus.error || "Fehler"}`}
-                </span>
-              ) : settings.kieApiKey ? (
-                <span className="text-xs text-amber-400 font-mono">Key hinterlegt (ungeprüft)</span>
-              ) : (
-                <span className="text-xs text-zinc-500 font-mono">Kein Key hinterlegt</span>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <button
-                type="button"
-                onClick={testKieBalance}
-                disabled={isTestingKie}
-                className="flex items-center gap-1.5 rounded-xl border border-orange-500/40 bg-orange-500/15 px-3 py-1.5 text-xs font-semibold text-orange-400 hover:bg-orange-500/25 transition-all disabled:opacity-50"
-              >
-                <RefreshCw className={cn("h-3.5 w-3.5", isTestingKie && "animate-spin")} />
-                {isTestingKie ? "Rufe Credits von api.kie.ai ab…" : "Guthaben von KIE.AI abrufen & testen"}
-              </button>
-
-              <a
-                href="https://kie.ai/api-key"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition-colors underline underline-offset-2 ml-auto"
-              >
-                <span>API-Key bei kie.ai holen</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            </div>
+                  <span className="text-xs font-semibold">{p.label}</span>
+                  <span
+                    className={cn(
+                      "text-[10px] font-bold px-2 py-0.5 rounded-full border",
+                      isSelected
+                        ? "border-orange-500/40 bg-orange-500/20 text-orange-400"
+                        : "border-white/10 bg-white/5 text-zinc-400",
+                    )}
+                  >
+                    {p.tag}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
-          <Row label="Modell">
-            <StudioSelect
-              value={settings.kieModel}
-              onChange={(v) => onChange({ kieModel: v as ApiSettings["kieModel"] })}
-              options={[
-                { value: "nano-banana-2", label: "nano-banana-2 (Empfohlen)" },
-                { value: "nano-banana-2-lite", label: "nano-banana-2-lite (Schnell)" },
-                { value: "nano-banana-pro", label: "nano-banana-pro (Premium Qualität)" },
-                { value: "gpt-image-2-text-to-image", label: "gpt-image-2 (OpenAI via KIE.AI)" },
-              ]}
-              ariaLabel="KIE.AI Modell"
-            />
-          </Row>
-          <Row label="Auflösung">
-            <StudioSelect
-              value={settings.kieResolution}
-              onChange={(v) => onChange({ kieResolution: v as ApiSettings["kieResolution"] })}
-              options={[
-                { value: "1K", label: "1K (Standard & Schnell)" },
-                { value: "2K", label: "2K HD" },
-                { value: "4K", label: "4K Ultra" },
-              ]}
-              ariaLabel="Auflösung"
-            />
-          </Row>
-          <Row label="Optionaler Webhook">
-            <input
-              type="text"
-              className="field-input"
-              value={settings.kieWebhookKey}
-              onChange={(e) => onChange({ kieWebhookKey: e.target.value })}
-              placeholder="https://deine-domain.de/api/callback"
-            />
-          </Row>
+          <div className="pt-2">
+            <Row label="Auflösung">
+              <StudioSelect
+                value={settings.kieResolution}
+                onChange={(v) => onChange({ kieResolution: v as ApiSettings["kieResolution"] })}
+                options={[
+                  { value: "1K", label: "1K Standard (Schnellste Generierung)" },
+                  { value: "2K", label: "2K HD (Empfohlen für Instagram)" },
+                  { value: "4K", label: "4K Ultra HD (Maximale Schärfe)" },
+                ]}
+                ariaLabel="Auflösung"
+              />
+            </Row>
+          </div>
         </Section>
 
-        <Section title="ai33.pro (FLUX / SDXL)">
-          <Row label="API Key">
-            <input
-              type="password"
-              className="field-input"
-              value={settings.ai33ApiKey}
-              onChange={(e) => onChange({ ai33ApiKey: e.target.value })}
-              placeholder="ai33_..."
-            />
-          </Row>
-          <Row label="Modell">
-            <StudioSelect
-              value={settings.ai33Model}
-              onChange={(v) => onChange({ ai33Model: v })}
-              options={AI33_MODELS.map((m) => ({ value: m, label: m }))}
-              ariaLabel="ai33.pro Modell"
-            />
-          </Row>
-        </Section>
-
-        <Section title="Google Gemini">
-          <Row label="Gemini API Key">
-            <input
-              type="password"
-              className="field-input"
-              value={settings.geminiApiKey}
-              onChange={(e) => onChange({ geminiApiKey: e.target.value })}
-              placeholder="AIzaSy..."
-            />
-          </Row>
-          <p className="text-[11px] text-zinc-500">
-            Wird für Text-Prompts, Serien-Generierung und Imagen 3 verwendet.
-          </p>
-        </Section>
-
-        <Section title="Cloud-Synchronisation & Backup">
-          <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-3.5 space-y-3">
-            <div className="flex items-center justify-between pb-2">
-              <span className="text-xs text-zinc-400">Cloud-Speicher Status:</span>
-              <span className={cn(
-                "text-xs font-semibold px-2 py-0.5 rounded-full border",
-                settings.s4AccessKey && settings.s4SecretKey
-                  ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
-                  : "border-zinc-500/30 bg-zinc-500/10 text-zinc-400"
-              )}>
-                {settings.s4AccessKey && settings.s4SecretKey ? "🟢 Bereit" : "⚪ Schlüssel erforderlich"}
+        {/* ── 2. Integrierter Cloud-Speicher (Zero-Config) ─────────────── */}
+        <Section title="Cloud-Speicher & Automatische Sicherung">
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-4 space-y-3.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Cloud className="h-4 w-4 text-emerald-400" />
+                <span className="text-xs font-semibold text-white">Integrierte Cloud-Synchronisation</span>
+              </div>
+              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 flex items-center gap-1.5">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Aktiv & Verbunden
               </span>
             </div>
 
-            <Row label="Cloud Access Key">
-              <input
-                type="text"
-                className="field-input text-xs font-mono"
-                value={settings.s4AccessKey || ""}
-                onChange={(e) => onChange({ s4AccessKey: e.target.value })}
-                placeholder="AKIA..."
-              />
-            </Row>
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Deine generierten Visuals, Karussells und Serien werden vollautomatisch in deinem persönlichen Cloud-Ordner gespeichert. Du kannst deine Galerie jederzeit durchsuchen oder ganze Ordner als ZIP herunterladen.
+            </p>
 
-            <Row label="Cloud Secret Key">
-              <input
-                type="password"
-                className="field-input text-xs font-mono"
-                value={settings.s4SecretKey || ""}
-                onChange={(e) => onChange({ s4SecretKey: e.target.value })}
-                placeholder="••••••••••••••••••••••••"
-              />
-            </Row>
-
-            <Row label="Cloud Region">
-              <input
-                type="text"
-                className="field-input text-xs"
-                value={settings.s4Region || "eu-central-1"}
-                onChange={(e) => onChange({ s4Region: e.target.value })}
-                placeholder="eu-central-1"
-              />
-            </Row>
-
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-[11px] text-zinc-500">
-                Ordner-Struktur: USERCONTENT/admins/... bzw. USERCONTENT/users/...
-              </span>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (!settings.s4AccessKey || !settings.s4SecretKey) {
-                    toast.error("Bitte gib zuerst Access Key & Secret Key an.");
-                    return;
-                  }
-                  toast.info("Prüfe Cloud-Verbindung & erstelle Ordner...");
-                  const testRes = await testCloudConnection();
-                  if (!testRes.success) {
-                    toast.error(`Verbindung fehlgeschlagen: ${testRes.message}`);
-                    return;
-                  }
-                  const user = getStoredCurrentUser();
-                  const folderRes = await ensureUserS4Folder(user);
-                  if (folderRes.success) {
-                    toast.success(`Cloud-Verbindung aktiv! Ordner „${folderRes.folder}“ im Cloud-Speicher bereit.`);
-                  } else {
-                    toast.warning(`Verbunden, aber Ordner-Hinweis: ${folderRes.error || "unbekannt"}`);
-                  }
-                }}
-                className="rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-1 text-xs font-medium text-zinc-200 transition-colors"
-              >
-                Verbindung & Ordner prüfen
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between pt-3 border-t border-white/[0.06]">
+            <div className="flex items-center justify-between pt-2 border-t border-white/[0.06]">
               <div className="space-y-0.5">
-                <span className="text-xs font-medium text-zinc-200">Automatische Cloud-Sicherung</span>
-                <p className="text-[11px] text-zinc-400">
-                  Alle generierten Bilder automatisch in deinem persönlichen Cloud-Ordner sichern, damit du jederzeit ganze Ordner oder einzelne Bilder als ZIP herunterladen kannst.
+                <span className="text-xs font-medium text-zinc-200">Automatische Sicherung</span>
+                <p className="text-[11px] text-zinc-500">
+                  Neue Entwürfe sofort im persönlichen Cloud-Workspace ablegen
                 </p>
               </div>
               <button
@@ -333,10 +173,11 @@ export function SettingsModal({
           </div>
         </Section>
 
-        <Section title="Anti-Wiederholung & Cache">
-          <div className="flex items-center justify-between gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] p-3.5">
+        {/* ── 3. Speicher & Cache ───────────────────────────────────────── */}
+        <Section title="Entwürfe & Cache">
+          <div className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3.5">
             <span className="text-xs text-zinc-400">
-              <strong className="text-white">{motifCount}</strong> gespeicherte Bild-Motive
+              <strong className="text-white">{motifCount}</strong> zwischengespeicherte Bild-Motive
             </span>
             {confirmClear ? (
               <span className="flex gap-2">
@@ -345,15 +186,16 @@ export function SettingsModal({
                   onClick={() => {
                     onClearMotifs();
                     setConfirmClear(false);
+                    toast.success("Cache geleert");
                   }}
-                  className="rounded-xl bg-destructive px-3 py-1.5 text-xs font-semibold text-white"
+                  className="rounded-xl bg-destructive px-3 py-1.5 text-xs font-semibold text-white cursor-pointer"
                 >
                   Wirklich löschen
                 </button>
                 <button
                   type="button"
                   onClick={() => setConfirmClear(false)}
-                  className="rounded-xl border border-white/[0.1] px-3 py-1.5 text-xs text-zinc-300"
+                  className="rounded-xl border border-white/[0.1] px-3 py-1.5 text-xs text-zinc-300 cursor-pointer"
                 >
                   Abbrechen
                 </button>
@@ -362,7 +204,7 @@ export function SettingsModal({
               <button
                 type="button"
                 onClick={() => setConfirmClear(true)}
-                className="flex items-center gap-1.5 rounded-xl border border-white/[0.1] bg-white/[0.03] px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:text-white hover:border-white/[0.2]"
+                className="flex items-center gap-1.5 rounded-xl border border-white/[0.1] bg-white/[0.03] px-3 py-1.5 text-xs text-zinc-400 transition-colors hover:text-white hover:border-white/[0.2] cursor-pointer"
               >
                 <Trash2 className="h-3.5 w-3.5" /> Cache leeren
               </button>
@@ -370,7 +212,108 @@ export function SettingsModal({
           </div>
         </Section>
 
-        <p className="text-[11px] text-zinc-500">ONYX Studio · Nano Banana 2 Production v2.0</p>
+        {/* ── 4. Admin Plattform-Keys (Nur für Administratoren sichtbar) ── */}
+        {currentUser?.role === "admin" ? (
+          <div className="pt-2 border-t border-white/[0.08]">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced((p) => !p)}
+              className="flex items-center justify-between w-full py-2 px-1 text-xs text-zinc-400 hover:text-zinc-200 transition-colors cursor-pointer group"
+            >
+              <span className="flex items-center gap-2 font-medium">
+                <Shield className="h-3.5 w-3.5 text-primary-bright" />
+                <span>Admin Master-API-Schlüssel</span>
+              </span>
+              {showAdvanced ? (
+                <ChevronUp className="h-4 w-4 text-zinc-500" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-zinc-500" />
+              )}
+            </button>
+
+            {showAdvanced && (
+              <div className="mt-3 space-y-4 rounded-xl border border-white/[0.08] bg-black/40 p-4 animate-in fade-in-50 duration-200">
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  Administrator-Modus: Diese Master-Keys steuern die globale Render-Pipeline für alle Endnutzer.
+                </p>
+
+                {/* Master Engine Key */}
+                <div className="space-y-2">
+                  <span className="text-xs font-semibold text-zinc-300">Master Engine Key (Nano-Banana Pipeline)</span>
+                  <input
+                    type="password"
+                    className="field-input text-xs font-mono"
+                    value={settings.kieApiKey}
+                    onChange={(e) => onChange({ kieApiKey: e.target.value })}
+                    placeholder="Master Bearer Token..."
+                  />
+                  <div className="flex items-center justify-between pt-1">
+                    <button
+                      type="button"
+                      onClick={testKieBalance}
+                      disabled={isTestingKie}
+                      className="text-[11px] text-orange-400 hover:text-orange-300 cursor-pointer"
+                    >
+                      {isTestingKie ? "Prüfe..." : "Verbindung testen"}
+                    </button>
+                    <span className="text-[11px] text-zinc-500">Zentrale Pipeline</span>
+                  </div>
+                </div>
+
+                {/* Gemini Custom Key */}
+                <div className="space-y-1.5 pt-2 border-t border-white/[0.06]">
+                  <span className="text-xs font-semibold text-zinc-300">Master Google Gemini Key</span>
+                  <input
+                    type="password"
+                    className="field-input text-xs font-mono"
+                    value={settings.geminiApiKey}
+                    onChange={(e) => onChange({ geminiApiKey: e.target.value })}
+                    placeholder="AIzaSy..."
+                  />
+                </div>
+
+                {/* AI33 Key */}
+                <div className="space-y-1.5 pt-2 border-t border-white/[0.06]">
+                  <span className="text-xs font-semibold text-zinc-300">Master AI33 Engine Key</span>
+                  <input
+                    type="password"
+                    className="field-input text-xs font-mono"
+                    value={settings.ai33ApiKey}
+                    onChange={(e) => onChange({ ai33ApiKey: e.target.value })}
+                    placeholder="ai33_..."
+                  />
+                </div>
+
+                {/* Custom Cloud Storage Keys */}
+                <div className="space-y-2 pt-2 border-t border-white/[0.06]">
+                  <span className="text-xs font-semibold text-zinc-300">Cloud-Speicher Master Keys</span>
+                  <input
+                    type="text"
+                    className="field-input text-xs font-mono"
+                    value={settings.s4AccessKey || ""}
+                    onChange={(e) => onChange({ s4AccessKey: e.target.value })}
+                    placeholder="Access Key..."
+                  />
+                  <input
+                    type="password"
+                    className="field-input text-xs font-mono"
+                    value={settings.s4SecretKey || ""}
+                    onChange={(e) => onChange({ s4SecretKey: e.target.value })}
+                    placeholder="Secret Key..."
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-center">
+            <p className="text-xs text-zinc-400">
+              ⚡ Alle KI-Engines und Render-Pipelines sind für deinen Account optimiert vorkonfiguriert.
+            </p>
+          </div>
+        )}
+
+        <p className="text-[10px] text-zinc-600 text-center">Socialcraft Studio Engine · Zero-Setup</p>
       </div>
     </ModalShell>
   );
