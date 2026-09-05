@@ -1,79 +1,90 @@
 import { ArrowUpRight } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
 
-export default function FUIHeroWithJelly() {
+interface FUIHeroWithJellyProps {
+  title?: string;
+  subtitle?: string;
+  ctaText?: string;
+  ctaHref?: string;
+  onCtaClick?: () => void;
+  className?: string;
+}
+
+export default function FUIHeroWithJelly({
+  title = "Manage your sales and analytics in one place. looking for",
+  subtitle = "Simple is a modern website builder powered by AI that changes how companies create user interfaces together.",
+  ctaText = "Buy this template",
+  ctaHref = "https://farmui.com/templates/ease",
+  onCtaClick,
+  className = "",
+}: FUIHeroWithJellyProps) {
   return (
-    <section className="relative text-white bg-[linear-gradient(to_bottom,#fff,#000_30%,#000_98%)] dark:bg-[linear-gradient(to_bottom,#000_10%,#000_30%,#000_98%)]">
-      <div className="px-2 mx-auto sm:px-6 md:px-0">
-        <div className="pt-32 p md:pt-40">
+    <section className={`relative text-white bg-[linear-gradient(to_bottom,#fff,#000_30%,#000_98%)] dark:bg-[linear-gradient(to_bottom,#000_10%,#000_30%,#000_98%)] overflow-hidden ${className}`}>
+      <div className="px-2 mx-auto sm:px-6 md:px-0 max-w-7xl">
+        <div className="pt-24 md:pt-36">
           <div className="pb-12 text-center md:pb-16">
             <h1
-              className="mb-6 border-y border-none text-5xl max-w-3xl mx-auto font-normal tracking-tighter dark:text-white md:text-6xl text-transparent bg-clip-text bg-gradient-to-b from-red-200 via-blue-200 to-white p-4"
-              data-aos="zoom-y-out"
-              data-aos-delay={150}
+              className="mb-6 border-y border-none text-4xl sm:text-5xl md:text-6xl max-w-4xl mx-auto font-normal tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-red-200 via-blue-200 to-white p-4 leading-tight"
             >
-              Manage your sales and analytics in one place.
-              <br className="max-lg:hidden" />
-              looking for
+              {title}
             </h1>
-            <div className="relative mx-auto max-w-3xl">
-              <p
-                className="mb-8 text-lg text-gray-400"
-                data-aos="zoom-y-out"
-                data-aos-delay={300}
-              >
-                Simple is a modern website builder powered by AI that changes
-                how companies create user interfaces together.
+            <div className="relative mx-auto max-w-3xl px-4">
+              <p className="mb-8 text-base sm:text-lg text-gray-400 leading-relaxed">
+                {subtitle}
               </p>
               <div
-                className="absolute left-0 top-0 h-80 w-[90%] opacity-60 overflow-x-hidden bg-[rgb(54,157,253)] bg-opacity-40 blur-[337.4px]"
+                className="absolute left-0 top-0 h-80 w-[90%] opacity-60 overflow-x-hidden bg-[rgb(54,157,253)] bg-opacity-40 blur-[337.4px] pointer-events-none"
                 style={{ transform: "rotate(-30deg)" }}
               />
               <div className="relative before:absolute before:inset-0 before:border-y before:border-none before:[border-image:linear-gradient(to_right,transparent,theme(colors.slate.300/.8),transparent)1]">
-                <div
-                  className="mx-auto z-20 max-w-xs mt-[-20px] mb-[20px] sm:flex sm:justify-center items-center sm:max-w-none gap-5"
-                  data-aos="zoom-y-out"
-                  data-aos-delay={450}
-                >
-                  <Link
-                    href="https://farmui.com/templates/ease"
-                    className="group inline-flex text-lg gap-x-2 mt-2 backdrop-blur-md text-white justify-center items-center py-3 px-5 ml-3 w-fit rounded-xl border duration-200 group bg-page-gradient border-white/30 text-md font-geistSans hover:border-zinc-600 hover:bg-transparent/10 hover:text-zinc-100"
+                <div className="mx-auto z-20 max-w-xs mt-[-20px] mb-[20px] sm:flex sm:justify-center items-center sm:max-w-none gap-5">
+                  <a
+                    href={ctaHref}
+                    onClick={(e) => {
+                      if (onCtaClick) {
+                        e.preventDefault();
+                        onCtaClick();
+                      }
+                    }}
+                    target={ctaHref.startsWith("http") ? "_blank" : undefined}
+                    rel="noopener noreferrer"
+                    className="group inline-flex text-base sm:text-lg gap-x-2 mt-2 backdrop-blur-md text-white justify-center items-center py-3 px-6 w-fit rounded-xl border duration-200 bg-page-gradient border-white/30 font-sans hover:border-zinc-500 hover:bg-white/[0.1] hover:text-white transition-all shadow-[0_0_30px_rgba(54,157,253,0.3)]"
                   >
-                    Buy this template
+                    <span>{ctaText}</span>
                     <div className="flex overflow-hidden relative justify-center items-center ml-1 w-5 h-5">
                       <ArrowUpRight className="absolute transition-all duration-500 group-hover:translate-x-4 group-hover:-translate-y-5" />
                       <ArrowUpRight className="absolute transition-all duration-500 -translate-x-4 -translate-y-5 group-hover:translate-x-0 group-hover:translate-y-0" />
                     </div>
-                  </Link>
+                  </a>
                 </div>
               </div>
             </div>
           </div>
-          {/* Hero image */}
 
-          <div className="relative">
-            <div className="absolute top-0 right-0 left-0 mx-auto mt-12 max-w-6xl">
+          {/* Hero image */}
+          <div className="relative z-10 px-4">
+            <div className="mx-auto max-w-5xl shadow-[0_25px_80px_rgba(0,0,0,0.8)] rounded-3xl overflow-hidden border border-white/10">
               <img
                 src="https://cdn.21st.dev/assets/mirror/12/12cca5de1e3d775e4aced9e0506d59a456399ae6f38b1d30dd3ffcb4e7d9af68.png"
-                className="w-full rounded-3xl shadow-lg bg-transparent"
-                alt=""
+                className="w-full rounded-3xl bg-transparent object-cover"
+                alt="Dashboard Preview"
               />
             </div>
           </div>
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            src="https://ease-one.vercel.app/bg/something.mp4"
-            className="overflow-hidden min-w-screen border-black mt-[-100px]"
-          />
-          <div
-            className="mx-auto max-w-full h-50 bg-black"
-            data-aos="zoom-y-out"
-            data-aos-delay={600}
-          ></div>
+
+          {/* Background Jelly Video */}
+          <div className="relative mt-[-100px] overflow-hidden">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              src="https://ease-one.vercel.app/bg/something.mp4"
+              className="w-full min-w-full object-cover opacity-80"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#07050A] via-transparent to-transparent" />
+          </div>
+
+          <div className="mx-auto max-w-full h-20 bg-[#07050A]" />
         </div>
       </div>
     </section>

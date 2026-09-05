@@ -25,6 +25,8 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import FUIHeroWithJelly from "@/components/ui/jelly-animated-hero";
+import { ParallaxComponent } from "@/components/ui/parallax-scrolling";
 import type { User } from "../auth";
 import { cn } from "@/lib/utils";
 
@@ -101,6 +103,20 @@ export function CryptoxLandingPage({
               className="rounded-full bg-[#FF4D17] px-4 py-1.5 text-xs font-semibold text-white shadow-[0_0_18px_-2px_#FF4D17]"
             >
               Startseite
+            </a>
+            <a
+              href="#jelly-hero"
+              className="rounded-full px-3 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors flex items-center gap-1"
+            >
+              <Sparkles className="h-3 w-3 text-cyan-400" />
+              <span>Jelly Hero</span>
+            </a>
+            <a
+              href="#parallax"
+              className="rounded-full px-3 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors flex items-center gap-1"
+            >
+              <Layers className="h-3 w-3 text-amber-400" />
+              <span>Parallax</span>
             </a>
             <a
               href="#features"
@@ -450,6 +466,40 @@ export function CryptoxLandingPage({
             ))}
           </div>
         </div>
+      </section>
+
+      {/* ── 4b. Jelly Animated Hero Showcase ──────────────────────── */}
+      <section id="jelly-hero" className="relative z-10 border-b border-white/[0.06]">
+        <div className="mx-auto max-w-6xl pt-14 pb-4 px-4 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 px-4 py-1.5 text-xs font-semibold text-cyan-300 mb-2">
+            <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+            <span>Interactive Fluid UI · Jelly Animated Hero</span>
+          </div>
+          <p className="text-xs text-white/50 max-w-md mx-auto">
+            Dynamisches Video-Hintergrund-Rendering mit schwebendem 3D-Dashboard-Interface.
+          </p>
+        </div>
+        <FUIHeroWithJelly
+          title="Verwalte deinen Content und Reichweiten-Analytics an einem Ort."
+          subtitle="Socialcraft ist die moderne Content-Plattform für virale Instagram-Karussells, visuelles Storytelling und nahtlose KI-Personas."
+          ctaText="Jetzt Studio testen"
+          ctaHref="#studio"
+          onCtaClick={onNavigateStudio}
+        />
+      </section>
+
+      {/* ── 4c. 3D Parallax Scrolling Showcase ─────────────────────── */}
+      <section id="parallax" className="relative z-10 border-b border-white/[0.06]">
+        <div className="mx-auto max-w-6xl pt-16 pb-4 px-4 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-semibold text-amber-300 mb-2">
+            <Layers className="h-3.5 w-3.5 text-amber-400" />
+            <span>Multi-Layer Parallax Scrolling · GSAP & Lenis Smooth</span>
+          </div>
+          <p className="text-xs text-white/50 max-w-md mx-auto">
+            Scrolle nach unten, um die mehrschichtigen Parallax-Ebenen in Echtzeit zu erleben.
+          </p>
+        </div>
+        <ParallaxComponent title="SOCIALCRAFT" />
       </section>
 
       {/* ── 5. Powerful Features Section (Waveform Hero Card) ──────── */}
