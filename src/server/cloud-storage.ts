@@ -125,8 +125,8 @@ export async function ensureCloudFolder(
     }
   }
 
-  // Create structured subfolders: carousels, clones, gallery
-  const subfolders = ["carousels", "clones", "gallery"];
+  // Create structured subfolders: carousels, clones, gallery, series
+  const subfolders = ["carousels", "clones", "gallery", "series"];
   for (const sub of subfolders) {
     const subDirKey = `${cleanPath}/${sub}/`;
     try {
@@ -154,7 +154,7 @@ export async function ensureCloudFolder(
       userId: meta?.id || "unknown",
       role: meta?.role || "user",
       email: meta?.email || "",
-      subfolders: ["carousels", "clones", "gallery"],
+      subfolders: ["carousels", "clones", "gallery", "series"],
       initializedAt: new Date().toISOString(),
       generator: "Socialcraft AI Cloud Sync",
     },

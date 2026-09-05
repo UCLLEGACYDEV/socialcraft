@@ -192,6 +192,13 @@ export async function listS4Images(
         if (cIndex !== -1 && keyParts[cIndex + 1] && keyParts[cIndex + 1] !== filename) {
           projectName = keyParts[cIndex + 1];
         }
+      } else if (obj.key.includes("/series/")) {
+        category = "series";
+        subfolder = "series";
+        const sIndex = keyParts.indexOf("series");
+        if (sIndex !== -1 && keyParts[sIndex + 1] && keyParts[sIndex + 1] !== filename) {
+          projectName = keyParts[sIndex + 1];
+        }
       } else if (obj.key.includes("/clones/")) {
         category = "ai-clone";
         subfolder = "clones";

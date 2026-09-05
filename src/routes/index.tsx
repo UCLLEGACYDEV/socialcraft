@@ -572,15 +572,15 @@ function OnyxStudio() {
           .replace(/\s+/g, "_")
           .slice(0, 40);
         const _seriesFolder = `${new Date().toISOString().slice(0, 10)}_${_seriesTopic}_${jobId.slice(0, 6)}`;
-        void saveImageToS4({
-          imageUrl: res.imageUrl,
-          prompt: slide.visualPrompt,
-          category: "carousel",
-          user: currentUser,
-          customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
-          subfolder: `carousels/${_seriesFolder}`,
-          projectName: _seriesFolder,
-        });
+              void saveImageToS4({
+                imageUrl: res.imageUrl,
+                prompt: slide.visualPrompt,
+                category: "series",
+                user: currentUser,
+                customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
+                subfolder: `series/${_seriesFolder}`,
+                projectName: _seriesFolder,
+              });
       }
 
       setQueue((prev) =>
@@ -687,10 +687,10 @@ function OnyxStudio() {
               void saveImageToS4({
                 imageUrl: res.imageUrl,
                 prompt: slide.visualPrompt,
-                category: "carousel",
+                category: "series",
                 user: currentUser,
                 customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
-                subfolder: `carousels/${_qSeriesFolder}`,
+                subfolder: `series/${_qSeriesFolder}`,
                 projectName: _qSeriesFolder,
               });
             }
