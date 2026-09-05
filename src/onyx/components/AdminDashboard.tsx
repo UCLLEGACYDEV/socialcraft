@@ -230,13 +230,17 @@ export function AdminDashboard({
       <header className="sticky top-0 z-40 w-full border-b border-white/[0.08] bg-[#100D15]/80 px-6 py-4 backdrop-blur-2xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
           {/* Left: Brand + Badge */}
-          <div className="flex items-center gap-3">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-tr from-[#FF3B00] to-[#FFA149] shadow-[0_0_20px_-3px_#FF4D17]">
+          <div
+            onClick={onNavigateStudio}
+            className="flex items-center gap-3 cursor-pointer group"
+            title="Zurück zum Studio"
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-tr from-[#FF3B00] to-[#FFA149] shadow-[0_0_20px_-3px_#FF4D17] transition-transform group-hover:scale-105">
               <Shield className="h-4 w-4 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-base font-bold tracking-tight text-white">Socialcraft</span>
+                <span className="text-base font-bold tracking-tight text-white group-hover:text-primary-bright transition-colors">Socialcraft</span>
                 <span className="rounded-full border border-[#FF4D17]/50 bg-[#FF4D17]/20 px-2 py-0.5 text-[10px] font-bold text-[#FFA149] uppercase tracking-wider">
                   Admin Konsole
                 </span>
@@ -290,14 +294,6 @@ export function AdminDashboard({
 
           {/* Right: Quick Action Return */}
           <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={onNavigateLanding}
-              className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-xs font-medium text-white/80 hover:bg-white/[0.08] hover:text-white transition-all"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Zur Startseite</span>
-            </button>
             <button
               type="button"
               onClick={onNavigateStudio}

@@ -86,22 +86,27 @@ export const Route = createFileRoute("/")({
 });
 
 function OnyxStudio() {
+  const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredCurrentUser());
   const [currentView, setCurrentView] = usePersistentState<"landing" | "studio" | "admin">(
     "onyx.currentView",
-    "landing",
+    currentUser ? "studio" : "landing",
   );
-  const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredCurrentUser());
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<"login" | "register">("login");
 
+  // SaaS rule: Authenticated users stay in the Studio workspace; never bounced to marketing landing page
+  useEffect(() => {
+    if (currentUser && currentView === "landing") {
+      setCurrentView("studio");
+    }
+  }, [currentUser, currentView, setCurrentView]);
+
   const handleLogout = () => {
     saveStoredCurrentUser(null);
     setCurrentUser(null);
+    setCurrentView("landing");
     toast.info("Erfolgreich abgemeldet.");
-    if (currentView === "admin") {
-      setCurrentView("landing");
-    }
   };
 
   const handleAuthSuccess = (user: User) => {
@@ -821,7 +826,6 @@ function OnyxStudio() {
         <CryptoxNavbar
           activeTab={activeTab}
           onNavigate={setActiveTab}
-          onNavigateLanding={() => setCurrentView("landing")}
           onNavigateAdmin={handleOpenAdmin}
           currentUser={currentUser}
           onOpenAuth={(mode) => {
@@ -856,7 +860,6 @@ function OnyxStudio() {
                 onOpenBrandKit={() => setShowBrandKit(true)}
                 onOpenSettings={() => setShowSettings(true)}
                 currentUser={currentUser}
-                onNavigateLanding={() => setCurrentView("landing")}
               />
             ) : (
               <div className="pt-4">

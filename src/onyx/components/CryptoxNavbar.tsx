@@ -84,12 +84,17 @@ export function CryptoxNavbar({
   return (
     <header className="sticky top-0 z-50 w-full px-4 pt-3 pb-2 transition-all">
       <div className="mx-auto flex max-w-[1550px] items-center justify-between gap-3">
-        {/* ── Left: Brand & Navigation Back ────────────────────────── */}
+        {/* ── Left: Brand & Workspace Identity ────────────────────── */}
         <div className="flex items-center gap-2 sm:gap-3">
           <div
-            onClick={onNavigateLanding ?? (() => onNavigate("carousel"))}
+            onClick={() => {
+              onNavigate("carousel");
+              if (typeof window !== "undefined") {
+                window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+              }
+            }}
             className="flex items-center gap-2.5 cursor-pointer select-none group"
-            title="Zurück zur Startseite"
+            title="Socialcraft Studio Workspace"
           >
             {/* Swirl logo icon */}
             <div className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-[#FF3B00] via-[#FF6A1F] to-[#FFA149] shadow-[0_0_20px_-2px_#FF4D17] transition-transform duration-300 group-hover:scale-105">
@@ -100,22 +105,10 @@ export function CryptoxNavbar({
                 Socialcraft
               </span>
               <span className="rounded-md border border-primary/40 bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold text-primary-bright uppercase tracking-wider">
-                Studio
+                {isAdmin ? "Admin" : currentUser ? "Pro" : "Studio"}
               </span>
             </div>
           </div>
-
-          {onNavigateLanding && (
-            <button
-              type="button"
-              onClick={onNavigateLanding}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-white hover:bg-white/[0.1] hover:border-white/20 transition-all cursor-pointer shadow-sm"
-              title="Zurück zur Startseite / Dashboard"
-            >
-              <ArrowLeft className="h-3.5 w-3.5 text-orange-400" />
-              <span className="hidden sm:inline">Startseite</span>
-            </button>
-          )}
         </div>
 
         {/* ── Center: Grouped Studio Navigation ────────────────────── */}
@@ -300,7 +293,7 @@ export function CryptoxNavbar({
                     onClick={onOpenProfile}
                     className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-zinc-200 hover:bg-white/[0.06] hover:text-white cursor-pointer transition-colors"
                   >
-                    <User className="h-4 w-4 text-orange-400" />
+                    <UserIcon className="h-4 w-4 text-orange-400" />
                     <span>Mein Profil & Mega S4 Sync</span>
                   </DropdownMenuItem>
                 )}
