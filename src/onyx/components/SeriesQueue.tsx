@@ -109,6 +109,15 @@ export function SeriesQueue({
           )}
         </div>
 
+
+        <textarea
+          rows={9}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder={"Thema: Disziplin\n\nSlide 1 – Hook\nPrompt text…\n\nSlide 2 – Konzept\nPrompt text…\n\n===\n\nThema: Fokus\nSlide 1 – Hook\n…"}
+          className="field-input text-xs sm:text-sm leading-relaxed font-mono"
+        />
+
         {/* ── Model & Resolution Selector ─────────────────────────── */}
         <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 space-y-3">
           <div className="flex items-center gap-2 text-xs font-bold text-white/70 uppercase tracking-wider">
@@ -178,18 +187,10 @@ export function SeriesQueue({
             <span className="text-[11px] text-white/50">
               {settings.kieApiKey?.trim()
                 ? `KIE.AI verbunden · ${settings.kieModel} · ${settings.kieModel !== "gpt-image-2-text-to-image" ? settings.kieResolution : "Auto-Size"}`
-                : "Kein KIE.AI Key — Serie läuft im Demo-Modus"}
+                : "Kein KIE.AI Key — Demo-Modus aktiv"}
             </span>
           </div>
         </div>
-
-        <textarea
-          rows={9}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={"Thema: Disziplin\n\nSlide 1 – Hook\nPrompt text…\n\nSlide 2 – Konzept\nPrompt text…\n\n===\n\nThema: Fokus\nSlide 1 – Hook\n…"}
-          className="field-input text-xs sm:text-sm leading-relaxed font-mono"
-        />
 
         {carouselsWithTitles.length > 0 && (
           <div className="space-y-3">
