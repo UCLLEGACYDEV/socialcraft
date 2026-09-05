@@ -1,4 +1,4 @@
-import type { User, UserRole } from "./auth";
+import { type User, type UserRole, getStoredCurrentUser } from "./auth";
 import {
   DEFAULT_API_SETTINGS,
   ANCHORED_S4_ACCESS_KEY,
@@ -64,12 +64,13 @@ export function getCloudHeaders(): Record<string, string> {
 }
 
 /** Determines the standard folder path in cloud storage for a user */
-export function getUserS4Folder(user: User | null): string {
-  if (!user) return "USERCONTENT/users/guest";
-  if (user.role === "admin") {
-    return `USERCONTENT/admins/${user.id}`;
+export function getUserS4Folder(user?: User | null): string {
+  const effectiveUser = user || getStoredCurrentUser();
+  if (!effectiveUser) return "USERCONTENT/users/guest";
+  if (effectiveUser.role === "admin") {
+    return `USERCONTENT/admins/${effectiveUser.id}`;
   }
-  return `USERCONTENT/users/${user.id}`;
+  return `USERCONTENT/users/${effectiveUser.id}`;
 }
 
 /**
@@ -77,20 +78,21 @@ export function getUserS4Folder(user: User | null): string {
  * Especially crucial when admin is active, so the folder is ready in the cloud bucket!
  */
 export async function ensureUserS4Folder(
-  user: User | null
+  user?: User | null
 ): Promise<{ success: boolean; folder: string; createdPaths?: string[] | undefined; error?: string | undefined }> {
-  const folder = getUserS4Folder(user);
+  const effectiveUser = user || getStoredCurrentUser();
+  const folder = getUserS4Folder(effectiveUser);
   try {
     const res = await fetch("/api/cloud/ensure-folder", {
       method: "POST",
       headers: getCloudHeaders(),
       body: JSON.stringify({
         folderPath: folder,
-        user: user ? {
-          id: user.id,
-          name: user.name,
-          role: user.role,
-          email: user.email,
+        user: effectiveUser ? {
+          id: effectiveUser.id,
+          name: effectiveUser.name,
+          role: effectiveUser.role,
+          email: effectiveUser.email,
         } : undefined,
       }),
     });
@@ -132,18 +134,20 @@ export async function testCloudConnection(): Promise<{ success: boolean; message
  * Lists images stored in the user's cloud folder
  */
 export async function listS4Images(
-  user: User | null,
+  user?: User | null,
   folderFilter: "my" | "users" | "admins" | "all" = "my",
 ): Promise<S4CloudImage[]> {
   const settings = getSettings();
   const bucket = settings.s4Bucket || S4_DEFAULT_BUCKET;
   const endpoint = settings.s4Endpoint || S4_DEFAULT_ENDPOINT;
 
+  const effectiveUser = user || getStoredCurrentUser();
+
   let prefix = "";
-  if (!user) {
+  if (!effectiveUser) {
     prefix = "USERCONTENT/users/guest/";
-  } else if (user.role !== "admin" || folderFilter === "my") {
-    prefix = `${getUserS4Folder(user)}/`;
+  } else if (effectiveUser.role !== "admin" || folderFilter === "my") {
+    prefix = `${getUserS4Folder(effectiveUser)}/`;
   } else if (folderFilter === "users") {
     prefix = "USERCONTENT/users/";
   } else if (folderFilter === "admins") {
@@ -230,9 +234,9 @@ export async function listS4Images(
         filename,
         subfolder,
         projectName,
-        userId: user?.id || "unknown",
-        userName: user?.name || "Benutzer",
-        userRole: user?.role || "free",
+        userId: effectiveUser?.id || "unknown",
+        userName: effectiveUser?.name || "Benutzer",
+        userRole: effectiveUser?.role || "free",
         prompt: "Aus Cloud-Speicher geladen",
         category,
         sizeBytes: obj.size || 0,
@@ -252,7 +256,7 @@ export interface SaveImageToS4Params {
   prompt?: string | undefined;
   category: S4CloudImage["category"];
   aspectRatio?: string | undefined;
-  user: User | null;
+  user?: User | null;
   customFilename?: string | undefined;
   subfolder?: string | undefined;
   projectName?: string | undefined;
@@ -267,7 +271,8 @@ export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4Clou
   const bucket = settings.s4Bucket || S4_DEFAULT_BUCKET;
   const endpoint = settings.s4Endpoint || S4_DEFAULT_ENDPOINT;
 
-  const userRoot = getUserS4Folder(user);
+  const effectiveUser = user || getStoredCurrentUser();
+  const userRoot = getUserS4Folder(effectiveUser);
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10);
   const timestamp = Date.now().toString().slice(-6);
@@ -278,7 +283,14 @@ export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4Clou
   let targetFolder = `${userRoot}/gallery`;
   if (subfolder) {
     targetFolder = `${userRoot}/${subfolder.replace(/^\/+|\/+$/g, "")}`;
-  } else if (category === "carousel" || category === "series") {
+  } else if (category === "series") {
+    const cleanProject = (projectName || "current_series")
+      .replace(/[^a-zA-Z0-9-_\s]/g, "")
+      .trim()
+      .replace(/\s+/g, "_")
+      .slice(0, 45);
+    targetFolder = `${userRoot}/series/${cleanProject}`;
+  } else if (category === "carousel") {
     const cleanProject = (projectName || "current_carousel")
       .replace(/[^a-zA-Z0-9-_\s]/g, "")
       .trim()
@@ -366,7 +378,7 @@ export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4Clou
 }
 
 export interface SaveCarouselToS4Params {
-  user: User | null;
+  user?: User | null;
   carouselId: string;
   topic: string;
   slides: Array<{
@@ -389,7 +401,8 @@ export async function saveCarouselToS4(params: SaveCarouselToS4Params): Promise<
   uploadedSlides: number;
 }> {
   const { user, carouselId, topic, slides } = params;
-  const userRoot = getUserS4Folder(user);
+  const effectiveUser = user || getStoredCurrentUser();
+  const userRoot = getUserS4Folder(effectiveUser);
   const dateStr = new Date().toISOString().slice(0, 10);
   const cleanTopic = (topic || "Karussell")
     .replace(/[^a-zA-Z0-9-_\s]/g, "")
@@ -529,11 +542,12 @@ export async function deleteBatchS4Images(keys: string[]): Promise<number> {
   }
 }
 
-export async function getS4StorageStats(user: User | null, folderFilter: "my" | "users" | "admins" | "all" = "my") {
-  const images = await listS4Images(user, folderFilter);
+export async function getS4StorageStats(user?: User | null, folderFilter: "my" | "users" | "admins" | "all" = "my") {
+  const effectiveUser = user || getStoredCurrentUser();
+  const images = await listS4Images(effectiveUser, folderFilter);
   const totalBytes = images.reduce((acc, img) => acc + img.sizeBytes, 0);
   const totalMB = (totalBytes / (1024 * 1024)).toFixed(1);
-  const folder = getUserS4Folder(user);
+  const folder = getUserS4Folder(effectiveUser);
   return {
     count: images.length,
     totalBytes,
