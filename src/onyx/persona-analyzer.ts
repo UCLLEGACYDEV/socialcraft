@@ -342,7 +342,7 @@ Return JSON with keys: extractedWardrobe, extractedPose, extractedLighting, extr
                 name: clone.name,
                 genderAge: clone.genderAge,
                 hairFace: clone.hairFace,
-                tattoosFeatures: clone.tattoosFeatures,
+                tattoosFeatures: clone.tattoosFeatures ?? "",
               },
               summary: Array.isArray(parsed.summary)
                 ? parsed.summary
@@ -403,7 +403,7 @@ Return JSON with keys: extractedWardrobe, extractedPose, extractedLighting, extr
       name: clone.name,
       genderAge: clone.genderAge,
       hairFace: clone.hairFace,
-      tattoosFeatures: clone.tattoosFeatures,
+      tattoosFeatures: clone.tattoosFeatures ?? "",
     },
     summary: [
       `Identität deines Klons (${clone.name}) beibehalten: Gesicht, Haare & Tattoos unverändert`,

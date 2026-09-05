@@ -22,8 +22,8 @@ export interface SupabaseAuthResult {
  * Checks if active Supabase connection variables are available.
  */
 export function hasSupabaseConfig(): boolean {
-  const url = (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL) || ANCHORED_SUPABASE_URL;
-  const key = (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY) || ANCHORED_SUPABASE_KEY;
+  const url = (typeof import.meta !== "undefined" && import.meta.env?.['VITE_SUPABASE_URL']) || ANCHORED_SUPABASE_URL;
+  const key = (typeof import.meta !== "undefined" && import.meta.env?.['VITE_SUPABASE_PUBLISHABLE_KEY']) || ANCHORED_SUPABASE_KEY;
   return Boolean(url && key && url.trim() && key.trim());
 }
 

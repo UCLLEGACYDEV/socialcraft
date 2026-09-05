@@ -360,7 +360,7 @@ export function CreditUpgradeModal({
                   </p>
                 </div>
 
-                <form onSubmit={handleRedeemPromoCode} className="flex items-center gap-2 w-full sm:w-auto">
+                <form onSubmit={handleRedeemPromo} className="flex items-center gap-2 w-full sm:w-auto">
                   <input
                     type="text"
                     value={promoCodeInput}
