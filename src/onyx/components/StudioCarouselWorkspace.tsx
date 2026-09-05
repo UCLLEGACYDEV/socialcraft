@@ -38,6 +38,7 @@ interface StudioCarouselWorkspaceProps {
   onOpenCloneStudio: () => void;
   onOpenPromptHub: () => void;
   onOpenBrandKit: () => void;
+  onOpenSettings?: () => void;
   currentUser?: User | null;
 }
 
@@ -126,6 +127,7 @@ export function StudioCarouselWorkspace({
   onOpenCloneStudio,
   onOpenPromptHub,
   onOpenBrandKit,
+  onOpenSettings,
   currentUser,
 }: StudioCarouselWorkspaceProps) {
   const [selectedHookType, setSelectedHookType] = useState<string | null>(null);
@@ -179,11 +181,25 @@ export function StudioCarouselWorkspace({
         {/* Live Engine & Format Badges */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Engine indicator */}
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-white/80">
+          <button
+            type="button"
+            onClick={onOpenSettings}
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-white/80 hover:bg-white/[0.08] hover:border-white/20 transition-all cursor-pointer"
+            title="KIE.AI Nano-Banana 2 API konfigurieren"
+          >
             <Cpu className="h-3.5 w-3.5 text-[#FF6A1F]" />
             <span>Nano-Banana 2</span>
-            <span className="text-[10px] text-white/40">· 1.4s Renderzeit</span>
-          </div>
+            {settings?.kieApiKey?.trim() ? (
+              <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Live API
+              </span>
+            ) : (
+              <span className="text-[10px] text-amber-400 font-semibold bg-amber-500/10 px-1.5 py-0.2 rounded-full border border-amber-500/20">
+                Key einrichten
+              </span>
+            )}
+          </button>
 
           {/* Aspect Ratio Badge */}
           <button

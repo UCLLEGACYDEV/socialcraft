@@ -1,7 +1,10 @@
 import { useState } from "react";
 import { Download, ImageIcon, Loader2, Sparkles, Trash2, UserCheck } from "lucide-react";
-import { mockGenerateImage } from "../mock-api";
-import type { HistoryEntry } from "../types";
+import { toast } from "sonner";
+import { DEFAULT_API_SETTINGS } from "../defaults";
+import { generateImageUnified, mockGenerateImage } from "../mock-api";
+import { LS, readLS } from "../storage";
+import type { ApiSettings, HistoryEntry } from "../types";
 
 interface DirectPromptViewProps {
   initialPrompt?: string;
@@ -21,9 +24,22 @@ export function DirectPromptView({ initialPrompt }: DirectPromptViewProps = {}) 
   const run = async () => {
     if (!prompt.trim()) return;
     setLoading(true);
+    const settings = readLS<ApiSettings>(LS.apiSettings, DEFAULT_API_SETTINGS);
     try {
-      const res = await mockGenerateImage(images.length + 1);
+      const res = await generateImageUnified({
+        slideNumber: images.length + 1,
+        prompt: prompt.trim(),
+        settings,
+      });
       setImages((p) => [res.imageUrl, ...p]);
+      if (res.fromRealApi) {
+        toast.success("Einzelbild via Nano-Banana 2 berechnet! 🍌");
+      } else {
+        toast.success("Einzelbild berechnet (Demo-Modus)");
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Fehler beim Rendern";
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

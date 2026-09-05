@@ -21,12 +21,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import {
+  DEFAULT_API_SETTINGS,
   DEFAULT_CLONE_PROFILES,
   assembleClonePrompt,
 } from "../defaults";
-import { makeId, mockGenerateImage } from "../mock-api";
-import { LS, usePersistentState } from "../storage";
-import type { AiCloneProfile, ClonePlacement } from "../types";
+import { generateImageUnified, makeId, mockGenerateImage } from "../mock-api";
+import { LS, readLS, usePersistentState } from "../storage";
+import type { AiCloneProfile, ApiSettings, ClonePlacement } from "../types";
 import { cn } from "@/lib/utils";
 
 interface AiCloneViewProps {
@@ -199,10 +200,23 @@ export function AiCloneView({
   // Test render
   const handleTestRender = async () => {
     setTestImageLoading(true);
+    const settings = readLS<ApiSettings>(LS.apiSettings, DEFAULT_API_SETTINGS);
     try {
-      const res = await mockGenerateImage(testImages.length + 1);
+      const res = await generateImageUnified({
+        slideNumber: testImages.length + 1,
+        prompt: assembledPrompt || `Portrait of ${activeProfile.name}, cinematic lighting, photorealistic`,
+        settings,
+        ...(activeProfile.referenceImages.length > 0 ? { referenceImages: activeProfile.referenceImages } : {}),
+      });
       setTestImages((prev) => [res.imageUrl, ...prev]);
-      toast.success("Test-Visual mit Persona erfolgreich berechnet!");
+      if (res.fromRealApi) {
+        toast.success("Test-Visual via Nano-Banana 2 & deiner Persona gerendert! 🍌");
+      } else {
+        toast.success("Test-Visual mit Persona berechnet (Demo-Modus)!");
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Fehler beim Rendern";
+      toast.error(msg);
     } finally {
       setTestImageLoading(false);
     }

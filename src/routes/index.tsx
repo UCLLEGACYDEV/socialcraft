@@ -31,7 +31,13 @@ import {
   assembleClonePrompt,
 } from "@/onyx/defaults";
 import { LS, usePersistentState } from "@/onyx/storage";
-import { makeId, mockGenerateCarousel, mockGenerateImage, mockGetCredits } from "@/onyx/mock-api";
+import {
+  generateImageUnified,
+  getLiveCredits,
+  makeId,
+  mockGenerateCarousel,
+  mockGenerateImage,
+} from "@/onyx/mock-api";
 import { downloadSlide, exportCarouselAsZip } from "@/onyx/export-zip";
 import type {
   AiCloneProfile,
@@ -189,8 +195,8 @@ function OnyxStudio() {
     setCreditStatus((prev) =>
       prev ? { ...prev, loading: true } : { loading: true, kie: empty(), ai33: empty() },
     );
-    setCreditStatus(await mockGetCredits());
-  }, []);
+    setCreditStatus(await getLiveCredits(settings));
+  }, [settings]);
 
   useEffect(() => {
     void refreshCredits();
@@ -237,19 +243,43 @@ function OnyxStudio() {
     const controller = new AbortController();
     abortRef.current = controller;
     setIsGeneratingImages(true);
+    let realNanoCount = 0;
     try {
       for (const slide of slides) {
         if (controller.signal.aborted) break;
         setSlideFlag(slide.id, { isGeneratingImage: true });
         try {
-          const res = await mockGenerateImage(slide.slideNumber, controller.signal);
+          const res = await generateImageUnified({
+            slideNumber: slide.slideNumber,
+            prompt: slide.visualPrompt,
+            settings,
+            ...(brief.useClone && activeClone?.referenceImages && activeClone.referenceImages.length > 0
+              ? { referenceImages: activeClone.referenceImages }
+              : {}),
+            aspectRatio: brandKit.aspectRatio,
+            signal: controller.signal,
+          });
           setSlideFlag(slide.id, { imageUrl: res.imageUrl, isGeneratingImage: false });
-        } catch {
+          if (res.fromRealApi) realNanoCount++;
+        } catch (err: unknown) {
           setSlideFlag(slide.id, { isGeneratingImage: false });
-          break;
+          if (controller.signal.aborted) break;
+          const msg = err instanceof Error ? err.message : "Fehler beim Rendern";
+          toast.error(`Slide ${slide.slideNumber}: ${msg}`);
+          if (msg.includes("401") || msg.includes("API-Key") || msg.includes("402")) {
+            setShowSettings(true);
+            break;
+          }
         }
       }
-      if (!controller.signal.aborted) toast.success("Alle Visuals geladen");
+      if (!controller.signal.aborted) {
+        if (realNanoCount > 0) {
+          toast.success(`${realNanoCount} Visuals via Nano-Banana 2 gerendert! 🍌`);
+          void refreshCredits();
+        } else {
+          toast.success("Alle Visuals geladen");
+        }
+      }
     } finally {
       setIsGeneratingImages(false);
       abortRef.current = null;
@@ -259,8 +289,32 @@ function OnyxStudio() {
   const rerollImage = async (slideId: string) => {
     setSlideFlag(slideId, { isGeneratingImage: true });
     const slide = slides.find((s) => s.id === slideId);
-    const res = await mockGenerateImage(slide?.slideNumber ?? 1);
-    setSlideFlag(slideId, { imageUrl: `${res.imageUrl}&v=${Date.now()}`, isGeneratingImage: false });
+    if (!slide) return;
+    try {
+      const res = await generateImageUnified({
+        slideNumber: slide.slideNumber,
+        prompt: slide.visualPrompt,
+        settings,
+        ...(brief.useClone && activeClone?.referenceImages && activeClone.referenceImages.length > 0
+          ? { referenceImages: activeClone.referenceImages }
+          : {}),
+        aspectRatio: brandKit.aspectRatio,
+      });
+      setSlideFlag(slideId, { imageUrl: res.imageUrl, isGeneratingImage: false });
+      if (res.fromRealApi) {
+        toast.success(`Slide ${slide.slideNumber} via Nano-Banana 2 gerendert!`);
+        void refreshCredits();
+      } else {
+        toast.success(`Slide ${slide.slideNumber} neu gerendert`);
+      }
+    } catch (err: unknown) {
+      setSlideFlag(slideId, { isGeneratingImage: false });
+      const msg = err instanceof Error ? err.message : "Fehler beim Rendern";
+      toast.error(msg);
+      if (msg.includes("401") || msg.includes("API-Key") || msg.includes("402")) {
+        setShowSettings(true);
+      }
+    }
   };
 
   const resetCarousel = () => {
@@ -445,6 +499,10 @@ function OnyxStudio() {
               void refreshCredits();
             }}
             onNavigateAdmin={handleOpenAdmin}
+            settings={settings}
+            onChangeSettings={patchSettings}
+            creditStatus={creditStatus}
+            onRefreshCredits={() => void refreshCredits()}
           />
         )}
         <Toaster />
@@ -519,6 +577,7 @@ function OnyxStudio() {
                 onOpenCloneStudio={() => setActiveTab("ai-clone")}
                 onOpenPromptHub={() => setActiveTab("prompt-gallery")}
                 onOpenBrandKit={() => setShowBrandKit(true)}
+                onOpenSettings={() => setShowSettings(true)}
                 currentUser={currentUser}
               />
             ) : (
@@ -662,6 +721,10 @@ function OnyxStudio() {
             void refreshCredits();
           }}
           onNavigateAdmin={handleOpenAdmin}
+          settings={settings}
+          onChangeSettings={patchSettings}
+          creditStatus={creditStatus}
+          onRefreshCredits={() => void refreshCredits()}
         />
       )}
 

@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { Lock, Trash2 } from "lucide-react";
+import { Lock, Trash2, ExternalLink, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 import { ModalShell } from "./SlideEditModal";
 import { StudioSelect } from "./StudioSelect";
+import { fetchKieCredits, type KieCreditResult } from "../kie-api";
 import type { ApiSettings, ImageProvider } from "../types";
 import { cn } from "@/lib/utils";
 
 const PROVIDERS: { id: ImageProvider; label: string }[] = [
-  { id: "kie-ai", label: "KIE.AI" },
+  { id: "kie-ai", label: "KIE.AI (Nano-Banana 2)" },
   { id: "ai33-pro", label: "ai33.pro" },
   { id: "gemini-imagen", label: "Google Imagen" },
-  { id: "mock", label: "Studio Preset" },
+  { id: "mock", label: "Studio Preset (Demo)" },
 ];
 
 const AI33_MODELS = ["flux-pro", "flux-dev", "sdxl-turbo", "midjourney-proxy", "imagen-3"];
@@ -20,6 +22,7 @@ interface SettingsModalProps {
   onClose: () => void;
   motifCount: number;
   onClearMotifs: () => void;
+  onCreditsUpdated?: () => void;
 }
 
 export function SettingsModal({
@@ -28,8 +31,36 @@ export function SettingsModal({
   onClose,
   motifCount,
   onClearMotifs,
+  onCreditsUpdated,
 }: SettingsModalProps) {
   const [confirmClear, setConfirmClear] = useState(false);
+  const [isTestingKie, setIsTestingKie] = useState(false);
+  const [kieStatus, setKieStatus] = useState<KieCreditResult | null>(null);
+
+  const testKieBalance = async () => {
+    if (!settings.kieApiKey?.trim()) {
+      toast.error("Bitte zuerst einen KIE.AI API-Key eingeben.");
+      return;
+    }
+    setIsTestingKie(true);
+    try {
+      const res = await fetchKieCredits(settings.kieApiKey);
+      setKieStatus(res);
+      if (res.success) {
+        toast.success(`KIE.AI verbunden: ${res.formatted} verfügbar!`, {
+          description: "Nano-Banana 2 Engine ist jetzt scharf geschaltet.",
+        });
+        onChange({ provider: "kie-ai" });
+        onCreditsUpdated?.();
+      } else {
+        toast.error(`KIE.AI Fehler: ${res.error || "Verbindung fehlgeschlagen"}`, {
+          description: "Bitte API-Key auf kie.ai/api-key überprüfen.",
+        });
+      }
+    } finally {
+      setIsTestingKie(false);
+    }
+  };
 
   return (
     <ModalShell
@@ -72,33 +103,72 @@ export function SettingsModal({
           </div>
         </Section>
 
-        <Section title="KIE.AI (Banana Engine)">
+        <Section title="KIE.AI (Nano-Banana 2 Engine)">
           <Row label="API Key">
             <input
               type="password"
               className="field-input"
               value={settings.kieApiKey}
               onChange={(e) => onChange({ kieApiKey: e.target.value })}
-              placeholder="kie_..."
+              placeholder="Bearer Token von kie.ai/api-key"
             />
           </Row>
-          <Row label="Webhook Key">
-            <input
-              type="password"
-              className="field-input"
-              value={settings.kieWebhookKey}
-              onChange={(e) => onChange({ kieWebhookKey: e.target.value })}
-              placeholder="Optionaler Webhook Key"
-            />
-          </Row>
+
+          {/* Live Credit Status & Test Action */}
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 space-y-2.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-zinc-400">Live KIE.AI Plattform-Guthaben:</span>
+              {kieStatus ? (
+                <span
+                  className={cn(
+                    "text-xs font-mono font-semibold px-2 py-0.5 rounded-full border",
+                    kieStatus.success
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                      : "border-red-500/30 bg-red-500/10 text-red-400",
+                  )}
+                >
+                  {kieStatus.success ? `🟢 ${kieStatus.formatted}` : `🔴 ${kieStatus.error || "Fehler"}`}
+                </span>
+              ) : settings.kieApiKey ? (
+                <span className="text-xs text-amber-400 font-mono">Key hinterlegt (ungeprüft)</span>
+              ) : (
+                <span className="text-xs text-zinc-500 font-mono">Kein Key hinterlegt</span>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={testKieBalance}
+                disabled={isTestingKie}
+                className="flex items-center gap-1.5 rounded-xl border border-orange-500/40 bg-orange-500/15 px-3 py-1.5 text-xs font-semibold text-orange-400 hover:bg-orange-500/25 transition-all disabled:opacity-50"
+              >
+                <RefreshCw className={cn("h-3.5 w-3.5", isTestingKie && "animate-spin")} />
+                {isTestingKie ? "Rufe Credits von api.kie.ai ab…" : "Guthaben von KIE.AI abrufen & testen"}
+              </button>
+
+              <a
+                href="https://kie.ai/api-key"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition-colors underline underline-offset-2 ml-auto"
+              >
+                <span>API-Key bei kie.ai holen</span>
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </div>
+          </div>
+
           <Row label="Modell">
             <StudioSelect
               value={settings.kieModel}
               onChange={(v) => onChange({ kieModel: v as ApiSettings["kieModel"] })}
-              options={["nano-banana-2", "nano-banana-2-lite", "nano-banana-pro"].map((m) => ({
-                value: m,
-                label: m,
-              }))}
+              options={[
+                { value: "nano-banana-2", label: "nano-banana-2 (Empfohlen)" },
+                { value: "nano-banana-2-lite", label: "nano-banana-2-lite (Schnell)" },
+                { value: "nano-banana-pro", label: "nano-banana-pro (Premium Qualität)" },
+                { value: "gpt-image-2-text-to-image", label: "gpt-image-2 (OpenAI via KIE.AI)" },
+              ]}
               ariaLabel="KIE.AI Modell"
             />
           </Row>
@@ -107,11 +177,20 @@ export function SettingsModal({
               value={settings.kieResolution}
               onChange={(v) => onChange({ kieResolution: v as ApiSettings["kieResolution"] })}
               options={[
-                { value: "1K", label: "1K (Standard)" },
+                { value: "1K", label: "1K (Standard & Schnell)" },
                 { value: "2K", label: "2K HD" },
                 { value: "4K", label: "4K Ultra" },
               ]}
               ariaLabel="Auflösung"
+            />
+          </Row>
+          <Row label="Optionaler Webhook">
+            <input
+              type="text"
+              className="field-input"
+              value={settings.kieWebhookKey}
+              onChange={(e) => onChange({ kieWebhookKey: e.target.value })}
+              placeholder="https://deine-domain.de/api/callback"
             />
           </Row>
         </Section>
@@ -188,7 +267,7 @@ export function SettingsModal({
           </div>
         </Section>
 
-        <p className="text-[11px] text-zinc-500">ONYX Studio · Cryptox Dark Ember Edition v1.1.2</p>
+        <p className="text-[11px] text-zinc-500">ONYX Studio · Nano Banana 2 Production v2.0</p>
       </div>
     </ModalShell>
   );

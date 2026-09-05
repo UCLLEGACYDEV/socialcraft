@@ -140,19 +140,29 @@ export function CryptoxNavbar({
             <div
               onClick={onRefreshCredits}
               className="flex items-center gap-1.5 cursor-pointer hover:text-white"
-              title="Klicken zum Aktualisieren"
+              title="Klicken zum Aktualisieren vom KIE.AI Server"
             >
               <Coins className="h-3.5 w-3.5 text-[#FF6A1F]" />
               <span className="font-semibold text-white font-mono">
-                {currentUser ? `${currentUser.credits.toLocaleString()} cr` : (creditStatus?.kie.formatted ?? "4.320 cr")}
+                {creditStatus?.kie.success
+                  ? `${creditStatus.kie.formatted} (KIE.AI)`
+                  : currentUser
+                  ? `${currentUser.credits.toLocaleString()} cr`
+                  : creditStatus?.kie.formatted ?? "Guthaben abrufen"}
               </span>
+              <RefreshCw
+                className={cn(
+                  "h-3 w-3 text-white/40 hover:text-white transition-colors",
+                  creditStatus?.loading && "animate-spin text-[#FFA149]",
+                )}
+              />
             </div>
             {onOpenCreditsUpgrade && (
               <button
                 type="button"
                 onClick={onOpenCreditsUpgrade}
                 className="flex items-center gap-1 rounded-full bg-[#FF4D17] hover:bg-[#FF6A1F] text-white px-2.5 py-1 text-[11px] font-bold shadow-[0_0_12px_#FF4D17] transition-all cursor-pointer"
-                title="Credits aufladen & upgraden"
+                title="Credits aufladen & KIE.AI verwalten"
               >
                 <span>+ Aufladen</span>
               </button>

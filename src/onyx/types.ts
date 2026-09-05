@@ -55,7 +55,7 @@ export interface ApiSettings {
   provider: ImageProvider;
   kieApiKey: string;
   kieWebhookKey: string;
-  kieModel: "nano-banana-2" | "nano-banana-2-lite" | "nano-banana-pro";
+  kieModel: "nano-banana-2" | "nano-banana-2-lite" | "nano-banana-pro" | "gpt-image-2-text-to-image";
   kieResolution: "1K" | "2K" | "4K";
   ai33ApiKey: string;
   ai33Model: string;

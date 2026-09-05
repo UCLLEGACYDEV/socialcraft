@@ -1,4 +1,5 @@
-import type { CreditStatus, SlideContent, SlideRole } from "./types";
+import { fetchKieCredits, generateNanoBananaImage, type KieModel } from "./kie-api";
+import type { ApiSettings, CreditStatus, ImageProvider, SlideContent, SlideRole } from "./types";
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -88,23 +89,110 @@ export async function mockGenerateCarousel(
   });
 }
 
-export async function mockGenerateImage(slideNumber: number, signal?: AbortSignal) {
+export interface GenerateImageParams {
+  slideNumber: number;
+  prompt?: string;
+  settings?: ApiSettings;
+  referenceImages?: string[] | undefined;
+  aspectRatio?: "4:5" | "1:1";
+  signal?: AbortSignal | undefined;
+  onProgress?: ((info: { state: string; message: string }) => void) | undefined;
+}
+
+// High-resolution fallback visuals for demo mode when no API key is set
+const MOCK_EDITORIAL_IMAGES = [
+  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1080&h=1350&q=85",
+  "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=1080&h=1350&q=85",
+  "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=1080&h=1350&q=85",
+  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1080&h=1350&q=85",
+  "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=1080&h=1350&q=85",
+  "https://images.unsplash.com/photo-1614850523459-c2f4c699c52e?auto=format&fit=crop&w=1080&h=1350&q=85",
+  "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=1080&h=1350&q=85",
+  "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1080&h=1350&q=85",
+];
+
+export async function generateImageUnified(params: GenerateImageParams): Promise<{
+  success: boolean;
+  imageUrl: string;
+  provider: ImageProvider;
+  fromRealApi: boolean;
+}> {
+  const { slideNumber, prompt, settings, referenceImages, aspectRatio = "4:5", signal, onProgress } = params;
+
+  // If user has a KIE.AI key and provider is kie-ai (or default), use real Nano-Banana 2 API!
+  const hasKieKey = Boolean(settings?.kieApiKey?.trim());
+  const useKieAi = hasKieKey && (settings?.provider === "kie-ai" || settings?.provider === "mock" || !settings?.provider);
+
+  if (useKieAi && settings?.kieApiKey) {
+    try {
+      const result = await generateNanoBananaImage({
+        model: (settings.kieModel || "nano-banana-2") as KieModel,
+        apiKey: settings.kieApiKey,
+        prompt: prompt || `Instagram 4:5 Carousel Slide ${slideNumber}, dark aesthetic, cinematic rim light, professional branding`,
+        ...(referenceImages && referenceImages.length > 0 ? { imageInput: referenceImages } : {}),
+        aspectRatio: aspectRatio,
+        resolution: settings.kieResolution || "1K",
+        outputFormat: "jpg",
+        ...(signal !== undefined ? { signal } : {}),
+        ...(onProgress !== undefined ? { onProgress } : {}),
+      });
+
+      return {
+        success: true,
+        imageUrl: result.imageUrl,
+        provider: "kie-ai",
+        fromRealApi: true,
+      };
+    } catch (err: unknown) {
+      console.warn("Nano-Banana 2 API Call failed, falling back to preview visual:", err);
+      // Re-throw if cancelled by user
+      if (signal?.aborted) throw err;
+      // If error is authentication or insufficient balance, throw so UI can inform user
+      if (err instanceof Error && (err.message.includes("401") || err.message.includes("402"))) {
+        throw err;
+      }
+      // Otherwise throw the error so the user knows what happened
+      throw err;
+    }
+  }
+
+  // Fallback demo/mock generation
   await delay(800 + Math.random() * 400);
   if (signal?.aborted) throw new DOMException("aborted", "AbortError");
+
+  const fallbackUrl = MOCK_EDITORIAL_IMAGES[(slideNumber - 1) % MOCK_EDITORIAL_IMAGES.length]!;
   return {
     success: true,
-    imageUrl: `https://placehold.co/1080x1350/060509/9333ea/png?text=Slide+${slideNumber}`,
-    provider: "mock" as const,
+    imageUrl: fallbackUrl,
+    provider: "mock",
+    fromRealApi: false,
   };
 }
 
-export async function mockGetCredits(): Promise<CreditStatus> {
-  await delay(300);
+export async function mockGenerateImage(slideNumber: number, signal?: AbortSignal) {
+  return generateImageUnified({ slideNumber, signal });
+}
+
+export async function getLiveCredits(settings?: ApiSettings): Promise<CreditStatus> {
+  const key = settings?.kieApiKey?.trim();
+  if (key) {
+    const liveKie = await fetchKieCredits(key);
+    return {
+      loading: false,
+      kie: liveKie,
+      ai33: { credits: 210, formatted: "210 cr", success: true },
+    };
+  }
+
   return {
     loading: false,
-    kie: { credits: 4320, formatted: "4.320 cr", success: true },
+    kie: { credits: 0, formatted: "Key fehlt", success: false },
     ai33: { credits: 210, formatted: "210 cr", success: true },
   };
+}
+
+export async function mockGetCredits(settings?: ApiSettings): Promise<CreditStatus> {
+  return getLiveCredits(settings);
 }
 
 export async function mockNameTopic(topic: string): Promise<string> {
@@ -112,3 +200,4 @@ export async function mockNameTopic(topic: string): Promise<string> {
   const words = topic.trim().split(/\s+/).filter(Boolean).slice(0, 4);
   return words.length ? words.join(" ") : "Unbenannt";
 }
+

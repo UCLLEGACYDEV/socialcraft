@@ -80,17 +80,19 @@ export function ModalShell({
   children,
   footer,
   maxHeight = "88vh",
+  maxWidth = "max-w-3xl",
 }: {
   title: string;
   onClose: () => void;
   children: React.ReactNode;
   footer?: React.ReactNode;
   maxHeight?: string;
+  maxWidth?: string;
 }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-xl animate-in fade-in duration-200">
       <div
-        className="cryptox-card-elevated relative flex w-full max-w-3xl flex-col overflow-hidden rounded-3xl"
+        className={`cryptox-card-elevated relative flex w-full ${maxWidth} flex-col overflow-hidden rounded-3xl`}
         style={{ maxHeight }}
       >
         <div className="flex items-center justify-between border-b border-white/[0.08] px-6 py-4 bg-white/[0.02]">

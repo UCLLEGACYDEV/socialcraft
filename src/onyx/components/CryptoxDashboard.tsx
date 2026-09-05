@@ -323,20 +323,20 @@ export function CryptoxDashboard({
                 <span className="font-medium text-white/70">Bild-Modell</span>
                 <span className="font-bold text-white">{settings.kieModel}</span>
               </div>
-              <div className="flex gap-1.5">
-                {(["nano-banana-2", "nano-banana-pro"] as const).map((m) => (
+              <div className="flex gap-1.5 flex-wrap">
+                {(["nano-banana-2", "nano-banana-pro", "gpt-image-2-text-to-image"] as const).map((m) => (
                   <button
                     key={m}
                     type="button"
                     onClick={() => onChangeSettings({ kieModel: m })}
                     className={cn(
-                      "flex-1 rounded-xl border py-1.5 text-xs font-semibold transition-colors",
+                      "flex-1 rounded-xl border py-1.5 text-xs font-semibold transition-colors min-w-fit px-2",
                       settings.kieModel === m
                         ? "border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF6A1F]"
                         : "border-white/10 bg-white/[0.03] text-white/60 hover:text-white",
                     )}
                   >
-                    {m}
+                    {m === "nano-banana-2" ? "Nano-Banana 2" : m === "nano-banana-pro" ? "Nano-Banana Pro" : "GPT Image 2"}
                   </button>
                 ))}
               </div>
