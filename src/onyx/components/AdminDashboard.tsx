@@ -55,7 +55,7 @@ const INITIAL_LOGS: AuditLog[] = [
   {
     id: "log-1",
     timestamp: "2026-09-05 06:12",
-    adminName: "Alexander Vance",
+    adminName: "Daniel (Socialcraft AI Admin)",
     action: "Credits gutgeschrieben",
     targetUser: "Elena Rostova",
     details: "+2.000 Credits (Profi-Paket Update)",
@@ -63,14 +63,14 @@ const INITIAL_LOGS: AuditLog[] = [
   {
     id: "log-2",
     timestamp: "2026-09-05 04:30",
-    adminName: "Alexander Vance",
+    adminName: "Daniel (Socialcraft AI Admin)",
     action: "System Update",
     details: "Nano Banana 2 Proxy Cache optimiert",
   },
   {
     id: "log-3",
     timestamp: "2026-09-04 19:45",
-    adminName: "Alexander Vance",
+    adminName: "Daniel (Socialcraft AI Admin)",
     action: "Rolle aktualisiert",
     targetUser: "Robert Brian",
     details: "Hochgestuft auf 'pro'",
@@ -78,7 +78,7 @@ const INITIAL_LOGS: AuditLog[] = [
   {
     id: "log-4",
     timestamp: "2026-09-04 11:20",
-    adminName: "Alexander Vance",
+    adminName: "Daniel (Socialcraft AI Admin)",
     action: "Neuer Benutzer",
     targetUser: "Cody Fisher",
     details: "Registrierung bestätigt (+500 Welcome Credits)",

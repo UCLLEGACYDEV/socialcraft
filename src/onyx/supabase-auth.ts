@@ -33,7 +33,7 @@ export function hasSupabaseConfig(): boolean {
 export const DEFAULT_ADMIN_CREDENTIALS = {
   email: "admin@socialcraft.ai",
   password: "SocialcraftAdmin2026!#",
-  name: "Alexander Vance (Admin)",
+  name: "Daniel (Socialcraft AI Admin)",
   role: "admin" as UserRole,
 };
 
@@ -41,15 +41,16 @@ export const DEFAULT_ADMIN_CREDENTIALS = {
  * Maps Supabase profile row to local User interface
  */
 function mapProfileToUser(profile: Record<string, any>, fallbackEmail: string): User {
+  const role = (profile['role'] as UserRole) || "creator";
   return {
     id: profile['id'],
-    name: profile['name'] || "Creator",
+    name: profile['name'] || (role === "admin" ? "Daniel (Socialcraft AI Admin)" : "Creator"),
     email: profile['email'] || fallbackEmail,
-    role: (profile['role'] as UserRole) || "creator",
+    role,
     credits: typeof profile['credits'] === "number" ? profile['credits'] : 1000,
-    avatarUrl: profile['avatar_url'] || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    avatarUrl: profile['avatar_url'] || (role === "admin" ? "/images/socialcraft-admin-logo.jpg" : "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face"),
     status: profile['status'] === "suspended" ? "suspended" : "active",
-    company: profile['company'] || "Socialcraft Studio",
+    company: profile['company'] || "Socialcraft AI Studio",
     createdAt: profile['created_at'] || new Date().toISOString(),
     lastLoginAt: profile['last_login_at'] || new Date().toISOString(),
   };

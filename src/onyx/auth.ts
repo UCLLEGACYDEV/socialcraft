@@ -24,15 +24,15 @@ const USERS_STORAGE_KEY = "onyx.usersList";
 export const INITIAL_USERS: User[] = [
   {
     id: "usr-admin-01",
-    name: "Alexander Vance",
+    name: "Daniel (Socialcraft AI Admin)",
     email: "admin@socialcraft.ai",
     role: "admin",
     credits: 99999,
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    avatarUrl: "/images/socialcraft-admin-logo.jpg",
     status: "active",
     createdAt: "2025-10-01T10:00:00Z",
     lastLoginAt: "2026-09-05T06:30:00Z",
-    company: "Socialcraft HQ",
+    company: "Socialcraft AI HQ",
   },
   {
     id: "usr-creator-02",
@@ -91,8 +91,28 @@ export function getStoredUsers(): User[] {
       localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(INITIAL_USERS));
       return INITIAL_USERS;
     }
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : INITIAL_USERS;
+    const parsed: User[] = JSON.parse(raw);
+    if (!Array.isArray(parsed) || parsed.length === 0) return INITIAL_USERS;
+
+    // Auto-migrate old Alexander admin records to Daniel with brand logo
+    let changed = false;
+    const migrated = parsed.map((u) => {
+      if (u.role === "admin" && (u.name.toLowerCase().includes("alexander") || u.avatarUrl.includes("photo-1534528741775"))) {
+        changed = true;
+        return {
+          ...u,
+          name: "Daniel (Socialcraft AI Admin)",
+          avatarUrl: "/images/socialcraft-admin-logo.jpg",
+          company: "Socialcraft AI HQ",
+        };
+      }
+      return u;
+    });
+
+    if (changed) {
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(migrated));
+    }
+    return migrated;
   } catch {
     return INITIAL_USERS;
   }
@@ -112,7 +132,18 @@ export function getStoredCurrentUser(): User | null {
   try {
     const raw = localStorage.getItem(AUTH_STORAGE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw);
+    const parsed: User = JSON.parse(raw);
+    if (parsed && parsed.role === "admin" && (parsed.name.toLowerCase().includes("alexander") || parsed.avatarUrl?.includes("photo-1534528741775"))) {
+      const updated = {
+        ...parsed,
+        name: "Daniel (Socialcraft AI Admin)",
+        avatarUrl: "/images/socialcraft-admin-logo.jpg",
+        company: "Socialcraft AI HQ",
+      };
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(updated));
+      return updated;
+    }
+    return parsed;
   } catch {
     return null;
   }

@@ -242,8 +242,11 @@ export function CryptoxNavbar({
                   )}
                 >
                   <img
-                    src={currentUser.avatarUrl}
+                    src={currentUser.avatarUrl || "/images/socialcraft-admin-logo.jpg"}
                     alt={currentUser.name}
+                    onError={(e) => {
+                      e.currentTarget.src = "/images/socialcraft-admin-logo.jpg";
+                    }}
                     className="h-7 w-7 rounded-lg object-cover border border-white/20"
                   />
                   <div className="hidden lg:flex flex-col text-left">
@@ -266,8 +269,11 @@ export function CryptoxNavbar({
                 {/* Header Profile Info */}
                 <div className="flex items-center gap-3 p-2.5 bg-white/[0.02] rounded-xl border border-white/[0.06] mb-1">
                   <img
-                    src={currentUser.avatarUrl}
+                    src={currentUser.avatarUrl || "/images/socialcraft-admin-logo.jpg"}
                     alt={currentUser.name}
+                    onError={(e) => {
+                      e.currentTarget.src = "/images/socialcraft-admin-logo.jpg";
+                    }}
                     className="h-9 w-9 rounded-xl object-cover border border-white/20"
                   />
                   <div className="flex-1 min-w-0">

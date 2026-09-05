@@ -124,13 +124,13 @@ function OnyxStudio() {
     if (currentUser?.role !== "admin") {
       const users = getStoredUsers();
       const adminUser = users.find((u) => u.role === "admin") ?? {
-        id: "usr-admin-1",
-        name: "Alexander Weber (Admin)",
+        id: "usr-admin-01",
+        name: "Daniel (Socialcraft AI Admin)",
         email: "admin@socialcraft.ai",
         role: "admin" as const,
         credits: 99999,
         createdAt: new Date().toISOString(),
-        avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        avatarUrl: "/images/socialcraft-admin-logo.jpg",
         status: "active" as const,
       };
       saveStoredCurrentUser(adminUser);
