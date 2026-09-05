@@ -1,9 +1,9 @@
-# ONYX Studio (SOCIALCRAFT)
+# SOCIALCRAFT AI (ONYX Studio)
 
 > **High-End Instagram Karussell Generator, Seriengenerator & KI-Persona-Studio.**  
 > Entwickelt für Creator, Gründer und Personal Brands — 100 % Local-First, clientseitig im Browser mit LocalStorage ohne Cloud-Zwang.
 
-![ONYX Studio](https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1600&q=80)
+![Socialcraft AI Instagram Carousel Studio](./public/images/socialcraft-readme-hero.jpg)
 
 ---
 
