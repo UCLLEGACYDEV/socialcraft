@@ -106,30 +106,28 @@ export function SocialcraftParallaxHero({
   return (
     <div
       ref={containerRef}
-      className="relative w-full overflow-hidden bg-[#07050A] text-white pt-10 pb-24"
+      className="relative w-full overflow-hidden bg-[#050508] text-white pt-10 pb-24"
     >
-      {/* ── Layer 1: Background Video & Ambient Glow ───────────────── */}
+      {/* ── Layer 1: Clean Dark Canvas with Video & Delicate Dot Grid ─ */}
       <div
         data-layer="bg"
         className="pointer-events-none absolute inset-0 z-0 h-[140%] w-full overflow-hidden"
       >
-        {/* Ambient colored blur glows */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 h-[550px] w-[800px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,77,23,0.3)_0%,rgba(147,51,234,0.15)_40%,transparent_70%)] blur-[120px]" />
-        <div className="absolute top-10 left-[10%] h-[350px] w-[350px] rounded-full bg-cyan-500/15 blur-[140px]" />
-        <div className="absolute top-1/3 right-[10%] h-[400px] w-[400px] rounded-full bg-[#FF4D17]/20 blur-[130px]" />
+        {/* Subtle Tech Dot Grid Pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(#ffffff0a_1px,transparent_1px)] [background-size:24px_24px]" />
 
-        {/* Jelly Video Background */}
+        {/* Jelly Video Background with clean blend */}
         <video
           autoPlay
           loop
           muted
           playsInline
           src="https://ease-one.vercel.app/bg/something.mp4"
-          className="h-full w-full object-cover opacity-25 mix-blend-screen"
+          className="h-full w-full object-cover opacity-20 mix-blend-screen"
         />
 
-        {/* Bottom Fade Gradient */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#07050A]/40 via-transparent to-[#07050A]" />
+        {/* Smooth Clean Fade Out */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#050508] via-transparent to-[#050508]" />
       </div>
 
       {/* ── Parallax Scene Container ───────────────────────────────── */}
@@ -139,9 +137,9 @@ export function SocialcraftParallaxHero({
           {/* Top Left Badge */}
           <div
             data-layer="badge-left"
-            className="absolute left-6 top-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/85 px-4 py-2 text-xs font-semibold text-white/90 shadow-[0_15px_35px_rgba(0,0,0,0.7)] backdrop-blur-xl"
+            className="absolute left-6 top-8 inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/90 px-4 py-2 text-xs font-semibold text-white/90 shadow-[0_15px_35px_rgba(0,0,0,0.8)] backdrop-blur-xl"
           >
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#FF4D17] text-[10px] text-white">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-[#FF4D17] text-[10px] text-white shadow-[0_0_10px_#FF4D17]">
               <Flame className="h-3 w-3" />
             </div>
             <span>Viraler Hook Booster ✦</span>
@@ -150,9 +148,9 @@ export function SocialcraftParallaxHero({
           {/* Bottom Left Badge */}
           <div
             data-layer="badge-left"
-            className="absolute left-16 top-40 inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/85 px-4 py-2 text-xs font-semibold text-white/90 shadow-[0_15px_35px_rgba(0,0,0,0.7)] backdrop-blur-xl"
+            className="absolute left-16 top-40 inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/90 px-4 py-2 text-xs font-semibold text-white/90 shadow-[0_15px_35px_rgba(0,0,0,0.8)] backdrop-blur-xl"
           >
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500 text-[10px] text-white">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-cyan-500 text-[10px] text-white shadow-[0_0_10px_#06B6D4]">
               <Zap className="h-3 w-3" />
             </div>
             <span>Storyline Optimierer ⚙</span>
@@ -161,9 +159,9 @@ export function SocialcraftParallaxHero({
           {/* Top Right Badge */}
           <div
             data-layer="badge-right"
-            className="absolute right-8 top-10 inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/85 px-4 py-2 text-xs font-semibold text-white/90 shadow-[0_15px_35px_rgba(0,0,0,0.7)] backdrop-blur-xl"
+            className="absolute right-8 top-10 inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/90 px-4 py-2 text-xs font-semibold text-white/90 shadow-[0_15px_35px_rgba(0,0,0,0.8)] backdrop-blur-xl"
           >
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] text-white">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-[10px] text-white shadow-[0_0_10px_#F59E0B]">
               ✦
             </div>
             <span>Nano Banana 2 Engine</span>
@@ -172,40 +170,40 @@ export function SocialcraftParallaxHero({
           {/* Bottom Right Badge */}
           <div
             data-layer="badge-right"
-            className="absolute right-14 top-44 inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/85 px-4 py-2 text-xs font-semibold text-white/90 shadow-[0_15px_35px_rgba(0,0,0,0.7)] backdrop-blur-xl"
+            className="absolute right-14 top-44 inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#120F17]/90 px-4 py-2 text-xs font-semibold text-white/90 shadow-[0_15px_35px_rgba(0,0,0,0.8)] backdrop-blur-xl"
           >
-            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-600 text-[10px] text-white">
+            <div className="flex h-5 w-5 items-center justify-center rounded-full bg-purple-600 text-[10px] text-white shadow-[0_0_10px_#9333EA]">
               <Sparkles className="h-3 w-3" />
             </div>
             <span>Konsistenter KI-Klon</span>
           </div>
         </div>
 
-        {/* ── Layer 2: Main Text & CTA (UI Design from 2nd Component) ── */}
+        {/* ── Layer 2: Clean Apple Pro Display Typography & CTA ──────── */}
         <div data-layer="text" className="mx-auto max-w-4xl text-center pt-8 sm:pt-14 pb-12">
           {/* Top Category Capsule */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary-bright mb-6 shadow-[0_0_20px_rgba(255,77,23,0.25)]">
-            <Sparkles className="h-3.5 w-3.5" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 text-xs font-semibold text-zinc-300 mb-6 shadow-[0_4px_20px_rgba(0,0,0,0.5)] backdrop-blur-xl">
+            <Sparkles className="h-3.5 w-3.5 text-[#FF6A1F]" />
             <span>Socialcraft Studio · Der neue Standard für Instagram Karussells</span>
           </div>
 
-          {/* Gradient Display Headline */}
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-b from-white via-orange-100 to-white/70 leading-[1.1] pb-3">
+          {/* Clean High-Contrast Headline (No Muddy Gradient) */}
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.1] pb-3">
             Erstelle virale Karussells & skaliere deine Reichweite.
           </h1>
 
           {/* Subtitle */}
-          <p className="mt-4 text-base sm:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+          <p className="mt-4 text-base sm:text-xl text-zinc-400 max-w-2xl mx-auto leading-relaxed">
             Socialcraft ist der High-End KI-Karussell-Builder für Creator und Marken:
             Psychologische Hook-Führung, synchrone KI-Klone und 1-Klick-Exports für Instagram im 4:5-Format.
           </p>
 
-          {/* CTA Button with Dual Arrow-Up-Right Animation (2nd Component Style) */}
+          {/* CTA Button with Dual Arrow-Up-Right Animation */}
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               type="button"
               onClick={onCtaClick}
-              className="group inline-flex text-base sm:text-lg gap-x-2.5 backdrop-blur-xl text-white justify-center items-center py-3.5 px-8 rounded-2xl border border-[#FF4D17]/50 bg-gradient-to-r from-[#FF3B00] via-[#FF5722] to-[#FFA149] font-bold shadow-[0_0_40px_rgba(255,77,23,0.55)] hover:scale-105 hover:shadow-[0_0_55px_rgba(255,77,23,0.8)] transition-all duration-300 cursor-pointer"
+              className="group inline-flex text-base sm:text-lg gap-x-2.5 backdrop-blur-xl text-white justify-center items-center py-3.5 px-8 rounded-2xl border border-[#FF4D17]/60 bg-gradient-to-r from-[#FF3B00] via-[#FF5722] to-[#FFA149] font-bold shadow-[0_0_35px_rgba(255,77,23,0.55)] hover:scale-105 hover:shadow-[0_0_50px_rgba(255,77,23,0.8)] transition-all duration-300 cursor-pointer"
             >
               <span>Jetzt im Studio starten</span>
               <div className="flex overflow-hidden relative justify-center items-center ml-1 w-5 h-5">
@@ -228,7 +226,7 @@ export function SocialcraftParallaxHero({
 
         {/* ── Layer 4: 3D Perspective Socialcraft Studio Dashboard ────── */}
         <div data-layer="mockup" className="relative mt-2 sm:mt-6 z-20">
-          <div className="relative mx-auto max-w-6xl rounded-3xl p-2 sm:p-4 bg-gradient-to-b from-white/15 via-white/[0.05] to-transparent shadow-[0_35px_120px_-20px_rgba(255,77,23,0.35),0_0_80px_rgba(0,0,0,0.9)] backdrop-blur-2xl border border-white/15 transition-transform">
+          <div className="relative mx-auto max-w-6xl rounded-3xl p-2 sm:p-4 bg-white/[0.04] shadow-[0_30px_90px_rgba(0,0,0,0.95)] backdrop-blur-2xl border border-white/15 transition-transform">
             {/* The 3D Mockup Image generated for Socialcraft */}
             <img
               src="/images/socialcraft-hero-3d.jpg"

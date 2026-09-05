@@ -71,13 +71,9 @@ export function CryptoxLandingPage({
   ];
 
   return (
-    <div className="relative min-h-screen bg-[#07050A] text-white selection:bg-[#FF4D17]/30 overflow-x-hidden font-sans">
-      {/* ── Fixed Ambient Background Glows ────────────────────────── */}
-      <div className="pointer-events-none fixed inset-0 z-0">
-        <div className="absolute -top-[20%] left-1/2 -translate-x-1/2 h-[750px] w-[950px] rounded-full bg-[radial-gradient(circle_at_center,#FF3B00_0%,#E64A19_25%,#601300_50%,transparent_75%)] opacity-35 blur-[130px]" />
-        <div className="absolute top-[40%] -left-[10%] h-[500px] w-[500px] rounded-full bg-[#FF4D17]/10 blur-[140px]" />
-        <div className="absolute top-[65%] -right-[10%] h-[600px] w-[600px] rounded-full bg-[#FF6A1F]/10 blur-[150px]" />
-      </div>
+    <div className="relative min-h-screen bg-[#050508] text-white selection:bg-[#FF4D17]/30 overflow-x-hidden font-sans">
+      {/* ── Sleek Dark Tech Grid Canvas (No Muddy Radial Glow Blobs) ── */}
+      <div className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(#ffffff08_1px,transparent_1px)] [background-size:28px_28px] opacity-70" />
 
       {/* ── 1. Top Navigation Bar (Cryptox Dark Ember Look) ────────── */}
       <header className="sticky top-0 z-50 w-full px-4 pt-4 pb-2 transition-all">
