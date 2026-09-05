@@ -1,3 +1,6 @@
+import { Download, Trash2 } from "lucide-react";
+import type { HistoryEntry } from "../types";
+
 export { DirectPromptView } from "./DirectPromptView";
 export { AiCloneView } from "./AiCloneView";
 

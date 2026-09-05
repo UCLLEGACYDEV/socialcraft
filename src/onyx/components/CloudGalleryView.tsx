@@ -702,8 +702,8 @@ export function CloudGalleryView({
                                   onClick={() => {
                                     // Try to match history entry by title
                                     const match = historyEntries.find(
-                                      (h) => h.title.toLowerCase().includes(projectName.toLowerCase()) ||
-                                        projectName.toLowerCase().includes(h.title.toLowerCase())
+                                      (h) => h.topic.toLowerCase().includes(projectName.toLowerCase()) ||
+                                        projectName.toLowerCase().includes(h.topic.toLowerCase())
                                     );
                                     if (match) {
                                       onOpenHistory(match);
