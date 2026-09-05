@@ -232,10 +232,11 @@ export async function analyzeInspirationAndFuseWithClone(
   clone: AiCloneProfile,
   options?: {
     apiKey?: string;
+    fastMode?: boolean;
     onProgress?: (progress: PersonaAnalysisProgress) => void;
   },
 ): Promise<InspirationFusionResult> {
-  const { apiKey, onProgress } = options || {};
+  const { apiKey, fastMode, onProgress } = options || {};
   const effectiveKey = (apiKey?.trim() || ANCHORED_KIE_API_KEY).trim();
   const urls = (Array.isArray(inspirationImages) ? inspirationImages : [inspirationImages]).filter(
     (u) => typeof u === "string" && u.trim().length > 0,
@@ -251,7 +252,7 @@ export async function analyzeInspirationAndFuseWithClone(
       : "Scanne Inspirationsbild nach Garderobe, Textilien & Schnitt…",
     percent: 25,
   });
-  await new Promise((r) => setTimeout(r, 450));
+  if (!fastMode) await new Promise((r) => setTimeout(r, 200));
 
   onProgress?.({
     step: 2,
@@ -259,7 +260,7 @@ export async function analyzeInspirationAndFuseWithClone(
     label: "Erkenne Körperhaltung, Pose & Bildausschnitt…",
     percent: 50,
   });
-  await new Promise((r) => setTimeout(r, 450));
+  if (!fastMode) await new Promise((r) => setTimeout(r, 200));
 
   onProgress?.({
     step: 3,
@@ -267,7 +268,7 @@ export async function analyzeInspirationAndFuseWithClone(
     label: "Analysiere Beleuchtungskonzept & Hintergrund-Atmosphäre…",
     percent: 75,
   });
-  await new Promise((r) => setTimeout(r, 400));
+  if (!fastMode) await new Promise((r) => setTimeout(r, 200));
 
   onProgress?.({
     step: 4,
@@ -275,7 +276,7 @@ export async function analyzeInspirationAndFuseWithClone(
     label: `Übertrage Stil auf deinen KI-Klon (${clone.name})…`,
     percent: 100,
   });
-  await new Promise((r) => setTimeout(r, 300));
+  if (!fastMode) await new Promise((r) => setTimeout(r, 150));
 
   // If online Vision API key available, attempt AI vision extraction
   const validVisionUrls = urls.filter(
