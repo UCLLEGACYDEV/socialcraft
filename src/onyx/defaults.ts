@@ -138,66 +138,8 @@ export const LLM_PROVIDERS = [
   { id: "anthropic", label: "Claude", url: "https://console.anthropic.com/settings/keys" },
 ] as const;
 
-export const DEFAULT_CLONE_PROFILES: AiCloneProfile[] = [
-  {
-    id: "founder-dark-ember",
-    name: "Founder Dark Ember",
-    isActive: true,
-    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
-    referenceImages: [
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80",
-    ],
-    genderAge: "Mann, Anfang 30, mitteleuropäischer Typ",
-    hairFace: "Kurze dunkle Haare, gepflegter 3-Tage-Bart, markante Kieferlinie, fokussierter Blick",
-    tattoosFeatures: "Dezentes geometrisches Tattoo am Unterarm, markante Wangenknochen, keine Hautunreinheiten",
-    wardrobe: "Schwarzer minimalistischer Merinowolle-Rollkragenpullover",
-    lightingLook: "Dramatisches Seitenlicht (Rembrandt), warmes orange-rotes Rimlight (#F04A20), tiefe Schatten",
-    framingCamera: "Close-up Porträt, 85mm Linse, f/1.8 Bokeh, Blick leicht an der Kamera vorbei ins Leere",
-    negativePrompt: "Keine Pickel, keine Hautunreinheiten, kein künstliches breites Grinsen, keine Cartoon-Ästhetik, kein greller Hintergrund",
-    customPrefix: "Consistent recurring persona: Man in early 30s, short dark hair, neat stubble beard, clear editorial skin without blemishes, subtle forearm geometric tattoo, wearing black turtleneck, cinematic dramatic side lighting, warm ember rimlight, dark studio background, 85mm portrait.",
-    placement: "hook_closing",
-    updatedAt: "2026-09-05T06:00:00.000Z",
-  },
-  {
-    id: "editorial-minimalist",
-    name: "Editorial Minimalist",
-    isActive: false,
-    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80",
-    referenceImages: [
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80",
-    ],
-    genderAge: "Frau, Ende 20",
-    hairFace: "Glatte braune Haare nach hinten gesteckt, natürliche Gesichtszüge, neutraler selbstbewusster Ausdruck",
-    tattoosFeatures: "Feine minimalistische Silber-Ohrstecker, glatte makellose Hautstruktur",
-    wardrobe: "Dunkelgrauer Oversize-Wollblazer, schlichtes weißes Seidentop",
-    lightingLook: "Weiches diffuses Studio-Licht, kühle Schattentöne, neutraler Beton-Hintergrund",
-    framingCamera: "Halbporträt, 50mm, High-End Modemagazin-Ästhetik, natürliche Hauttextur",
-    negativePrompt: "Keine Pickel, keine Unreinheiten, keine Überbelichtung, kein unnatürliches Plastik-Haut-Glätten",
-    customPrefix: "Consistent recurring persona: Woman in late 20s, slicked-back brown hair, pristine smooth editorial skin, subtle silver studs, wearing dark grey oversized blazer, soft high-end studio lighting, minimalist editorial aesthetic.",
-    placement: "hook_closing",
-    updatedAt: "2026-09-05T06:00:00.000Z",
-  },
-  {
-    id: "cyber-visionary",
-    name: "Cyberpunk Visionary",
-    isActive: false,
-    avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80",
-    referenceImages: [
-      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80",
-    ],
-    genderAge: "Person, Anfang 30",
-    hairFace: "Kurze dunkle Haare, futuristische runde Sonnenbrille mit Stadtspiegelung",
-    tattoosFeatures: "Sichtbare Cyber-Linien-Tätowierung am Halsansatz, Titan-Ring",
-    wardrobe: "Matte schwarze Techwear-Jacke mit dezentem Kragen",
-    lightingLook: "Kühles blau-violettes Kantenlicht (#8B5CF6), volumetrischer Dunst, dunkles Interieur",
-    framingCamera: "Nahaufnahme, dramatischer Untersicht-Winkel, 35mm Weitwinkel-Porträt",
-    negativePrompt: "Keine Pickel, keine Hautflecken, kein bunter Anime-Look, keine grellen Neonschilder",
-    customPrefix: "Consistent recurring persona: Person wearing round reflective sunglasses, black techwear jacket, subtle geometric neck tattoo, violet rimlight, dark atmospheric studio, cinematic high contrast.",
-    placement: "all_slides",
-    updatedAt: "2026-09-05T06:00:00.000Z",
-  },
-];
+// Kein vordefinierter Klon-Preset — ein neuer Benutzer erstellt seinen Klon selbst aus 1 Foto
+export const DEFAULT_CLONE_PROFILES: AiCloneProfile[] = [];
 
 export function assembleClonePrompt(clone: AiCloneProfile): string {
   if (clone.customPrefix && clone.customPrefix.trim()) {

@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Camera,
   Check,
@@ -147,12 +147,29 @@ export function AiCloneFlowStudio({
   );
   const [activeId, setActiveId] = usePersistentState<string>(
     LS.activeCloneId,
-    DEFAULT_CLONE_PROFILES[0]?.id ?? "",
+    "",
   );
 
-  const activeClone: AiCloneProfile = useMemo(() => {
-    return profiles.find((p) => p.id === activeId) ?? profiles[0] ?? DEFAULT_CLONE_PROFILES[0]!;
-  }, [profiles, activeId]);
+  const DUMMY_PRESET_IDS = useMemo(
+    () => new Set(["editorial-minimalist", "founder-dark-ember", "cyber-visionary", "michael-schmidt"]),
+    [],
+  );
+
+  // Automatically remove legacy demo presets so user only sees their own clones
+  useEffect(() => {
+    if (profiles.some((p) => DUMMY_PRESET_IDS.has(p.id))) {
+      const cleaned = profiles.filter((p) => !DUMMY_PRESET_IDS.has(p.id));
+      setProfiles(cleaned);
+      if (cleaned[0]) setActiveId(cleaned[0].id);
+      else setActiveId("");
+    }
+  }, [profiles, setProfiles, setActiveId, DUMMY_PRESET_IDS]);
+
+  const activeClone: AiCloneProfile | null = useMemo(() => {
+    const valid = profiles.filter((p) => !DUMMY_PRESET_IDS.has(p.id));
+    if (valid.length === 0) return null;
+    return valid.find((p) => p.id === activeId) ?? valid[0] ?? null;
+  }, [profiles, activeId, DUMMY_PRESET_IDS]);
 
   // Settings
   const [settings, setSettings] = usePersistentState<ApiSettings>(
@@ -302,6 +319,12 @@ export function AiCloneFlowStudio({
 
   // 3. Generate a SINGLE Inspiration Card
   const handleGenerateSingleItem = async (itemId: string) => {
+    if (!activeClone) {
+      setShowCloneCreator(true);
+      toast.error("Bitte erstelle zuerst deinen KI-Klon aus einem Porträtfoto (Schritt 1).");
+      return;
+    }
+
     const item = inspirationItems.find((i) => i.id === itemId);
     if (!item) return;
 
@@ -341,15 +364,18 @@ export function AiCloneFlowStudio({
         aspectRatio: aspectRatio as any,
       });
 
-      // Step C: Cloud Backup to S4
+      // Step C: Cloud Backup to S4 with structured folder
       let s4Result: S4CloudImage | null = null;
       try {
+        const cleanName = activeClone.name.toLowerCase().replace(/[^a-z0-9]/g, "_") || "mein_klon";
         s4Result = await saveImageToS4({
           imageUrl: res.imageUrl,
           prompt: fusion.fusedPrompt,
           category: "ai-clone",
           aspectRatio,
           user: currentUser || null,
+          projectName: activeClone.name,
+          subfolder: `clones/${cleanName}/styles`,
         });
       } catch (s4Err) {
         console.warn("[CloneStudio] S4 upload:", s4Err);
@@ -595,55 +621,79 @@ export function AiCloneFlowStudio({
         </div>
 
         {/* Selected Clone Display & Switcher */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
-          <div className="flex items-center gap-3.5">
-            {activeClone.avatarUrl ? (
-              <img
-                src={activeClone.avatarUrl}
-                alt={activeClone.name}
-                className="h-12 w-12 rounded-xl object-cover border border-[#FF4D17]/40 shadow-sm shrink-0"
-              />
-            ) : (
-              <div className="h-12 w-12 rounded-xl bg-zinc-800 border border-white/10 flex items-center justify-center text-zinc-400 shrink-0">
+        {!activeClone ? (
+          <div className="p-5 rounded-xl border border-dashed border-white/15 bg-white/[0.02] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+            <div className="flex flex-col sm:flex-row items-center gap-3.5">
+              <div className="h-12 w-12 rounded-xl bg-[#FF4D17]/10 border border-[#FF4D17]/30 flex items-center justify-center text-[#FF4D17] shrink-0">
                 <User className="h-6 w-6" />
               </div>
-            )}
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-bold text-white">{activeClone.name}</span>
-                <span className="rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] px-2 py-0.2 font-semibold">
-                  Aktiv
-                </span>
-                <span className="rounded bg-[#FF4D17]/15 text-[#FF4D17] border border-[#FF4D17]/30 text-[10px] px-2 py-0.2 font-semibold flex items-center gap-1">
-                  <ShieldCheck className="h-3 w-3" />
-                  Reine Haut (Filter aktiv)
-                </span>
+              <div>
+                <h3 className="text-sm font-bold text-white">Noch kein eigener KI-Klon angelegt</h3>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Lade 1 Porträtfoto von dir hoch. Die KI erkennt Gesicht, Haare & Bart automatisch in 10 Sekunden.
+                </p>
               </div>
-              <p className="text-xs text-zinc-400 line-clamp-1 mt-0.5">
-                {activeClone.hairFace}
-                {activeClone.tattoosFeatures ? ` • ${activeClone.tattoosFeatures}` : ""}
-              </p>
             </div>
+            <button
+              type="button"
+              onClick={() => setShowCloneCreator(true)}
+              className="cryptox-orange-btn !py-2.5 !px-4 text-xs font-bold flex items-center gap-2 shrink-0 shadow-lg"
+            >
+              <Camera className="h-4 w-4" />
+              <span>Eigenen KI-Klon erstellen (10s)</span>
+            </button>
           </div>
-
-          {/* Switch Dropdown if multiple profiles exist */}
-          {profiles.length > 1 && (
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-zinc-400 shrink-0">Klon wechseln:</span>
-              <select
-                value={activeClone.id}
-                onChange={(e) => setActiveId(e.target.value)}
-                className="field-input !py-1.5 !px-3 text-xs bg-black/60 border-white/10 text-white rounded-lg cursor-pointer"
-              >
-                {profiles.map((p) => (
-                  <option key={p.id} value={p.id} className="bg-zinc-900 text-white">
-                    {p.name}
-                  </option>
-                ))}
-              </select>
+        ) : (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.06]">
+            <div className="flex items-center gap-3.5">
+              {activeClone.avatarUrl ? (
+                <img
+                  src={activeClone.avatarUrl}
+                  alt={activeClone.name}
+                  className="h-12 w-12 rounded-xl object-cover border border-[#FF4D17]/40 shadow-sm shrink-0"
+                />
+              ) : (
+                <div className="h-12 w-12 rounded-xl bg-zinc-800 border border-white/10 flex items-center justify-center text-zinc-400 shrink-0">
+                  <User className="h-6 w-6" />
+                </div>
+              )}
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-white">{activeClone.name}</span>
+                  <span className="rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-[10px] px-2 py-0.2 font-semibold">
+                    Aktiv
+                  </span>
+                  <span className="rounded bg-[#FF4D17]/15 text-[#FF4D17] border border-[#FF4D17]/30 text-[10px] px-2 py-0.2 font-semibold flex items-center gap-1">
+                    <ShieldCheck className="h-3 w-3" />
+                    Reine Haut (Filter aktiv)
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400 line-clamp-1 mt-0.5">
+                  {activeClone.hairFace}
+                  {activeClone.tattoosFeatures ? ` • ${activeClone.tattoosFeatures}` : ""}
+                </p>
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Switch Dropdown if multiple profiles exist */}
+            {profiles.length > 1 && (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-zinc-400 shrink-0">Klon wechseln:</span>
+                <select
+                  value={activeClone.id}
+                  onChange={(e) => setActiveId(e.target.value)}
+                  className="field-input !py-1.5 !px-3 text-xs bg-black/60 border-white/10 text-white rounded-lg cursor-pointer"
+                >
+                  {profiles.map((p) => (
+                    <option key={p.id} value={p.id} className="bg-zinc-900 text-white">
+                      {p.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* ── SCHRITT 2: MULTI-INSPIRATION BOARD (PINTEREST FLOW) ───────── */}
@@ -951,30 +1001,41 @@ export function AiCloneFlowStudio({
         </div>
 
         {/* The Giant Glowing Batch Action Button */}
-        <button
-          type="button"
-          onClick={() => void handleRunBatchFlow()}
-          disabled={isBatchRunning || inspirationItems.length === 0}
-          className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-[#FF4D17] via-amber-500 to-[#FF4D17] bg-[length:200%_auto] hover:bg-right transition-all duration-500 text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-[0_0_35px_rgba(255,77,23,0.5)] disabled:opacity-40 cursor-pointer"
-        >
-          {isBatchRunning ? (
-            <>
-              <Loader2 className="h-5 w-5 animate-spin" />
-              <span>
-                Generiere Bild {batchCurrentIndex} von {batchTotal} ({settings.kieModel || "Nano-Banana 2"})…
-              </span>
-            </>
-          ) : (
-            <>
-              <Sparkles className="h-5 w-5 fill-white animate-pulse" />
-              <span>
-                {inspirationItems.length > 1
-                  ? `✨ Alle ${inspirationItems.length} Inspirationen mit meinem Klon generieren (Batch)`
-                  : "✨ Inspiration mit meinem Klon generieren (1-Click)"}
-              </span>
-            </>
-          )}
-        </button>
+        {!activeClone ? (
+          <button
+            type="button"
+            onClick={() => setShowCloneCreator(true)}
+            className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-[#FF4D17] via-amber-500 to-[#FF4D17] text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-[0_0_35px_rgba(255,77,23,0.5)] cursor-pointer"
+          >
+            <Camera className="h-5 w-5" />
+            <span>📸 Zuerst deinen KI-Klon aus 1 Foto erstellen (10 Sekunden)</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => void handleRunBatchFlow()}
+            disabled={isBatchRunning || inspirationItems.length === 0}
+            className="w-full py-4 px-6 rounded-xl bg-gradient-to-r from-[#FF4D17] via-amber-500 to-[#FF4D17] bg-[length:200%_auto] hover:bg-right transition-all duration-500 text-white font-extrabold text-sm sm:text-base flex items-center justify-center gap-2.5 shadow-[0_0_35px_rgba(255,77,23,0.5)] disabled:opacity-40 cursor-pointer"
+          >
+            {isBatchRunning ? (
+              <>
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span>
+                  Generiere Bild {batchCurrentIndex} von {batchTotal} ({settings.kieModel || "Nano-Banana 2"})…
+                </span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-5 w-5 fill-white animate-pulse" />
+                <span>
+                  {inspirationItems.length > 1
+                    ? `✨ Alle ${inspirationItems.length} Inspirationen mit meinem Klon generieren (Batch)`
+                    : "✨ Inspiration mit meinem Klon generieren (1-Click)"}
+                </span>
+              </>
+            )}
+          </button>
+        )}
 
         {/* Clean Controls Bar (Engine & Format) */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 text-xs border-t border-white/[0.08]">

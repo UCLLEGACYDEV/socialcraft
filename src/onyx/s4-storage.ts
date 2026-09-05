@@ -17,6 +17,8 @@ export interface S4CloudImage {
   url: string;              
   displayUrl: string;       
   filename: string;
+  subfolder?: string;
+  projectName?: string;
   userId: string;
   userName: string;
   userRole: UserRole;
@@ -174,14 +176,40 @@ export async function listS4Images(
     if (!data.objects) return [];
 
     const images: S4CloudImage[] = data.objects.map((obj) => {
-      // Parse category or default
-      const keyParts = obj.key.split("/");
+      // Parse category and subfolders
+      const keyParts = obj.key.split("/").filter(Boolean);
       const filename = obj.filename || keyParts[keyParts.length - 1] || "image.jpg";
+      
       let category: S4CloudImage["category"] = "upload";
-      if (filename.includes("_carousel_")) category = "carousel";
-      else if (filename.includes("_series_")) category = "series";
-      else if (filename.includes("_direct-prompt_")) category = "direct-prompt";
-      else if (filename.includes("_ai-clone_")) category = "ai-clone";
+      let subfolder: string | undefined = undefined;
+      let projectName: string | undefined = undefined;
+
+      if (obj.key.includes("/carousels/")) {
+        category = "carousel";
+        subfolder = "carousels";
+        const cIndex = keyParts.indexOf("carousels");
+        if (cIndex !== -1 && keyParts[cIndex + 1] && keyParts[cIndex + 1] !== filename) {
+          projectName = keyParts[cIndex + 1];
+        }
+      } else if (obj.key.includes("/clones/")) {
+        category = "ai-clone";
+        subfolder = "clones";
+        const clIndex = keyParts.indexOf("clones");
+        if (clIndex !== -1 && keyParts[clIndex + 1] && keyParts[clIndex + 1] !== filename) {
+          projectName = keyParts[clIndex + 1];
+        }
+      } else if (obj.key.includes("/gallery/")) {
+        category = "direct-prompt";
+        subfolder = "gallery";
+      } else if (filename.includes("_carousel_")) {
+        category = "carousel";
+      } else if (filename.includes("_series_")) {
+        category = "series";
+      } else if (filename.includes("_direct-prompt_")) {
+        category = "direct-prompt";
+      } else if (filename.includes("_ai-clone_")) {
+        category = "ai-clone";
+      }
 
       return {
         id: obj.key,
@@ -191,6 +219,8 @@ export async function listS4Images(
         url: obj.url,
         displayUrl: obj.url,
         filename,
+        subfolder,
+        projectName,
         userId: user?.id || "unknown",
         userName: user?.name || "Benutzer",
         userRole: user?.role || "free",
@@ -215,24 +245,47 @@ export interface SaveImageToS4Params {
   aspectRatio?: string | undefined;
   user: User | null;
   customFilename?: string | undefined;
+  subfolder?: string | undefined;
+  projectName?: string | undefined;
 }
 
 /**
- * Saves an image to the user's cloud folder
+ * Saves an image to the user's cloud folder hierarchy
  */
 export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4CloudImage | null> {
-  const { imageUrl, prompt = "Generiertes Visual", category, aspectRatio = "4:5", user, customFilename } = params;
+  const { imageUrl, prompt = "Generiertes Visual", category, aspectRatio = "4:5", user, customFilename, subfolder, projectName } = params;
   const settings = getSettings();
   const bucket = settings.s4Bucket || S4_DEFAULT_BUCKET;
   const endpoint = settings.s4Endpoint || S4_DEFAULT_ENDPOINT;
 
-  const folder = getUserS4Folder(user);
+  const userRoot = getUserS4Folder(user);
   const now = new Date();
   const dateStr = now.toISOString().slice(0, 10);
   const timestamp = Date.now().toString().slice(-6);
   const cleanCategory = category.replace(/[^a-z0-9]/gi, "-").toLowerCase();
   const filename = customFilename || `${dateStr}_${cleanCategory}_${timestamp}.jpg`;
-  const key = `${folder}/${filename}`;
+
+  // Determine structured target folder
+  let targetFolder = `${userRoot}/gallery`;
+  if (subfolder) {
+    targetFolder = `${userRoot}/${subfolder.replace(/^\/+|\/+$/g, "")}`;
+  } else if (category === "carousel") {
+    const cleanProject = (projectName || "current_carousel")
+      .replace(/[^a-zA-Z0-9-_\s]/g, "")
+      .trim()
+      .replace(/\s+/g, "_")
+      .slice(0, 45);
+    targetFolder = `${userRoot}/carousels/${cleanProject}`;
+  } else if (category === "ai-clone") {
+    const cleanClone = (projectName || "mein_klon")
+      .replace(/[^a-zA-Z0-9-_\s]/g, "")
+      .trim()
+      .replace(/\s+/g, "_")
+      .slice(0, 45);
+    targetFolder = `${userRoot}/clones/${cleanClone}/styles`;
+  }
+
+  const key = `${targetFolder}/${filename}`;
 
   try {
     const res = await fetch("/api/cloud/upload", {
@@ -257,6 +310,26 @@ export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4Clou
       window.dispatchEvent(new CustomEvent("onyx:s4-update", { detail: { count: 1 } }));
     }
 
+    // Record in Supabase (socialcraft_cloud_images) if Supabase is connected
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      if (supabase && user?.id) {
+        await supabase.from("socialcraft_cloud_images" as any).upsert({
+          id: data.key,
+          user_id: user.id.startsWith("usr-") ? undefined : user.id,
+          s4_key: data.key,
+          url: data.url,
+          prompt,
+          aspect_ratio: aspectRatio,
+          category,
+          size_bytes: data.size,
+          created_at: now.toISOString(),
+        });
+      }
+    } catch {
+      // Offline fallback
+    }
+
     return {
       id: data.key,
       key: data.key,
@@ -265,6 +338,8 @@ export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4Clou
       url: data.url,
       displayUrl: data.url,
       filename,
+      subfolder: subfolder || category,
+      projectName,
       userId: user?.id || "guest",
       userName: user?.name || "Gast",
       userRole: user?.role || "free",
@@ -278,6 +353,121 @@ export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4Clou
     console.error("Fehler beim Speichern des Bildes in Cloud:", error);
     return null;
   }
+}
+
+export interface SaveCarouselToS4Params {
+  user: User | null;
+  carouselId: string;
+  topic: string;
+  slides: Array<{
+    id: string;
+    slideNumber: number;
+    headline: string;
+    subtext: string;
+    imageUrl?: string;
+    visualPrompt?: string;
+  }>;
+}
+
+/**
+ * Saves an entire carousel project with its slides and a manifest file into Mega S4 Cloud and Supabase
+ */
+export async function saveCarouselToS4(params: SaveCarouselToS4Params): Promise<{
+  success: boolean;
+  folder: string;
+  manifestUrl?: string;
+  uploadedSlides: number;
+}> {
+  const { user, carouselId, topic, slides } = params;
+  const userRoot = getUserS4Folder(user);
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const cleanTopic = (topic || "Karussell")
+    .replace(/[^a-zA-Z0-9-_\s]/g, "")
+    .trim()
+    .replace(/\s+/g, "_")
+    .slice(0, 40);
+  const projectFolderName = `${dateStr}_${cleanTopic}_${carouselId.slice(0, 6)}`;
+  const subfolderPath = `carousels/${projectFolderName}`;
+  const fullFolderPath = `${userRoot}/${subfolderPath}`;
+
+  let uploadedCount = 0;
+
+  // 1. Upload slides with images
+  for (const s of slides) {
+    if (s.imageUrl) {
+      const res = await saveImageToS4({
+        imageUrl: s.imageUrl,
+        prompt: s.visualPrompt || s.headline,
+        category: "carousel",
+        user,
+        customFilename: `slide_${String(s.slideNumber).padStart(2, "0")}.jpg`,
+        subfolder: subfolderPath,
+        projectName: projectFolderName,
+      });
+      if (res) uploadedCount++;
+    }
+  }
+
+  // 2. Upload manifest JSON as data URL
+  const manifestData = JSON.stringify(
+    {
+      id: carouselId,
+      topic,
+      slideCount: slides.length,
+      createdAt: new Date().toISOString(),
+      user: user ? { id: user.id, name: user.name, email: user.email } : null,
+      slides: slides.map((s) => ({
+        slideNumber: s.slideNumber,
+        headline: s.headline,
+        subtext: s.subtext,
+        imageUrl: s.imageUrl,
+      })),
+    },
+    null,
+    2,
+  );
+
+  const manifestDataUrl = `data:application/json;base64,${typeof btoa !== "undefined" ? btoa(unescape(encodeURIComponent(manifestData))) : Buffer.from(manifestData).toString("base64")}`;
+
+  const manifestUpload = await saveImageToS4({
+    imageUrl: manifestDataUrl,
+    prompt: `Manifest für Karussell ${topic}`,
+    category: "carousel",
+    user,
+    customFilename: `carousel_data.json`,
+    subfolder: subfolderPath,
+    projectName: projectFolderName,
+  });
+
+  // 3. Sync to Supabase socialcraft_carousels
+  try {
+    const { supabase } = await import("@/integrations/supabase/client");
+    if (supabase && user?.id) {
+      await supabase.from("socialcraft_carousels" as any).upsert({
+        id: carouselId.length === 36 ? carouselId : undefined,
+        title: topic || "Karussell",
+        topic,
+        slide_count: slides.length,
+        slides,
+        raw_data: {
+          s4_folder: fullFolderPath,
+          manifest_url: manifestUpload?.url,
+          user_id: user.id,
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      });
+    }
+  } catch (supaErr) {
+    console.info("[Supabase] Carousel record notice:", supaErr);
+  }
+
+  return {
+    success: true,
+    folder: fullFolderPath,
+    manifestUrl: manifestUpload?.url,
+    uploadedSlides: uploadedCount,
+  };
 }
 
 /**

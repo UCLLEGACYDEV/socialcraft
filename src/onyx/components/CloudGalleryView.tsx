@@ -2,10 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Archive,
   Check,
+  ChevronDown,
+  ChevronRight,
   Cloud,
   Download,
+  Eye,
   Folder,
   FolderDown,
+  FolderOpen,
+  Layers,
+  LayoutGrid,
   Maximize2,
   Plus,
   RefreshCw,
@@ -29,6 +35,7 @@ import {
 } from "../s4-storage";
 import { downloadCloudImage, exportS4ImagesAsZip } from "../export-zip";
 import { HistoryView } from "./SimpleViews";
+import { LS } from "../storage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -184,6 +191,62 @@ export function CloudGalleryView({
       const count = await exportS4ImagesAsZip(allImages, folderName);
       if (count > 0) {
         toast.success(`Ordner mit ${count} Bildern als ZIP heruntergeladen!`);
+      } else {
+        toast.error("Fehler beim Erstellen der ZIP-Datei.");
+      }
+    } finally {
+      setIsZipping(false);
+    }
+  };
+
+  const [galleryViewMode, setGalleryViewMode] = useState<"folders" | "grid">("folders");
+  const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
+
+  const toggleProjectExpand = (projectName: string) => {
+    setExpandedProjects((prev) => ({
+      ...prev,
+      [projectName]: !prev[projectName],
+    }));
+  };
+
+  // Group images into clean user folder hierarchy: carousels, clones, gallery
+  const folderTree = useMemo(() => {
+    const carousels: Record<string, S4CloudImage[]> = {};
+    const clones: Record<string, S4CloudImage[]> = {};
+    const gallery: S4CloudImage[] = [];
+
+    for (const img of filteredImages) {
+      if (img.subfolder === "carousels" || img.category === "carousel") {
+        const proj = img.projectName || "Standard Karussell-Projekt";
+        if (!carousels[proj]) carousels[proj] = [];
+        carousels[proj].push(img);
+      } else if (img.subfolder === "clones" || img.category === "ai-clone") {
+        const proj = img.projectName || "Eigene KI-Klone";
+        if (!clones[proj]) clones[proj] = [];
+        clones[proj].push(img);
+      } else {
+        gallery.push(img);
+      }
+    }
+
+    // Sort carousels slides by filename (slide_01, slide_02, etc.)
+    Object.keys(carousels).forEach((k) => {
+      carousels[k].sort((a, b) => a.filename.localeCompare(b.filename));
+    });
+
+    return { carousels, clones, gallery };
+  }, [filteredImages]);
+
+  // Download entire single project folder as ZIP
+  const handleDownloadProjectZip = async (projectName: string, images: S4CloudImage[]) => {
+    if (images.length === 0) return;
+    setIsZipping(true);
+    toast.info(`Erstelle ZIP für Projekt „${projectName}“…`);
+    try {
+      const cleanProj = projectName.replace(/[^\p{L}\p{N}_-]+/gu, "_") || "Karussell_Projekt";
+      const count = await exportS4ImagesAsZip(images, cleanProj);
+      if (count > 0) {
+        toast.success(`Projekt „${projectName}“ (${count} Slides) heruntergeladen!`);
       } else {
         toast.error("Fehler beim Erstellen der ZIP-Datei.");
       }
@@ -396,17 +459,51 @@ export function CloudGalleryView({
           </div>
 
           {/* ── Search, Categories & Bulk Actions Bar ──────────────── */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            {/* Search Input */}
-            <div className="relative flex-1 max-w-md">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Nach Bildname, Thema oder Motiv suchen…"
-                className="field-input !pl-10 !py-2 text-xs sm:text-sm w-full"
-              />
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+            {/* Search Input & View Switcher */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1 max-w-xl">
+              <div className="relative flex-1">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Nach Bildname, Thema oder Motiv suchen…"
+                  className="field-input !pl-10 !py-2 text-xs sm:text-sm w-full"
+                />
+              </div>
+
+              {/* View Switcher: Ordner-Struktur vs Kachel-Raster */}
+              <div className="flex items-center rounded-xl border border-white/10 bg-[#0B0910] p-1 text-xs shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setGalleryViewMode("folders")}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-semibold transition-all cursor-pointer",
+                    galleryViewMode === "folders"
+                      ? "bg-[#FF4D17]/20 text-[#FF6A1F] border border-[#FF4D17]/40 shadow-[0_0_10px_rgba(255,77,23,0.2)]"
+                      : "text-zinc-400 hover:text-white",
+                  )}
+                  title="Strukturierte Ordner-Ansicht nach Projekten und Kategorien"
+                >
+                  <FolderOpen className="h-3.5 w-3.5 text-[#FF6A1F]" />
+                  <span>Ordner-Struktur</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setGalleryViewMode("grid")}
+                  className={cn(
+                    "flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-semibold transition-all cursor-pointer",
+                    galleryViewMode === "grid"
+                      ? "bg-[#FF4D17]/20 text-[#FF6A1F] border border-[#FF4D17]/40 shadow-[0_0_10px_rgba(255,77,23,0.2)]"
+                      : "text-zinc-400 hover:text-white",
+                  )}
+                  title="Flaches Kachel-Raster aller Bilder"
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" />
+                  <span>Kachel-Raster</span>
+                </button>
+              </div>
             </div>
 
             {/* Category Pills */}
@@ -414,6 +511,7 @@ export function CloudGalleryView({
               {[
                 { id: "all", label: "Alle" },
                 { id: "carousel", label: "Karussell" },
+                { id: "ai-clone", label: "KI-Klon" },
                 { id: "series", label: "Serie" },
                 { id: "direct-prompt", label: "Direct-Prompt" },
                 { id: "upload", label: "Uploads" },
@@ -423,7 +521,7 @@ export function CloudGalleryView({
                   type="button"
                   onClick={() => setCategoryFilter(cat.id)}
                   className={cn(
-                    "rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all",
+                    "rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer",
                     categoryFilter === cat.id
                       ? "border-orange-500/60 bg-orange-500/20 text-orange-400 shadow-[0_0_10px_rgba(255,77,23,0.2)]"
                       : "border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white hover:border-white/20",
@@ -446,14 +544,14 @@ export function CloudGalleryView({
                   <button
                     type="button"
                     onClick={selectAll}
-                    className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
+                    className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                   >
                     Alle
                   </button>
                   <button
                     type="button"
                     onClick={deselectAll}
-                    className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
+                    className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
                   >
                     Keine
                   </button>
@@ -466,7 +564,7 @@ export function CloudGalleryView({
                     type="button"
                     onClick={handleDownloadSelectedZip}
                     disabled={isZipping}
-                    className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-white/15 shadow-sm"
+                    className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-white/15 shadow-sm cursor-pointer"
                   >
                     <Archive className="h-3.5 w-3.5 text-orange-400" />
                     Ausgewählte als ZIP ({selectedIds.length})
@@ -475,7 +573,7 @@ export function CloudGalleryView({
                   <button
                     type="button"
                     onClick={handleDeleteBatch}
-                    className="flex items-center gap-1.5 rounded-lg border border-destructive/50 bg-destructive/15 px-3 py-1.5 text-xs font-semibold text-rose-300 transition-all hover:bg-destructive/30 hover:text-white shadow-[0_0_12px_rgba(239,68,68,0.2)]"
+                    className="flex items-center gap-1.5 rounded-lg border border-destructive/50 bg-destructive/15 px-3 py-1.5 text-xs font-semibold text-rose-300 transition-all hover:bg-destructive/30 hover:text-white shadow-[0_0_12px_rgba(239,68,68,0.2)] cursor-pointer"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     Ausgewählte löschen ({selectedIds.length})
@@ -495,20 +593,335 @@ export function CloudGalleryView({
               <p className="text-xs text-zinc-400 max-w-md mx-auto">
                 {searchQuery || categoryFilter !== "all"
                   ? "Keine Treffer für deine Suche."
-                  : "Erzeuge ein Karussell, generiere Visuals oder füge manuell ein Bild hinzu. Alles wird automatisch in deinem Cloud-Ordner gesichert."}
+                  : "Erzeuge ein Karussell, erstelle Visuals oder lade ein Bild hoch. Alles wird automatisch in deinem Cloud-Ordner gesichert und mit Supabase synchronisiert."}
               </p>
               <button
                 type="button"
                 onClick={() => setShowUploadModal(true)}
-                className="cryptox-orange-btn !py-2 !px-4 text-xs font-semibold inline-flex items-center gap-1.5"
+                className="cryptox-orange-btn !py-2 !px-4 text-xs font-semibold inline-flex items-center gap-1.5 cursor-pointer"
               >
                 <Upload className="h-3.5 w-3.5" /> Erstes Bild ablegen
               </button>
             </div>
           )}
 
-          {/* ── Image Grid ─────────────────────────────────────────── */}
-          {filteredImages.length > 0 && (
+          {/* ── VIEW MODE 1: Ordner-Struktur (Projekte & Unterordner) ─ */}
+          {filteredImages.length > 0 && galleryViewMode === "folders" && (
+            <div className="space-y-6">
+              {/* SECTION: Karussell-Projekte (carousels/) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-2">
+                  <div className="flex items-center gap-2">
+                    <FolderOpen className="h-4 w-4 text-[#FF6A1F]" />
+                    <h2 className="text-sm font-bold text-white tracking-wide">
+                      Unterordner: <span className="text-[#FF6A1F]">carousels/</span>
+                    </h2>
+                    <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-zinc-300">
+                      {Object.keys(folderTree.carousels).length} {Object.keys(folderTree.carousels).length === 1 ? "Projekt" : "Projekte"}
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-zinc-400">
+                    Jedes Posting erhält automatisch einen eigenen Unterordner mit allen Slides
+                  </span>
+                </div>
+
+                {Object.keys(folderTree.carousels).length === 0 ? (
+                  <div className="rounded-2xl border border-white/[0.06] bg-black/20 p-6 text-center text-xs text-zinc-500">
+                    Noch keine Karussell-Projekte in diesem Ordner abgelegt.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {Object.entries(folderTree.carousels).map(([projectName, slides]) => {
+                      const isExpanded = expandedProjects[projectName] !== false; // default open
+                      const totalSizeMB = (slides.reduce((acc, s) => acc + s.sizeBytes, 0) / (1024 * 1024)).toFixed(1);
+                      const latestSlide = slides[0];
+
+                      return (
+                        <div
+                          key={projectName}
+                          className="rounded-2xl border border-white/[0.08] bg-[#100E17]/90 backdrop-blur-xl overflow-hidden shadow-lg transition-all"
+                        >
+                          {/* Folder Header Row */}
+                          <div
+                            onClick={() => toggleProjectExpand(projectName)}
+                            className="flex flex-wrap items-center justify-between gap-3 p-4 bg-white/[0.02] border-b border-white/[0.06] cursor-pointer hover:bg-white/[0.04] transition-colors"
+                          >
+                            <div className="flex items-center gap-3 min-w-0">
+                              <button
+                                type="button"
+                                className="text-zinc-400 hover:text-white p-0.5"
+                                aria-label={isExpanded ? "Einklappen" : "Aufdecken"}
+                              >
+                                {isExpanded ? (
+                                  <ChevronDown className="h-4 w-4 text-[#FF6A1F]" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4 text-zinc-400" />
+                                )}
+                              </button>
+                              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/15 border border-orange-500/30 text-orange-400 shrink-0">
+                                <Folder className="h-4 w-4" />
+                              </div>
+                              <div className="min-w-0">
+                                <h3 className="text-xs sm:text-sm font-bold text-white truncate flex items-center gap-2">
+                                  <span>{projectName}</span>
+                                  <span className="text-[10px] font-normal text-zinc-500">
+                                    ({slides.length} Slides · {totalSizeMB} MB)
+                                  </span>
+                                </h3>
+                                <p className="text-[11px] text-zinc-400 truncate">
+                                  Pfad: <code className="text-zinc-300 font-mono text-[10px]">{stats.folder || "USERCONTENT"}/carousels/{projectName}/</code>
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Project Folder Actions */}
+                            <div className="flex items-center gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                type="button"
+                                onClick={() => toggleProjectExpand(projectName)}
+                                className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs font-semibold text-zinc-300 transition-colors cursor-pointer"
+                              >
+                                <Eye className="h-3.5 w-3.5 text-zinc-400" />
+                                <span>{isExpanded ? "Einklappen" : "Inhalte aufdecken"}</span>
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => void handleDownloadProjectZip(projectName, slides)}
+                                disabled={isZipping}
+                                className="flex items-center gap-1.5 rounded-xl border border-orange-500/30 bg-orange-500/15 hover:bg-orange-500/25 px-3 py-1.5 text-xs font-semibold text-orange-400 transition-colors cursor-pointer disabled:opacity-50"
+                                title="Dieses Karussell-Projekt komplett als ZIP herunterladen"
+                              >
+                                <Archive className="h-3.5 w-3.5" />
+                                <span>Projekt als ZIP</span>
+                              </button>
+
+                              {onOpenHistory && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    // Try to match history entry by title
+                                    const match = historyEntries.find(
+                                      (h) => h.title.toLowerCase().includes(projectName.toLowerCase()) ||
+                                        projectName.toLowerCase().includes(h.title.toLowerCase())
+                                    );
+                                    if (match) {
+                                      onOpenHistory(match);
+                                    } else if (slides[0]?.prompt && onUseInCarousel) {
+                                      onUseInCarousel(slides[0].displayUrl || slides[0].url, slides[0].prompt);
+                                    } else {
+                                      toast.info(`Projekt „${projectName}“ geladen.`);
+                                    }
+                                  }}
+                                  className="flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/10 hover:bg-white/20 px-3 py-1.5 text-xs font-semibold text-white transition-colors cursor-pointer"
+                                  title="Dieses Projekt im Karussell-Editor bearbeiten"
+                                >
+                                  <Sparkles className="h-3.5 w-3.5 text-orange-400" />
+                                  <span>Im Editor öffnen</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Expanded Content: Reveal all slides in the folder */}
+                          {isExpanded && (
+                            <div className="p-4 bg-black/30">
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                {slides.map((slide, idx) => {
+                                  const isSelected = selectedIds.includes(slide.id);
+                                  return (
+                                    <div
+                                      key={slide.id}
+                                      className={cn(
+                                        "group relative flex flex-col overflow-hidden rounded-xl border bg-[#14111C] transition-all",
+                                        isSelected
+                                          ? "border-[#FF4D17] ring-1 ring-[#FF4D17]"
+                                          : "border-white/[0.08] hover:border-orange-500/40"
+                                      )}
+                                    >
+                                      {/* Slide Number Badge */}
+                                      <div className="absolute top-2 left-2 z-10 rounded-md bg-black/80 border border-white/15 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+                                        Slide {idx + 1}
+                                      </div>
+
+                                      {/* Selection Checkbox */}
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          toggleSelect(slide.id);
+                                        }}
+                                        className={cn(
+                                          "absolute top-2 right-2 z-10 flex h-5 w-5 items-center justify-center rounded-md border transition-all cursor-pointer",
+                                          isSelected
+                                            ? "border-[#FF4D17] bg-[#FF4D17] text-white"
+                                            : "border-white/30 bg-black/60 text-transparent hover:border-white/60"
+                                        )}
+                                      >
+                                        <Check className={cn("h-3 w-3 stroke-[3]", isSelected ? "text-white" : "opacity-0")} />
+                                      </button>
+
+                                      {/* Image Thumbnail */}
+                                      <div
+                                        className="relative aspect-[4/5] w-full overflow-hidden bg-black/50 cursor-pointer"
+                                        onClick={() => setPreviewImage(slide)}
+                                      >
+                                        <img
+                                          src={slide.displayUrl || slide.url}
+                                          alt={slide.filename}
+                                          loading="lazy"
+                                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                          onError={(e) => {
+                                            const proxy = `/api/cloud/file?key=${encodeURIComponent(slide.key)}`;
+                                            if (e.currentTarget.src !== proxy) e.currentTarget.src = proxy;
+                                          }}
+                                        />
+
+                                        {/* Hover Overlay */}
+                                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-1.5 bg-black/70 opacity-0 backdrop-blur-[2px] transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              setPreviewImage(slide);
+                                            }}
+                                            className="p-1.5 rounded-lg bg-white/20 text-white hover:bg-white/30 transition-transform hover:scale-110"
+                                            title="Großansicht"
+                                          >
+                                            <Maximize2 className="h-3.5 w-3.5" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={(e) => {
+                                              e.stopPropagation();
+                                              void handleDownloadSingle(slide);
+                                            }}
+                                            className="p-1.5 rounded-lg bg-white text-black hover:bg-zinc-200 transition-transform hover:scale-110"
+                                            title="Herunterladen"
+                                          >
+                                            <Download className="h-3.5 w-3.5" />
+                                          </button>
+                                        </div>
+                                      </div>
+
+                                      {/* Footer */}
+                                      <div className="p-2 space-y-1">
+                                        <p className="text-[10px] font-semibold text-zinc-300 truncate" title={slide.filename}>
+                                          {slide.filename}
+                                        </p>
+                                        <p className="text-[9px] text-zinc-500 line-clamp-1" title={slide.prompt}>
+                                          {slide.prompt}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* SECTION: KI-Klone (clones/) */}
+              {Object.keys(folderTree.clones).length > 0 && (
+                <div className="space-y-3 pt-4 border-t border-white/[0.08]">
+                  <div className="flex items-center justify-between pb-1">
+                    <div className="flex items-center gap-2">
+                      <FolderOpen className="h-4 w-4 text-purple-400" />
+                      <h2 className="text-sm font-bold text-white tracking-wide">
+                        Unterordner: <span className="text-purple-400">clones/</span>
+                      </h2>
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-zinc-300">
+                        {Object.keys(folderTree.clones).length} Klone
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    {Object.entries(folderTree.clones).flatMap(([cloneName, imgs]) =>
+                      imgs.map((img) => (
+                        <div
+                          key={img.id}
+                          onClick={() => setPreviewImage(img)}
+                          className="group relative flex flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-[#14111C] hover:border-purple-500/40 transition-all cursor-pointer"
+                        >
+                          <div className="relative aspect-square w-full overflow-hidden bg-black/50">
+                            <img
+                              src={img.displayUrl || img.url}
+                              alt={img.filename}
+                              loading="lazy"
+                              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                              onError={(e) => {
+                                const proxy = `/api/cloud/file?key=${encodeURIComponent(img.key)}`;
+                                if (e.currentTarget.src !== proxy) e.currentTarget.src = proxy;
+                              }}
+                            />
+                            <div className="absolute top-1 left-1 rounded bg-black/70 px-1.5 py-0.5 text-[9px] font-semibold text-purple-300">
+                              {cloneName}
+                            </div>
+                          </div>
+                          <div className="p-2 text-[10px] font-medium text-zinc-300 truncate">
+                            {img.prompt}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* SECTION: Einzelbilder & Galerie (gallery/) */}
+              {folderTree.gallery.length > 0 && (
+                <div className="space-y-3 pt-4 border-t border-white/[0.08]">
+                  <div className="flex items-center justify-between pb-1">
+                    <div className="flex items-center gap-2">
+                      <FolderOpen className="h-4 w-4 text-emerald-400" />
+                      <h2 className="text-sm font-bold text-white tracking-wide">
+                        Unterordner: <span className="text-emerald-400">gallery/</span>
+                      </h2>
+                      <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-zinc-300">
+                        {folderTree.gallery.length} Einzelbilder
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    {folderTree.gallery.map((img) => (
+                      <div
+                        key={img.id}
+                        onClick={() => setPreviewImage(img)}
+                        className="group relative flex flex-col overflow-hidden rounded-xl border border-white/[0.08] bg-[#14111C] hover:border-emerald-500/40 transition-all cursor-pointer"
+                      >
+                        <div className="relative aspect-[4/5] w-full overflow-hidden bg-black/50">
+                          <img
+                            src={img.displayUrl || img.url}
+                            alt={img.filename}
+                            loading="lazy"
+                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            onError={(e) => {
+                              const proxy = `/api/cloud/file?key=${encodeURIComponent(img.key)}`;
+                              if (e.currentTarget.src !== proxy) e.currentTarget.src = proxy;
+                            }}
+                          />
+                        </div>
+                        <div className="p-2 space-y-0.5">
+                          <p className="text-[10px] font-semibold text-zinc-300 truncate">{img.filename}</p>
+                          <p className="text-[9px] text-zinc-500 line-clamp-1">{img.prompt}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── VIEW MODE 2: Kachel-Raster (Flache Übersicht) ──────── */}
+          {filteredImages.length > 0 && galleryViewMode === "grid" && (
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filteredImages.map((img) => {
                 const isSelected = selectedIds.includes(img.id);
@@ -532,7 +945,7 @@ export function CloudGalleryView({
                         toggleSelect(img.id);
                       }}
                       className={cn(
-                        "absolute left-3 top-3 z-20 flex h-6 w-6 items-center justify-center rounded-lg border transition-all duration-200",
+                        "absolute left-3 top-3 z-20 flex h-6 w-6 items-center justify-center rounded-lg border transition-all duration-200 cursor-pointer",
                         isSelected
                           ? "border-[#FF4D17] bg-[#FF4D17] text-white shadow-[0_0_10px_#FF4D17]"
                           : "border-white/30 bg-black/60 text-transparent hover:border-white/60 hover:bg-black/80",

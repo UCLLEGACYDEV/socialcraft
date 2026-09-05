@@ -18,7 +18,7 @@ import {
   PromptGallery,
 } from "@/onyx/components/SimpleViews";
 import { CloudGalleryView } from "@/onyx/components/CloudGalleryView";
-import { saveImageToS4, ensureUserS4Folder } from "@/onyx/s4-storage";
+import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder } from "@/onyx/s4-storage";
 import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
 import { AdminDashboard } from "@/onyx/components/AdminDashboard";
 import { AuthModal } from "@/onyx/components/AuthModal";
@@ -288,13 +288,19 @@ function OnyxStudio() {
           setSlideFlag(slide.id, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
           if (settings.s4AutoSave) {
             const effectiveUser = currentUser || getStoredCurrentUser();
+            const cleanTopic = (brief.topic || "karussell").replace(/[^a-zA-Z0-9-_\s]/g, "").trim().replace(/\s+/g, "_") || "karussell";
+            const dateStr = new Date().toISOString().slice(0, 10);
+            const carouselFolder = `${dateStr}_${cleanTopic}`;
+
             void saveImageToS4({
               imageUrl: res.imageUrl,
               prompt: slide.visualPrompt,
               category: "carousel",
               aspectRatio: brandKit.aspectRatio,
               user: effectiveUser,
-              customFilename: `slide_${slide.slideNumber}.jpg`,
+              customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
+              subfolder: `carousels/${carouselFolder}`,
+              projectName: carouselFolder,
             }).then((cloudImg) => {
               if (cloudImg) {
                 toast.success(`Slide ${slide.slideNumber} in Mega S4 gesichert ☁️`, { duration: 2500 });
@@ -314,11 +320,27 @@ function OnyxStudio() {
         }
       }
       if (!controller.signal.aborted) {
+        if (settings.s4AutoSave) {
+          const effectiveUser = currentUser || getStoredCurrentUser();
+          void saveCarouselToS4({
+            user: effectiveUser,
+            carouselId: `car_${Date.now()}`,
+            topic: brief.topic || "Instagram Karussell",
+            slides: slides.map((s) => ({
+              id: s.id,
+              slideNumber: s.slideNumber,
+              headline: s.headline,
+              subtext: s.subtext,
+              imageUrl: s.imageUrl,
+              visualPrompt: s.visualPrompt,
+            })),
+          });
+        }
         if (realNanoCount > 0) {
           toast.success(`${realNanoCount} Visuals via Nano-Banana 2 gerendert! 🍌`);
           void refreshCredits();
         } else {
-          toast.success("Alle Visuals geladen");
+          toast.success("Alle Visuals geladen & in Cloud-Ordner gesichert ☁️");
         }
       }
     } finally {

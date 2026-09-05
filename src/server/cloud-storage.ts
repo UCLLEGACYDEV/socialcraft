@@ -125,6 +125,25 @@ export async function ensureCloudFolder(
     }
   }
 
+  // Create structured subfolders: carousels, clones, gallery
+  const subfolders = ["carousels", "clones", "gallery"];
+  for (const sub of subfolders) {
+    const subDirKey = `${cleanPath}/${sub}/`;
+    try {
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: cfg.bucket,
+          Key: subDirKey,
+          Body: "",
+          ContentType: "application/x-directory",
+        })
+      );
+      createdPaths.push(subDirKey);
+    } catch (err) {
+      console.warn(`[CloudStorage] Subfolder marker notice for ${subDirKey}:`, err);
+    }
+  }
+
   // Create a metadata marker file inside the user's specific folder
   // This guarantees Mega S4 web console and Cyberduck show the folder immediately!
   const metaKey = `${cleanPath}/.folder_meta.json`;
@@ -135,6 +154,7 @@ export async function ensureCloudFolder(
       userId: meta?.id || "unknown",
       role: meta?.role || "user",
       email: meta?.email || "",
+      subfolders: ["carousels", "clones", "gallery"],
       initializedAt: new Date().toISOString(),
       generator: "Socialcraft AI Cloud Sync",
     },

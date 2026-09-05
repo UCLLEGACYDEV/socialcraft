@@ -1,4 +1,4 @@
-import { useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
   Camera,
   Check,
@@ -133,11 +133,40 @@ export function AiCloneView({
   const [fusionProgress, setFusionProgress] = useState<PersonaAnalysisProgress | null>(null);
   const [fusionResult, setFusionResult] = useState<InspirationFusionResult | null>(null);
 
+  const DUMMY_PRESET_IDS = useMemo(() => new Set(["editorial-minimalist", "founder-dark-ember", "cyber-visionary", "michael-schmidt"]), []);
+
+  useEffect(() => {
+    if (profiles.some((p) => DUMMY_PRESET_IDS.has(p.id))) {
+      const cleaned = profiles.filter((p) => !DUMMY_PRESET_IDS.has(p.id));
+      setProfiles(cleaned);
+      if (cleaned[0]) setActiveId(cleaned[0].id);
+      else setActiveId("");
+    }
+  }, [profiles, setProfiles, setActiveId, DUMMY_PRESET_IDS]);
+
   // Active profile
-  const fallbackProfile: AiCloneProfile = DEFAULT_CLONE_PROFILES[0]!;
+  const fallbackProfile: AiCloneProfile = useMemo(() => ({
+    id: "new_clone",
+    name: "Mein KI-Klon",
+    isActive: true,
+    avatarUrl: "",
+    referenceImages: [],
+    genderAge: "",
+    hairFace: "",
+    tattoosFeatures: "",
+    wardrobe: "",
+    lightingLook: "",
+    framingCamera: "",
+    negativePrompt: "Keine Pickel, keine Hautunreinheiten, kein künstliches Grinsen, keine Cartoon-Ästhetik",
+    customPrefix: "",
+    placement: "hook_closing",
+    updatedAt: new Date().toISOString(),
+  }), []);
+
   const activeProfile: AiCloneProfile = useMemo(() => {
-    return profiles.find((p) => p.id === activeId) ?? profiles[0] ?? fallbackProfile;
-  }, [profiles, activeId, fallbackProfile]);
+    const valid = profiles.filter((p) => !DUMMY_PRESET_IDS.has(p.id));
+    return valid.find((p) => p.id === activeId) ?? valid[0] ?? fallbackProfile;
+  }, [profiles, activeId, fallbackProfile, DUMMY_PRESET_IDS]);
 
   // Patch active profile
   const patchProfile = (patch: Partial<AiCloneProfile>) => {

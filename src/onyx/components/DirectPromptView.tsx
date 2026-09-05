@@ -143,17 +143,37 @@ export function DirectPromptView({
   );
   const [activeCloneId, setActiveCloneId] = usePersistentState<string>(
     LS.activeCloneId,
-    DEFAULT_CLONE_PROFILES[0]?.id ?? "",
+    "",
   );
 
-  const fallbackProfile: AiCloneProfile = DEFAULT_CLONE_PROFILES[0]!;
+  const DUMMY_PRESET_IDS = useMemo(() => new Set(["editorial-minimalist", "founder-dark-ember", "cyber-visionary", "michael-schmidt"]), []);
+
+  const fallbackProfile: AiCloneProfile = useMemo(() => ({
+    id: "default_clone",
+    name: "Mein KI-Klon",
+    isActive: true,
+    avatarUrl: "",
+    referenceImages: [],
+    genderAge: "",
+    hairFace: "",
+    tattoosFeatures: "",
+    wardrobe: "",
+    lightingLook: "",
+    framingCamera: "",
+    negativePrompt: "Keine Pickel, keine Hautunreinheiten, kein Plastik-Look",
+    customPrefix: "",
+    placement: "hook_closing",
+    updatedAt: new Date().toISOString(),
+  }), []);
+
   const activeClone: AiCloneProfile = useMemo(() => {
+    const valid = profiles.filter((p) => !DUMMY_PRESET_IDS.has(p.id));
     return (
-      profiles.find((p) => p.id === activeCloneId) ??
-      profiles[0] ??
+      valid.find((p) => p.id === activeCloneId) ??
+      valid[0] ??
       fallbackProfile
     );
-  }, [profiles, activeCloneId, fallbackProfile]);
+  }, [profiles, activeCloneId, fallbackProfile, DUMMY_PRESET_IDS]);
 
   // Multi-Inspiration Images State
   const [inspirationImages, setInspirationImages] = useState<string[]>([]);
