@@ -100,26 +100,32 @@ export function Sidebar({
 
       <div className="space-y-1 px-2 pb-3">
         {!collapsed && creditStatus && (
-          <div className="mb-2 rounded-lg border border-border bg-foreground/[0.03] px-3 py-2">
-            <div className="flex items-center justify-between">
-              <span className="mono-label">Credits</span>
+          <div className="mb-2 rounded-xl border border-border/70 bg-foreground/[0.03] p-2.5 transition-colors">
+            <div className="flex items-center justify-between pb-1.5 border-b border-border/40">
+              <span className="text-[11px] font-semibold tracking-wider uppercase text-muted-foreground/90">Credits</span>
               <button
                 type="button"
                 onClick={onRefreshCredits}
-                className="text-muted-foreground transition-colors hover:text-foreground"
+                className="p-1 -mr-1 rounded-md text-muted-foreground transition-colors hover:text-foreground hover:bg-foreground/5"
+                title="Credits aktualisieren"
                 aria-label="Credits aktualisieren"
               >
                 <RefreshCw className={cn("h-3 w-3", creditStatus.loading && "animate-spin")} />
               </button>
             </div>
-            <div
-              className={cn(
-                "mt-1 font-mono text-[11px] leading-5",
-                lowCredits ? "text-warning" : "text-muted-foreground",
-              )}
-            >
-              <div>KIE · {creditStatus.kie.formatted}</div>
-              <div>ai33 · {creditStatus.ai33.formatted}</div>
+            <div className="mt-2 space-y-1.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground font-medium">KIE</span>
+                <span className={cn("font-semibold", lowCredits ? "text-warning" : "text-foreground")}>
+                  {creditStatus.kie.formatted}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground font-medium">ai33</span>
+                <span className={cn("font-semibold", lowCredits ? "text-warning" : "text-foreground")}>
+                  {creditStatus.ai33.formatted}
+                </span>
+              </div>
             </div>
           </div>
         )}
