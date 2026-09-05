@@ -19,6 +19,10 @@ import {
   McpModalContent,
   PromptGallery,
 } from "@/onyx/components/SimpleViews";
+import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
+import { AdminDashboard } from "@/onyx/components/AdminDashboard";
+import { AuthModal } from "@/onyx/components/AuthModal";
+import { type User, getStoredCurrentUser, saveStoredCurrentUser } from "@/onyx/auth";
 
 import {
   DEFAULT_API_SETTINGS,
@@ -74,6 +78,27 @@ export const Route = createFileRoute("/")({
 });
 
 function OnyxStudio() {
+  const [currentView, setCurrentView] = usePersistentState<"landing" | "studio" | "admin">(
+    "onyx.currentView",
+    "landing",
+  );
+  const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredCurrentUser());
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<"login" | "register">("login");
+
+  const handleLogout = () => {
+    saveStoredCurrentUser(null);
+    setCurrentUser(null);
+    toast.info("Erfolgreich abgemeldet.");
+    if (currentView === "admin") {
+      setCurrentView("landing");
+    }
+  };
+
+  const handleAuthSuccess = (user: User) => {
+    setCurrentUser(user);
+  };
+
   const [activeTab, setActiveTab] = usePersistentState<TabKey>(LS.activeTab, "carousel");
   const [collapsed, setCollapsed] = usePersistentState<boolean>(LS.sidebarCollapsed, false);
   const [brandKit, setBrandKit] = usePersistentState<BrandKit>(LS.brandKit, DEFAULT_BRAND_KIT);
@@ -341,6 +366,52 @@ function OnyxStudio() {
     if (slide) await downloadSlide(slide);
   };
 
+  if (currentView === "landing") {
+    return (
+      <div className="min-h-screen bg-[#07050A] text-white">
+        <CryptoxLandingPage
+          currentUser={currentUser}
+          onOpenAuth={(mode) => {
+            setAuthModalMode(mode);
+            setShowAuthModal(true);
+          }}
+          onNavigateStudio={() => setCurrentView("studio")}
+          onNavigateAdmin={() => setCurrentView("admin")}
+          onLogout={handleLogout}
+        />
+        {showAuthModal && (
+          <AuthModal
+            initialMode={authModalMode}
+            onClose={() => setShowAuthModal(false)}
+            onSuccess={handleAuthSuccess}
+          />
+        )}
+        <Toaster />
+      </div>
+    );
+  }
+
+  if (currentView === "admin") {
+    return (
+      <div className="min-h-screen bg-[#0A080E] text-white">
+        <AdminDashboard
+          currentUser={currentUser}
+          onNavigateLanding={() => setCurrentView("landing")}
+          onNavigateStudio={() => setCurrentView("studio")}
+          onLogout={handleLogout}
+        />
+        {showAuthModal && (
+          <AuthModal
+            initialMode={authModalMode}
+            onClose={() => setShowAuthModal(false)}
+            onSuccess={handleAuthSuccess}
+          />
+        )}
+        <Toaster />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#060509] text-foreground relative overflow-x-hidden selection:bg-[#FF4D17] selection:text-white">
       {/* Background ambient glow matching screenshot */}
@@ -355,6 +426,14 @@ function OnyxStudio() {
         <CryptoxNavbar
           activeTab={activeTab}
           onNavigate={setActiveTab}
+          onNavigateLanding={() => setCurrentView("landing")}
+          onNavigateAdmin={() => setCurrentView("admin")}
+          currentUser={currentUser}
+          onOpenAuth={(mode) => {
+            setAuthModalMode(mode);
+            setShowAuthModal(true);
+          }}
+          onLogout={handleLogout}
           creditStatus={creditStatus}
           onRefreshCredits={() => void refreshCredits()}
           onOpenBrandKit={() => setShowBrandKit(true)}
@@ -520,6 +599,13 @@ function OnyxStudio() {
           onClose={() => setEditing(null)}
           onSave={(patch) => applyEdit(patch, false)}
           onRegenerate={(patch) => applyEdit(patch, true)}
+        />
+      )}
+      {showAuthModal && (
+        <AuthModal
+          initialMode={authModalMode}
+          onClose={() => setShowAuthModal(false)}
+          onSuccess={handleAuthSuccess}
         />
       )}
 
