@@ -39,6 +39,7 @@ import {
   DEFAULT_API_SETTINGS,
   DEFAULT_CLONE_PROFILES,
 } from "../defaults";
+import { EngineSelector } from "./EngineSelector";
 import { generateImageUnified } from "../mock-api";
 import {
   analyzeInspirationAndFuseWithClone,
@@ -124,6 +125,12 @@ export function DirectPromptView({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialPrompt]);
+
+  // Engine & API Settings State
+  const [settings, setSettings] = usePersistentState<ApiSettings>(
+    LS.apiSettings,
+    DEFAULT_API_SETTINGS,
+  );
 
   // KI-Klon State
   const [useClone, setUseClone] = usePersistentState<boolean>(
@@ -684,6 +691,24 @@ export function DirectPromptView({
               <span>Fotos wählen</span>
             </button>
           </div>
+        </div>
+
+        {/* KI-Engine Auswahl (Model Selector) */}
+        <div className="pt-4 pb-3 border-b border-white/[0.06]">
+          <EngineSelector
+            currentProvider={settings.provider}
+            currentKieModel={settings.kieModel}
+            onSelectEngine={(engine) => {
+              const updated: ApiSettings = {
+                ...settings,
+                provider: engine.provider,
+                ...(engine.kieModel ? { kieModel: engine.kieModel } : {}),
+              };
+              setSettings(updated);
+              writeLS(LS.apiSettings, updated);
+              toast.success(`KI-Engine gewählt: ${engine.name} (${engine.badge})`);
+            }}
+          />
         </div>
 
         {/* Hidden Multi-file input */}

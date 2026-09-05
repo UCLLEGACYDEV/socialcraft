@@ -920,6 +920,14 @@ function OnyxStudio() {
           )}
           {activeTab === "ai-clone" && (
             <AiCloneView
+              currentUser={currentUser}
+              onDeductCredits={(amt) => {
+                if (currentUser) {
+                  const updated = Math.max(0, (currentUser.credits ?? 0) - amt);
+                  setCurrentUser((prev) => (prev ? { ...prev, credits: updated } : null));
+                }
+                void refreshCredits();
+              }}
               onUseInCarousel={() => {
                 patchBrief({ useClone: true });
                 setActiveTab("carousel");

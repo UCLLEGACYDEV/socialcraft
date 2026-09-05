@@ -21,6 +21,8 @@ import {
   Palette,
   Wand2,
   X,
+  Zap,
+  SlidersHorizontal,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -37,6 +39,8 @@ import {
 } from "../persona-analyzer";
 import { LS, readLS, usePersistentState } from "../storage";
 import type { AiCloneProfile, ApiSettings, ClonePlacement } from "../types";
+import type { User as AuthUser } from "../auth";
+import { DirectPromptView } from "./DirectPromptView";
 import { cn } from "@/lib/utils";
 
 const INSPIRATION_PRESETS = [
@@ -67,6 +71,8 @@ const INSPIRATION_PRESETS = [
 ];
 
 interface AiCloneViewProps {
+  currentUser?: AuthUser | null;
+  onDeductCredits?: (amount: number) => void;
   onUseInCarousel?: (clonePrompt: string) => void;
   onUseInDirectPrompt?: (clonePrompt: string) => void;
 }
@@ -90,9 +96,14 @@ const PLACEMENT_OPTIONS: { id: ClonePlacement; label: string; desc: string }[] =
 ];
 
 export function AiCloneView({
+  currentUser,
+  onDeductCredits,
   onUseInCarousel,
   onUseInDirectPrompt,
 }: AiCloneViewProps) {
+  // Studio Mode: "flow" (1-Click Style-Transfer Studio) vs. "dna" (Detailed form)
+  const [studioMode, setStudioMode] = useState<"flow" | "dna">("flow");
+
   const [profiles, setProfiles] = usePersistentState<AiCloneProfile[]>(
     LS.cloneProfiles,
     DEFAULT_CLONE_PROFILES,
@@ -475,8 +486,49 @@ export function AiCloneView({
         </div>
       </div>
 
-      {/* ── Main 2-Column Studio Grid ────────────────────────────── */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+      {/* ── Studio Mode Switcher: 1-Click Flow vs. Klon-DNA ── */}
+      <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] shadow-inner mb-6">
+        <button
+          type="button"
+          onClick={() => setStudioMode("flow")}
+          className={cn(
+            "flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer",
+            studioMode === "flow"
+              ? "bg-gradient-to-r from-[#FF4D17] to-amber-500 text-white shadow-[0_0_20px_rgba(255,77,23,0.4)]"
+              : "text-zinc-400 hover:text-white hover:bg-white/[0.04]",
+          )}
+        >
+          <Zap className="h-4 w-4 fill-current" />
+          <span>⚡ 1-Click Klon Studio & Style-Transfer</span>
+          <span className="rounded bg-black/30 px-2 py-0.5 text-[10px] font-mono text-white/90">
+            Aktiv
+          </span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setStudioMode("dna")}
+          className={cn(
+            "flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer",
+            studioMode === "dna"
+              ? "bg-white/10 text-white border border-white/20 shadow-md font-bold"
+              : "text-zinc-400 hover:text-white hover:bg-white/[0.04]",
+          )}
+        >
+          <SlidersHorizontal className="h-4 w-4" />
+          <span>⚙️ Klon-DNA & Basisdaten bearbeiten</span>
+        </button>
+      </div>
+
+      {studioMode === "flow" ? (
+        <DirectPromptView
+          currentUser={currentUser}
+          onDeductCredits={onDeductCredits}
+          onNavigateToClone={() => setStudioMode("dna")}
+        />
+      ) : (
+        /* ── Main 2-Column Studio Grid ────────────────────────────── */
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
         {/* Left Column: Structured Form & Settings (7 cols) */}
         <div className="space-y-6 lg:col-span-7">
           {/* Section 1: Profil & Identität */}
@@ -1108,6 +1160,7 @@ export function AiCloneView({
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 }
