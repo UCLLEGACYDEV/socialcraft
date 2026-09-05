@@ -282,6 +282,16 @@ export function SeriesQueue({
                     </span>
                   ))}
                 </div>
+                {/* Caption-Vorschlag – shown but never treated as a slide */}
+                {c.caption && (
+                  <div className="rounded-xl border border-violet-500/25 bg-violet-500/[0.07] p-3 space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-violet-400">Caption-Vorschlag</span>
+                      <span className="rounded-full bg-violet-500/20 px-2 py-0.5 text-[9px] font-semibold text-violet-300">kein Slide</span>
+                    </div>
+                    <p className="whitespace-pre-wrap text-[11px] leading-relaxed text-zinc-400 font-mono">{c.caption}</p>
+                  </div>
+                )}
               </div>
             ))}
             <button

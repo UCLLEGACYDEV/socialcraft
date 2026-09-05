@@ -159,6 +159,28 @@ export function parseSlides(text: string): ParsedSlide[] {
   return slides;
 }
 
+/**
+ * Detects a trailing "Caption-Vorschlag" / "Caption" block at the end of a
+ * raw carousel text, strips it out, and returns both the cleaned text and
+ * the caption string. The caption section must NOT be counted as a slide.
+ *
+ * Matches headings like:
+ *   **Caption-Vorschlag:**
+ *   Caption-Vorschlag:
+ *   **Caption:**
+ *   Caption:
+ *   ### Caption-Vorschlag
+ */
+const CAPTION_SECTION = /(?:^|\n)\s*(?:[*#_~`\s]*)(?:caption(?:-vorschlag)?|caption(?:\s*vorschlag)?)\s*:?(?:[*#_~`\s]*)\s*\n([\s\S]*)$/i;
+
+export function extractCaption(raw: string): { text: string; caption: string | undefined } {
+  const match = raw.match(CAPTION_SECTION);
+  if (!match) return { text: raw, caption: undefined };
+  const caption = match[1]?.trim() || undefined;
+  const text = raw.slice(0, match.index).trimEnd();
+  return { text, caption };
+}
+
 export function extractTitle(text: string, slides: ParsedSlide[]): string {
   // 1. Explicit topic marker
   const match = text.match(/^\s*(?:thema|topic|titel|title)\s*[:–—-]\s*(.+)$/im);
@@ -199,13 +221,17 @@ export function parseBlock(text: string): ParsedCarousel[] {
 
   return chunks
     .map((raw) => {
-      const slides = parseSlides(raw);
-      const explicit = /^\s*(?:thema|topic|titel|title)\s*[:–—-]/im.test(raw);
+      // Strip trailing caption block BEFORE parsing slides so it is never
+      // mistaken for a slide or appended to the last slide's prompt.
+      const { text: cleanedRaw, caption } = extractCaption(raw);
+      const slides = parseSlides(cleanedRaw);
+      const explicit = /^\s*(?:thema|topic|titel|title)\s*[:–—-]/im.test(cleanedRaw);
       return {
-        title: extractTitle(raw, slides),
+        title: extractTitle(cleanedRaw, slides),
         titleFromBlock: explicit,
-        raw,
+        raw: cleanedRaw,
         slides,
+        ...(caption !== undefined && { caption }),
       } satisfies ParsedCarousel;
     })
     .filter((c) => c.slides.length > 0);

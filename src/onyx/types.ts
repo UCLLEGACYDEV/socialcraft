@@ -140,6 +140,8 @@ export interface ParsedCarousel {
   titleFromBlock: boolean;
   raw: string;
   slides: ParsedSlide[];
+  /** Instagram caption extracted from a "Caption-Vorschlag:" block – NOT a slide */
+  caption?: string;
 }
 
 export type ClonePlacement = "hook_closing" | "all_slides" | "even_slides" | "custom";
