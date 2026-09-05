@@ -37,3 +37,52 @@ export async function exportCarouselAsZip(slides: SlideContent[], topic: string)
   saveAs(content, `${safeName(topic || "ONYX_Karussell")}.zip`);
   return withImages.length;
 }
+
+export async function downloadCloudImage(image: { filename: string; displayUrl: string }) {
+  try {
+    const res = await fetch(image.displayUrl);
+    const blob = await res.blob();
+    saveAs(blob, image.filename || "bild.jpg");
+  } catch {
+    const a = document.createElement("a");
+    a.href = image.displayUrl;
+    a.download = image.filename || "bild.jpg";
+    a.target = "_blank";
+    a.rel = "noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+}
+
+export async function exportS4ImagesAsZip(
+  images: { filename: string; displayUrl: string }[],
+  folderName = "Mein_Cloud_Ordner",
+) {
+  if (images.length === 0) return 0;
+  const zip = new JSZip();
+  let addedCount = 0;
+
+  for (let i = 0; i < images.length; i++) {
+    const item = images[i];
+    if (!item?.displayUrl) continue;
+    try {
+      const res = await fetch(item.displayUrl);
+      const blob = await res.blob();
+      zip.file(item.filename || `Bild_${i + 1}.jpg`, blob);
+      addedCount++;
+    } catch {
+      // If direct cross-origin fetch is blocked, fetch as image or skip
+    }
+  }
+
+  // Fallback: If cors prevented fetch, generate text index or notify
+  if (addedCount > 0) {
+    const content = await zip.generateAsync({ type: "blob" });
+    saveAs(content, `${safeName(folderName)}.zip`);
+    return addedCount;
+  }
+
+  return 0;
+}
+

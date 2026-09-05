@@ -230,47 +230,27 @@ export function SettingsModal({
           </p>
         </Section>
 
-        <Section title="MegaS4 S3 Cloud Storage (socialgrow.s3.g.megas4.com)">
-          <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 space-y-3">
+        <Section title="Cloud-Synchronisation & Backup">
+          <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-3.5 space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs text-zinc-400">S3 Host & Bucket:</span>
-              <span className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
-                🟢 {settings.s4Bucket || "socialgrow"}.s3.g.megas4.com
+              <span className="text-xs text-zinc-400">Cloud-Speicher:</span>
+              <span className="text-xs font-semibold px-2 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">
+                🟢 Verbunden & Aktiv
               </span>
             </div>
 
-            <Row label="S4 Bucket Name">
-              <input
-                type="text"
-                className="field-input text-xs"
-                value={settings.s4Bucket || "socialgrow"}
-                onChange={(e) => onChange({ s4Bucket: e.target.value })}
-                placeholder="socialgrow"
-              />
-            </Row>
-
-            <Row label="S4 Endpoint Host">
-              <input
-                type="text"
-                className="field-input text-xs font-mono"
-                value={settings.s4Endpoint || "socialgrow.s3.g.megas4.com"}
-                onChange={(e) => onChange({ s4Endpoint: e.target.value })}
-                placeholder="socialgrow.s3.g.megas4.com"
-              />
-            </Row>
-
             <div className="flex items-center justify-between pt-1 border-t border-white/[0.06]">
               <div className="space-y-0.5">
-                <span className="text-xs font-medium text-zinc-200">Auto-Upload in Cloud</span>
-                <p className="text-[10px] text-zinc-500">
-                  Alle generierten Bilder automatisch im Benutzer-Ordner ablegen
+                <span className="text-xs font-medium text-zinc-200">Automatische Cloud-Sicherung</span>
+                <p className="text-[11px] text-zinc-400">
+                  Alle generierten Bilder automatisch in deinem persönlichen Cloud-Ordner sichern, damit du jederzeit ganze Ordner oder einzelne Bilder als ZIP herunterladen kannst.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => onChange({ s4AutoSave: !settings.s4AutoSave })}
                 className={cn(
-                  "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out",
+                  "relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ml-3",
                   settings.s4AutoSave ? "bg-[#FF4D17]" : "bg-white/20",
                 )}
               >

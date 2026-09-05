@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  Archive,
+  Check,
   Cloud,
-  Copy,
   Download,
   Folder,
-  HardDrive,
-  Loader2,
+  FolderDown,
   Maximize2,
   Plus,
   RefreshCw,
@@ -15,7 +15,6 @@ import {
   Upload,
   User as UserIcon,
   X,
-  Check,
 } from "lucide-react";
 import type { User } from "../auth";
 import type { HistoryEntry } from "../types";
@@ -23,11 +22,11 @@ import {
   deleteBatchS4Images,
   deleteS4Image,
   getS4StorageStats,
-  getUserS4Folder,
   listS4Images,
   saveImageToS4,
   type S4CloudImage,
 } from "../s4-storage";
+import { downloadCloudImage, exportS4ImagesAsZip } from "../export-zip";
 import { HistoryView } from "./SimpleViews";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -59,10 +58,11 @@ export function CloudGalleryView({
   const [uploadUrl, setUploadUrl] = useState("");
   const [uploadPrompt, setUploadPrompt] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [isZipping, setIsZipping] = useState(false);
 
   const isAdmin = currentUser?.role === "admin";
 
-  // Reload when storage changes
+  // Reload when cloud storage changes
   useEffect(() => {
     const handleUpdate = () => setRefreshTrigger((prev) => prev + 1);
     window.addEventListener("onyx:s4-update", handleUpdate);
@@ -85,8 +85,7 @@ export function CloudGalleryView({
         const matchPrompt = img.prompt.toLowerCase().includes(query);
         const matchFilename = img.filename.toLowerCase().includes(query);
         const matchUser = img.userName.toLowerCase().includes(query);
-        const matchKey = img.key.toLowerCase().includes(query);
-        return matchPrompt || matchFilename || matchUser || matchKey;
+        return matchPrompt || matchFilename || matchUser;
       }
       return true;
     });
@@ -107,22 +106,64 @@ export function CloudGalleryView({
   };
 
   const handleDeleteSingle = (image: S4CloudImage) => {
-    if (confirm(`Bild „${image.filename}“ wirklich aus socialgrow.s3.g.megas4.com löschen?`)) {
+    if (confirm(`Bild „${image.filename}“ wirklich aus deinem Cloud-Ordner löschen?`)) {
       const ok = deleteS4Image(image.id);
       if (ok) {
         setSelectedIds((prev) => prev.filter((id) => id !== image.id));
         if (previewImage?.id === image.id) setPreviewImage(null);
-        toast.success(`Bild aus S4-Bucket gelöscht`);
+        toast.success(`Bild gelöscht`);
       }
     }
   };
 
   const handleDeleteBatch = () => {
     if (selectedIds.length === 0) return;
-    if (confirm(`${selectedIds.length} Bilder wirklich dauerhaft aus dem S4-Bucket löschen?`)) {
+    if (confirm(`${selectedIds.length} Bilder wirklich aus dem Cloud-Ordner löschen?`)) {
       const count = deleteBatchS4Images(selectedIds);
       setSelectedIds([]);
-      toast.success(`${count} Bilder aus socialgrow.s3.g.megas4.com entfernt`);
+      toast.success(`${count} Bilder erfolgreich gelöscht`);
+    }
+  };
+
+  const handleDownloadSingle = async (image: S4CloudImage) => {
+    await downloadCloudImage(image);
+    toast.success(`Bild „${image.filename}“ heruntergeladen`);
+  };
+
+  // Download entire folder as ZIP
+  const handleDownloadFolderZip = async () => {
+    if (allImages.length === 0) {
+      toast.error("Keine Bilder zum Herunterladen im Ordner.");
+      return;
+    }
+    setIsZipping(true);
+    toast.info("Erstelle ZIP-Archiv des Ordners…");
+    try {
+      const folderName = currentUser?.name ? `Cloud_Ordner_${currentUser.name.replace(/\s+/g, "_")}` : "Mein_Cloud_Ordner";
+      const count = await exportS4ImagesAsZip(allImages, folderName);
+      if (count > 0) {
+        toast.success(`Ordner mit ${count} Bildern als ZIP heruntergeladen!`);
+      } else {
+        toast.error("Fehler beim Erstellen der ZIP-Datei.");
+      }
+    } finally {
+      setIsZipping(false);
+    }
+  };
+
+  // Download only selected images as ZIP
+  const handleDownloadSelectedZip = async () => {
+    const selectedImages = allImages.filter((img) => selectedIds.includes(img.id));
+    if (selectedImages.length === 0) return;
+    setIsZipping(true);
+    toast.info(`Erstelle ZIP-Archiv mit ${selectedImages.length} Bildern…`);
+    try {
+      const count = await exportS4ImagesAsZip(selectedImages, `Auswahl_${selectedImages.length}_Bilder`);
+      if (count > 0) {
+        toast.success(`${count} Bilder als ZIP heruntergeladen!`);
+      }
+    } finally {
+      setIsZipping(false);
     }
   };
 
@@ -131,20 +172,17 @@ export function CloudGalleryView({
     if (!uploadUrl.trim()) return;
     saveImageToS4({
       imageUrl: uploadUrl.trim(),
-      prompt: uploadPrompt.trim() || "Manuell hochgeladenes Bild",
+      prompt: uploadPrompt.trim() || "Manuell hinzugefügtes Bild",
       category: "upload",
       user: currentUser,
     });
     setUploadUrl("");
     setUploadPrompt("");
     setShowUploadModal(false);
-    toast.success(`Bild im S4-Ordner abgelegt: ${getUserS4Folder(currentUser)}`);
+    toast.success(`Bild in deinem Cloud-Ordner gesichert`);
   };
 
-  const handleCopyUrl = (url: string) => {
-    navigator.clipboard.writeText(url);
-    toast.success("S3-URL in die Zwischenablage kopiert!");
-  };
+  const currentFolderName = currentUser ? currentUser.name : "Mein Cloud-Workspace";
 
   return (
     <div className="space-y-6">
@@ -152,17 +190,17 @@ export function CloudGalleryView({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl flex items-center gap-2.5">
-            <span>Galerie & Cloud-Storage</span>
+            <span>Cloud-Galerie & Mediathek</span>
             <span className="rounded-full border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 text-xs font-semibold text-orange-400">
-              socialgrow.s3.g.megas4.com
+              Cloud-Sync aktiv
             </span>
           </h1>
           <p className="text-xs text-zinc-400 mt-0.5">
-            Verwalte deine in MegaS4 abgelegten Bilder in isolierten Benutzer-Ordnern.
+            Alle deine generierten Bilder sicher in deinem persönlichen Cloud-Ordner abgelegt.
           </p>
         </div>
 
-        {/* Tab Switcher: Cloud Bucket vs Lokales Archiv */}
+        {/* Tab Switcher: Mein Cloud-Ordner vs Lokales Archiv */}
         <div className="flex items-center rounded-2xl border border-white/[0.08] bg-[#0F0D15] p-1 shadow-inner">
           <button
             type="button"
@@ -175,7 +213,7 @@ export function CloudGalleryView({
             )}
           >
             <Cloud className="h-4 w-4 text-[#FF6A1F]" />
-            <span>MegaS4 Cloud Bucket</span>
+            <span>Mein Cloud-Ordner</span>
             <span className="rounded-full bg-white/10 px-1.5 py-0.2 text-[10px] text-zinc-300">
               {allImages.length}
             </span>
@@ -192,7 +230,7 @@ export function CloudGalleryView({
             )}
           >
             <Folder className="h-4 w-4 text-zinc-400" />
-            <span>Lokales Archiv</span>
+            <span>Lokale Entwürfe</span>
             <span className="rounded-full bg-white/10 px-1.5 py-0.2 text-[10px] text-zinc-300">
               {historyEntries.length}
             </span>
@@ -209,27 +247,24 @@ export function CloudGalleryView({
         />
       )}
 
-      {/* ── SubTab 1: MegaS4 Cloud Bucket ──────────────────────────── */}
+      {/* ── SubTab 1: Mein Cloud-Ordner ────────────────────────────── */}
       {activeSubTab === "cloud" && (
         <div className="space-y-5">
-          {/* S4 Connection Banner & Quick Stats */}
+          {/* Cloud Connection Banner & Folder Management */}
           <div className="cryptox-card relative overflow-hidden border border-white/[0.08] p-5 sm:p-6 bg-gradient-to-r from-[#120F1C]/90 to-[#1A1424]/90">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2">
                   <div className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
                   <span className="text-xs font-bold text-white uppercase tracking-wider">
-                    MegaS4 Object Storage verbunden
-                  </span>
-                  <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-300 font-mono">
-                    ONLINE
+                    Cloud-Speicher aktiv · Gesichert
                   </span>
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2 pt-0.5">
-                  <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-black/40 px-3 py-1 font-mono text-xs text-orange-400">
-                    <Folder className="h-3.5 w-3.5" />
-                    s3://socialgrow/{getUserS4Folder(currentUser)}/
+                <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
+                  <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-black/40 px-3 py-1 font-semibold text-xs text-orange-400">
+                    <Folder className="h-3.5 w-3.5 text-orange-400" />
+                    Ordner: {currentFolderName}
                   </span>
                   <span className="text-xs text-zinc-400">
                     {stats.count} {stats.count === 1 ? "Bild" : "Bilder"} gespeichert ({stats.formattedSize})
@@ -237,21 +272,34 @@ export function CloudGalleryView({
                 </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Buttons: ZIP Download & Upload */}
               <div className="flex flex-wrap items-center gap-2">
+                {/* Download entire folder as ZIP */}
+                <button
+                  type="button"
+                  onClick={handleDownloadFolderZip}
+                  disabled={isZipping || allImages.length === 0}
+                  className="flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/[0.05] px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-white/[0.1] hover:border-white/25 disabled:opacity-40 disabled:pointer-events-none shadow-sm"
+                  title="Alle Bilder dieses Ordners als ZIP herunterladen"
+                >
+                  <FolderDown className="h-4 w-4 text-[#FF6A1F]" />
+                  <span>Ganzen Ordner herunterladen (ZIP)</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setShowUploadModal(true)}
                   className="flex items-center gap-1.5 rounded-xl border border-orange-500/40 bg-orange-500/15 px-3.5 py-2 text-xs font-semibold text-orange-400 transition-all hover:bg-orange-500/25 hover:text-white shadow-[0_0_15px_rgba(255,77,23,0.15)]"
                 >
                   <Plus className="h-3.5 w-3.5" />
-                  Bild in S4 ablegen
+                  Bild hinzufügen
                 </button>
+
                 <button
                   type="button"
                   onClick={() => setRefreshTrigger((p) => p + 1)}
                   className="rounded-xl border border-white/10 bg-white/5 p-2 text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
-                  title="Bucket aktualisieren"
+                  title="Ordner aktualisieren"
                   aria-label="Aktualisieren"
                 >
                   <RefreshCw className="h-4 w-4" />
@@ -267,9 +315,9 @@ export function CloudGalleryView({
                   <div className="flex rounded-xl border border-white/10 bg-black/30 p-0.5 text-xs">
                     {(
                       [
-                        { id: "my", label: "Mein Ordner (admins/)" },
-                        { id: "users", label: "Nutzer-Ordner (users/)" },
-                        { id: "all", label: "Gesamter Bucket (*)" },
+                        { id: "my", label: "Mein Ordner" },
+                        { id: "users", label: "Alle Benutzer" },
+                        { id: "all", label: "Gesamte Mediathek" },
                       ] as const
                     ).map((tab) => (
                       <button
@@ -290,7 +338,7 @@ export function CloudGalleryView({
                 </div>
 
                 <span className="text-[11px] text-zinc-500">
-                  Als Administrator hast du Zugriff auf alle S4-Bucket-Ordner.
+                  Als Administrator kannst du zwischen deinen eigenen und den Ordnern aller Nutzer wechseln.
                 </span>
               </div>
             )}
@@ -305,7 +353,7 @@ export function CloudGalleryView({
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Nach Prompt, Dateinamen oder Ordner suchen…"
+                placeholder="Nach Bildname, Thema oder Motiv suchen…"
                 className="field-input !pl-10 !py-2 text-xs sm:text-sm w-full"
               />
             </div>
@@ -347,14 +395,14 @@ export function CloudGalleryView({
                   <button
                     type="button"
                     onClick={selectAll}
-                    className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-300 hover:text-white hover:bg-white/10"
+                    className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-300 hover:text-white hover:bg-white/10 transition-colors"
                   >
                     Alle
                   </button>
                   <button
                     type="button"
                     onClick={deselectAll}
-                    className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-400 hover:text-white hover:bg-white/10"
+                    className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
                   >
                     Keine
                   </button>
@@ -362,14 +410,26 @@ export function CloudGalleryView({
               </div>
 
               {selectedIds.length > 0 && (
-                <button
-                  type="button"
-                  onClick={handleDeleteBatch}
-                  className="flex items-center gap-1.5 rounded-lg border border-destructive/50 bg-destructive/15 px-3 py-1.5 text-xs font-semibold text-rose-300 transition-all hover:bg-destructive/30 hover:text-white shadow-[0_0_12px_rgba(239,68,68,0.2)]"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Ausgewählte löschen ({selectedIds.length})
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleDownloadSelectedZip}
+                    disabled={isZipping}
+                    className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-semibold text-white transition-all hover:bg-white/15 shadow-sm"
+                  >
+                    <Archive className="h-3.5 w-3.5 text-orange-400" />
+                    Ausgewählte als ZIP ({selectedIds.length})
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleDeleteBatch}
+                    className="flex items-center gap-1.5 rounded-lg border border-destructive/50 bg-destructive/15 px-3 py-1.5 text-xs font-semibold text-rose-300 transition-all hover:bg-destructive/30 hover:text-white shadow-[0_0_12px_rgba(239,68,68,0.2)]"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Ausgewählte löschen ({selectedIds.length})
+                  </button>
+                </div>
               )}
             </div>
           )}
@@ -380,11 +440,11 @@ export function CloudGalleryView({
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
                 <Cloud className="h-7 w-7 text-orange-400" />
               </div>
-              <h3 className="text-base font-bold text-white">Keine Bilder im S4-Ordner gefunden</h3>
+              <h3 className="text-base font-bold text-white">Noch keine Bilder im Cloud-Ordner</h3>
               <p className="text-xs text-zinc-400 max-w-md mx-auto">
                 {searchQuery || categoryFilter !== "all"
-                  ? "Keine Treffer für deine Filtereinstellungen."
-                  : `In deinem Ordner s3://socialgrow/${getUserS4Folder(currentUser)}/ sind noch keine Bilder abgelegt. Erzeuge ein Karussell oder lade manuell ein Bild hoch.`}
+                  ? "Keine Treffer für deine Suche."
+                  : "Erzeuge ein Karussell, generiere Visuals oder füge manuell ein Bild hinzu. Alles wird automatisch in deinem Cloud-Ordner gesichert."}
               </p>
               <button
                 type="button"
@@ -431,7 +491,7 @@ export function CloudGalleryView({
                       <Check className={cn("h-3.5 w-3.5 stroke-[3]", isSelected ? "text-white" : "opacity-0")} />
                     </button>
 
-                    {/* Category Badge & S4 Pill */}
+                    {/* Category Badge */}
                     <div className="absolute right-3 top-3 z-20 flex items-center gap-1.5">
                       <span className="rounded-md border border-white/20 bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-zinc-300 backdrop-blur-md">
                         {img.category}
@@ -451,37 +511,37 @@ export function CloudGalleryView({
                       />
 
                       {/* Hover Overlay with Action Buttons */}
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-2 bg-black/75 opacity-0 backdrop-blur-[2px] transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-2.5 bg-black/75 opacity-0 backdrop-blur-[2px] transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             setPreviewImage(img);
                           }}
-                          className="flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 transition-transform hover:scale-110"
-                          title="Vorschau & Details"
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md hover:bg-white/20 transition-transform hover:scale-110"
+                          title="Details & Großansicht"
                         >
                           <Maximize2 className="h-4 w-4" />
                         </button>
-                        <a
-                          href={img.displayUrl}
-                          download={img.filename}
-                          target="_blank"
-                          rel="noreferrer"
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black hover:bg-zinc-100 shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-transform hover:scale-110"
-                          title="Download"
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            void handleDownloadSingle(img);
+                          }}
+                          className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-black hover:bg-zinc-100 shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-transform hover:scale-110"
+                          title="Bild herunterladen"
                         >
                           <Download className="h-4 w-4" />
-                        </a>
+                        </button>
                         <button
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteSingle(img);
                           }}
-                          className="flex h-9 w-9 items-center justify-center rounded-full border border-rose-500/40 bg-rose-500/20 text-rose-300 hover:bg-rose-500/40 hover:text-white transition-transform hover:scale-110 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
-                          title="Aus S4 Bucket löschen"
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-rose-500/40 bg-rose-500/20 text-rose-300 hover:bg-rose-500/40 hover:text-white transition-transform hover:scale-110 shadow-[0_0_15px_rgba(244,63,94,0.3)]"
+                          title="Bild löschen"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -490,19 +550,11 @@ export function CloudGalleryView({
 
                     {/* Metadata Card Footer */}
                     <div className="p-3.5 space-y-2 border-t border-white/[0.06] bg-[#0E0C14]">
-                      {/* S3 Key / Path */}
-                      <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400">
-                        <span className="truncate max-w-[170px]" title={img.key}>
-                          s3://{img.key}
+                      {/* Filename */}
+                      <div className="flex items-center justify-between text-xs font-semibold text-zinc-200">
+                        <span className="truncate" title={img.filename}>
+                          {img.filename}
                         </span>
-                        <button
-                          type="button"
-                          onClick={() => handleCopyUrl(img.url)}
-                          className="text-zinc-500 hover:text-orange-400 transition-colors shrink-0"
-                          title="S3-URL kopieren"
-                        >
-                          <Copy className="h-3 w-3" />
-                        </button>
                       </div>
 
                       {/* Prompt */}
@@ -534,12 +586,12 @@ export function CloudGalleryView({
             <div className="flex items-center justify-between border-b border-white/10 pb-4">
               <div className="space-y-0.5">
                 <h3 className="text-base font-bold text-white">{previewImage.filename}</h3>
-                <p className="text-xs text-zinc-400 font-mono">socialgrow.s3.g.megas4.com/{previewImage.key}</p>
+                <p className="text-xs text-zinc-400">In deinem Cloud-Ordner gesichert</p>
               </div>
               <button
                 type="button"
                 onClick={() => setPreviewImage(null)}
-                className="rounded-full p-1.5 text-zinc-400 hover:text-white hover:bg-white/10"
+                className="rounded-full p-1.5 text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -556,36 +608,6 @@ export function CloudGalleryView({
 
               <div className="space-y-4 text-xs">
                 <div>
-                  <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">S3 Key Path</span>
-                  <div className="flex items-center gap-2 mt-1 rounded-xl border border-white/10 bg-black/40 p-2 font-mono text-orange-400 text-xs">
-                    <span className="truncate flex-1">{previewImage.key}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyUrl(previewImage.url)}
-                      className="p-1 hover:text-white"
-                      title="Kopieren"
-                    >
-                      <Copy className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Vollständige S3-URL</span>
-                  <div className="flex items-center gap-2 mt-1 rounded-xl border border-white/10 bg-black/40 p-2 font-mono text-zinc-300 text-[11px]">
-                    <span className="truncate flex-1">{previewImage.url}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleCopyUrl(previewImage.url)}
-                      className="p-1 hover:text-white"
-                      title="Kopieren"
-                    >
-                      <Copy className="h-3.5 w-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                <div>
                   <span className="text-[10px] uppercase tracking-wider font-semibold text-zinc-500">Visual Prompt</span>
                   <p className="mt-1 rounded-xl border border-white/10 bg-white/[0.02] p-3 text-zinc-300 leading-relaxed">
                     {previewImage.prompt}
@@ -594,17 +616,34 @@ export function CloudGalleryView({
 
                 <div className="grid grid-cols-2 gap-2 text-zinc-400 pt-1">
                   <div>
-                    <span className="text-[10px] uppercase text-zinc-500 block">Ersteller</span>
-                    <span className="text-white font-medium">{previewImage.userName} ({previewImage.userRole})</span>
+                    <span className="text-[10px] uppercase text-zinc-500 block">Kategorie</span>
+                    <span className="text-white font-medium capitalize">{previewImage.category}</span>
                   </div>
                   <div>
                     <span className="text-[10px] uppercase text-zinc-500 block">Dateigröße</span>
                     <span className="text-white font-medium">{(previewImage.sizeBytes / (1024 * 1024)).toFixed(2)} MB</span>
                   </div>
+                  <div>
+                    <span className="text-[10px] uppercase text-zinc-500 block">Gespeichert am</span>
+                    <span className="text-white font-medium">{new Date(previewImage.createdAt).toLocaleString("de-DE")}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase text-zinc-500 block">Benutzer</span>
+                    <span className="text-white font-medium">{previewImage.userName}</span>
+                  </div>
                 </div>
 
                 {/* Direct Action Buttons */}
                 <div className="flex flex-wrap gap-2 pt-3 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => void handleDownloadSingle(previewImage)}
+                    className="flex-1 rounded-xl border border-white/15 bg-white/10 px-3 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                  >
+                    <Download className="h-3.5 w-3.5 text-orange-400" />
+                    Herunterladen
+                  </button>
+
                   {onUseInCarousel && (
                     <button
                       type="button"
@@ -619,21 +658,10 @@ export function CloudGalleryView({
                     </button>
                   )}
 
-                  <a
-                    href={previewImage.displayUrl}
-                    download={previewImage.filename}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-white hover:bg-white/10 flex items-center gap-1.5"
-                  >
-                    <Download className="h-3.5 w-3.5" />
-                    Download
-                  </a>
-
                   <button
                     type="button"
                     onClick={() => handleDeleteSingle(previewImage)}
-                    className="rounded-xl border border-rose-500/40 bg-rose-500/15 px-3 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/30 hover:text-white flex items-center gap-1.5"
+                    className="rounded-xl border border-rose-500/40 bg-rose-500/15 px-3 py-2 text-xs font-semibold text-rose-300 hover:bg-rose-500/30 hover:text-white flex items-center gap-1.5 transition-colors"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     Löschen
@@ -655,7 +683,7 @@ export function CloudGalleryView({
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="text-base font-bold text-white flex items-center gap-2">
                 <Cloud className="h-4 w-4 text-orange-400" />
-                Bild in S4 Cloud ablegen
+                Bild im Cloud-Ordner sichern
               </h3>
               <button
                 type="button"
@@ -667,9 +695,9 @@ export function CloudGalleryView({
             </div>
 
             <p className="text-xs text-zinc-400">
-              Das Bild wird in deinem S4-Bucket-Ordner abgelegt:
-              <span className="block mt-1 font-mono text-orange-400 font-semibold">
-                socialgrow.s3.g.megas4.com/{getUserS4Folder(currentUser)}/
+              Das Bild wird in deinem persönlichen Cloud-Ordner abgelegt:
+              <span className="block mt-1 font-semibold text-orange-400">
+                Ordner: {currentFolderName}
               </span>
             </p>
 
@@ -687,7 +715,7 @@ export function CloudGalleryView({
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-zinc-300 font-medium">Prompt / Beschreibung (optional)</label>
+                <label className="text-zinc-300 font-medium">Prompt / Notiz (optional)</label>
                 <input
                   type="text"
                   value={uploadPrompt}
@@ -711,7 +739,7 @@ export function CloudGalleryView({
                 className="cryptox-orange-btn !py-2 !px-4 text-xs font-semibold flex items-center gap-1.5"
               >
                 <Upload className="h-3.5 w-3.5" />
-                In S4 speichern
+                In Cloud sichern
               </button>
             </div>
           </form>
