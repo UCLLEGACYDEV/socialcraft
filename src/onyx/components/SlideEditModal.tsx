@@ -90,7 +90,7 @@ export function ModalShell({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-xl animate-in fade-in duration-200">
       <div
-        className="cryptox-card-elevated relative flex w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-white/[0.12] bg-[#0E0C13]/95 shadow-[0_35px_100px_-20px_rgba(0,0,0,0.95),0_0_45px_-10px_rgba(255,77,23,0.25)] backdrop-blur-2xl"
+        className="cryptox-card-elevated relative flex w-full max-w-3xl flex-col overflow-hidden rounded-3xl"
         style={{ maxHeight }}
       >
         <div className="flex items-center justify-between border-b border-white/[0.08] px-6 py-4 bg-white/[0.02]">

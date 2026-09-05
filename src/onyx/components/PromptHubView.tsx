@@ -315,7 +315,7 @@ export function PromptHubView({
               <div
                 key={item.id}
                 onClick={() => setActiveModalPrompt(item)}
-                className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1.5 hover:border-orange-500/40 hover:bg-[#15121c] hover:shadow-[0_20px_50px_-15px_rgba(255,77,23,0.25)] cursor-pointer"
+                className="glass-card group relative flex flex-col overflow-hidden cursor-pointer hover:-translate-y-1.5"
               >
                 {/* Image Container */}
                 <div className="relative aspect-[4/5] w-full overflow-hidden bg-black/50">
@@ -462,7 +462,7 @@ export function PromptHubView({
           onClick={() => setActiveModalPrompt(null)}
         >
           <div
-            className="cryptox-card-elevated relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-white/[0.12] bg-[#0E0C13]/95 shadow-[0_35px_100px_-20px_rgba(0,0,0,0.95),0_0_50px_-10px_rgba(255,77,23,0.25)] backdrop-blur-2xl md:flex-row"
+            className="cryptox-card-elevated relative flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl md:flex-row"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Close Button */}

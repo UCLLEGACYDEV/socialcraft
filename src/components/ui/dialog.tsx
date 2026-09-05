@@ -38,7 +38,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-3xl border border-white/[0.12] bg-[#0E0C13]/95 p-6 shadow-[0_35px_100px_-20px_rgba(0,0,0,0.95),0_0_45px_-10px_rgba(255,77,23,0.25)] backdrop-blur-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-3xl border border-white/20 bg-gradient-to-b from-white/[0.1] via-[#120E19]/92 to-[#09070E]/98 p-6 shadow-[0_40px_110px_-20px_rgba(0,0,0,0.95),inset_0_1px_0_0_rgba(255,255,255,0.25),0_0_50px_-10px_rgba(255,77,23,0.3)] backdrop-blur-3xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95",
         className,
       )}
       {...props}

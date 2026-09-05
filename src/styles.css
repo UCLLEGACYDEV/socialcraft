@@ -170,25 +170,28 @@
 }
 
 @utility glass-card {
-  background: rgba(16, 14, 20, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(18, 14, 24, 0.72) 45%, rgba(10, 8, 14, 0.88) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 24px;
-  backdrop-filter: blur(24px);
-  box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
-  transition: all 250ms ease;
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.85), inset 0 1px 0 0 rgba(255, 255, 255, 0.2), inset 0 0 20px 0 rgba(255, 255, 255, 0.02);
+  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
 
   &:hover {
-    border-color: rgba(255, 85, 25, 0.35);
-    box-shadow: 0 25px 70px -15px rgba(0, 0, 0, 0.9), 0 0 25px -8px rgba(255, 77, 23, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 77, 23, 0.45);
+    box-shadow: 0 35px 90px -15px rgba(0, 0, 0, 0.95), 0 0 35px -8px rgba(255, 77, 23, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.32);
+    transform: translateY(-2px);
   }
 }
 
 @utility glass-card-hero {
-  background: rgba(12, 10, 16, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.11) 0%, rgba(22, 16, 30, 0.82) 45%, rgba(12, 9, 18, 0.94) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 28px;
-  backdrop-filter: blur(32px);
-  box-shadow: 0 35px 100px -20px rgba(0, 0, 0, 0.95), 0 0 45px -12px rgba(255, 77, 23, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
+  box-shadow: 0 40px 110px -20px rgba(0, 0, 0, 0.95), 0 0 50px -10px rgba(255, 77, 23, 0.3), inset 0 1.5px 0 0 rgba(255, 255, 255, 0.28), inset 0 0 25px 0 rgba(255, 255, 255, 0.04);
 }
 
 /* Warm rim glow used on hover for cards and slide tiles. */
@@ -296,25 +299,35 @@
 }
 
 @utility cryptox-card {
-  background: rgba(16, 14, 20, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(18, 14, 24, 0.72) 45%, rgba(10, 8, 14, 0.88) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 28px;
-  backdrop-filter: blur(28px);
-  box-shadow: 0 30px 80px -25px rgba(0, 0, 0, 0.8), inset 0 1px 0 0 rgba(255, 255, 255, 0.08);
-  transition: all 250ms ease;
+  backdrop-filter: blur(28px) saturate(190%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%);
+  box-shadow: 0 30px 85px -20px rgba(0, 0, 0, 0.88), inset 0 1px 0 0 rgba(255, 255, 255, 0.2), inset 0 0 20px 0 rgba(255, 255, 255, 0.02);
+  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
 
   &:hover {
-    border-color: rgba(255, 85, 25, 0.35);
-    box-shadow: 0 35px 90px -20px rgba(0, 0, 0, 0.9), 0 0 30px -10px rgba(255, 77, 23, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 77, 23, 0.45);
+    box-shadow: 0 38px 95px -15px rgba(0, 0, 0, 0.95), 0 0 35px -8px rgba(255, 77, 23, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.32);
+    transform: translateY(-2px);
   }
 }
 
 @utility cryptox-card-elevated {
-  background: rgba(12, 10, 16, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.12) 0%, rgba(24, 18, 34, 0.88) 45%, rgba(14, 10, 20, 0.95) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 28px;
-  backdrop-filter: blur(32px);
-  box-shadow: 0 35px 100px -20px rgba(0, 0, 0, 0.95), 0 0 45px -12px rgba(255, 77, 23, 0.25), inset 0 1px 0 0 rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
+  box-shadow: 0 40px 110px -20px rgba(0, 0, 0, 0.95), 0 0 50px -10px rgba(255, 77, 23, 0.3), inset 0 1.5px 0 0 rgba(255, 255, 255, 0.28), inset 0 0 25px 0 rgba(255, 255, 255, 0.04);
+  transition: all 300ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  &:hover {
+    border-color: rgba(255, 90, 30, 0.55);
+    box-shadow: 0 45px 120px -15px rgba(0, 0, 0, 0.98), 0 0 60px -8px rgba(255, 77, 23, 0.4), inset 0 1.5px 0 0 rgba(255, 255, 255, 0.38);
+    transform: translateY(-3px);
+  }
 }
 
 @utility cryptox-satellite-pill {

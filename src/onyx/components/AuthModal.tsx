@@ -139,7 +139,7 @@ export function AuthModal({ initialMode = "login", onClose, onSuccess }: AuthMod
       />
 
       {/* Modal Card */}
-      <div className="relative w-full max-w-md rounded-3xl border border-white/10 bg-[#120F17]/95 p-6 sm:p-8 shadow-[0_25px_70px_rgba(0,0,0,0.8)] backdrop-blur-2xl transition-all animate-in zoom-in-95 duration-200">
+      <div className="relative w-full max-w-md rounded-3xl border border-white/20 bg-gradient-to-b from-white/[0.1] via-[#120E19]/92 to-[#0A0710]/98 p-6 sm:p-8 shadow-[0_35px_100px_-20px_rgba(0,0,0,0.95),inset_0_1px_0_0_rgba(255,255,255,0.25),0_0_50px_-10px_rgba(255,77,23,0.3)] backdrop-blur-3xl transition-all animate-in zoom-in-95 duration-200">
         {/* Close Button */}
         <button
           type="button"

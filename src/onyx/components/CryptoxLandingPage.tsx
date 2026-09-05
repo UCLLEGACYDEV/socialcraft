@@ -212,7 +212,7 @@ export function CryptoxLandingPage({
       <section id="showcase" className="relative z-10 pt-4 pb-14 px-4">
         <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-3 gap-5 items-end">
           {/* Left Card: Design Archetypen */}
-          <div className="cryptox-card rounded-3xl p-5 border border-white/10 bg-[#120E18]/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+          <div className="cryptox-card p-5">
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-bold text-white tracking-wide">Design-Archetypen</span>
               <span
@@ -231,7 +231,7 @@ export function CryptoxLandingPage({
               ].map((item, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-2 rounded-2xl hover:bg-white/[0.03] transition-colors"
+                  className="flex items-center justify-between p-2 rounded-2xl hover:bg-white/[0.04] transition-colors"
                 >
                   <div className="flex items-center gap-2.5">
                     <div
@@ -261,7 +261,7 @@ export function CryptoxLandingPage({
           </div>
 
           {/* Center Card: Elevated Storyline Retention Curve */}
-          <div className="cryptox-card-elevated rounded-3xl p-6 border border-white/15 bg-[#171220]/95 backdrop-blur-2xl shadow-[0_25px_60px_rgba(0,0,0,0.8)] md:-translate-y-4">
+          <div className="cryptox-card-elevated p-6 md:-translate-y-4">
             {/* Top Sub-Nav Pills */}
             <div className="flex items-center justify-between mb-4 border-b border-white/[0.06] pb-3">
               <div className="flex items-center gap-1.5 text-[11px] font-medium text-white/60">
@@ -313,7 +313,7 @@ export function CryptoxLandingPage({
           </div>
 
           {/* Right Card: Content Transformer (Prompt to Slides) */}
-          <div className="cryptox-card rounded-3xl p-5 border border-white/10 bg-[#120E18]/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+          <div className="cryptox-card p-5">
             <div className="flex items-center justify-between mb-4">
               <span className="text-xs font-bold text-white tracking-wide">Content Transformer</span>
               <Maximize2 className="h-3.5 w-3.5 text-white/40 hover:text-white cursor-pointer" />
@@ -409,7 +409,7 @@ export function CryptoxLandingPage({
           </div>
 
           {/* Large Waveform Feature Card */}
-          <div className="cryptox-card rounded-3xl border border-white/10 bg-[#120E18]/90 p-6 sm:p-10 backdrop-blur-2xl shadow-[0_25px_70px_rgba(0,0,0,0.7)] grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="cryptox-card-elevated p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Left Col: Copy & CTA */}
             <div className="lg:col-span-5 space-y-4">
               <h3 className="text-2xl sm:text-3xl font-extrabold text-white leading-snug">
@@ -432,7 +432,7 @@ export function CryptoxLandingPage({
             </div>
 
             {/* Right Col: Smooth Waveform Chart */}
-            <div className="lg:col-span-7 rounded-2xl border border-white/10 bg-black/40 p-4 sm:p-6">
+            <div className="lg:col-span-7 rounded-2xl border border-white/15 bg-black/40 p-4 sm:p-6 backdrop-blur-xl">
               {/* Wave SVG */}
               <div className="relative h-44 w-full">
                 <svg className="w-full h-full" viewBox="0 0 400 140" preserveAspectRatio="none">
@@ -491,7 +491,7 @@ export function CryptoxLandingPage({
       <section className="relative z-10 py-10 px-4">
         <div className="mx-auto max-w-6xl grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Bento Card 1: Leaderboard / Analytics */}
-          <div className="cryptox-card rounded-3xl p-6 sm:p-8 border border-white/10 bg-[#120E18]/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+          <div className="cryptox-card p-6 sm:p-8">
             <div className="space-y-3 mb-6">
               {[
                 { name: "Robert Brian", change: "+18.4% Engagement", val: "51.5k Saves", sub: "Tech & SaaS", avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=face" },
@@ -501,7 +501,7 @@ export function CryptoxLandingPage({
               ].map((user, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center justify-between p-3 rounded-2xl border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] transition-colors"
+                  className="flex items-center justify-between p-3 rounded-2xl border border-white/[0.08] bg-white/[0.03] hover:bg-white/[0.06] transition-colors"
                 >
                   <div className="flex items-center gap-3">
                     <img
@@ -528,7 +528,7 @@ export function CryptoxLandingPage({
           </div>
 
           {/* Bento Card 2: Persona Security Shield */}
-          <div className="cryptox-card rounded-3xl p-6 sm:p-8 border border-white/10 bg-[#120E18]/80 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex flex-col justify-between">
+          <div className="cryptox-card p-6 sm:p-8 flex flex-col justify-between">
             {/* Concentric Shield Graphic */}
             <div className="my-auto py-6 flex flex-col items-center justify-center">
               <div className="relative flex h-40 w-40 items-center justify-center">
@@ -602,7 +602,7 @@ export function CryptoxLandingPage({
               return (
                 <div
                   key={idx}
-                  className="glass-card rounded-2xl p-6 border border-white/10 hover:border-[#FF4D17]/40 transition-all group"
+                  className="glass-card p-6 group cursor-pointer"
                 >
                   <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary-bright group-hover:scale-110 transition-transform">
                     <Icon className="h-5 w-5" />
@@ -657,7 +657,7 @@ export function CryptoxLandingPage({
             ].map((t, idx) => (
               <div
                 key={idx}
-                className="cryptox-card rounded-2xl p-6 border border-white/10 bg-[#120E18]/80 backdrop-blur-xl flex flex-col justify-between"
+                className="cryptox-card p-6 flex flex-col justify-between"
               >
                 <div className="mb-4 flex items-center gap-1 text-amber-400">
                   {[...Array(t.stars)].map((_, i) => (
@@ -667,7 +667,7 @@ export function CryptoxLandingPage({
                 <p className="text-xs text-white/80 leading-relaxed italic mb-6">
                   "{t.quote}"
                 </p>
-                <div className="flex items-center gap-3 border-t border-white/[0.06] pt-4">
+                <div className="flex items-center gap-3 border-t border-white/[0.08] pt-4">
                   <img
                     src={t.avatar}
                     alt={t.author}
@@ -702,7 +702,7 @@ export function CryptoxLandingPage({
               return (
                 <div
                   key={idx}
-                  className="rounded-2xl border border-white/10 bg-[#120F17]/80 backdrop-blur-xl overflow-hidden transition-all"
+                  className="glass-card overflow-hidden transition-all"
                 >
                   <button
                     type="button"
@@ -718,7 +718,7 @@ export function CryptoxLandingPage({
                     />
                   </button>
                   {isOpen && (
-                    <div className="px-5 pb-5 text-xs text-white/70 leading-relaxed border-t border-white/[0.04] pt-3 animate-in fade-in-50 duration-200">
+                    <div className="px-5 pb-5 text-xs text-white/70 leading-relaxed border-t border-white/[0.06] pt-3 animate-in fade-in-50 duration-200">
                       {faq.a}
                     </div>
                   )}
@@ -731,7 +731,7 @@ export function CryptoxLandingPage({
 
       {/* ── 10. Call to Action Banner ─────────────────────────────── */}
       <section className="relative z-10 py-16 px-4">
-        <div className="mx-auto max-w-5xl rounded-3xl border border-white/15 bg-gradient-to-b from-[#1E1325] to-[#100B17] p-8 sm:p-14 text-center shadow-[0_20px_70px_rgba(255,77,23,0.25)] relative overflow-hidden">
+        <div className="cryptox-card-elevated mx-auto max-w-5xl p-8 sm:p-14 text-center relative overflow-hidden">
           <div className="absolute -top-24 left-1/2 -translate-x-1/2 h-48 w-96 rounded-full bg-[#FF4D17]/30 blur-[80px] pointer-events-none" />
 
           <h2 className="relative z-10 text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
