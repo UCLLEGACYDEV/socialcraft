@@ -33,7 +33,7 @@ export function viteCloudStoragePlugin(): Plugin {
             const webRequest = new Request(fullUrl, {
               method: req.method,
               headers,
-              body: bodyBuffer ?? null,
+              body: bodyBuffer ? new Uint8Array(bodyBuffer) : null,
             });
 
             const webResponse = await handleCloudApiRequest(webRequest);

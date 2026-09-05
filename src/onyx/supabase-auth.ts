@@ -93,11 +93,11 @@ export async function signInUser(
         userProfile = mapProfileToUser(profileData, authUser.email || cleanEmail);
       } else {
         // Fallback: Create initial profile in socialcraft_profiles
-        const isAdmin = cleanEmail === DEFAULT_ADMIN_CREDENTIALS.email || authUser.user_metadata?.role === "admin";
+        const isAdmin = cleanEmail === DEFAULT_ADMIN_CREDENTIALS.email || authUser.user_metadata?.['role'] === "admin";
         const newProfile = {
           id: authUser.id,
           email: authUser.email || cleanEmail,
-          name: authUser.user_metadata?.name || splitEmailName(cleanEmail),
+          name: authUser.user_metadata?.['name'] || splitEmailName(cleanEmail),
           role: isAdmin ? "admin" : "creator",
           credits: isAdmin ? 99999 : 1000,
           avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
