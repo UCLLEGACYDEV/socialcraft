@@ -12,36 +12,36 @@ export const DEFAULT_BRAND_KIT: BrandKit = {
 
 // Feste Master-Verankerung des Engine API-Keys (aus .env VITE_KIE_API_KEY oder festem Code-Fallback)
 export const ANCHORED_KIE_API_KEY =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_KIE_API_KEY) ||
+  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_KIE_API_KEY']) ||
   "4029b7b2ebc1d6e0609bf6559172e335";
 
 // Feste Verankerung des Mega S4 Cloud-Speichers
 export const ANCHORED_S4_ACCESS_KEY =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_S4_ACCESS_KEY) ||
+  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_S4_ACCESS_KEY']) ||
   "AKIAPMXGIG3XMUCRBNIX7YA4JKJ2D3P4KQ5FLAPDX4OW";
 
 export const ANCHORED_S4_SECRET_KEY =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_S4_SECRET_KEY) ||
+  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_S4_SECRET_KEY']) ||
   "uUQ1e7Eov9Pm0BlVqXyzGB8sD5qoMfED68PbN5oz";
 
 export const ANCHORED_S4_ENDPOINT =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_S4_ENDPOINT) ||
+  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_S4_ENDPOINT']) ||
   "socialgrow.s3.g.megas4.com";
 
 export const ANCHORED_S4_BUCKET =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_S4_BUCKET) ||
+  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_S4_BUCKET']) ||
   "socialgrow";
 
 export const ANCHORED_S4_REGION =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_S4_REGION) ||
+  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_S4_REGION']) ||
   "eu-central-1";
 
 export const ANCHORED_SUPABASE_URL =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL) ||
+  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_SUPABASE_URL']) ||
   "https://tugujzoprvfpmhdhhivj.supabase.co";
 
 export const ANCHORED_SUPABASE_KEY =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY) ||
+  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_SUPABASE_PUBLISHABLE_KEY']) ||
   "";
 
 export const DEFAULT_API_SETTINGS: ApiSettings = {

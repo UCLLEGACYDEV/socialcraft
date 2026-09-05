@@ -22,8 +22,8 @@ export interface SupabaseAuthResult {
  * Checks if active Supabase connection variables are available.
  */
 export function hasSupabaseConfig(): boolean {
-  const url = (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL) || ANCHORED_SUPABASE_URL;
-  const key = (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_PUBLISHABLE_KEY) || ANCHORED_SUPABASE_KEY;
+  const url = (typeof import.meta !== "undefined" && import.meta.env?.['VITE_SUPABASE_URL']) || ANCHORED_SUPABASE_URL;
+  const key = (typeof import.meta !== "undefined" && import.meta.env?.['VITE_SUPABASE_PUBLISHABLE_KEY']) || ANCHORED_SUPABASE_KEY;
   return Boolean(url && key && url.trim() && key.trim());
 }
 
@@ -42,16 +42,16 @@ export const DEFAULT_ADMIN_CREDENTIALS = {
  */
 function mapProfileToUser(profile: Record<string, any>, fallbackEmail: string): User {
   return {
-    id: profile.id,
-    name: profile.name || "Creator",
-    email: profile.email || fallbackEmail,
-    role: (profile.role as UserRole) || "creator",
-    credits: typeof profile.credits === "number" ? profile.credits : 1000,
-    avatarUrl: profile.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
-    status: profile.status === "suspended" ? "suspended" : "active",
-    company: profile.company || "Socialcraft Studio",
-    createdAt: profile.created_at || new Date().toISOString(),
-    lastLoginAt: profile.last_login_at || new Date().toISOString(),
+    id: profile['id'],
+    name: profile['name'] || "Creator",
+    email: profile['email'] || fallbackEmail,
+    role: (profile['role'] as UserRole) || "creator",
+    credits: typeof profile['credits'] === "number" ? profile['credits'] : 1000,
+    avatarUrl: profile['avatar_url'] || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    status: profile['status'] === "suspended" ? "suspended" : "active",
+    company: profile['company'] || "Socialcraft Studio",
+    createdAt: profile['created_at'] || new Date().toISOString(),
+    lastLoginAt: profile['last_login_at'] || new Date().toISOString(),
   };
 }
 
@@ -93,11 +93,11 @@ export async function signInUser(
         userProfile = mapProfileToUser(profileData, authUser.email || cleanEmail);
       } else {
         // Fallback: Create initial profile in socialcraft_profiles
-        const isAdmin = cleanEmail === DEFAULT_ADMIN_CREDENTIALS.email || authUser.user_metadata?.role === "admin";
+        const isAdmin = cleanEmail === DEFAULT_ADMIN_CREDENTIALS.email || authUser.user_metadata?.['role'] === "admin";
         const newProfile = {
           id: authUser.id,
           email: authUser.email || cleanEmail,
-          name: authUser.user_metadata?.name || splitEmailName(cleanEmail),
+          name: authUser.user_metadata?.['name'] || splitEmailName(cleanEmail),
           role: isAdmin ? "admin" : "creator",
           credits: isAdmin ? 99999 : 1000,
           avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",

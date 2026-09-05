@@ -130,6 +130,7 @@ export function StudioCarouselWorkspace({
   onOpenBrandKit,
   onOpenSettings,
   currentUser,
+  onNavigateLanding,
 }: StudioCarouselWorkspaceProps) {
   const [selectedHookType, setSelectedHookType] = useState<string | null>(null);
 
