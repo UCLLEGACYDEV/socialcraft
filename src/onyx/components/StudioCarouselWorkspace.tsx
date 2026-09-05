@@ -41,6 +41,7 @@ interface StudioCarouselWorkspaceProps {
   onOpenBrandKit: () => void;
   onOpenSettings?: () => void;
   currentUser?: User | null;
+  onNavigateLanding?: () => void;
 }
 
 // 4 Psychologische Hook-Typen mit echten Generierungs-Modifikatoren

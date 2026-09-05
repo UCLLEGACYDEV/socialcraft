@@ -188,7 +188,7 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
         return new Response("Object not found", { status: 404 });
       }
 
-      return new Response(fileObj.buffer, {
+      return new Response(new Uint8Array(fileObj.buffer), {
         status: 200,
         headers: {
           "Content-Type": fileObj.contentType,
