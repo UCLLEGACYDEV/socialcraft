@@ -80,6 +80,7 @@ function OnyxStudio() {
   const [motifs, setMotifs] = usePersistentState<string[]>(LS.motifHistory, []);
   const [history, setHistory] = usePersistentState<HistoryEntry[]>(LS.history, []);
   const [brief, setBrief] = usePersistentState<BriefValues>(LS.brief, DEFAULT_BRIEF);
+  const [directPrompt, setDirectPrompt] = usePersistentState<string>("onyx.directPrompt", "");
 
   const [isGeneratingCarousel, setIsGeneratingCarousel] = useState(false);
   const [isGeneratingImages, setIsGeneratingImages] = useState(false);
@@ -406,9 +407,22 @@ function OnyxStudio() {
             />
           )}
 
-          {activeTab === "direct-prompt" && <DirectPromptView />}
+          {activeTab === "direct-prompt" && <DirectPromptView initialPrompt={directPrompt} />}
           {activeTab === "ai-clone" && <AiCloneView />}
-          {activeTab === "prompt-gallery" && <PromptGallery />}
+          {activeTab === "prompt-gallery" && (
+            <PromptGallery
+              onUseInCarousel={(promptText, title) => {
+                patchBrief({ topic: `${title}: ${promptText}` });
+                setActiveTab("carousel");
+                toast.success("Prompt ins Karussell übertragen!");
+              }}
+              onUseInDirectPrompt={(promptText) => {
+                setDirectPrompt(promptText);
+                setActiveTab("direct-prompt");
+                toast.success("Prompt ins Einzelbild übertragen!");
+              }}
+            />
+          )}
           {activeTab === "history" && (
             <HistoryView
               entries={history}

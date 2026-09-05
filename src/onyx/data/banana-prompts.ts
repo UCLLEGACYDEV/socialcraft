@@ -1,0 +1,3622 @@
+// Auto-generated Banana Prompts Explore Library
+// Source: https://www.bananaprompts.xyz/explore
+
+export interface BananaPromptItem {
+  id: string;
+  title: string;
+  prompt: string;
+  image: string;
+  likes: number;
+  creatorName: string;
+  model: string;
+  tags: string[];
+}
+
+export const BANANA_PROMPTS_DATA: BananaPromptItem[] = [
+  {
+    "id": "07e723fe-85dc-40b8-aa5b-aaf2fb270d79",
+    "title": "Urban Reflection in Dramatic Light",
+    "prompt": "Dramatic, ultra-realistic close-up in black and white with high-contrast cinematic lighting from the side, highlighting the contours of his face and beard, casting deep shadows. He wears round, reflective sunglasses. He gazes confidently upward into a dark void. The sunglasses reflect a city's towering skyline. The atmosphere is mysterious with a minimalist black background. Details in 4K. Keep the subject's exact facial structure, hair texture, the original photo.",
+    "image": "https://cdn.bananaprompts.xyz/18973a18-e495-4d7c-b8aa-a7fc55767459/cb66879a-fcef-4010-ad28-5033521e664b.png",
+    "likes": 2130,
+    "creatorName": "@tariqHasanSyed",
+    "model": "ChatGPT",
+    "tags": [
+      "Cinematic",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "19180ee6-63ca-4d6e-90a2-2ec6674eab43",
+    "title": "Retrato editorial masculino premium",
+    "prompt": "Studio portrait of a confident man sitting on a modern beige armchair with wooden legs, leaning slightly forward with his hands together. He wears a dark navy blue dress shirt with the top buttons open, light beige slim-fit pants, and black loafers with tan soles. He has short dark brown hair styled with texture, a trimmed full beard, tanned skin, and an intense confident gaze directed at the camera. The background is minimalist light gray with a smooth gradient, evenly lit with soft natural studio lighting. The mood is cinematic and fashion editorial, with high realism and fine details. Shot with a 50mm lens at f/2.8, vertical framing, full-body composition.\r\nthe subject from the uploaded image, maintaining the exact real face, hairstyle, skin tone, and body identity unchanged.",
+    "image": "https://cdn.bananaprompts.xyz/ae5f8289-1a58-4605-8d97-0ffa38b6a5cf/76bcf139-247c-40a9-adf1-a450be31a762.jpeg",
+    "likes": 1126,
+    "creatorName": "@edferreirajr",
+    "model": "bananas",
+    "tags": [
+      "Fashion",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "dc5bd64d-7dd8-4455-a1d6-37f3ca48d772",
+    "title": "Submerged",
+    "prompt": "Hyper-realistic, ultra-detailed close-up portrait showing only the left half of my face submerged in water, one eye in sharp focus, positioned on the far left of the frame, light rays creating caustic patterns on the skin, suspended water droplets and bubbles adding depth, cinematic lighting with soft shadows and sharp highlights, photorealistic textures including skin pores, wet lips, eyelashes, and subtle subsurface scattering, surreal and dreamlike atmosphere, shallow depth of field, underwater macro perspective. 3:4 aspect ratio",
+    "image": "https://cdn.bananaprompts.xyz/2513bb4b-b97f-4488-9f3e-7cc8448f1568/c30a900e-8ba4-4a2d-ac99-d18eb216898d.png",
+    "likes": 1007,
+    "creatorName": "@_raffanascimento",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Modern"
+    ]
+  },
+  {
+    "id": "184635af-56b3-4579-93e6-260611343b67",
+    "title": "Gini",
+    "prompt": "Maintain the same face and person (use attached photo for accurate face\r\n\r\n‎Hyper-realistic cinematic Create an 8k photorealistic image using the attached photo. A close-up portrait of a woman with long, jet-black, slightly wind-swept hair falling across her face. Her striking, light-colored eyes gaze upwards and to the right, catching a sharp, diagonal beam of natural light that illuminates the high points of her cheekbone, nose, and plump, glossy, mauve-toned lips a slightly light weight silk",
+    "image": "https://cdn.bananaprompts.xyz/95945df9-736c-4faf-8710-acee35cb47c3/db37e078-415c-41e3-be75-08d64fae3a3b.jpeg",
+    "likes": 955,
+    "creatorName": "Gemini",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Portrait",
+      "Photography",
+      "Fashion",
+      "Minimalist",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "18fb5c09-2dd2-4393-a14f-f033417ab1d9",
+    "title": "Propt moto esportiva",
+    "prompt": "Crie uma imagem minha [foto enviada em anexo] um retrato ultra-realista. Eu estou sentado em uma Moto esportiva preta brilhante em uma área ao ar livre contra o fundo de árvores verdes. Eu uso uma camiseta preta solta, jeans escuros soltos com dobras na parte inferior e tênis Nike preto e branco. Os acessórios usados incluem um relógio preto. Minha mão esquerda descansou casualmente em sua coxa, enquanto sua mão direita descansou na moto enquanto segurava um capacete preto brilhante com uma viseira transparente.\r\nA moto parece detalhada com um motor grande, quadro forte e detalhes cromados brilhantes, acentuando a impressão moderna e poderosa. O fundo mostra árvores altas com luz natural suave, criando uma mistura equilibrada de sombra e luz. A expressão é calma e confiante, olhando diretamente para\r\na câmera. O estilo geral é cinematográfico e moderno, combinando a sensação de streetwear jovem com a presença de uma motocicleta arrojada. Alta resolução, estilo editorial fotorrealista.",
+    "image": "https://cdn.bananaprompts.xyz/b19b46c2-89c0-499f-bccc-39e2dcb6ee59/e9313887-c3bd-4837-a411-d5cbf1e7d469.jpeg",
+    "likes": 802,
+    "creatorName": "@tiago Santana",
+    "model": "Model",
+    "tags": [
+      "Realistic",
+      "Photography"
+    ]
+  },
+  {
+    "id": "0930aca0-b52e-4d3a-acdf-ac160aa7e764",
+    "title": "A cinematic urban portrait",
+    "prompt": "A cinematic urban portrait of me, keeping my real face unchanged. I am sitting casually on outdoor stone steps in front of a building entrance, leaning slightly forward with a confident and contemplative posture. My left elbow rests on my knee, with my hand raised to my temple in a thoughtful gesture, while my right arm hangs more loosely, with my hand extended downward in a relaxed position. My legs are bent naturally, spreading apart for a grounded and strong presence. My gaze is directed toward the camera, steady and intense, with a calm yet powerful expression. I am wearing a black outfit: a fitted turtleneck sweater layered under a black coat with a wide collar and subtle texture. The coat has a tailored yet modern look, with a slightly matte fabric that absorbs the light, creating depth. My trousers are also black, slim-fitted, completing the clean, monochromatic style. No visible accessories, emphasizing minimalism and sophistication.\r\nThe background shows part of an urban building with glass doors and warm interior lights softly glowing, adding contrast to the darker tones of my outfit. The lighting is warm and diffused, highlighting my face and upper body while creating soft shadows that add cinematic depth. The camera captures me slightly from below (low angle), emphasizing strength and presence, framed from the knees up. The focal length resembles a portrait lens around 50-85mm, producing natural proportions with a shallow depth of field that keeps me sharp against the softly blurred background. Style: cinematic, moody urban portrait, editorial fashion photography, minimalistic monochrome outfit, professional model vibe.",
+    "image": "https://cdn.bananaprompts.xyz/3af490e3-bf8b-4fc2-a77f-33dfca4e5040/5dbf467c-003a-43d1-b3ec-c0e46b428c4a.jpeg",
+    "likes": 686,
+    "creatorName": "@hahibomarov",
+    "model": "Nano Banana",
+    "tags": [
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "90266a03-91ed-4b52-8c07-72ca17b79fd8",
+    "title": "Foto black tie",
+    "prompt": "Uma foto realista com todos os traços e linhas idênticos ao da foto com um semblante imponente, em preto em branco, no traje de terno preto e gravata slim.",
+    "image": "https://cdn.bananaprompts.xyz/e7cafee4-0124-4156-90e2-faad0e1e8b60/aad96207-11a9-4943-a8a5-6ede4d234f9f.jpeg",
+    "likes": 621,
+    "creatorName": "@Eddie_san_",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Portrait",
+      "Minimalist",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "54dc6ad1-074d-4c04-a156-5d1f1c7c50b1",
+    "title": "Instinct and Spirit",
+    "prompt": "Create a realistic and emotional scene showing a man (use the provided image for accurate facial features) and a lion face to face in a moment of connection and respect. The man's eyes are closed, with a serene expression, while the lion gently rests its forehead and muzzle against his, conveying trust and a spiritual bond.\r\nBoth are standing on ground covered in light snow, with snowflakes gently falling. The man wears a dark coat and hair slightly tousled by the wind, and the lion displays a thick, majestic mane.\r\nIn the background, a cold, misty natural landscape with blurred mountains and gray tones reinforces the calm and powerful atmosphere.\r\nThe lighting is soft and diffuse, highlighting the textures of the skin, fur, and coat, creating a cinematic and poetic atmosphere.\r\nThe composition should convey friendship, courage, and harmony between man and nature.\r\n\r\nSuggested settings:\r\nStyle: Ultra-realistic, cinematic, 8K\r\nLighting: Soft, diffuse, natural winter light\r\nCamera: Medium close-up, focus on expressions\r\nEmotion: Connection, respect, tranquility\r\nSetting: Falling snow, blurred background with mountains",
+    "image": "https://cdn.bananaprompts.xyz/f4f238cc-bb8e-4716-bfde-51c2718d5984/7761e3e5-32c1-47a7-8dfa-9f650aec6af3.png",
+    "likes": 561,
+    "creatorName": "@robsonazevedo",
+    "model": "nanobanana",
+    "tags": [
+      "Surreal",
+      "Realistic",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": "d585c28e-ee4e-4b08-aa6f-a6da855cb535",
+    "title": "Studio Photography",
+    "prompt": "Studio photography of a me in a black suit, black turtleneck and round sunglasses with translucent yellow lenses.\r\nVibrant orange background.\r\nUnique poses from the front.",
+    "image": "https://cdn.bananaprompts.xyz/68155dad-d783-427e-bb9e-b7254480bf27/6080b41d-5c16-40b8-b8f4-baf2d3722a75.jpeg",
+    "likes": 539,
+    "creatorName": "KhandujaBoy",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Business",
+      "Minimalist",
+      "Vibrant / Colorful"
+    ]
+  },
+  {
+    "id": "6ea353c4-d99b-4ec6-8bb9-43b3bab4a89e",
+    "title": "Monochromatic minimal elegant",
+    "prompt": "Recreate this scene using my submitted photo as a reference, maintaining the same framing, pose, lighting, and style as the example image.\r\n\r\nThe composition should show a half-length **male** portrait, with the model sitting and leaning slightly forward. The right arm should cross the body, with the left hand resting gently on the opposite arm, conveying elegance and confidence.\r\n\r\nThe facial expression should be serene, confident, and slightly enigmatic. The gaze should be directed toward the camera, with lips softly closed and a firm posture.\r\n\r\nThe outfit consists of a dark, sophisticated ensemble—a structured **black blazer** worn over a **fitted black shirt (or T-shirt/sweater)**. **The hair should be neatly groomed and styled appropriately for a man (e.g., short, slicked back, or a modern cut and wearing Sunglasses).**\r\n\r\nThe lighting should be studio-style, with soft, contrasting directional light (Rembrandt-style or sidelight), highlighting the contours of the face, creating elegant shadows and a subtle gradient in the background.\r\n\r\nThe background should be smooth and neutral, in dark gray tones, with slight depth and no distracting elements. \r\n\r\nThe final style should be black and white, with refined contrast, smooth skin texture, and a realistic editorial portrait look.\r\n\r\nVertical format (1080x1920), portrait aspect ratio, professional studio photo quality, and a cinematic, realistic finish.",
+    "image": "https://cdn.bananaprompts.xyz/fa85b14b-1b1e-4374-8ee1-b915de48d811/ac9fa2f0-8733-4d6f-9c4e-072acf246630.jpeg",
+    "likes": 518,
+    "creatorName": "Ahmed Khalil",
+    "model": "Nano banana",
+    "tags": [
+      "Portrait",
+      "Realistic",
+      "Modern",
+      "Minimalist",
+      "Concept art",
+      "Dark / Moody",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "14a68538-655b-4320-93e7-12fe81e6bba7",
+    "title": "A hyper-realistic portrait",
+    "prompt": "A hyper-realistic portrait of the uploaded young man inside a giant Instagram post frame that dominates the scene. His face remains same, sharp and untouched, wearing dark sunglasses and sleek shoes, exuding bold charisma. His relaxed pose shows his right elbow resting on his knee, left arm casual, and one leg stepping out of the Instagram frame in a 3D illusion. The Instagram frame is highly realistic with username GoogleGeminiPrompts, verified checkmark, display name \"Al Generation\", caption: \"Too real to stay inside frame #AlCreation #GoogleGeminiPrompts\", and authentic icons. The background is designed for masculine boldness: deep cobalt blue blending into cyan, with subtle light streaks adding energy, Clean, cinematic lighting highlights his clothing textures and the 3D illusion, making him the viral centerpiece.",
+    "image": "https://cdn.bananaprompts.xyz/68155dad-d783-427e-bb9e-b7254480bf27/60cb4ece-c0b9-41db-a44c-2812e060a752.jpeg",
+    "likes": 485,
+    "creatorName": "KhandujaBoy",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Portrait",
+      "Photography",
+      "Modern",
+      "Fantasy",
+      "Vibrant / Colorful",
+      "Flat Design"
+    ]
+  },
+  {
+    "id": "f1a644d0-4fad-420e-8192-bd7e133e40c5",
+    "title": "Couple Polaroid",
+    "prompt": "Take a photo taken with a Polaroid camera. The photo should look like an ordinary photograph, without an explicit subject or property. The photo should have a slight blur and a consistent light source, like a flash from a dark room, scattered throughout the photo. Don't change the face. Change the background behind those two people with white curtains. With that boy and me make a cute poses. Make the boy holding a red coca cola can and girl a burger.",
+    "image": "https://cdn.bananaprompts.xyz/c695cc01-8dc4-474f-b2ea-29388bec3ab3/5801091f-bf44-4b9e-936e-5e351db73af9.jpeg",
+    "likes": 483,
+    "creatorName": "@promptwithmeai",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Portrait",
+      "Photography",
+      "Minimalist",
+      "Retro / Vintage",
+      "Vibrant / Colorful"
+    ]
+  },
+  {
+    "id": "900713c5-029c-4e3d-856f-c77eadb2ae0b",
+    "title": "الإبداع و التطور",
+    "prompt": "A beautiful, confident woman wearing a black suit sits elegantly on a luxurious white chair that highlights her slim, graceful figure. Her right hand rests gently beneath her chin, with her chin slightly raised in a pose of self-assurance. Her head tilts subtly to the right, eyes steady and looking forward with confidence. Her facial features glow under high-quality cinematic lighting, enhancing her natural beauty. The background is pure white, featuring a rare art painting and soft, cinematic illumination. Beside the chair stands a unique white table topped with a black coffee cup and a stylish lamp decor, creating a refined and elegant atmosphere.",
+    "image": "https://cdn.bananaprompts.xyz/e5ab51cf-6adc-45c4-b3c5-400ab13c538f/8dfbeb68-111f-4850-bc0a-6811640b3179.jpeg",
+    "likes": 481,
+    "creatorName": "Habiba Ashraf",
+    "model": "سورا و منتصف الرحله والمدرج",
+    "tags": [
+      "Anime",
+      "Cinematic",
+      "Realistic",
+      "Architecture",
+      "Cartoon",
+      "3D Render",
+      "Vector",
+      "Sketch / Line Art",
+      "Watercolor",
+      "Oil Painting",
+      "Abstract",
+      "Surreal",
+      "Photography",
+      "Fashion",
+      "Portrait",
+      "Minimalist",
+      "Business",
+      "Corporate",
+      "Modern",
+      "Product / Poster",
+      "Logo",
+      "Concept art",
+      "Infographic",
+      "Cyberpunk",
+      "Sci-Fi",
+      "Fantasy",
+      "Grunge",
+      "Retro / Vintage",
+      "Dark / Moody",
+      "Vibrant / Colorful",
+      "Elegant",
+      "Flat Design",
+      "Neon",
+      "Glitch"
+    ]
+  },
+  {
+    "id": "6437e65c-6dd8-4c1b-a0fb-5e12531dbbb1",
+    "title": "reflections in style",
+    "prompt": "Use the uploaded photo to create an Ultra-realistic mirror selfie of a stylish man with glasses.\r\nHe is wearing a loose white sweater layered over a crisp white T-shirt, paired with dark blue denim jeans.\r\nHe holds a new modern iPhone 17 smartphone orange colour in one hand, partially covering his face, while his other hand rests casually in his pocket.\r\n\r\nThe scene is set in warm indoor lighting, creating a cinematic, moody atmosphere with soft shadow”",
+    "image": "https://cdn.bananaprompts.xyz/6a1be39f-1739-44c7-8dda-8a7e17b93b78/036f1a5f-928d-42f1-99c1-97d945a6c9c8.png",
+    "likes": 480,
+    "creatorName": "@hanscreatvstudio",
+    "model": "gemini",
+    "tags": []
+  },
+  {
+    "id": "dfde07c3-5105-4472-9e19-4e8b24a3f18f",
+    "title": "A Man with a beard, illuminated by dramatic dual-colored lighting.",
+    "prompt": "A man with a beard and short dark hair is captured in a striking portrait, illuminated by dramatic dual-colored lighting. His face is split, with one side bathed in a cool blue light and the other in a vibrant pink/red hue, creating a high-contrast and neon-like effect. He gazes directly at the viewer with a thoughtful or pensive expression, his left hand resting on his chin. He is wearing a dark t-shirt and a watch on his left wrist. The background is dark and indistinct, further emphasizing the colorful illumination on his face and upper body.\r\n\r\nDO NOT CHANGE THE FACE",
+    "image": "https://cdn.bananaprompts.xyz/aade4ced-0fca-4b62-b70e-fb82e654624f/f92efcf0-d1c6-4ab6-b720-0d0d30d40bcb.png",
+    "likes": 479,
+    "creatorName": "Knot Squared",
+    "model": "AI",
+    "tags": [
+      "Realistic",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "61b2a0bb-87b2-4700-a94e-4d86995a8d73",
+    "title": "Untamed Spirit",
+    "prompt": "A cinematic, mid-length portrait, capturing a female figure with a strong and elegant presence, standing next to a horse. The subject faces the camera, with a direct and confident gaze. One hand gently holds the horse's halter or head, conveying a calm and powerful connection with the animal.\r\n\r\nShe wears a long-sleeved shirt in a neutral tone (beige, khaki, or light gray), with the top buttons undone to create a V-neckline. The bottoms are earthy-colored pants (brown or khaki), complemented by a brown leather belt with a large, prominent gold buckle (possibly with the letter 'V'). A gold chain hangs from the belt loops, adding a touch of glamour. The look is adorned with multiple bracelets on both wrists, combining metals and natural materials.\r\n\r\nHer hair is long, with voluminous waves and a natural look, as if gently blown by the wind, framing her face. The makeup is natural yet defined, enhancing the beauty of her features. Beside her, a brown horse with a white marking on its face looks forward, in harmony with the figure.\r\n\r\nThe background is an open field, such as a prairie or a valley, with a cloudy sky and the landscape in the background gently blurred, creating a sense of vastness. The lighting is natural and diffuse, typical of an overcast day, resulting in soft shadows and light that flatters the face and body.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm f/1.8 or 105mm f/1.4) on a full-frame camera for optimal compression and creamy bokeh. Aperture set between f/2.0 and f/2.8 to perfectly isolate the subject and horse from the background. ISO 100-200 for maximum image quality with abundant natural light. Shutter speeds of 1/400s to 1/800s ensure absolute sharpness and freeze any subtle movement of the hair or horse. The lighting is exclusively natural, taking advantage of the soft light of an overcast sky.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, hair style, and color with maximum fidelity. The goal is to create a version of the user in this cinematic portrait. The clothing, accessories, the pose next to the horse, the confident expression, the diffuse natural lighting, and the open field setting should be rendered as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/75bdae76-e15a-4933-a487-ccc49acb5894.jpeg",
+    "likes": 479,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "f785eea7-edfa-4fd7-ab9b-f9cbb1096db0",
+    "title": "Vintage Car Pro",
+    "prompt": "Create a hyper-realistic portrait of a man (man of the uploaded photo) sitting in the driver's seat of a car, wearing a black shirt, combined with a faded light gray jacket and light gray wide-leg pants. White shoes should be visible, complementing the casual look. Round sunglasses with dark lenses should be positioned on the nose, highlighting a confident and slightly ironic facial expression. Relaxed posture: one arm on the sports steering wheel, the other supporting the head, conveying a relaxed look. The interior of the car should include side windows showing urban scenery (trees, buildings and part of another vehicle), and a black textured seat. Soft natural lighting, simulating daylight coming through the windows, creating a contrast between the warm colors of the clothing and the neutral environment of the car. Vintage style, with desaturated tones and slightly grainy textures, evoking a nostalgic atmosphere. Dominant tones of gray, white and black, with a balance between external light and internal shadows. Slightly elevated perspective, framing that includes the top of the knees to the head, with the steering wheel partially visible on the right.",
+    "image": "https://cdn.bananaprompts.xyz/3330b9a2-ba1c-46b4-987b-3888173a1875/d8f4e8c1-2d84-4e26-94a7-a4ed5b86d7aa.jpeg",
+    "likes": 479,
+    "creatorName": "@HMJordo",
+    "model": "GEMINI",
+    "tags": [
+      "Fashion",
+      "Cinematic"
+    ]
+  },
+  {
+    "id": "f59be0c9-0662-466e-9da6-b2c6f5744f96",
+    "title": "Empresário e seu Reflexo",
+    "prompt": "A cinematic close-up portrait of a stylish individual standing by a large glass window, gazing thoughtfully at their reflection. The person wears a black turtleneck sweater layered under a fitted dark blazer, creating a sleek and elegant look. The lighting is soft and natural, coming from the window, gently illuminating one side of the face while casting subtle shadows on the other, emphasizing depth and texture. The background is softly blurred, highlighting the calm and introspective mood of the scene. The reflection in the glass adds a sense of duality and contemplation. The overall atmosphere is moody, sophisticated, and cinematic, with a color palette dominated by neutral tones and soft daylight.",
+    "image": "https://cdn.bananaprompts.xyz/cd605ca9-13f3-45c0-b05b-3793f5565615/e0f7be6f-2b1a-4606-9798-3e121f5f7855.png",
+    "likes": 478,
+    "creatorName": "Vitor Reggiani",
+    "model": "Gemini, Freepik, Midjourney etc.",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Corporate",
+      "Minimalist",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "7000cf05-9257-45ef-b0dc-33b3f0a848fc",
+    "title": "Low-key portrait photography",
+    "prompt": "professional studio portrait of a person, confident and determined expression, head slightly tilted down, wearing a black V-neck t-shirt. Using a low-key photography setup with butterfly lighting (key light from front above), a hair rim light from behind, and a faint background light. The atmosphere is filled with a subtle haze or smoke. Shot on a medium format camera, high contrast, cinematic, sharp focus, soft shadows. The atmosphere has a subtle haze. Hyper-realistic, shot on a 85mm lens, sharp focus on eyes, detailed facial features. --ar 4:5 --style raw",
+    "image": "https://cdn.bananaprompts.xyz/ea78a09f-a3bb-472b-a7c1-0e93c7661e8d/82f1edc2-5d9b-473b-918d-4b4183f7086d.png",
+    "likes": 476,
+    "creatorName": "@hooman_fl",
+    "model": "Gimini",
+    "tags": [
+      "Realistic",
+      "Portrait",
+      "Photography",
+      "Cinematic",
+      "Dark / Moody",
+      "Elegant",
+      "Fashion"
+    ]
+  },
+  {
+    "id": "0307890c-a321-4ed8-8fc6-9acd06353518",
+    "title": "Mulher Elegante",
+    "prompt": "Recrie essa cena usando minha foto enviada como referência, mantendo o mesmo enquadramento, pose, iluminação e estilo da imagem de exemplo.\r\n\r\nA composição deve mostrar um retrato feminino de meio corpo, com a modelo sentada e levemente inclinada para a frente. O braço direito deve cruzar o corpo, com a mão esquerda apoiada suavemente no braço oposto, transmitindo elegância e confiança.\r\n\r\nA expressão facial deve ser serena, confiante e levemente enigmática. O olhar deve estar direcionado à câmera, com os lábios suavemente fechados e postura firme.\r\n\r\nA roupa é composta por um conjunto escuro e sofisticado — blazer preto estruturado, usado sobre uma blusa preta justa. O cabelo deve estar solto, liso e bem alinhado, caindo sobre um dos ombros de forma natural.\r\n\r\nA iluminação deve ser de estúdio, com luz direcional suave e contrastada (estilo Rembrandt ou luz lateral), destacando o contorno do rosto, criando sombras elegantes e um degradê sutil no fundo.\r\n\r\nO fundo deve ser liso e neutro, em tons de cinza escuro, com profundidade leve e sem elementos de distração.\r\n\r\nO estilo final deve ser preto e branco, com contraste refinado, textura suave da pele e aparência realista de retrato editorial.\r\n\r\nFormato vertical (1080x1920), proporção retrato, qualidade fotográfica de estúdio profissional, acabamento cinematográfico e realista.",
+    "image": "https://cdn.bananaprompts.xyz/076c11fd-41b9-4ff9-a31b-68d0d255186f/02723cbb-62e9-47ff-9c7e-54e642c6d94f.png",
+    "likes": 442,
+    "creatorName": "@cwbarteprodutora",
+    "model": "nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Corporate",
+      "Business",
+      "Modern",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "44bcf483-75ec-4d07-8895-016c09796217",
+    "title": "Street Photographer",
+    "prompt": "edit this image — transform the photo into a high-end street-photography portrait of a traveler/photographer leaning casually on a lamp post in front of a historic tower. Keep the original pose and composition: standing with left leg bent and foot on the lamp base, right leg relaxed, left hand in jacket pocket, right hand holding a camera down by the thigh, shoulders slightly turned to camera, chin up and gaze off-frame. Preserve the camera, beard and textured jacket but enhance and stylize as follows:\r\n\r\nWardrobe & accessories: keep the dark parka/jacket but enrich fabric texture (subtle waxed canvas look), change inner hoodie to a soft charcoal knit, keep blue jeans but slightly deepened to rich indigo with natural creasing. Emphasize the high-top sneakers — boost contrast on black-and-white panels and add faint scuff details for realism. Add a small messenger bag strap across the chest and a compact leather wrist strap on the camera.\r\nLighting & color: cinematic cool-tone grade (soft blue shadows) with warm golden rim light hitting the left side of the face and shoulder (suggest late-afternoon sun). Slightly boost contrast and midtones to create punch without losing skin detail. Add subtle film grain and gentle vignette to focus on the subject.\r\nCamera & optics: emulate 35mm–50mm prime look, shallow DOF (f/1.8–2.8) so the tower and crowd become painterly bokeh while the subject remains razor-sharp. Slight perspective correction to emphasize the tower peek behind his shoulder. Enhance catchlight/reflection in the eyes (or sunglasses reflection if present) and sharpen camera details.\r\nBackground & atmosphere: keep the busy pedestrian scene but soften and desaturate it so the subject pops; raise clarity and texture on the stone tower so it reads as a strong architectural anchor. Add a few falling autumn leaves and a faint wet-pavement sheen to suggest recent rain (subtle reflections under shoes).\r\nFinal touches: natural skin retouching (preserve stubble and pores), boost micro-contrast on jacket and jeans, accentuate lens/glass reflections on the camera. Export as photorealistic, vertical 4K editorial crop with high detail.\r\nPosition (short): standing, left foot on lamp base, leaning against lamppost, camera in right hand, left hand in pocket, gaze off-frame.",
+    "image": "https://cdn.bananaprompts.xyz/266feef8-bb5d-4954-baff-4bcab8751544/dd6d20fc-464d-4e1a-8d52-5dd32638b87b.png",
+    "likes": 436,
+    "creatorName": "BKD",
+    "model": "AI",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Portrait",
+      "Photography"
+    ]
+  },
+  {
+    "id": "89630128-5ac4-4da2-846b-555286e45dda",
+    "title": "Love in Focus",
+    "prompt": "A warm and joyful close-up portrait, capturing a couple in a moment of affection and connection, seen through a heart shape made with hands in the foreground. Both faces are in sharp focus within the heart formed by the blurred fingers. Both look directly at the camera with wide, genuine smiles, conveying happiness and intimacy.\r\n\r\nThe female figure has long, brown hair that falls gently over her shoulders. She wears a light-colored, turtleneck top (or sweater) in a neutral tone.\r\n\r\nThe male figure has dark hair and a casual hairstyle, complemented by a well-trimmed beard. He wears a light-colored, polo-neck or crewneck top (or sweater), also in a neutral tone.\r\n\r\nThe background is a softly blurred outdoor setting, possibly a park or natural area with trees, keeping the focus on the couple. The lighting is natural and soft, typical of a clear or slightly cloudy day, creating a natural glow on the faces and enhancing the joyful expressions.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 50mm or 85mm) on a full-frame camera for an intimate perspective and creamy bokeh. Aperture set between f/1.8 and f/2.8 to create a very shallow depth of field, keeping faces sharp and dramatically blurring hands in the foreground and background. ISO 100-200 for maximum image quality in natural light. Shutter speed of 1/250s to 1/500s to ensure sharp smiles. White balance set to 'Daylight' for natural, warm colors.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the male user's reference photo to capture and apply all of his facial features, facial structure, hair and beard style, eye color, and skin tone to the male figure in the image. Similarly, use the female user's reference photo to apply all of her facial features, facial structure, hairstyle, eye color, and skin tone to the female figure in the image. The goal is to create a version of the couple in this warm portrait. The pose (face in the hands holding a heart), the cheerful smiles, the neutral clothing, the blurred natural background, and the soft lighting should be created as described, creating a perfect fusion between the identities of both users and the aesthetics of the image.",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/0ccadc89-cb52-49c4-aa92-6cae507d179c.jpeg",
+    "likes": 435,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "28cbfd0a-479c-495c-9867-8ba48e4f874c",
+    "title": "Dark Studio",
+    "prompt": "A cinematic portrait of a man (use the uploaded picture as reference for the face) sitting confidently on a round black beanbag chair against a dark gradient background. He wears a black hoodie with the sleeves slightly pushed up, black cargo pants, and clean white sneakers. A silver wristwatch is visible on his left wrist. His pose is relaxed and strong elbows resting on his knees, hands hanging loosely between his legs. He has a calm, slight smiling facial expression. The lighting is dramatic and directional, illuminating his face, sneakers, and upper body while the background fades into darkness. The atmosphere is modern, minimalist, and powerful, with a studio photography style and high contrast.",
+    "image": "https://cdn.bananaprompts.xyz/853c23d9-0f80-4ce3-a9b6-b8031490c56a/834a8f98-d86a-42ab-8c2e-a8f7ce9c9e20.png",
+    "likes": 426,
+    "creatorName": "@ui.johnson",
+    "model": "Gemini",
+    "tags": [
+      "Realistic"
+    ]
+  },
+  {
+    "id": "a1b48fce-ebf6-4d1e-af52-4f803e873081",
+    "title": "Elegante",
+    "prompt": "Recrie essa cena utilizando minha foto enviada como base, mantendo o mesmo enquadramento, pose, iluminação e atmosfera da imagem de referência.\r\n\r\nA composição deve mostrar uma mulher sentada sobre um banco alto de madeira com estrutura metálica preta, em um estúdio minimalista de fundo neutro em tons de cinza. O enquadramento deve capturar o corpo inteiro, com leve distância que realce a postura e o cenário limpo.\r\n\r\nA modelo deve estar com a perna direita dobrada e apoiada no degrau do banco, enquanto a esquerda toca o chão com elegância, calçando sapatos de salto preto com detalhes translúcidos.\r\n\r\nO figurino é totalmente preto e elegante: blazer estruturado sobre os ombros, calça de alfaiataria justa e blusa preta por baixo, transmitindo força, estilo e profissionalismo.\r\n\r\nO cabelo solto e alinhado deve cair suavemente sobre os ombros, e a expressão facial deve ser confiante, com o olhar direcionado levemente para o lado, transmitindo poder e serenidade.\r\n\r\nA iluminação deve ser de estúdio, com luz suave e direcional, criando contraste equilibrado entre sombras e áreas iluminadas, realçando a textura do tecido e o contorno do rosto.\r\n\r\nO fundo deve permanecer liso, com um degradê sutil em cinza, sem distrações, mantendo o foco totalmente na modelo.\r\n\r\nO estilo geral deve ser editorial corporativo moderno, com acabamento realista, aparência fotográfica profissional e composição elegante digna de revista.\r\n\r\nFormato vertical (1080x1920), proporção de retrato, qualidade fotográfica premium, tom sofisticado e iluminação cinematográfica.",
+    "image": "https://cdn.bananaprompts.xyz/076c11fd-41b9-4ff9-a31b-68d0d255186f/9b87ed0a-0568-4168-9f1c-43ff7087beef.png",
+    "likes": 421,
+    "creatorName": "@cwbarteprodutora",
+    "model": "nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Corporate",
+      "Business",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "fc73e3cb-e780-4f90-a115-aa383a7333e5",
+    "title": "Foto estilosa de homem com jaqueta de couro e óculos escuros cor azul agua",
+    "prompt": "Crie uma imagem hiper-realista baseada na minha imagem de referência (Imagem 1), preservando meus traços e aparência originais, mas recriando fielmente o estilo, roupa, pose, iluminação e cenário da imagem modelo.\r\nO personagem (baseado na minha foto) aparece em plano médio, voltado levemente para a direita, com o rosto inclinado e olhar firme em direção à câmera.\r\n\r\nA expressão é confiante e neutra, transmitindo presença e estilo.\r\nEle veste uma jaqueta de couro turquesa, moderna e ajustada, com textura realista e brilho suave típico do couro tratado.\r\n\r\nO zíper e os botões metálicos devem refletir a luz com realismo e sutileza, mantendo o aspecto de fotografia de moda profissional.\r\n\r\nNos olhos, óculos escuros espelhados azul-petróleo, com reflexos sutis do ambiente — realçando a estética urbana.\r\nO fundo é monocromático, em tom turquesa idêntico à jaqueta, criando um visual harmonioso e de alto contraste com a pele.\r\n💡 Iluminação de estúdio profissional:\r\n\r\nLuz principal (key light) suave e frontal, vinda levemente da esquerda, com difusor grande (softbox 120 cm).\r\nLuz secundária de preenchimento (fill light) neutra do lado direito, reduzindo sombras e mantendo textura facial.\r\nLuz de recorte (rim light) sutil no ombro e cabelo, criando separação do fundo.\r\nTemperatura de cor balanceada (5500K) — luz branca natural de estúdio.\r\nSombras limpas e controladas, mantendo foco no rosto e na jaqueta.\r\n📷 Câmera e Lente:\r\n\r\nSony A7R IV, lente 85mm f/1.8, ISO 100, obturador 1/160s, abertura f/2.\r\n\r\nFoco absoluto no rosto, fundo suavemente desfocado (bokeh leve).\r\n🎨 Color grading e estilo visual:\r\n\r\nEstilo Modern Editorial Cool Tone:\r\nPaleta dominada por tons turquesa, azul e pele quente neutra.\r\nContraste alto e nitidez refinada, mas sem perder naturalidade.\r\nCores vibrantes e limpas, sem granulação perceptível.\r\nTextura realista de pele e cabelo, com brilho controlado.\r\nReflexos metálicos sutis no zíper e nos óculos.\r\nTom visual: elegante, vibrante e urbano — como capa de revista ou campanha de moda contemporânea.\r\nFiltro: Cinematic Cool HDR, com cores saturadas e luz de estúdio limpa.\r\nAmbiente: fundo monocromático turquesa, estúdio moderno, luz balanceada.\r\nPalavras-chave visuais:\r\n--ultra realistic --studio lighting --8k --HDR contrast --photo realism --vibrant tones --depth of field --sharp focus --fashion editorial --turquoise tones --clean background --modern portrait --soft shadows --bokeh background --studio quality --skin texture detail --leather jacket\r\n🎬 Notas do Diretor de Fotografia:\r\n\r\nA chave visual é o equilíbrio entre o turquesa saturado e a pele natural, sem que nenhuma cor domine a outra.\r\n\r\nA luz suave e frontal garante textura na pele e brilho uniforme na jaqueta.\r\n\r\nO enquadramento em plano médio com leve inclinação do rosto transmite carisma e estilo.\r\n\r\nO resultado deve parecer uma foto de revista de moda internacional (GQ, Vogue Men, Balmain Campaign) — idêntica em cor, luz e composição à original, mas com você como protagonista.",
+    "image": "https://cdn.bananaprompts.xyz/2421e674-fd9e-4375-9d96-79756179b8c1/180e1f8d-7070-47fd-a611-a3e6ac7a7b1e.png",
+    "likes": 412,
+    "creatorName": "@cartazhd",
+    "model": "gemini",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Surreal",
+      "Photography",
+      "Portrait",
+      "Modern",
+      "Concept art",
+      "Fantasy",
+      "Retro / Vintage",
+      "Vibrant / Colorful"
+    ]
+  },
+  {
+    "id": "5665f1bd-ecb8-488b-8a55-09c3cda2909e",
+    "title": "Classroom effect",
+    "prompt": "Edit this image of a young man into a high-contrast black and white portrait in a quiet classroom. he leans casually on a wooden school chair, legs crossed, wearing a navy blue sweatshirt, beige chinos, and black-and-white Converse sneakers. calm neutral expression. His left arm rests on the desk, his right hand drops casually to the side. Behind him, an off-white classroom wall with visible wear, pinned papers, photos, and sticky notes in a grid. One page clearly shows the printed word “Silence”, positioned above his head. Sunlight enters sharply from the right, casting a triangular beam of light on the wall and her shadow. The contrast is dramatic, cinematic, and natural, with a warm late-afternoon tone. The overall style feels candid and realistic, similar to a film photograph: slightly grainy, soft vintage texture, natural imperfections.",
+    "image": "https://cdn.bananaprompts.xyz/6a1be39f-1739-44c7-8dda-8a7e17b93b78/3cef928d-8708-45b1-946f-e591e6df43ad.jpeg",
+    "likes": 397,
+    "creatorName": "@hanscreativstudio",
+    "model": "Gemini",
+    "tags": [
+      "Cinematic",
+      "Fashion"
+    ]
+  },
+  {
+    "id": "e8158509-f932-4764-85c5-ef2c6ec33cb9",
+    "title": "Windswept Soul",
+    "prompt": "A cinematic and intimate portrait with an analog film aesthetic, capturing a female figure inside a car. The subject is looking out the open window, her arm resting on the door and her face partially framed by the car's frame, creating a sense of depth and a spontaneously captured moment. Her gaze is direct, intense, and melancholic toward the camera.\r\n\r\nHer hair is tousled and flowing, as if blown by the wind, with strands falling over her face, adding a sense of movement and rawness to the scene.\r\n\r\nShe wears a dark, casual jacket (jeans or sweatshirt).\r\n\r\nThe background is a blurred, desolate landscape, suggesting a road on a cloudy day or at dusk. The car's rearview mirror is visible, adding to the travel context. The color palette is desaturated, with cool, earthy tones, and the image has visible film grain, contributing to the nostalgic and introspective atmosphere. The lighting is natural, soft, and diffuse, typical of an overcast day, shaping the face with delicate shadows.\r\n\r\nCamera Settings: Captured with a 50mm or 85mm prime lens on a full-frame camera for an intimate and natural perspective. Aperture set between f/1.8 and f/2.8 to create a very shallow depth of field, keeping the eye in sharp focus and gently blurring the foreground and background. ISO 400-800 to capture the scene in low light and highlight the natural film grain. Post-production editing to achieve the analog film look, with desaturated colors and cool tones.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, style, and hair color with maximum fidelity. The goal is to create a version of the user in this cinematic portrait. The pose in the car window, the flowing hair, the soft lighting, the desaturated color palette with film grain, and the introspective atmosphere should be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/87afa473-7606-4454-ae5c-045b48edd3e4.jpeg",
+    "likes": 394,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "38329944-908f-4d0f-8a75-3de411c3c30a",
+    "title": "Morpheus Style",
+    "prompt": "Can you convert this man to be seated in a grand, ornate armchair, dark in color. He's dressed in a dark trench coat, a crisp suit, and using distinctive round sunglasses, which add to an enigmatic aura. The postureshould be composed and intentional, with his hands extended to offer a red and a blue pill.\r\nThe background is dark, almost sterile room, but visually dominated by the cascading green digital code that symbolizes a simulated reality. This code flows down walls or appears as if projected, creating a sense of being within a computer program. The lighting in this scene is dramatic, casting shadows that emphasize the gravity of the choice being made.",
+    "image": "https://cdn.bananaprompts.xyz/0ed0fceb-7139-4fc5-9252-7cc31109959e/8c4a5db9-fce5-4f8e-9d13-2987d30875c6.png",
+    "likes": 383,
+    "creatorName": "@cmcunha1973",
+    "model": "AI",
+    "tags": [
+      "Cinematic",
+      "Surreal",
+      "Portrait",
+      "Modern",
+      "Product / Poster",
+      "Sci-Fi",
+      "Cyberpunk",
+      "Dark / Moody",
+      "Elegant",
+      "Glitch"
+    ]
+  },
+  {
+    "id": "c4a5e81e-7c55-4d3f-8afc-6989537830c7",
+    "title": "homem elegante num barco",
+    "prompt": "Crie uma imagem realista baseada na foto que estou enviando, substituindo o rosto e aparência do homem pela minha imagem.\r\n\r\nCena: homem elegante relaxando em um barco de luxo navegando por um lago calmo cercado por montanhas e casas sofisticadas ao fundo. O sol da tarde ilumina a cena com luz dourada, refletindo na água cristalina.\r\n\r\nDetalhes do personagem: use minha foto como base para o rosto, cabelo e aparência geral. O homem está usando um terno bege claro, sem gravata, com a camisa parcialmente aberta, exibindo um visual sofisticado e confiante. Ele usa óculos de sol escuros e um relógio de luxo no pulso.\r\n\r\nAmbiente: barco de madeira polida com estofamento claro, navegando em águas azuis com o reflexo do céu e da paisagem. O fundo mostra vilas à beira do lago e vegetação exuberante em um cenário europeu elegante.\r\n\r\nEstilo visual: fotografia de alta qualidade, estilo editorial de revista de moda, iluminação natural e tons quentes.",
+    "image": "https://cdn.bananaprompts.xyz/076c11fd-41b9-4ff9-a31b-68d0d255186f/6cc0ef62-465d-4c09-a9ca-ab1c12c8a9f4.png",
+    "likes": 375,
+    "creatorName": "@cwbarteprodutora",
+    "model": "nano banana",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Business",
+      "Corporate",
+      "Modern",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "1b304631-3171-4406-b155-9d9010139dac",
+    "title": "Engraving illustration portrait photo",
+    "prompt": "Generate a portrait the [change the person] from neck to head, and follow strictely the engraving illustration style of the reference. Put a lot more hatch lines on the face The clothes] don't have any details, only the outside lines.",
+    "image": "https://cdn.bananaprompts.xyz/8f00c66a-30ab-4f21-908c-bd48aeb47fb7/cfc6b626-76fa-4b63-bf0f-f03f02828010.png",
+    "likes": 375,
+    "creatorName": "@vinnyalencarr",
+    "model": "Nano Banana",
+    "tags": [
+      "Flat Design",
+      "Dark / Moody",
+      "Retro / Vintage",
+      "Minimalist",
+      "Portrait",
+      "Sketch / Line Art"
+    ]
+  },
+  {
+    "id": "b10333da-740f-41ec-8d25-18897047ec11",
+    "title": "Greenary",
+    "prompt": "A young man with a slight smile (see the uploaded picture as reference for the face), wearing outfit: oversized white sweatshirt, lemon green oversized combat jean, styled with footwear: lemon green neutral Nike sneakers and white ribbed socks. Environment: futuristic lemon green-tone studio background. Lighting: soft cinematic glow highlighting skin and fabric textures. Style: fashion editorial x futuristic. Model seats on lemon green bench elegantly with a relaxed posture.",
+    "image": "https://cdn.bananaprompts.xyz/8540bbf4-c598-4d32-8366-dc68f67ef85c/fe2fdb24-7432-4c98-84c9-7ca07263d765.png",
+    "likes": 369,
+    "creatorName": "@elnizthemogul",
+    "model": "Banana",
+    "tags": [
+      "Realistic",
+      "Fashion",
+      "Photography",
+      "Portrait",
+      "Minimalist",
+      "Modern",
+      "Retro / Vintage",
+      "Vibrant / Colorful"
+    ]
+  },
+  {
+    "id": "ab8c6ad7-40ab-4607-af28-acd1c133212c",
+    "title": "Piercing Gaze",
+    "prompt": "“Create a bold, dramatic GQ-style editorial portrait with intense, directional lighting that creates striking shadows and highlights, emphasizing strong facial contours and jawline. The subject wears a sharply tailored, fashion-forward business casual outfit, Use a minimalist, high-contrast background with moody, dark gradients or shadows to create a powerful visual impact. The expression should be confident and slightly fierce, with a piercing gaze that commands attention and conveys authority. Incorporate artistic shadow play and high-definition details to evoke a cinematic, magazine cover effect. The overall image should feel modern and edgy, pushing the boundaries of traditional corporate portraits with a polished, avant-garde finish and vibrant but moody color grading. Use this person in the picture, his face and facial structure, hair, beard, etc",
+    "image": "https://cdn.bananaprompts.xyz/bf7850a0-ceb5-400a-bcbe-9015146985bd/1b1e4be7-a81f-49f1-9a4b-8c9c5810abe0.png",
+    "likes": 360,
+    "creatorName": "Renato",
+    "model": "AI",
+    "tags": []
+  },
+  {
+    "id": "62e60c38-9f34-4619-ac94-b14ebda4d918",
+    "title": "Modern Intellect",
+    "prompt": "A close-up portrait photograph with a high-fashion aesthetic and dramatic lighting. It captures a male figure with a contemplative and sophisticated expression. The subject is positioned slightly to the side, with his head raised and his gaze directed upward and out of the frame, as if observing something with interest or admiration. His lips are slightly parted.\r\n\r\nHe wears a ribbed black turtleneck under a dark blazer or coat (black or navy blue). He wears prescription glasses with thin, dark, round frames, which add an intellectual touch to the look.\r\n\r\nHis hair is dark brown, medium length, with a wavy texture and casually tousled style, with some strands falling over his forehead. A full, but well-trimmed beard and a mustache define his face.\r\n\r\nThe background is a smooth, vibrant surface in a deep orange. Strong, geometric shadows (sharp diagonal lines) are cast across the background and over part of the subject's face and shoulder, creating dramatic contrast and an artistic composition. The lighting is direct, strong sunlight, coming from a side angle and possibly filtered through a structure (such as a window or blind) to create sharp shadows. This intense light highlights the texture of the skin (with visible pores), hair, and beard, and creates reflections on the glasses. The skin has a tan tone.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm f/1.4 or 100mm f/2.0) on a full-frame camera for a sharp close-up with elegant compression. Aperture set between f/2.8 and f/4.0 to keep the face in sharp focus and create soft separation from the background. ISO 100 for bright sunlight. Fast shutter speed (e.g., 1/500s to 1/1000s). Natural lighting, using direct sunlight and intentionally created geometric shadows.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, hair and beard style, eye color, and skin tone with maximum fidelity. The goal is to create a version of the user in this high-fashion portrait. The clothing (black turtleneck, dark blazer, round glasses), the contemplative expression, the direct sunlight with geometric shadows, and the vibrant orange background should be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/39378abd-0e0b-4115-afe0-e1ac655fd913.png",
+    "likes": 337,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Portrait",
+      "Corporate"
+    ]
+  },
+  {
+    "id": "5570b369-b861-4184-a5e4-c1e3365c4ed1",
+    "title": "Nitendo cinema",
+    "prompt": "\"A hyperrealistic cinematic shot inside a dark movie theater with visible blue seats in the background, filled with various video game characters having fun. The main character, a man (from the provided photo), looks embarrassed, wearing a simple black Nintendo t-shirt, holding a large red and white striped popcorn bucket in one hand.\r\nOn each side of the main character:\r\n• Left: Mario Bros. holds a red soda cup in one hand, with a mischievous expression.\r\n• Right: Donkey Kong is laughing heartily, holding his own popcorn bucket. His smile is wide and sensual, with gleaming teeth.\r\nIn the background, other video game characters are visible in the seats, including Goku from Dragon Ball, Kratos from God of War, Sonic, Link, Zelda, Princess Peach, a Pikachu-like character, and many more, some wearing 3D glasses, others tossing popcorn in the air, creating a chaotic and festive atmosphere.\r\nThe lighting is cinematic, primarily coming from an invisible screen in front of them, with light reflections on their faces and popcorn buckets. The details are extremely realistic. The overall atmosphere is joyful, original, and slightly exaggerated.\"",
+    "image": "https://cdn.bananaprompts.xyz/84adaccc-427d-4823-be3e-1ee7016e3db2/eaa3b684-4d0c-4989-b466-0a7c83babdf1.jpeg",
+    "likes": 335,
+    "creatorName": "@3r_criacoes",
+    "model": "Gemini",
+    "tags": [
+      "3D Render",
+      "Fantasy",
+      "Vibrant / Colorful"
+    ]
+  },
+  {
+    "id": "5f1d8b7a-b4e9-49f2-895f-e63d909acc2c",
+    "title": "Urban Perch",
+    "prompt": "Digital photo of a young man (use my photo as a reference) sitting on a steel wire fence, wearing a stylish casual outfit. Streetwear: black oversized t-shirt with a cool design, light blue oversized wide-leg jeans, white chunky sneakers, wearing a black watch. He is holding an iced drink in a plastic cup with a straw. The background features a bright blue sky, bamboo trees and modern buildings. The pose is from a lower angle, casual yet stylish.",
+    "image": "https://cdn.bananaprompts.xyz/f4b54699-192f-4636-8025-4262f70f7d9b/e1b26687-bfce-4ae1-b24c-fd95c5126b47.png",
+    "likes": 333,
+    "creatorName": "@arghyack",
+    "model": "AI",
+    "tags": [
+      "Portrait"
+    ]
+  },
+  {
+    "id": "92057f32-d072-4348-9fff-ede13c0b4b60",
+    "title": "Work Profile",
+    "prompt": "Create a realistic professional portrait of a man sitting at an office desk with a laptop and documents in front of him. The man’s face should be based on the reference photo provided, keeping the same facial structure, hairstyle, and expression.\r\nHe is wearing a light beige blazer over a light blue shirt, sitting confidently in a modern office environment with natural lighting and a soft background including a plant and a picture frame.\r\nThe overall vibe should be clean, professional, and elegant, like a business executive headshot.\r\nHigh resolution, cinematic lighting, realistic textures, detailed depth of field.",
+    "image": "https://cdn.bananaprompts.xyz/020a08b2-70bd-4cf0-8e8f-7da90ca07917/6e341100-83ca-42bb-9f95-12e5c0fc0100.jpeg",
+    "likes": 331,
+    "creatorName": "Alireza",
+    "model": "Gimini",
+    "tags": [
+      "Portrait"
+    ]
+  },
+  {
+    "id": "5b76ea41-6981-43ce-b402-fa4308867401",
+    "title": "Thalyson",
+    "prompt": "Gostaria que você atuasse como profissional em prompt",
+    "image": "https://cdn.bananaprompts.xyz/06815cbe-75c7-425c-8990-3a80522a69d0/7eafea39-d503-4373-86a3-601e5533f6d5.jpeg",
+    "likes": 330,
+    "creatorName": "@thalyson",
+    "model": "AI",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "3D Render",
+      "Vector",
+      "Surreal",
+      "Fashion",
+      "Photography",
+      "Corporate",
+      "Business",
+      "Minimalist",
+      "Modern",
+      "Logo",
+      "Product / Poster",
+      "Infographic",
+      "Concept art",
+      "Elegant",
+      "Vibrant / Colorful",
+      "Dark / Moody",
+      "Neon",
+      "Flat Design",
+      "Glitch",
+      "Sci-Fi",
+      "Retro / Vintage"
+    ]
+  },
+  {
+    "id": "6a1c4bba-809d-424c-b17b-02eb405dfc72",
+    "title": "segue Ai",
+    "prompt": "Crie uma renderização digital 3D em alta\r\nresolução e ultra-realista de um cartão de perfil\r\nfuturista do Instagram seguindo como base referência da imagem, sendo segurado entre a mão. O\r\ncartão deve ser feito de vidro transparente\r\nbrilhante, com bordas de neon em tom vermelho\r\nescuro que emitem uma luz intensa e radiante,\r\nrefletindo vividamente nos dedos e na pele da\r\nmão. O fundo deve ser bem escuro (quase\r\npreto), com texturas ou gradientes sutis para\r\ndestacar o brilho neon. No canto superior\r\nesquerdo do cartão, inclua o ícone do Instagram  em estilo neon. No centro do cartão: uma foto de\r\nperfil circular da pessoa mostrada na imagem\r\nenviada, com aparência profissional, confiante e\r\nolhar firme. Na parte inferior do cartão: • Nome\r\ncompleto em uma fonte moderna e limpa • Título\r\nprofissional: Criador de Conteúdo em cor\r\nvermelho neon • Nome de usuário do Instagram\r\ncom ícone: @edinhoferrari • Estatísticas\r\nhorizontais: 1622 posts, 913 seguidores, 2.919\r\nseguindo também em cor neon vermelho.\r\nAdicione também em brilho neon o ícone da\r\ncasa, da lupa e de seguidor.",
+    "image": "https://cdn.bananaprompts.xyz/a1a0a13e-9202-4390-9794-dd823d1db904/08cb981b-2923-4a5a-b28a-7d4384fc6e01.jpeg",
+    "likes": 330,
+    "creatorName": "@edinhoferrari",
+    "model": "Gemini",
+    "tags": [
+      "Neon"
+    ]
+  },
+  {
+    "id": "fe8be1d3-4bc9-4cec-adfa-e402a1d9e568",
+    "title": "BUK.Shall",
+    "prompt": "Using the uploaded image, keep the exact real face, hairstyle, and skin tone unchanged. Fashion photography of a stylish male model sitting casually on a soft textured beanbag chair, working on a MacBook Pro 2025. He is wearing oversized off-white wide-leg trousers, a textured oversized grey sweater, and clean chunky white sneakers. He holds a takeaway coffee cup in one hand and the laptop rests naturally on his lap. Background: smooth neutral wall with soft natural sunlight casting diagonal shadows. Lighting: bright, minimalist, editorial, muted neutral tones with a modern marketing aesthetic. Camera angle: straight-on eye-level shot with slight upward perspective. Lens: 50mm prime, close-up editorial framing. Clean minimalist composition, high-resolution detail.",
+    "image": "https://cdn.bananaprompts.xyz/d5fd8f8e-f7b9-4ade-b530-9abb8d4ea62d/52ad4f01-27bf-4a90-8eb3-f8232c72a999.png",
+    "likes": 323,
+    "creatorName": "@buharishall",
+    "model": "AI",
+    "tags": []
+  },
+  {
+    "id": "1149bf41-1770-4127-98eb-3165193c1f66",
+    "title": "Omar Faruk Jafree",
+    "prompt": "A hyper-realistic, cinematic low-angle portrait of a young man standing confidently in the middle of a modern city street, surrounded by towering skyscrapers curving inward toward the sky. He wears a casual oversized gray t-shirt with bold lettering text OMER J, camouflage cargo shorts, and carries a backpack. Black headphones rest around his neck, and he holds a water bottle in one hand. The lighting is natural and dramatic, with clear blue skies and scattered clouds above, emphasizing the sense of scale and urban energy. The composition creates a powerful, larger-than-life perspective, making the subject appear heroic and adventurous-with ultra-detailed textures in clothing, skin, and architecture.",
+    "image": "https://cdn.bananaprompts.xyz/847737eb-68be-4332-84c1-2bbee2f44a2f/b76fc97a-51dd-4272-a660-c0757d17bc67.jpeg",
+    "likes": 318,
+    "creatorName": "omarfarukjafree",
+    "model": "Nano Banana",
+    "tags": [
+      "Abstract",
+      "Fashion",
+      "Photography",
+      "Portrait",
+      "Cinematic"
+    ]
+  },
+  {
+    "id": "cc5b1ea8-cd7e-4dca-86ef-ea876bf1cec8",
+    "title": "Window Blind Gaze",
+    "prompt": "An extremely intimate and dramatic close-up portrait photograph, with a golden hour and chiaroscuro (light and shadow) aesthetic. It captures a female figure indoors, near a window with horizontal blinds (Venetian blinds). The subject is positioned sideways, with her body slightly away from the window, but her head turned over her shoulder, looking directly at the camera with an intense, penetrating, and seductive expression. Her lips are slightly parted, and her gaze is direct and captivating, creating a strong connection with the viewer. The composition is dominated by the play of light and shadow created by the blinds, which cast over the figure's face, hair, and shoulders.\r\n\r\nThe female figure appears to have a slender build, as indicated by the visible shoulder line and neck. Her breasts are suggested to be medium-sized, with the strap of a garment visible on the shoulder. Due to the extremely tight framing, it is impossible to determine the slenderness of her waist, the width of her hips, the thickness of her legs, or the size of her buttocks. The skin on her face and shoulders has a golden tan tone, with a natural, healthy glow, enhanced by the warm light. Small imperfections or natural skin textures may be subtly visible under the bright light.\r\n\r\nShe is wearing a garment with a visible yellow strap on her left shoulder, suggesting a top, sundress, or swimsuit. The rest of the clothing is out of frame or obscured by shadows.\r\n\r\nHer hair is long, voluminous, and medium to dark brown, with warm reflections from the light. It has a natural wavy texture and a slightly tousled or messy appearance, with strands falling over her face and shoulder, interacting with the shadows from the blinds. Some strands catch the light intensely, creating golden highlights. Her makeup is natural but effective in enhancing her features: well-defined and filled-in eyebrows, eyes (possibly light brown or honey) that shine brightly under the light, highlighted with mascara, and perhaps a subtle smoky eyeliner. The lips are a natural shade of coral pink or terracotta, with a slightly glossy or satin finish, appearing full and inviting.\r\n\r\nThe immediate background is the window with its light-colored (white or beige) horizontal blinds, which are the source of the striped shadows. The environment outside the window is overexposed or blurred, not a focal point. Lighting is crucial: strong, direct natural sunlight from the golden hour (late afternoon or early morning) enters through the window and is fragmented by the blind slats. This creates a dramatic pattern of horizontal stripes of bright light and dark shadow that cross the figure's face, hair, neck, and shoulders, sculpting the contours and creating an intimate, mysterious, and cinematic atmosphere. The contrast between the illuminated areas and the shadows is very high. The overall tone of the light is warm and golden.\r\n\r\nCamera Settings: Captured with a high-quality portrait prime lens (e.g., 85mm f/1.4 or 100mm f/2.0) on a full-frame camera for an extreme close-up with elegant compression and smooth bokeh. Aperture set between f/1.8 and f/2.8 for a very shallow depth of field, focusing intensely on the eyes and lips, and blurring the shutters and background. ISO 100 for bright sunlight. Shutter speed adjusted to correctly expose the highlights without blowing them out completely, allowing the shadows to remain deep (e.g., 1/250s to 1/500s). White balance adjusted to enhance the warm tones of the golden hour. Lighting exclusively natural, using the shutters as a light modifier.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, eye structure, and face, eye color, skin tone (tan), hair style and color (long, wavy, brown), as well as the suggested body shape (slender, medium-sized breasts) with maximum fidelity. The goal is to create a version of the user in this intimate and dramatic portrait. The clothing (visible yellow strap), the pose looking over the shoulder, the intense/seductive expression, the golden hour lighting with pronounced window shade shadows, and the window background with window shades should be rendered as described, creating a perfect fusion between the user's identity and the aesthetics of the image.",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/5c3e76ed-9be9-44f5-b2b9-46b97f452df3.jpeg",
+    "likes": 316,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "734b739b-f9d7-413a-a49d-7994af508501",
+    "title": "Urban Cool Elegance",
+    "prompt": "A full-length photograph, captured at eye level, with a smart-casual, elegant, and confident menswear aesthetic. The male figure stands, leaning casually against a dark, textured wall (possibly metal panels or modern cladding). The pose is relaxed yet stylish: one leg is crossed in front of the other, with the foot resting on the wall, while the hands are in the pockets of his pants. The body is turned slightly to the right, and the head is turned in the same direction, looking out of the frame with a serious, confident expression and a touch of cool, enhanced by the sunglasses. The vertical composition highlights the slender silhouette and the outfit.\r\n\r\nThe man's physique is athletic and defined, with broad shoulders, a muscular chest and arms (visible through the fitted shirt), and a relatively small waist.\r\n\r\nHe wears an elegant and modern outfit. A white, short-sleeved dress shirt made of a lightweight fabric (possibly linen or cotton) with a slim fit accentuates his physique. The collar is structured (mandarin-style or with hidden buttons), and the shirt is unbuttoned at the top, revealing a bit of chest. The pants are formal or chino, black or very dark navy blue, with a slim cut and slightly shorter length (above the ankle). A light brown (caramel) leather belt with a silver buckle accentuates the waist, creating a color contrast. On his feet, he wears white leather sneakers, minimalist sneaker style, with no visible socks. Accessories include dark sunglasses with thin metal frames (aviator style or similar), a wristwatch with a silver metal strap on the left wrist, and a leather or beaded bracelet on the right wrist.\r\n\r\nHis hair is dark brown, medium length on top, with a wavy or curly texture, combed back or to the side with volume, and shorter sides (undercut or fade). A full, but well-trimmed and styled beard connects to the mustache, framing the face and adding a sophisticated touch. The eyebrows are dark and well-defined. The skin has a healthy tan.\r\n\r\nThe background is a modern, dark wall with vertical lines or panels that create a subtle geometric texture. The color is black or a very dark gray, providing a strong contrast with the white shirt. The lighting is natural and bright, coming from the left side (where the subject is looking). This direct sunlight creates strong highlights on the left side of the body, the shirt, arms, and face, while the right side is in soft shadow, sculpting the muscles and adding depth and drama to the image. The floor is not visible. The overall atmosphere is one of urban elegance, confidence, and impeccable style in the sun.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm f/1.8 or 50mm f/1.4) on a full-frame camera for a sharp, full-body portrait with good background separation. Aperture set between f/2.8 and f/4.0 to keep the subject in sharp focus and create soft bokeh, while still maintaining the recognizable texture of the wall. ISO 100 for bright sunlight. Fast shutter speed (e.g., 1/500s to 1/1000s). Natural, direct sunlight from the side.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, hair and beard style, eye color, and skin tone with maximum fidelity. The goal is to create a version of the user in this men's fashion portrait. The clothing (white shirt, dark pants, caramel belt, white sneakers, sunglasses, watch, bracelet), the pose leaning against the wall, the confident expression, the side sunlight and the dark wall background must be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/6644fcd7-5f91-4a17-825b-c73c84740844.png",
+    "likes": 298,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "08ad5163-be45-42c2-9356-d67e6d480759",
+    "title": "braços erguidos atrás da cabeça",
+    "prompt": "Crie uma imagem realista com o MEU ROSTO e a MINHA APARÊNCIA exatamente como na foto que enviei — não mude absolutamente nenhuma das minhas características físicas (rosto, traços, formato dos olhos, nariz, boca, pele, cabelo, corpo etc). Apenas replique o estilo e a composição da imagem abaixo com fidelidade.\r\n\r\nA pessoa deve estar com os braços erguidos atrás da cabeça, em uma pose confiante e sensual. A iluminação deve vir de uma janela, projetando faixas de luz e sombra no rosto e no corpo, criando um contraste dramático e artístico. A luz deve destacar principalmente os olhos e o brilho natural da pele.\r\n\r\nO fundo deve ser simples e neutro, em tom claro, para manter o foco no rosto. O clima geral da imagem precisa ser intimista, elegante e cinematográfico, com um toque de mistério e intensidade no olhar.\r\n\r\nA maquiagem deve ser natural e iluminada, com pele glow e lábios com leve brilho. Os cabelos devem estar soltos, com aparência natural e volume suave. A roupa deve ser uma blusa preta com alças, deixando os ombros à mostra.\r\n\r\nImportante: mantenha 100% das minhas características reais — não altere o formato do rosto, olhos, nariz, boca, cor da pele, cabelo ou qualquer traço físico meu. Apenas insira minha aparência nessa mesma pose, iluminação e estilo descritos",
+    "image": "https://cdn.bananaprompts.xyz/532c87ba-3845-4719-995a-6f5fbf19aac9/def45ecb-4094-4394-be1c-f4c0b7eb8209.png",
+    "likes": 297,
+    "creatorName": "@thiesen",
+    "model": "AI",
+    "tags": []
+  },
+  {
+    "id": "8e80d1cf-c2ae-4d92-bbd1-a029e190e027",
+    "title": "Corporativo",
+    "prompt": "Prompt principal (positivos):\r\n\r\nRetrato masculino em preto e branco, estilo editorial de revista, foco em um homem sentado em um sofá, expressão confiante e introspectiva, olhar direto para a câmera, pose relaxada com a mão apoiando o queixo, camisa social clara com alguns botões abertos, barba bem aparada e cabelo penteado para trás com volume natural, iluminação suave vinda da lateral criando contraste e profundidade, ambiente sofisticado com cortinas e decoração moderna ao fundo, textura realista da pele e do tecido, nitidez alta, qualidade fotográfica profissional, lente 85mm f/1.8, estilo monocromático cinematográfico.\r\n\r\nDetalhes técnicos (para controle de qualidade):\r\n\r\nEstilo fotográfico: retrato editorial em preto e branco\r\n\r\nEnquadramento: close médio (do peito até o topo da cabeça)\r\n\r\nIluminação: luz lateral suave com sombras bem definidas\r\n\r\nAmbiente: interior elegante, tons neutros e textura de cortina ao fundo\r\n\r\nExpressão: neutra, confiante, levemente pensativa\r\n\r\nRoupa: camisa de algodão clara, casual, botões abertos no colarinho\r\n\r\nCabelo e barba: penteado natural, barba curta e alinhada\r\n\r\nTom geral: sofisticado, artístico, masculino\r\n\r\nParâmetros opcionais (para ajustes finos no Nano Banana):\r\n\r\n--style: cinematic_bw\r\n--focus: face\r\n--lighting: soft_side\r\n--pose: hand_on_chin\r\n--mood: confident_relaxed\r\n--camera: 85mm_f1.8\r\n--quality: ultra_detail\r\n\r\n\r\nPrompt negativo (para evitar problemas):\r\n\r\nblurry, cartoonish, oversaturated, smiling, colored image, low contrast, low detail, harsh lighting, distorted proportions, unrealistic texture, cluttered background",
+    "image": "https://cdn.bananaprompts.xyz/d7a105a2-5dde-4cd5-96bf-f5cb83690a1f/3fe244de-696e-4381-8d53-c494133a6a76.png",
+    "likes": 295,
+    "creatorName": "@cwbarteprodutora",
+    "model": "nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Portrait",
+      "Corporate",
+      "Business",
+      "Modern",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "5e8358e7-6dd4-4bfc-8905-36da1a042aab",
+    "title": "Fora do Carro por do sol",
+    "prompt": "“Retrato Masculino Elegante ao Pôr do Sol com Carro de Luxo”\r\n\r\nPrompt principal (positivos):\r\n\r\nRetrato masculino realista, estilo editorial de luxo, mostrando o mesmo homem da referência principal (barba curta bem aparada, cabelo penteado para trás com volume natural, óculos de armação grossa, expressão confiante e madura) encostado em um carro esportivo preto brilhante durante o pôr do sol.\r\n\r\nEle veste um terno azul-marinho bem ajustado, camisa branca e gravata bordô. Usa sapatos de couro marrom e relógio elegante no pulso.\r\n\r\nA cena se passa em um ambiente urbano sofisticado, próximo a um parapeito de pedra com vista panorâmica e montanhas ao fundo. O pôr do sol ilumina o céu com tons dourados, alaranjados e rosados, refletindo suavemente na lataria do carro.\r\n\r\nO enquadramento é em plano médio, mostrando o homem inteiro encostado casualmente no carro, com uma perna cruzada e uma postura confiante. O foco está na harmonia entre o luxo, o bom gosto e a iluminação cinematográfica dourada.\r\n\r\nAlta definição, textura realista da pele, tecidos e reflexos do carro. Estilo fotográfico contemporâneo, luz natural dourada, atmosfera elegante e sofisticada.\r\n\r\nDetalhes técnicos e estéticos:\r\n\r\nCenário: rua ou mirante urbano durante o pôr do sol\r\n\r\nPersonagem: mesmo homem da foto original (barba, cabelo, óculos, traços maduros)\r\n\r\nRoupa: terno azul-marinho ajustado, camisa branca, gravata bordô, sapatos de couro marrom\r\n\r\nAcessórios: relógio elegante, óculos, lenço no bolso do paletó\r\n\r\nCarro: esportivo preto de luxo, com acabamento polido\r\n\r\nIluminação: dourada e quente, luz natural do entardecer\r\n\r\nComposição: corpo inteiro, levemente inclinado, encostado no carro\r\n\r\nClima/emoção: confiança, poder, sucesso e sofisticação\r\n\r\nEstilo: editorial de moda masculina / publicidade automotiva\r\n\r\nParâmetros recomendados (para Nano Banana):\r\n--style: cinematic_sunset\r\n--lighting: golden_hour\r\n--camera: full_body_portrait\r\n--focus: man_and_car\r\n--mood: confident_elegant\r\n--quality: ultra_detail\r\n--composition: leaning_on_car\r\n\r\nPrompt negativo (para evitar ruídos):\r\n\r\nblurry, cartoonish, low contrast, overly saturated, smiling widely, messy background, casual clothes, distorted car, poor reflections, unnatural skin tones, exaggerated lighting, low detail",
+    "image": "https://cdn.bananaprompts.xyz/d7a105a2-5dde-4cd5-96bf-f5cb83690a1f/d262fc4a-4c80-49d4-97c5-5b513c57c727.png",
+    "likes": 294,
+    "creatorName": "@cwbarteprodutora",
+    "model": "nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Corporate",
+      "Business",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "9adb4c9e-be22-4a58-ad5a-2d5b10726f50",
+    "title": "3D Names",
+    "prompt": "Create a photo using the attached template without changing your face, features, hair, ethnicity, or gender. I'm in a modern studio setting, leaning casually against a large, white sculptural object shaped like the word ROBSON. My body is captured from the side, with my weight resting primarily on one leg, in a relaxed yet confident posture.\r\nI have my arms crossed, in a natural, unconcerned posture. My head is tilted slightly downward as I cast a calm gaze out of the frame, maintaining a composed, introspective expression.\r\nI'm wearing a loose-fitting black t-shirt made of dryfit fabric, with no logos or prints. I pair it with jeans. On my feet, I wear chunky white sneakers with visible laces and a bold sole, adding a sporty touch to the minimalist look.\r\nThe overall style is monochromatic, minimalist, and contemporary streetwear. The image is captured from a low angle, emphasizing height and presence, while the sculptural ROBSON letters in the background take on a monumental appearance. The camera's framing resembles a roughly 85mm portrait lens, producing cinematic compression and natural proportions. The lighting is controlled studio lighting, evenly highlighting my figure and casting soft, directed shadows on the sculptural letters behind me.\r\n\r\nThe background features a clean, minimalist, dark gray gradient, contrasting with the striking white typography.\r\n\r\nThe overall mood is cinematic, editorial, and modern, blending casual streetwear with bold architectural typography, in a dramatic low-angle perspective.",
+    "image": "https://cdn.bananaprompts.xyz/f4f238cc-bb8e-4716-bfde-51c2718d5984/4345bf7e-a405-43bf-812d-794d1619628b.png",
+    "likes": 293,
+    "creatorName": "ROBSON",
+    "model": "nanobanana",
+    "tags": [
+      "3D Render",
+      "Concept art"
+    ]
+  },
+  {
+    "id": "e76ad5fd-b2d9-4652-9df3-1699115c61c0",
+    "title": "CINEMATIC POTRET",
+    "prompt": "A handsome Asian man (identical to the reference photo, maintaining the original facial features) with a relaxed street-style vibe, sitting in a beauty salon chair with both legs casually resting on the table. He is wearing an oversized white Mbelgedez t-shirt, ripped light blue jeans, brown sunglasses, a silver chain necklace, a G-Shock watch on his wrist, and white high-top sneakers. His hair is styled simply in a neutral tone that complements his outfit. He leans back in a confident yet relaxed pose — one hand lightly touching his face, while the other rests on the armrest of the chair.\r\nStyle: Photorealistic, urban street style aesthetic.\r\nLighting: Natural indoor lighting with soft shadows and slightly warm tones, enhancing the relaxed atmosphere.\r\nComposition: Medium shot, subject centered in a salon environment with mirrors, scattered beauty tools, and raw urban details.\r\nDetails: Realistic fabric textures (with the Mbelgedez logo clearly visible on the t-shirt), fine hair strand detailing, reflective sunglasses, metallic shine on the silver chain, details on the G-Shock watch, worn textures on the sneakers, and subtle skin shine. A confident expression with an effortless mood in a stylish urban setting.\r\nQuality: High detail, 8K, masterpiece, cinematic photography.",
+    "image": "https://cdn.bananaprompts.xyz/99c098b7-b5ff-45f0-a9a9-3b48a46ed638/387f60f2-0041-44d0-800d-90005f4dd8a7.png",
+    "likes": 291,
+    "creatorName": "by @BangPro",
+    "model": "gemini",
+    "tags": [
+      "Cinematic",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "0c3ee0b5-f41a-4645-a33d-e2c11123d20d",
+    "title": "Green Serenity",
+    "prompt": "A medium-length photograph with a tropical and glamorous aesthetic. It captures a female figure standing in an elegant pose, her hands adjusting the ties on her dress. The subject is looking up and slightly to the side, with a dreamy expression and slightly parted lips.\r\n\r\nShe wears a sheer, olive-green (khaki/military) crochet or knit ensemble consisting of a triangle bikini top, a tie-up miniskirt, and a long-sleeved blouse with tie details in the front. The outfit reveals a toned abdomen.\r\n\r\nHer hair is long, very straight, and platinum blonde, falling over her shoulders and chest. Her makeup is natural, highlighting her eyes and lips.\r\n\r\nThe background is an indoor or outdoor setting with dense, lush green foliage, creating a green wall, with details of wicker baskets or straw objects. The lighting is soft and diffuse, coming from an overcast day or controlled studio light, highlighting her skin and the textures of her clothing.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm f/1.8 or 50mm f/1.4) on a full-frame camera for a flattering portrait with soft bokeh. Aperture set between f/2.0 and f/2.8 for a shallow depth of field, focusing on the subject and blurring the foliage in the background. ISO 100-200 for controlled or ambient light. Fast shutter speed (e.g., 1/250s to 1/500s). Soft, diffuse lighting from a large light source or through a large window.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, hairstyle (long and straight), and skin tone with maximum fidelity. The goal is to create a version of the user in this glamorous, tropical pose. The clothing (olive green crochet set with bikini, skirt and top), the pose adjusting the outfit, the dreamy expression, the soft lighting and the background of foliage and wicker should be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/346a5eb4-ec42-4acb-9e6e-2d792732de5c.jpeg",
+    "likes": 280,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "9e9b3e29-af98-4f5a-9e55-f214d0614680",
+    "title": "On the stairs",
+    "prompt": "Ultra-realistic vertical photo (9:16). A young Indonesian-Asian man (use uploaded face, 100% identity lock, no alteration) sits on indoor stairs beside a matte concrete wall. A rectangular beam of golden sunlight from a window hits the wall, creating a crisp shadow silhouette inside the bright frame.\r\nHe wears a black ribbed knit sweater, tapered grey chinos, and chunky white sneakers.\r\nPose: seated, elbows on thighs, hands loosely clasped, chin slightly lifted, eyes looking toward the light, calm and confident expression.\r\nLighting: hard warm sunlight from camera-right as key, soft ambient bounce fill, high contrast with long shadows, cinematic golden-hour mood.\r\nCamera & look: low-mid angle from a few steps below, 50–85mm f/2.2 lens, shallow depth of field, clean optics, realistic skin texture, fine film grain, subtle vignette.\r\nStyle: minimalist background, no clutter, fashion editorial realism.\r\nExclude: cartoon, CGI, AI-artifacts, over-smoothing, plastic skin, excessive sharpening, motion blur, warped anatomy, extra fingers, disfigured hands, double shadow, blown highlights, banding, watermark, logo, text, bad perspective, dirty wall, clutter.",
+    "image": "https://cdn.bananaprompts.xyz/898c52b7-a3c2-49be-9368-a7289cc5b6e7/7d0e3025-4819-4b00-bce0-4b9be9a7c3c7.jpeg",
+    "likes": 280,
+    "creatorName": "Ednelson",
+    "model": "Nano-banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Modern",
+      "Minimalist",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "4c16329f-39ce-47cd-9858-15c564fa80d9",
+    "title": "Sketch",
+    "prompt": "Buat gambar garis/sketsa tinta bergaya foto dari wajah yang identik dengan gambar referensi yang diunggah — pertahankan setiap fitur wajah, proporsi, dan ekspresi agar tetap sama persis.\r\nGunakan warna tinta [warna garis] dengan detail garis yang rumit dan halus, digambar di atas latar belakang bergaya halaman buku catatan.\r\nTampilkan tangan kanan yang memegang pena dan penghapus di dekat sketsa, seolah-olah seniman tersebut masih berkarya. Sertakan sketsa tanda tangan yang dihubungkan dengan garis pensil, bertuliskan \"oleh: [nama kamu]\" dalam gaya goresan gambar tangan artistik.\r\nGaya: gambar foto-realistis, tekstur tinta detail, bayangan halus, serat kertas lembut, resolusi 8K, Format 1:1",
+    "image": "https://cdn.bananaprompts.xyz/ae55039e-98a1-4185-8527-8a1a0b47b4d7/9bcdd7b4-7bee-4770-bf89-0d6fe45e3492.png",
+    "likes": 274,
+    "creatorName": "maulanatrisurti",
+    "model": "Nano Banana",
+    "tags": []
+  },
+  {
+    "id": "0f087f64-d3fc-4b81-89d5-3d6d47b238b8",
+    "title": "realistic painting with abstract background",
+    "prompt": "A highly detailed and realistic fine art painting of a person with the same exact facial features as the original photo. The painting should be in the style of a classical or photorealistic oil painting, with smooth brushstrokes and a high level of detail, particularly on the face. The subject should have cinematic color grading and bright lighting that highlights their face.The background should be an abstract painting on a canvas, with colors that complement the subject, but it should not be pure white. The lighting should be dramatic and highlight the edges of the person to separate the subject from the background.The subject should be expertly mingled with the background, seamlessly integrating with the scene. The overall image must have the high-quality, non-digital feel of a traditional painting, with no artifacts from a screenshot or digital editing. The final output image must be in a 16:9 landscape ratio with their face matched. face match 100%.",
+    "image": "https://cdn.bananaprompts.xyz/af49f64d-76a7-48af-a1e7-0118b7eef382/90147297-514c-4dd9-83e7-12b9b2321c53.png",
+    "likes": 274,
+    "creatorName": "@Ananth",
+    "model": "nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Sketch / Line Art",
+      "Oil Painting",
+      "Abstract",
+      "Photography",
+      "Portrait",
+      "Concept art",
+      "Retro / Vintage",
+      "Vibrant / Colorful"
+    ]
+  },
+  {
+    "id": "d1dc09c6-8abd-4935-ba07-5b700e79bec9",
+    "title": "POSE CASUAL",
+    "prompt": "Portrait of a confident man sitting on a beige armchair in an elegant living room. He wears a dark navy blue suit with a white dress shirt, no tie. His hair is dark brown, neatly styled back, and he has a short full beard and fair skin. He sits with his right leg crossed over his left, left arm resting on the chair arm, right hand on his leg, looking directly at the camera with a serious and confident expression. The background shows a sophisticated room with soft warm lighting, blurred lamps, curtains, and framed artwork. The lighting is natural and soft, cinematic, emphasizing texture and detail. Vertical framing, 85mm lens, f/2.8, ultra-realistic corporate editorial portrait.\r\nthe subject from the uploaded image, maintaining the exact real face, hairstyle, skin tone, and body identity unchanged.",
+    "image": "https://cdn.bananaprompts.xyz/ae5f8289-1a58-4605-8d97-0ffa38b6a5cf/235e70a5-bd1e-4bd0-a578-20019a199629.webp",
+    "likes": 273,
+    "creatorName": "@edferreirajr",
+    "model": "bananas",
+    "tags": [
+      "Realistic",
+      "Modern"
+    ]
+  },
+  {
+    "id": "b6f18158-d5c3-42ef-8cbc-138834335c86",
+    "title": "Tropical Beach Girl",
+    "prompt": "Create an 8K ultra-realistic portrait of an Indian woman wearing a vibrant all-red, v-shape tie-front crop top,textured midriff-baring outfit with a loose, tied sarong-style bottom. Her brown black wavy hair with high bun. (use same face as uploaded photo) She has long, wind-blown hair and is adorned with intricate stone gold jewelry. She poses with confident introspection, one hand gently resting on her neck, revealing The setting is a bright tropical environment. Focus on textures,warm tones,and fine art photographic quality.",
+    "image": "https://cdn.bananaprompts.xyz/78f8be03-4eb9-4601-8881-1d6f782f68ad/0a1743aa-8166-4b6b-8811-7473a0d33de6.jpeg",
+    "likes": 273,
+    "creatorName": "@parththakarofc",
+    "model": "Beach",
+    "tags": [
+      "Fashion",
+      "Photography",
+      "Portrait",
+      "Realistic",
+      "Cinematic",
+      "Modern",
+      "Vibrant / Colorful"
+    ]
+  },
+  {
+    "id": "98548499-ebbe-436c-afd3-b5302571f181",
+    "title": "GTA 5",
+    "prompt": "Preserve the identity, face, and physical characteristics of the original person with high similarity. Do not alter the face; keep the face exactly as in the original photo. A female gangster character in the art style of the video game Grand Theft Auto V (GTA V), with a face identical to the one in the photo provided. She is wearing black leather pants and a sexy floral bikini top and Nike Blazer Brown Hi sneakers. The character is casually leaning against a shiny lowrider with chrome wheels, with one leg crossed over the other. Her expression is serious and confident, exuding a gangster attitude. The background features a vibrant urban sunset with palm trees silhouetted against an orange and purple sky. The GTA V logo is subtly visible somewhere in the image. The lighting is dramatic and colorful, characteristic of a cinematic game environment. The image should be hyper-detailed, ultra HD, with realistic reflections on the car and urban surfaces, capturing the authentic street style of Los Santos. Style: Video game art (GTA V), stylized illustration, game character realism.\r\n\r\nLighting: Urban sunset, dramatic, colorful, neo-noir.\r\n\r\nDetails: Hyper-detailed, Ultra HD, realistic reflections, fabric texture, and chrome.\r\n\r\nComposition: Full-body or half-body character, urban background.",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/8d790944-37b7-49b1-835e-e917c97f2ab0.jpeg",
+    "likes": 272,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Cinematic",
+      "Cartoon",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": "1eb6a112-5964-4c52-bf1f-1052d40b4533",
+    "title": "Untitled prompt",
+    "prompt": "A young man (face similar to the photo) is sitting casually on the front door of a tuned GTR R34 with a large rear spoiler, chrome rims, a silver body with blue stripes, and a blue-violet street racing vinyl sticker along the side. The background is a busy office street or many tall buildings at night, with warm cinematic lighting and soft shadows. The overall atmosphere is inspired by the street racing culture of the 2000s. Photorealistic, high detail, 4k resolution, 3:4 photo size, shallow depth of field, cinematic atmosphere",
+    "image": "https://cdn.bananaprompts.xyz/4edd829a-0b01-4bad-bfdd-f60c57901e23/76f21d6e-f9aa-4438-827c-c5d6265ee741.jpeg",
+    "likes": 269,
+    "creatorName": "Community",
+    "model": "AI",
+    "tags": []
+  },
+  {
+    "id": "b3f53cde-fe34-4506-a7bb-d5a7e8ece985",
+    "title": "Aventura Pokémon",
+    "prompt": "{\"Ultra-realistic 8K cinematic portrait of the young man in the photo \"without any facial modification\" as a Pokémon Trainer, centered and posing confidently, smiling very \"very subtly\" naturally. Surrounding the user are friendly Pokémon: Pikachu, Bulbasaur, Charmander, and Squirtle, interacting in playful and dynamic ways, some leaning towards the user. The background is a vibrant, sunlit training ground, featuring soft shadows, cinematic lighting, and a spectacular sunset sky with warm orange and pink hues. In the sky, Legendary Pokémon soar majestically, illuminated by the golden sunlight, appearing larger and more prominent for an epic effect. Lifelike Pokémon fur, clothing, and textures, HDR lighting, sharp details, natural yet vivid colors, realistic lens flares, wide-angle perspective, shallow depth of field, and subtle motion blur for dynamic energy. Framed composition like a heroic game poster, capturing a joyful atmosphere, Adventurous and epic Pokémon trainer.\",\r\n\"size\": \"1024x1024\",}",
+    "image": "https://cdn.bananaprompts.xyz/e36330b0-bebe-44f4-b6e0-7523fa6bb17c/a6afb638-f9b2-465f-a326-d6c7c23b07b5.png",
+    "likes": 269,
+    "creatorName": "Yosep_vega619",
+    "model": "Nano banana🍌",
+    "tags": [
+      "Photography",
+      "Surreal",
+      "Cinematic",
+      "Realistic",
+      "Cartoon",
+      "Anime",
+      "Sci-Fi",
+      "Fantasy",
+      "Vibrant / Colorful"
+    ]
+  },
+  {
+    "id": "2fc5b535-d9d5-4964-b406-e70050efbaae",
+    "title": "Mercedes-AMG G63 negro",
+    "prompt": "--preserve_identity=100% --no_stylization --no_feature_blending. Sujeto basado en la imagen de referencia. Rasgos faciales exactos; \tEstilo editorial hiperrealista en 8K, con atmósfera cinematográfica de atardecer; \tHombre sentado de lado sobre el techo de un Mercedes-AMG G63 negro, pierna doblada y pie apoyado en el capó, cabeza ligeramente girada mirando a cámara con presencia impactante; vestimenta: chaqueta bomber beige con cremallera frontal, pantalones negros de corte moderno, zapatillas CONVERSE x OFF-WHITE Chuck Taylor Vulcanized Hi “Clear”, gafas de sol Ray-Ban Wayfarer, estilo casual, sofisticado, urbano y moderno con toque editorial; \tZona Urbana, fondo con cielo nublado gris;\tLuz cálida difusa del atardecer, faros del coche encendidos iluminando suavemente y creando profundidad dramática; retrato en 8K hiperrealista, lente 24 mm f/1.2, profundidad de campo reducida, fondo suavemente desenfocado, enfoque absoluto en texturas de piel, cabello, ropa y materiales del automóvil, iluminación natural combinada con faros, tonos cálidos y contraste suave. \t-- ar 9:16 vertical, 8K RAW, lente 35-85mm f/1.2-f/2.8, ISO 100-400, enfoque nítido en rostro/ojos, profundidad de campo reducida, bokeh suave, HDR, iluminación cinematográfica, gradación cálida/natural, grano de película sutil, texturas hiperrealistas de piel, ropa y accesorios, fondo suavemente desenfocado, nitidez editorial, estilo editorial/alta moda.\t-- sin CGI, 3D, render, caricatura, anime; sin piel de plástico, borroso, artefactos, distorsiones, poses rígidas; evitar saturación o colores irreales, sobreexposición, reflejos falsos; no alterar rostro, expresión, cuerpo ni identidad; mantener realismo y estilo cinematográfico/editorial.",
+    "image": "https://cdn.bananaprompts.xyz/061276f7-260c-46af-b9cb-7bb63cf9a231/2753d46c-67eb-47fd-95df-857eb7beee26.png",
+    "likes": 268,
+    "creatorName": "@samvartor",
+    "model": "GEMENI",
+    "tags": [
+      "Realistic",
+      "Fashion",
+      "Photography",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "c512ef9c-5701-4d53-aab9-f3440588c95b",
+    "title": "Crafting the Night",
+    "prompt": "Cinematic photorealistic portrait, vertical composition, saturated and vivid colors. A man (use the provided image for accurate facial features) stands outdoors at sunset, waist up, in the right third of the frame, in profile facing left. He holds a giant, bright full moon in both hands, palms supporting its lower part, fingers spread. The moon is large, occupying the upper left quadrant, glowing intensely in a golden orange (#FF9E00 – #FFB84D), with visible craters and texture, radiating strong light. The man wears a light grayish-beige dress shirt. His skin and face are illuminated by a warm, deep orange light from the bright moon. Background: dramatic, saturated twilight sky, deep fiery orange (#FF4500) and intense crimson red (#D9381E) near the horizon, merging upward into a dark purple-violet (#4B2E83). Low: Dark clouds, visible horizon, silhouettes of trees and buildings in pure black (#000000), with some small, bright bokeh lights.\r\nLighting and style: Cinematic golden hour tones, high saturation, high contrast, dramatic and dreamlike, warm and intense highlights of the moon, deep shadows for silhouette effect, photorealistic rendering, poetic atmosphere.",
+    "image": "https://cdn.bananaprompts.xyz/f4f238cc-bb8e-4716-bfde-51c2718d5984/fcacf1f8-7396-42b6-b857-19c2bb1d5166.png",
+    "likes": 268,
+    "creatorName": "Robson",
+    "model": "nanobanana",
+    "tags": [
+      "Fantasy"
+    ]
+  },
+  {
+    "id": "fa86728b-ca32-4ed6-880c-ef3b777fabf2",
+    "title": "A Study in Shadows",
+    "prompt": "A high-impact black and white studio portrait, capturing a female figure with an introspective and pensive expression. The subject is photographed in a close-up that encompasses the face and upper chest, with her head tilted slightly back and her gaze directed upward and to the right, conveying a sense of dreaminess, hope, or deep contemplation. Her lips are slightly parted.\r\n\r\nShe wears a dark leather jacket, the collar and shoulders of which are visible, adding a touch of edgy and timeless style to the portrait.\r\n\r\nHer hair is long, with soft, natural waves that fall over her shoulders, adding volume and movement to the composition. The texture of her hair is detailed, with light and dark streaks that stand out against the gradation of grays.\r\n\r\nThe background is completely black and uniform, eliminating any distractions and focusing all attention on the subject's expression and the details of her face and hair. The lighting is dramatic and sculptural, low-key, using a single main light source from above and from the side to create sharp contrasts. This highlights the cheekbones, jawline, neck, and skin texture, while deep shadows add mystery and depth. A subtle glow is visible in the eyes, reflecting light and adding vibrancy to the look.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm or 100mm) on a full-frame camera, ideal for intimate, distortion-free close-ups. Aperture set between f/1.8 and f/2.2 for an extremely shallow depth of field (creamy bokeh), which focuses intensely on the eyes and face, leaving the rest softly blurred. ISO 100-200 for maximum black-and-white image quality and no noise. Shutter speed from 1/160s to 1/250s to ensure sharpness. Studio lighting with a strip box or beauty dish with a grid as the main light, positioned above and in front of the subject to create dramatic, sculptural lighting, without fill light to maintain strong contrasts.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, and hair style and texture with maximum fidelity. The goal is to create a version of the user in this black and white portrait, with the same pose, expression, and dramatic lighting. The dark leather jacket and the uniform black background should be rendered as described, creating a perfect fusion between the user's identity and the aesthetic of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/52ce9b64-8dab-4e6d-a1f0-d2d49bb31e8d.jpeg",
+    "likes": 265,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Portrait",
+      "Photography",
+      "Fashion"
+    ]
+  },
+  {
+    "id": "4ef3e62f-47ac-4feb-ac66-53fcce8d1ed9",
+    "title": "Monochrome side-profile shot",
+    "prompt": "Can you make this A monochrome side-profile shot of me, with light highlighting the edges of his hair and face. The background fades into darkness, creating a soft contrast that emphasizes his silhouette",
+    "image": "https://cdn.bananaprompts.xyz/1116fa68-5b12-4a09-b3e8-c1694f4a3227/2a034bac-f547-4701-a9bf-b3df4002c8e4.png",
+    "likes": 263,
+    "creatorName": "AM7",
+    "model": "Banan Google",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Photography"
+    ]
+  },
+  {
+    "id": "fd8112e5-1600-4d92-8463-71e59f3f9908",
+    "title": "The Low-Key Hacker",
+    "prompt": "A portrait using my face, depicted as a hacker in a dark, rainy urban environment, strongly in the style of Mr. Robot. The subject is wearing a large hooded sweatshirt, covering the entire head but leaving the face visible, looking at the camera, with a computer screen reflecting a soft green code onto their face. The lighting is dramatic and low-contrast, with only the monitor light and some blurred streetlights in the background. There is a sense of isolation and paranoia. The image has a grainy, almost cinematic aesthetic, reminiscent of modern noir films, with a focus on technology and surveillance.",
+    "image": "https://cdn.bananaprompts.xyz/d58848eb-9617-4fce-bc0d-6aae88a5a436/ce7f755f-f9b1-4e70-be57-f1689e20e7de.png",
+    "likes": 262,
+    "creatorName": "@mmassieri",
+    "model": "Gemini AI",
+    "tags": [
+      "Sci-Fi",
+      "Dark / Moody",
+      "Minimalist",
+      "Cyberpunk"
+    ]
+  },
+  {
+    "id": "bffd309d-f71e-487f-9794-187e704650d5",
+    "title": "Selfie with Celebrities",
+    "prompt": "Ultra-realistic first-person selfie, captured in a 9:16 vertical format, taken with a modern cell phone. The arm is extended forward, holding the phone, and the camera is tilted slightly downward, capturing a spontaneous and fun moment.\r\nThe image must be in 4K quality, with impeccable photorealism, resembling an authentic photo taken on the spot.\r\n\r\nThe man in the image (the selfie taker) must preserve 100% of his real physical and facial features, with a face identical to the original photo, natural expression, and true skin tone, without any modifications. He has a lean physique (5'9\" tall and 165 lbs).\r\nHis expression is relaxed, with a slight smile of satisfaction, holding a glass of cold beer with foam and visible condensation.\r\nHe is wearing casual, lightweight clothing for the warm evening: a white cotton t-shirt, shorts, and flip-flops.\r\n\r\nIn the background, on the right, sits Jennifer Aniston, smiling and charismatic, with a friendly expression. She's wearing a fitted black tank top, highlighting her figure, denim shorts, and flip-flops. She's holding a cold bottle of beer. She's leaning slightly to appear in the selfie, looking at the camera with a \"cheers\" or thumbs-up gesture.\r\n\r\nScene: A lively street bar on the sidewalk of Belo Horizonte (Station Square) at night.\r\nThe table is simple, metal or plastic, with a shallow plate with a side of fries and roast picanha on it. The lighting comes from the warm, neon lights of nearby bars, reflecting off the surfaces and creating a vibrant and welcoming atmosphere.\r\nIn the background, people are chatting, waitresses passing by, and the typical big-city atmosphere.\r\nThe artificial lighting creates soft reflections and shadows, highlighting the faces and details of the clothes and drinks.\r\n\r\nThe image conveys joy, friendship, and authenticity, with vibrant nighttime colors, realistic skin and clothing textures, and a soft depth of field, giving it the appearance of a real selfie.",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/3f80b371-78a2-4437-bcf9-6b6f63c43128.jpeg",
+    "likes": 259,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "cf4944c3-5f93-4f67-ad4f-4a7ffd290b2e",
+    "title": "Duo Tone Portrait",
+    "prompt": "A creative, high-contrast studio portrait capturing a female figure in an intimate close-up with a mysterious and introspective atmosphere. The subject is posed with her head tilted slightly downward, her gaze directed toward the ground, just outside the frame, conveying a sense of deep contemplation.\r\n\r\nThe most striking feature of the image is the dramatic lighting with dual-colored gels. One side of the face and body is bathed in vibrant cyan or teal light, while the opposite side is illuminated by contrasting red or magenta light. This creates a sharp color division in the center of the figure, sculpting the facial features with colorful highlights and deep shadows.\r\n\r\nShe wears a simple black top with a low neckline, which allows the colored light to play across the skin of her décolleté and shoulders. Her makeup is defined, with eyeliner accentuating her eyes and lips with a subtle, light-catching gloss.\r\n\r\nThe hair is long, straight, and dark, falling softly over the shoulders and framing the face, the strands capturing the reflections of the colored lights.\r\n\r\nThe background is completely black and uniform, ensuring that all the focus remains on the subject and the vibrant play of light.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm or 100mm) on a full-frame camera for a sharp, distortion-free close-up. Aperture set between f/2.8 and f/4.0 to keep the face in sharp focus with a shallow depth of field. ISO 100-200 for maximum image quality, free of noise. Shutter speed from 1/160s to 1/250s. Lighting is key: two studio light sources (strobes or continuous lights) with colored gels (cyan and red) positioned on opposite sides of the subject to create a split-light effect, without using fill light to maximize contrast.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, and hair style, color, and texture with maximum fidelity. The goal is to create a version of the user in this artistic portrait. The pose (head tilted down), the dramatic dual-gel lighting (cyan and red), the black top, and the dark background should be created as described, creating a seamless fusion between the user's identity and the modern, colorful aesthetic of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/c24290a2-1bab-47d6-83cb-ebb8770b228c.jpeg",
+    "likes": 255,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "9efd0b46-8f2a-4d95-8bd3-44a725e1440a",
+    "title": "A Studio Portrait",
+    "prompt": "Please create a vertical portrait in 1080x1920 format, preserving the subject’s exact facial features. The image should feature stark, cinematic lighting with high contrast. Capture the subject from a slightly low, upward-facing angle to emphasize the jawline and neck, evoking a sense of quiet dominance and sculptural elegance. Use a rich, soft blue background that complements the subject’s eye color, creating a striking contrast with luminous skin tones and a dark wardrobe.",
+    "image": "https://cdn.bananaprompts.xyz/aade4ced-0fca-4b62-b70e-fb82e654624f/ce30c5d6-3c69-4a23-b85a-6e8a6eb809a7.png",
+    "likes": 254,
+    "creatorName": "Knot Squared",
+    "model": "AI",
+    "tags": [
+      "Realistic",
+      "Photography",
+      "Portrait",
+      "Corporate",
+      "Business",
+      "Minimalist",
+      "Modern",
+      "Dark / Moody"
+    ]
+  },
+  {
+    "id": "e26ad605-7cde-447d-97e3-c4054e6297b5",
+    "title": "Love with lion",
+    "prompt": "A hyper-realistic cinematic portrait of the uploaded man. Use precise ID locking to preserve his precise facial features, hairstyle, skin tone, body proportions, age, and expressions with 100% accuracy. He exudes the personality of a powerful and domineering gangster, sitting confidently on a luxurious velvet sofa, leaning back in a comfortable yet dominant posture. A lion rests on his lap, its body flowing naturally and comfortably above it. The man's head tilted slightly downward, looking at the cat with a calm and serene expression, while dark sunglasses enhance his aura of dominance and elegance. One hand rests casually on the cat back, the other on the sofa's armrest. He wears a dark, elegant outfit: either a finely pinstriped suit or an open-necked silk shirt... an aura of calm and authority, his presence radiating a quiet, non-aggressive power. Style: realistic, cinematic lighting, extreme detail, and a luxurious atmosphere",
+    "image": "https://cdn.bananaprompts.xyz/59e6f935-de7d-44db-97b4-f578f025f7b1/16e11237-b9bd-4826-a749-74d7522e263c.jpeg",
+    "likes": 252,
+    "creatorName": "@syedtuseefulhassan",
+    "model": "Nano Bnana",
+    "tags": [
+      "Cinematic"
+    ]
+  },
+  {
+    "id": "c2c6c292-8688-4fe1-820d-58e30748d60f",
+    "title": "Overhead shot of a 2-month-old baby",
+    "prompt": "Overhead shot of a 2-month-old baby, wide awake and yawning with arms stretched up, lying on a crisp white surface. The baby is wearing a blue and white striped long-sleeve onesie. Alongside the baby, arranged for a milestone photo: a wooden measuring stick showing '58cm', a fluffy blue number '2' indicating '2month old', and text 'May 26 2016'. Also present are a small brown bottle labeled 'baby oil', a miniature 1kg dumbbell, and a neatly folded blue and white striped baby shirt with a white collar, alongside text '5140g'.",
+    "image": "https://cdn.bananaprompts.xyz/aade4ced-0fca-4b62-b70e-fb82e654624f/31bb7276-c287-4996-82cd-fcadbfe9f692.jpeg",
+    "likes": 251,
+    "creatorName": "Knot Squared",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "9169a1bc-a153-4b92-a799-d4b38b2ac66d",
+    "title": "Selfie",
+    "prompt": "Ultra-realistic mirror selfie of a me (uploaded pic)with glasses.\r\nHe is wearing a loose brown sweater layered over a crisp white T-shirt, paired with blue jeans.\r\nA silver chain necklace adds a subtle accessory touch. He holds a new modern iPhone 17 smartphone orange colour in one hand, partially covering his face, while his other hand rests casually in his pocket.\r\nThe scene is set in warm indoor lighting, creating a cinematic, moody atmosphere with soft shadow",
+    "image": "https://cdn.bananaprompts.xyz/9b56a818-80ce-4fbb-8c38-2097454d063e/6d45b765-5f93-4088-a4ee-41de7e7b7c06.png",
+    "likes": 251,
+    "creatorName": "Mosewonder",
+    "model": "Gemini ai",
+    "tags": [
+      "Realistic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "61001793-4092-4a00-9adc-199cae085dc9",
+    "title": "Foto masculina casual",
+    "prompt": "Studio portrait of a confident man sitting on a modern beige armchair with wooden legs, leaning slightly forward with his hands together. He wears a dark navy blue dress shirt with the top buttons open, light beige slim-fit pants, and black loafers with tan soles. He has short dark brown hair styled with texture, a trimmed full beard, tanned skin, and an intense confident gaze directed at the camera. The background is minimalist light gray with a smooth gradient, evenly lit with soft natural studio lighting. The mood is cinematic and fashion editorial, with high realism and fine details. Shot with a 50mm lens at f/2.8, vertical framing, full-body composition.\r\nthe subject from the uploaded image, maintaining the exact real face, hairstyle, skin tone, and body identity unchanged.",
+    "image": "https://cdn.bananaprompts.xyz/508be680-527c-40f6-b37e-99ed04542948/69422c56-35d3-445a-9138-d21e030a49db.jpeg",
+    "likes": 248,
+    "creatorName": "@marcelosantos",
+    "model": "AI",
+    "tags": [
+      "Photography",
+      "Portrait",
+      "Fashion",
+      "Modern"
+    ]
+  },
+  {
+    "id": "1075c499-cdd3-42df-9746-dc1a36f5fe9a",
+    "title": "Black-and-white editorial portrait",
+    "prompt": "A black-and-white editorial portrait of a\r\nstylish man sitting on a minimalist wooden\r\nblock inside a modern loft apartment. He\r\nwears a fitted black sweater, tailored dark\r\ntrousers, and clean white sneakers, exuding\r\na refined yet relaxed elegance. Natural\r\nwindow light softly illuminates his face,\r\ncasting subtle shadows for depth. The\r\nsetting includes a potted plant, a large\r\nindustrial window, and minimalist furniture\r\nin the background. High-fashion magazine\r\naesthetic, Numéro Homme style, sharp\r\ndetails, cinematic mood, medium shot,\r\nprofessional photography.",
+    "image": "https://cdn.bananaprompts.xyz/3af490e3-bf8b-4fc2-a77f-33dfca4e5040/b359fc00-bae8-48c1-8b10-33d896afae95.jpeg",
+    "likes": 247,
+    "creatorName": "@habibomarov",
+    "model": "Nano Banana",
+    "tags": [
+      "Portrait",
+      "Photography",
+      "Minimalist",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "44d2213f-8b02-4cfa-b186-d157a2dd12ce",
+    "title": "Game of Thrones",
+    "prompt": "uma imagem minha [foto enviada em anexo] criar uma foto 4K altamente realista em um ambiente frio, com o rosto de Drogon ao fundo, levemente desfocado. Eu estou de costas, virando apenas a cabeça para a câmera. Eu estou usando roupas pretas Targaryen levemente desfocadas, enquanto meu rosto e feições permanecem claros e realistas.",
+    "image": "https://cdn.bananaprompts.xyz/c2c73835-5cf3-4eff-a1f8-828b91c66b62/5f10a2be-2554-438e-aa4d-6adadcc466a8.png",
+    "likes": 247,
+    "creatorName": "@edytricoloor",
+    "model": "AI",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Surreal",
+      "Fantasy",
+      "Sci-Fi",
+      "Dark / Moody"
+    ]
+  },
+  {
+    "id": "40c96d79-0e7a-4946-9773-035cfbe43dee",
+    "title": "Waiting on the Steps",
+    "prompt": "An outdoor lifestyle photograph featuring a male figure seated on a rustic stone staircase, exuding a laid-back, urban vibe. The subject is positioned at the bottom of the staircase, facing right and looking out of the frame, with a serious, thoughtful expression behind sunglasses. His legs are bent, with his arms resting on his thighs, conveying a relaxed yet attentive attitude.\r\n\r\nHe wears a light, dark gray cardigan or sweater with a V-neck and buttons, over a no-show or collarless T-shirt. Skinny or slim-fit pants in a striking shade of wine or burgundy create an elegant contrast to the gray top. Various accessories, such as discreet necklaces and multiple leather bracelets and beads on the wrists, add a touch of personal style. Dark, square sunglasses cover his eyes, intensifying the aura of mystery.\r\n\r\nThe background consists of an old stone wall or staircase, with rustic blocks and subtle green moss in some crevices, creating a natural, aged texture. On the right, a touch of green vegetation complements the ambiance. The lighting is natural and diffuse, typical of a clear day outdoors, creating soft shadows and a natural glow on skin and fabrics.\r\n\r\nCamera Settings: Captured with a standard lens (e.g., 50mm or 35mm) on a full-frame camera for a natural perspective and a well-balanced full-body portrait. Aperture set between f/2.8 and f/4.0 to create a soft background blur (bokeh) that isolates the subject while maintaining sharpness on the face and clothing. ISO 100-200 for maximum image quality in natural light. Shutter speed of 1/250s to 1/500s to ensure sharpness and freeze any subtle movement. White balance should be set to \"Daylight\" for accurate, natural colors.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, and hair color with maximum fidelity. The goal is to create a version of the user in this scenario. The pose (sitting on the stairs, sideways gaze), clothing (gray cardigan, burgundy pants, accessories, sunglasses), natural lighting, and the stone staircase background should be generated as described, creating a seamless fusion between the user's identity and the aesthetics of the image. Do not describe or generate specific details about the subject's hair or beard; focus only on the other visual characteristics described and those in the reference image, applying them to the user's facial features.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/34f784d3-4b81-4652-a6a2-2501b967e103.jpeg",
+    "likes": 238,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Portrait",
+      "Photography",
+      "Fashion"
+    ]
+  },
+  {
+    "id": "eef7ecbc-7f03-4b96-8898-b3ed1d8d7a0b",
+    "title": "Mulher de Negócios",
+    "prompt": "Recrie essa cena usando o meu rosto e corpo como referência da foto enviada. Mantenha a mesma composição, pose e enquadramento da imagem: uma mulher sentada no chão, com as pernas dobradas e braços apoiados nelas. O cenário deve ser minimalista, com fundo neutro em tons de cinza claro. A iluminação deve ser suave e profissional, destacando o rosto e o cabelo com leve brilho. A roupa deve ser um conjunto branco elegante, composto por calça de alfaiataria e blazer, transmitindo sofisticação e serenidade. A expressão facial deve ser natural e confiante, com um toque de suavidade. Estilo de retrato editorial corporativo, luz de estúdio, tons neutros e acabamento realista.",
+    "image": "https://cdn.bananaprompts.xyz/076c11fd-41b9-4ff9-a31b-68d0d255186f/914c1342-32a1-4d85-8fce-a0803722d464.png",
+    "likes": 236,
+    "creatorName": "@cwbarteprodutora",
+    "model": "nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Corporate",
+      "Business",
+      "Modern",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "bb702950-fbaf-4783-b663-e0942b49519b",
+    "title": "sitting on the floor",
+    "prompt": "Modify the attached image of a man sitting on a bright white surface, angled towards the viewer. He is wearing a cream, short-sleeved shirt over a brown T-shirt, paired with dark brown, wide-legged trousers. Accessories include a small black beaded necklace and a silver watch. He has short, curly brown hair and a neutral expression, looking slightly upwards. His body appears slim. One leg is bent, with a large, light gray and white sneaker in front, creating a forced perspective. The other leg is also bent and is to the right. The lighting is bright and even, casting a subtle shadow of the shoe on the white surface. The composition is a low-angle shot, emphasizing the height and volume of the shoe, giving a sense of depth. The atmosphere is clean and simple, with a touch of contemporary fashion. Image resolution above 4k",
+    "image": "https://cdn.bananaprompts.xyz/edb339ee-8d88-4f89-b255-b3ae9d19de70/1fb492f8-7c8c-44ff-9b14-c544a3cfbf7a.jpeg",
+    "likes": 234,
+    "creatorName": "Gemini",
+    "model": "Gemini",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Watercolor",
+      "Photography",
+      "Modern"
+    ]
+  },
+  {
+    "id": "358a9d5f-71bb-46f0-aad5-2f66b393e5cf",
+    "title": "An Intimate Gaze",
+    "prompt": "Use my photo as the main base. Maintain my authentic facial features, bone structure, gaze, skin texture, body proportions, and natural expression, adapting the artistic style and visual direction based on reference.\r\n\r\nFashion magazine editorial photoshoot aesthetic, minimalist and sophisticated atmosphere.\r\nBody position: Sitting on a dark wooden chair turned upside down, with arms resting casually on the backrest, hands in a natural position. Confident posture and intense expression, direct and penetrating gaze into the camera.\r\nStylized outfit: White dress shirt slightly open in the center, natural drape of the fabric with realistic creases, sensually elegant without vulgarity—high fashion editorial vibe.\r\nHair hangs loose, natural, and slightly artistically tousled, with detailed texture.\r\n\r\nPhotographic style: High-contrast black and white (B&W), soft grayscale tones, preserved skin texture, and light highlighting the volume of the face and arms.\r\nPlain background, professional studio, with full focus on the model's presence and expression.\r\n\r\nProfessional camera settings: 85mm f/1.4 lens, ISO 100, wide aperture for a slightly blurred background, extremely sharp focus on the eyes. Studio lighting with a soft front key light slightly above eye level, minimal side fill to maintain striking shadows and a dramatic atmosphere.\r\nCentralized composition, cinematic aesthetic, and premium magazine editorial like Vogue/Harper's Bazaar, with a sense of presence and quiet power.",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/56882c4c-1b88-41d3-9b4b-b1c6c8919ebb.jpeg",
+    "likes": 233,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "65d84426-6490-439e-81d6-35fffcc03edd",
+    "title": "Sunset",
+    "prompt": "Hyper-realistic 4K full-body shot of the man (same face, no changes), walking barefoot along the beach at sunset, wearing unbuttoned white linen shirt and light beige cropped trousers, holding dark brown flip-flops in right hand, sunglasses on, watch visible, glowing golden sky with sun near horizon, soft reflection on wet sand, cinematic depth of field.",
+    "image": "https://cdn.bananaprompts.xyz/2b3de26f-a356-4f7f-aee8-0369c92b4705/cf257105-6db7-43cf-8389-4194358fe8f8.jpeg",
+    "likes": 231,
+    "creatorName": "@Nadjib",
+    "model": "AI",
+    "tags": []
+  },
+  {
+    "id": "f653661d-b2ab-47f6-8199-a4a1ee0d17fc",
+    "title": "The Dragon",
+    "prompt": "A hyper-realistic 8K cinematic up-close\r\nphoto of a man (use attached photo) performing an avatar bending stance outdoors. A swirling ring of all four elements: earth, air, water, and fire surrounds him, forming a dragon, complete with claws, whiskers, and dramatic twists. The dragon appears to be alive flowing outside his hands, captured with natural physics elements-water, droplets, splashes, refractions, mist, rocks, dust, pebbles, wind, flames,\r\nembers, 3:4 aspect ratio.",
+    "image": "https://cdn.bananaprompts.xyz/898c52b7-a3c2-49be-9368-a7289cc5b6e7/063b9812-7f53-4203-9273-13321079d003.png",
+    "likes": 230,
+    "creatorName": "Ednelson",
+    "model": "Nano-banana",
+    "tags": [
+      "Cartoon",
+      "Anime",
+      "Sketch / Line Art",
+      "Oil Painting",
+      "Surreal",
+      "Concept art",
+      "Fantasy",
+      "Cyberpunk",
+      "Sci-Fi",
+      "Retro / Vintage",
+      "Grunge",
+      "Vibrant / Colorful",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "774d9b10-e513-4c94-88af-3df6b942d31a",
+    "title": "classic",
+    "prompt": "Hyper-realistic cinematic editorial portrait of the provided man (keep face 100% unchanged, preserve realistic skin texture). He stands tall in a dark, moody studio, facing the camera under a dramatic spotlight, with soft drifting smoke creating atmosphere. Outfit: crisp short-sleeve white button-up shirt in relaxed old money style, tucked effortlessly into tailored lightweight trousers, minimal belt, and polished leather loafers. Accessories: a classic luxury wristwatch visible on the wrist, and vintage sunglasses casually held in one hand. His posture feels effortlessly confident, one hand partly in pocket, shoulders relaxed, head tilted slightly upward with calm authority. Strong contrast lighting enhances the natural textures of skin and fabric, creating a timeless, understated but powerful old money editorial look in photorealistic 8K detail",
+    "image": "https://cdn.bananaprompts.xyz/ead058ef-2159-4a0e-903d-e73a5981bec0/c3692bce-6bba-4a4e-9f32-d48b2341ea60.png",
+    "likes": 230,
+    "creatorName": "Mahmood",
+    "model": "AI",
+    "tags": [
+      "Realistic",
+      "Fashion",
+      "Photography"
+    ]
+  },
+  {
+    "id": "6fd12c85-4382-48c8-bf0e-68b01380edff",
+    "title": "Profissional",
+    "prompt": "Uma mulher com cabelos soltos bagunçado, com uma tonalidade marrom escura. Seu cabelo é brilhantemente iluminado por trás, criando um halo dourado luminoso que contrasta nitidamente com o fundo escuro.\r\nExpressão e pose: Ela vira o rosto para a câmera, com o olhar diretamente, mas parcialmente coberto por sombras. Sua boca está ligeiramente entreaberta, o que adiciona um ar expressivo e íntimo à foto. Sem mudar a fisionomia",
+    "image": "https://cdn.bananaprompts.xyz/2c5c9f0e-aadc-43d9-b87f-0da2bfe9e437/f21c2665-b70e-4f56-98e2-04366c423d18.webp",
+    "likes": 226,
+    "creatorName": "@maielly.cardoso",
+    "model": "AI",
+    "tags": [
+      "Photography",
+      "Infographic"
+    ]
+  },
+  {
+    "id": "bb1028c1-8074-46ce-b52f-0fad066bb6d4",
+    "title": "Paris",
+    "prompt": "A hyper-realistic cinematic image, uploaded image a picture of the young man, 1m60, 22 old years do not edit . \r\nHe is standing at the very top of a famous tower in Paris,\r\nFrom this high vantage point, the entire Paris skyline is visible: the Eiffel Tower in the distance, classic Parisian rooftops, and winding streets below. White tee-shirt, black watch\r\nGolden daylight shines across the city, with soft atmospheric haze adding depth. \r\nThe camera angle is wide, slightly low, making the person look majestic and free while embracing the panoramic view. \r\nMood: liberating, cinematic, awe-inspiring. \r\nAspect ratio: 16:9, ultra-realistic, cinematic detail.",
+    "image": "https://cdn.bananaprompts.xyz/7e69b073-7084-4c02-b199-621ae8b1efed/1ed1232c-f164-4886-b7dd-a041a7f3f51b.png",
+    "likes": 224,
+    "creatorName": "Community",
+    "model": "AI",
+    "tags": [
+      "Cinematic"
+    ]
+  },
+  {
+    "id": "ab3326f3-4565-4800-abe4-5aa4a7eae29d",
+    "title": "in the water",
+    "prompt": "Edit This close-up photograph of a man submerged underwater, half of his body exposed from chest to head, occupies the center frame. He appears to be of Arab descent, with a serious expression. His eyes are open and directed towards the viewer. He appears shirtless. The water's surface, with its manipulated light, creates caustic patterns on his skin. Slightly suspended water droplets and bubbles add depth. Cinematic lighting with soft shadows and sharp highlights, and realistic textures create an intricate pattern of light and shadow on his face and upper body. The background is a color gradient between greenish-blue and dark blue, with scattered air bubbles, suggesting a deep environment. The lighting is diffused, casting soft shadows, enhancing the underwater atmosphere. The overall style of the image is photographic and realistic, with an emphasis on capturing the details of the water's effect on the person in 4k resolution.",
+    "image": "https://cdn.bananaprompts.xyz/edb339ee-8d88-4f89-b255-b3ae9d19de70/9048647d-6d65-4b8d-b972-3f9bea2ecd98.jpeg",
+    "likes": 221,
+    "creatorName": "Gemini",
+    "model": "Banana topics",
+    "tags": [
+      "Realistic",
+      "Photography",
+      "Modern",
+      "Business",
+      "Watercolor"
+    ]
+  },
+  {
+    "id": "374cb828-8529-43f0-8ed0-a1d78dd5e5e2",
+    "title": "Luxury Style Photo",
+    "prompt": "Edit this image to show a men positioned in a close-up portrait shot, face tilted slightly upward at approximately 15-20 degrees with her chin gently lifted, creating a confident, aspirational angle. His head is centered in the frame with his gaze directed straight toward the camera from behind the sunglasses. He has short, raven-black hair, he's wearing nice vintage-inspiredround eye sunglasses with molten black-to-grey gradient lenses and matte black frames with delicate etched details, positioned perfectly on the bridge of his nose. His body is angled slightly (about 30 degrees) to create dimension, with shoulders relaxed and one shoulder subtly closer to the camera. he exudes magnetic confidence with a sultry pout. he's wearing a luxurious black blazer. The background is a rich, saturated golden-yellow that transitions to deeper amber tones at the edges. Dramatic directional lighting from above-left creates sculptural shadows along his neck and cheekbones, with warm backlighting creating a subtle halo effect. The composition is a Style/fashion portrait style with the face taking up roughly 60% of the frame. use the subject in the image provided just exactly as he is",
+    "image": "https://cdn.bananaprompts.xyz/3f139765-77c6-447c-8bf2-3aa7dfb01fd3/b4047395-e60b-4eee-a094-a8aae37befad.png",
+    "likes": 221,
+    "creatorName": "@gtorres",
+    "model": "AI",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Portrait",
+      "Photography",
+      "Modern",
+      "Minimalist",
+      "Product / Poster",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "69fbf611-3379-4d89-91a0-3cbb90af4037",
+    "title": "Sweet Fifteen Celebration",
+    "prompt": "A full-length studio photograph with a festive and vibrant aesthetic, celebrating a 15th birthday. The female figure is standing sideways, facing the camera, holding a large rose gold metallic balloon in the shape of a '15'. She looks directly at the camera with a wide, cheerful smile.\r\n\r\nShe is wearing a short, voluminous party dress in a vibrant shade of lavender or light lilac. The dress features sheer puff sleeves, a fitted bodice, and a full, voluminous skirt. On her feet are silver high-heeled platform sandals. Large, sparkling dangling earrings adorn her ears.\r\n\r\nHer hair is dark and straight, slicked back in a low ponytail or elegant bun, with a healthy shine.\r\n\r\nThe background is a solid-colored studio backdrop in a shade of lilac or lavender that complements the dress, creating a monochromatic and cheerful atmosphere. The lighting is studio-quality, bright, and even (high-key), coming from a frontal angle, which eliminates harsh shadows and highlights the color of the dress and the sparkle of the balloons and accessories.\r\n\r\nCamera Settings: Captured with a standard lens (e.g., 50mm) or slightly wide-angle (e.g., 35mm) on a full-frame camera for a distortion-free full-body portrait. Aperture set between f/8 and f/11 to ensure exceptional sharpness across the entire subject, from the dress to the balloons. ISO 100 for maximum studio image quality. Shutter speed from 1/160s to 1/250s. High-key studio lighting with multiple softboxes ensures soft, enveloping light.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, hair style, and color with maximum fidelity. The goal is to create a version of the user in this celebration scene. The clothing (lilac 15th birthday dress with puffed sleeves, platform sandals, shiny earrings), the rose gold '15' balloon, the cheerful and smiling pose, the bright lighting and the lilac background must be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/136c46eb-7fd1-4e28-9452-5fe45b425e5b.jpeg",
+    "likes": 219,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "bf191e09-46a5-437e-a40e-1354a9daf736",
+    "title": "John Wick Style",
+    "prompt": "cinematic film still from the John Wick franchise, neo-noir aesthetic, hyper-detailed 8K --ar 16:9\r\n\r\nSUBJECT: A hyperrealistic portrait of [subject: use uploaded reference photo for *exact facial features, bone structure, and unique characteristics], exuding an aura of intense focus and dangerous calm. He is posed stoically against his classic American muscle car (a 1969 Ford Mustang). He wears a impeccably sharp, all-black tailored suit and a black shirt. **Crucially, the face and hairstyle must retain 100% fidelity to the provided reference photo, ensuring no deviation in distinct facial markings, eye shape, or overall likeness.*\r\n\r\nSCENE: A rain-slicked, dark city alleyway at night, drenched in the glow of vibrant Japanese and Cyrillic neon signs. Puddles on the asphalt reflect the electric blues, deep purples, and crimson reds of the background.\r\n\r\nLIGHTING: Dramatic, high-contrast lighting. The car's headlights act as a harsh key light, sculpting the subject's features and creating long, hard shadows. The ambient neon lights cast a saturated, colorful rim light. Prominent anamorphic lens flares streak horizontally from the light sources.\r\n\r\nATMOSPHERE & COLOR: Moody, gritty, and atmospheric, with visible mist and fog diffusing the light. The color grade is heavily stylized with deep, crushed blacks, and a saturated palette of electric blue, magenta, and warm amber.\r\n\r\nCAMERA: Shot on an anamorphic lens, shallow depth of field, low-angle shot. Subtle, realistic cinematic film grain.",
+    "image": "https://cdn.bananaprompts.xyz/c695cc01-8dc4-474f-b2ea-29388bec3ab3/1cf2ac37-525c-4754-bdb5-4958e997f82a.jpeg",
+    "likes": 219,
+    "creatorName": "@promptwithmeai",
+    "model": "Nano Banana",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Photography",
+      "Cyberpunk",
+      "Sci-Fi",
+      "Fantasy",
+      "Vibrant / Colorful",
+      "Neon"
+    ]
+  },
+  {
+    "id": "d20adc7c-e156-4f01-b898-b6e9caa5e91a",
+    "title": "Preto e branco",
+    "prompt": "Ultrarealistic artistic portrait of the model in the reference photo, preserving all real features. [uploaded image], [do not alter the face in the submitted photo], wearing a stylish black sweatshirt, hair glowing with golden backlighting, contrasted by cool green light on the face and chest, against a deep black background. The model is posed slightly in profile, head turned gently to the side with a thoughtful expression, avoiding direct eye contact with the camera.",
+    "image": "https://cdn.bananaprompts.xyz/508be680-527c-40f6-b37e-99ed04542948/fc39e2b4-59cf-425d-81e2-b7633b5e308e.jpeg",
+    "likes": 216,
+    "creatorName": "MARCELO Santos",
+    "model": "AI",
+    "tags": []
+  },
+  {
+    "id": "e93c9cf2-996d-49b5-b330-b0cbbbbc2a88",
+    "title": "Glamour",
+    "prompt": "Faça um retrato de estúdio profissional, estilo glamouroso, de uma linda mulher morena com cabelo cacheado e castanho escuro, com uma mecha lateral dramática cobrindo parte de um olho. Ela tem um tom de pele quente e maquiagem sofisticada, com olhos esfumados em bronze e lábios nude fosco. Veste uma blusa ou vestido preto ombro a ombro com um delicado acabamento de renda preta. Ela posa elegantemente, segurando a mão direita com unhas pretas longas e afiadas suavemente sob o queixo, com uma expressão contemplativa e sedutora. A iluminação é suave e direcional (clamshell lighting), criando um gradiente sutil de luz e sombra (chiaroscuro) que realça suas feições e a textura do tecido acetinado. Fundo preto sólido. Alta qualidade, ultra detalhe, fotografia de moda.",
+    "image": "https://cdn.bananaprompts.xyz/f4026d85-2d95-4245-978d-e0138ea7e8a1/eb233cbf-3106-49c3-b621-ed5aacce3f1f.png",
+    "likes": 211,
+    "creatorName": "@jussara",
+    "model": "AI",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Fashion",
+      "Photography",
+      "Portrait",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "e7ff66b8-dd24-46f1-9ae6-e57c6bc0092c",
+    "title": "Retrato em Preto e Branco",
+    "prompt": "Um retrato cinematográfico em preto e branco meu, mantendo meu rosto real inalterado. Estou de perfil, encostado em uma parede lisa com uma postura relaxada, mas elegante. Minha cabeça está ligeiramente inclinada para trás, queixo levantado e olhos fechados, transmitindo uma sensação de calma e introspecção. Meu braço esquerdo repousa naturalmente ao longo do corpo, enquanto meu braço direito está dobrado, segurando um copo transparente na altura da cintura com uma pegada leve. Estou vestindo uma camisa social branca bem ajustada com as mangas casualmente arregaçadas até os cotovelos; o tecido está ligeiramente esticado no peito e nos braços, enfatizando uma silhueta sob medida. A camisa está bem dobrada dentro de calças escuras e bem ajustadas, presas com um cinto preto fino.\r\n​Sem acessórios adicionais, o visual permanece atemporal e minimalista. A iluminação é dramática e de alto contraste, com realces suaves acentuando os contornos do rosto, as dobras da camisa e o copo, enquanto sombras profundas intensificam o clima da cena. Os tons monocromáticos criam uma estética clássica e refinada.\r\n​Estilo: atemporal, fotografia em preto e branco, cinematográfico, melancólico e elegante, editorial de moda, retrato de modelo profissional, mesmo rosto.",
+    "image": "https://cdn.bananaprompts.xyz/f82da864-7f82-4a41-ade2-9bd051b301c1/c6f2b1ed-53c5-4f22-869f-f4cb26940caa.jpeg",
+    "likes": 209,
+    "creatorName": "@rafapacheco0525",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Concept art",
+      "Retro / Vintage",
+      "Dark / Moody"
+    ]
+  },
+  {
+    "id": "4908f7e0-4e5f-4f7f-b85e-6ed4500595c5",
+    "title": "Sand & Gaze",
+    "prompt": "Absolutely! As instructed, here are the full analyses for each of the six images you submitted.\r\n\r\nAnalysis 1 (Woman in the Sand - Close-up)\r\nPrompt:\r\n\r\n\"An intimate and natural close-up portrait, capturing a female figure lying on the sand on the beach. The subject is lying face down, with her arms crossed and her face resting on them, looking directly at the camera with a serene and captivating expression. The skin on her arms and face is covered in a thin layer of sand.\r\n\r\nHer hair is dark and wet, with visible grains of sand scattered over the sand.\r\n\r\nThe background is the beach sand itself, gently blurred. The lighting is soft and diffuse, typical of dawn or dusk, creating a melancholic and organic atmosphere.\r\n\r\nCamera Settings: Captured with a macro prime lens (e.g., 100mm f/2.8) or a standard portrait lens (e.g., 85mm f/1.4) on a full-frame camera for an extreme close-up and sharp details of the sand. Aperture set between f/2.0 and f/2.8 for a very shallow depth of field, focusing intensely on the eyes. ISO 200-400 for soft ambient light. Shutter speed 1/160s to 1/250s. Diffused natural lighting.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, hair style, and color with maximum fidelity. The goal is to create a version of the user in this artistic portrait. The pose lying on the sand, the sand-covered skin, the wet hair, the serene expression, and the soft lighting should be created as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/3112f18e-2034-4747-9575-929ba29ad8b2.jpeg",
+    "likes": 208,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "0ed94b47-8268-4e9a-997f-b0fd98241562",
+    "title": "Mr.Damra 3",
+    "prompt": "Generate an image with the following features, using the face in the image I have attached: A man with a modern and elegant style wearing sunglasses with yellow or orange lenses and a dark frame. He wears a black silk shirt with some unbuttoned buttons, revealing delicate gold necklaces. Over his shirt, he wears a black blazer with shiny satin lapels. The lighting is nocturnal and dramatic, with the Eiffel Tower illuminated in the background, creating a warm glow in the dark sky. The man is on a raised balcony or terrace, with the city of Paris at night visible below, filled with twinkling lights. His pose is contemplative, looking down or sideways, with one of the hands visible and nails well-groomed. The atmosphere is sophisticated and mysterious Keep 100% of the reference photo face!",
+    "image": "https://cdn.bananaprompts.xyz/d19290ea-4dbe-4ab2-8158-8cfdf743fbcf/f7046aeb-4578-48ca-b222-b0e0cbbed055.png",
+    "likes": 206,
+    "creatorName": "Ali.damra",
+    "model": "Bananas",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Portrait",
+      "Photography",
+      "Fashion",
+      "Modern",
+      "Product / Poster",
+      "Infographic",
+      "Fantasy",
+      "Retro / Vintage",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "7499abf6-6b0b-4556-91fe-d0e2db99126a",
+    "title": "Mr.Damra 2",
+    "prompt": "Hyper-realistic cinematic full-body fashion photoshoot of the uploaded person (age 26, 5'5\"), exact face and hairstyle from uploaded image, perfectly styled. Leaning back on deep navy blue bean bag, one arm resting on bag edge, legs slightly apart, exuding confidence. Bold all-navy Blue denim navy blue jacket: under white t-shirt, with denim blue jeans, chunky sneakers, silver watch. Solid navy blue background.",
+    "image": "https://cdn.bananaprompts.xyz/d19290ea-4dbe-4ab2-8158-8cfdf743fbcf/b6e734e6-c48a-420d-9a25-380727f2acc5.jpeg",
+    "likes": 205,
+    "creatorName": "Ali.damra",
+    "model": "Bananas",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Portrait",
+      "Photography",
+      "Fashion",
+      "Modern",
+      "Product / Poster",
+      "Retro / Vintage",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "46091f70-ca0d-4223-8f3f-d1ff28d445a3",
+    "title": "Stairway attitude",
+    "prompt": "edit this image — transform the current shot into a high-contrast cinematic editorial of a young urban rebel while keeping the original pose and composition. Keep him seated center-frame on the concrete steps (legs apart, elbows resting on knees, hands reaching slightly forward toward camera, head tilted just a little to the right). Preserve his sunglasses, tousled hair and light stubble.\r\n\r\nWardrobe & accessories: keep the grey shearling denim jacket and charcoal tee but deepen textures and fabric detail; slightly darken and desaturate the jeans to charcoal; emphasize worn black combat boots. Add subtle leather wrist cuff and a minimal gold watch on one wrist; enhance visible hand/forearm tattoos (increase clarity and tonal separation).\r\n\r\nLighting & color: cinematic teal-orange grade — warm rim light from the left, cool shadow fill on the right; punchy midtone contrast, gentle vignette to focus on subject.\r\n\r\nCamera & detail: emulate 50mm f/1.8 shallow DOF, tight vertical crop, skin slightly retouched but natural (retain stubble and texture), sharpen eyes/reflections behind sunglasses and jacket collars, increase micro-contrast on jacket and tattoos. Add light film grain and subtle chromatic aberration for realism.\r\n\r\nBackground & atmosphere: preserve blurred stair repetition but desaturate it to emphasize subject; add a faint orange neon graffiti glow on the left rail and a whisper of street mist at the lower steps for mood.\r\n\r\nOutput spec: photorealistic, high detail, vertical 4K editorial crop.\r\n\r\nPosition (short): seated on stairs, leaning forward, elbows on knees, hands forward, head slightly tilted right.",
+    "image": "https://cdn.bananaprompts.xyz/266feef8-bb5d-4954-baff-4bcab8751544/b2b9a3f1-aa8f-4ac4-a6cf-174901ee144d.png",
+    "likes": 205,
+    "creatorName": "BKD",
+    "model": "AI",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Fashion",
+      "Portrait",
+      "Photography"
+    ]
+  },
+  {
+    "id": "fcc7c368-3a62-4c5a-9415-5ede6b29ce65",
+    "title": "Garden Swing Serenity",
+    "prompt": "A full-length photograph with a summery, relaxing aesthetic captures a female figure sitting on a wicker swing suspended in the garden. The subject sits cross-legged or slightly extended, holding a glass of water or a clear beverage. She looks directly at the camera with a serious, confident expression, wearing sunglasses. One hand is raised, touching her hair or glasses.\r\n\r\nShe wears a nude/beige bikini top with a triangle top and low-rise panties. She wears dark sunglasses, gold hoop earrings, and gold and blue bracelets on her wrist.\r\n\r\nHer hair is long, dark, and straight, falling to her shoulders.\r\n\r\nThe background is a sunny garden with bright green grass, trees, and a portion of a house or wall. The wicker swing is large, with dark green cushions and a decorative geometric-print pillow. The lighting is bright, natural sunlight, which creates highlights on her tanned skin and hair, and soft shadows.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm or 50mm) on a full-frame camera for flattering compression and smooth bokeh. Aperture set between f/2.8 and f/4.0 to keep the subject in sharp focus and gently blur the garden background. ISO 100 for bright sunlight. Fast shutter speed (e.g., 1/500s to 1/1000s) to avoid overexposure. Natural, direct sunlight.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, hair style, and color with maximum fidelity. The goal is to create a version of the user in this garden setting. The clothing (nude bikini, sunglasses, jewelry), the pose on the wicker swing, the confident expression, the glass of water, the bright sunlight and the garden background must be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/6e402fe1-eee2-4040-9fd7-382c5f8fb133.jpeg",
+    "likes": 204,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "0a68058e-28f5-4528-b366-d5cd2bbbe19c",
+    "title": "Elegant man",
+    "prompt": "Use this exact reference image as the sole basis for my facial features—keep my face identical in structure, skin tone, eye color, hair, expression (confident and approachable), and all details. Do not alter, stylize, or generate a new face; replicate it precisely in every output.Hyper-ultra realistic 8K cinematic portrait, face unchanged from the reference. A stylish man leans casually against a dark industrial metal door frame with one hand resting",
+    "image": "https://cdn.bananaprompts.xyz/2b3de26f-a356-4f7f-aee8-0369c92b4705/c78b3857-e99a-4aeb-bb08-0d7bb131e243.jpeg",
+    "likes": 202,
+    "creatorName": "@nadjib",
+    "model": "Gimini",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Portrait",
+      "Fashion",
+      "Business",
+      "Corporate",
+      "Modern",
+      "Product / Poster",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "5f1d4819-03f2-4293-92db-eea713f382a2",
+    "title": "ROGERIO SOUSA",
+    "prompt": "Crie um retrato vertical no formato 1080x1920 pixels, proporção, usando exatamente as mesmas características faciais, da imagem (idêntico à foto referência enviada em anexo, sem mudar o rosto, cabelo, traços, imperfeições e marcas de expressão, foto enviada em anexo) um retrato ultra-realista,  cinematográfico  em 8K,  Use câmera full-frame, lente 85mm f/1.4, ISO 100, exposição 1/1000, luz natural direta, HDR em 8k Ultra Realistic.\r\nFaça este retrato dramático ao ar livre apresenta um homem atlético, de pele clara e magro de pele branca [homem de referência na foto] posando nas rochas, com uma cachoeira alta e um penhasco úmido coberto de musgo ao fundo.\r\nAssunto Principal\r\nUm homem / modelo de aparência asiática, com uma constituição muito atlética e musculosa.\r\nEle está sem camisa e vestindo apenas calções de branco.\r\nEle fica descalço em uma grande rocha na base da cachoeira.\r\nO homem posa com as mãos amplamente esticadas para cima, olhando para a câmera, transmitindo uma expressão de orgulho, força ou admiração pela natureza.\r\nO tundo é dominado por uma cachoeira alta e estreita, com um riacho fino e fino.\r\nA face do penhasco atrás da cachoeira é coberta de musgo e vegetação espessa, úmida e verde-escura.\r\nO assunto é cercado por grandes rochas escuras na base da cachoeira.\r\nExistem algumas samambaias ou pequenas plantas verdes em primeiro plano no canto interior direito, adicionando textura. luminação e Ambiente\r\nA iluminação suave e difusa, típica de áreas protegidas da luz solar direta (como o fundo do vale ou floresta densa), cria um contraste natural.\r\nAs cores são dominadas pelo verde escuro, cinza escuro (rocha) e branco azulado (cachoeira).\r\nA atmosfera geral é épica, robusta e masculina, enfatizando a força física e uma conexão com a natureza.",
+    "image": "https://cdn.bananaprompts.xyz/3dd9ae3e-6f0e-4c4b-94c0-fef708495ff2/97b289a7-89f9-4f8a-9f83-cde84261ffa8.jpeg",
+    "likes": 202,
+    "creatorName": "@rogeriosousa",
+    "model": "AI",
+    "tags": [
+      "Cinematic",
+      "Modern",
+      "Retro / Vintage"
+    ]
+  },
+  {
+    "id": "1de65a03-5a04-4348-b973-17714635fdc7",
+    "title": "Moody Studio Portrait",
+    "prompt": "This is a photo of me. Craft a moody studio portrait of the uploaded person bathed in a golden-orange spotlight that creates a glowing circular halo behind",
+    "image": "https://cdn.bananaprompts.xyz/99aad09f-ea2d-44eb-abfd-4699a48c5eac/1f29938a-ea53-4a3b-be64-487922606a7f.png",
+    "likes": 202,
+    "creatorName": "@HazemSharf",
+    "model": "Nano Banana",
+    "tags": [
+      "Fashion",
+      "Cinematic",
+      "Concept art",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "dc0d9672-ec56-4914-90e0-d99e844bd53a",
+    "title": "The Rider's Pause",
+    "prompt": "A black-and-white portrait with a rugged, cinematic aesthetic captures a male figure seated on a classic motorcycle (café racer or bobber style). The subject is leaning forward over the handlebars, striking a thoughtful and intense pose. One hand rests on the headlight or handlebars, while the other arm is bent, supporting his head. His gaze is directed outward, conveying a contemplative and virile expression.\r\n\r\nHe wears a dark cotton T-shirt and pants (possibly jeans). A chunky wristwatch is visible on one arm, and a ring on his finger.\r\n\r\nHis hair is medium-length, textured, and casually tousled. A short, well-groomed beard defines his face.\r\n\r\nThe background is a softly blurred urban or street environment. The lighting is natural and dramatic, with high contrast, creating deep shadows and sharp highlights that sculpt the facial features and arm muscles. The image has a subtle grain, evoking the look of analog film.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm or 105mm) on a full-frame camera for optimal compression and sharp bokeh. Aperture set between f/1.8 and f/2.8 for a very shallow depth of field, isolating the subject from the background. ISO 200-400 to capture the scene with natural light and add a slight grain. Shutter speed of 1/250s to 1/500s to ensure sharpness. Natural, side, and contrast lighting to create the dramatic effect.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, hair and beard style, eye color, and skin tone with maximum fidelity. The goal is to create a version of the user in this biker-style portrait. The clothing (t-shirt, watch, ring), motorcycle, leaning-over-the-handlebar pose, contemplative expression, high-contrast black-and-white lighting, and film grain must be rendered as described, creating a seamless fusion between the wearer's identity and the image's aesthetic.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/023259c5-232f-4069-aba4-99307aba888d.jpeg",
+    "likes": 202,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography"
+    ]
+  },
+  {
+    "id": "7955b551-9862-4219-a51e-cc7b73c036ad",
+    "title": "uma mulher sentada em uma cama com lençóis brancos",
+    "prompt": "Recrie essa cena usando o meu rosto e corpo como referência da foto enviada. Mantenha a mesma composição, pose e enquadramento da imagem: uma mulher sentada em uma cama com lençóis brancos, com uma perna dobrada e a outra pendendo suavemente, inclinando-se levemente para a frente enquanto passa a mão pelos cabelos, em um gesto natural e confiante.\r\nA expressão deve ser alegre e acolhedora, com um sorriso genuíno e olhar direto para a câmera, transmitindo leveza e espontaneidade.\r\nA roupa deve ser composta por uma blusa de cetim preta com alcinhas finas e decote suave, shorts jeans e sandálias pretas abertas com tiras decoradas por pedrarias coloridas em tom de arco-íris.\r\nComo acessório, um colar prateado delicado.\r\nO cenário deve ser um quarto moderno, com paredes neutras, uma porta ao fundo e uma bolsa de palha com tecido laranja parcialmente visível no chão, mantendo o clima casual e autêntico.\r\nA iluminação deve ser natural e clara, proveniente de uma janela lateral, destacando os tons suaves da pele e o brilho do cabelo.\r\nEstilo de retrato realista e vibrante, atmosfera íntima e descontraída, formato vertical 4:5, qualidade de câmera de smartphone, com profundidade de campo suave e foco no rosto e expressão.",
+    "image": "https://cdn.bananaprompts.xyz/532c87ba-3845-4719-995a-6f5fbf19aac9/58b3c075-4e63-4e8a-97f1-eb0feeeed126.png",
+    "likes": 201,
+    "creatorName": "@thiesen",
+    "model": "AI",
+    "tags": []
+  },
+  {
+    "id": "69d21bed-9abe-4107-8140-b0f5da5cda0e",
+    "title": "Amanhã",
+    "prompt": "Convert this image so that the man is sitting in the center of a high-back armchair in a minimal, monochromatic studio setting. Replace the current background with a seamless wall and floor in a single solid color, either deep teal, slate blue, or forest green. Dress him in a matching jacket and pants in the same color, paired with a simple white T-shirt underneath. Keep his sneakers clean and white with subtle accents matching the outfit. Retain his wristwatch as an accessory. His posture should be upright and composed, with both feet flat on the ground and his hands gently clasped in his lap. The chair should match the overall color scheme to create a seamless monochrome effect. Lighting should be soft, even, and studio-style, with minimal shadows. The final image should be ultra-high-resolution, sleek, modern, and minimalist, in the style of high-fashion portrait photography.",
+    "image": "https://cdn.bananaprompts.xyz/3cd16cf4-b578-49db-96a8-891c88bffdc2/f59bd6b2-cc94-4f1d-8178-bd3e4f2caa4e.png",
+    "likes": 201,
+    "creatorName": "Amanhã",
+    "model": "Amanhã09",
+    "tags": []
+  },
+  {
+    "id": "475831f0-4c0a-4f70-8d33-758398926699",
+    "title": "Roadside Romance",
+    "prompt": "Pair these two people with this prompt.\r\n\r\n\"A lifestyle photograph, with a biker-chic and romantic aesthetic, captures a couple sitting on a Harley-Davidson motorcycle on a road. The female figure sits in the back, embracing the man in front. Both look directly at the camera with serious and confident expressions.\r\n\r\nThe woman wears a black leather ensemble, including a short, fitted leather jacket, high-waisted leather pants, and black leather high-heeled boots. Black leather gloves adorn her hands. Her hair is long and brown, with soft waves falling over her shoulders.\r\n\r\nThe man wears a fitted black leather jacket, dark jeans, and black motorcycle-style boots. His hair is dark and neat, with a short, well-groomed beard.\r\n\r\nThe motorcycle is a Harley-Davidson (possibly a Sportster model), with a matte military green or olive green fuel tank, black and chrome accents, and a black leather tandem seat. The motorcycle is parked on the side of a paved road, which stretches to the Background.\r\n\r\nThe setting is a rural road lined with trees and vegetation in the background, with a clear, slightly cloudy sky, conveying a sense of travel and freedom. The lighting is natural and diffuse, typical of a clear day outdoors, creating soft shadows and a natural glow on the leather.\r\n\r\nCamera Settings: Captured with a standard lens (e.g., 50mm or 85mm) on a full-frame camera for a natural and intimate perspective of the couple and the motorcycle. Aperture adjusted between f/2.8 and f/4.0 to create a soft blur in the background (bokeh) that isolates the couple and the motorcycle while maintaining sharpness on the subject. ISO 100-200 for maximum image quality in abundant natural light. Shutter speed of 1/250s to 1/500s to ensure sharpness. The lighting is exclusively natural, taking advantage of ambient light.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the images of the user's reference man and woman to capture and apply all their facial features, facial structure, hair and beard style, eye color, and skin tone (based on the gender in the photo) with maximum fidelity. The goal is to create a version of the user (and a partner with the same features, if applicable, maintaining the original pose) in this romantic, biker-themed setting. The clothing (leather jackets, leather pants/jeans, boots, gloves), the Harley-Davidson motorcycle, the couple's pose, the natural lighting, and the country road setting should be generated as described, creating a seamless fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/6c515297-697b-4724-92fd-ac75992b34ac.jpeg",
+    "likes": 201,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "023a2306-eb4b-471f-b75d-394517b53711",
+    "title": "Sunset Swim",
+    "prompt": "A stunning portrait with a golden hour aesthetic, capturing a female figure in a beach setting at sunset. The subject stands waist-deep in the ocean (or lake) water, looking to the side with a serene smile and a relaxed expression.\r\n\r\nShe wears a dark-colored bikini (brown or burgundy). Several tattoos are visible on her arm and forearm.\r\n\r\nHer hair is long, dark, and wavy, falling over her shoulders and back, with a natural glow from the sunlight.\r\n\r\nThe background is the main element: a dramatic sunset. The sky is painted in shades of orange, yellow, and dark clouds. On the horizon, a strip of land with trees is silhouetted against the sky. The light of the setting sun creates a shimmering golden reflection on the surface of the water, enveloping the figure in a warm glow.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 50mm f/1.8 or 85mm f/1.4) on a full-frame camera to capture ambient light and create soft bokeh. Aperture set between f/2.8 and f/4.0 to keep the subject in sharp focus and gently blur the background, preserving the sun's glow. ISO 400-800 to compensate for the fading light of sunset. Shutter speed of 1/250s to 1/500s to ensure sharpness. Warm, natural lighting from the setting sun.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, hair style and color, and tattoos with maximum fidelity. The goal is to create a version of the user in this sunset scene. The clothing (dark bikini), the pose in the water, the serene expression, the dramatic golden hour lighting, and the sunset background with golden reflections on the water should be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\r\n\r\nA title about the image in English",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/9c22c6a3-b01f-42e4-b008-20909f784173.jpeg",
+    "likes": 199,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "6cd86e32-7c82-4cd7-baa1-f9806741a847",
+    "title": "The Stairwell",
+    "prompt": "cinematic black and white photograph with faint nicotine-yellow and rust-red tones bleeding into highlights and midtones, evoking aged tungsten light and cigarette smoke, inspired by film noir and German Expressionism, interior of an old decaying house with a wooden staircase and ornate railing, diagonal expressionist shadows cast by a strong single light source, a man in a dark hooded jacket and cargo pants stands halfway up the stairs, hands in pockets, no hat, expression somber and introspective, atmosphere of solitude, guilt, and spiritual purgatory, chiaroscuro lighting with high contrast between light and darkness, beam of light cutting through the air like a confession, dust or haze visible, psychological tension and silence thick as smoke, film grain texture, 85mm lens look, f/1.8 cinematic depth of field, ISO 800, subtle vignette, soft highlight roll-off, volumetric light rays, contrast +25, shadows +10, style reminiscent of The Third Man, The Innocents, Angel Heart, and Detour, 1940s–1980s hybrid noir aesthetic, expressionist geometry of shadow and light, mood of existential dread, metaphysical tension, and haunting beauty.",
+    "image": "https://cdn.bananaprompts.xyz/9f3db513-1c7c-4fde-bef3-831ed70a80ac/59aa9faf-9040-4a98-a9a7-36c1f3c18fa6.jpeg",
+    "likes": 199,
+    "creatorName": "@palimpsestvisuals",
+    "model": "Midjourney v6",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Surreal",
+      "Retro / Vintage",
+      "Dark / Moody"
+    ]
+  },
+  {
+    "id": "b369a890-7bbd-49ca-a8a0-4b554569cc0a",
+    "title": "Always say thank you to AI",
+    "prompt": "Create an ultra-realistic 3D selfie in 9:16 vertical aspect ratio from the attached photo of the man (use the provided image for accurate facial features) with a T-800-style robot. The photo should look like a typical iPhone selfie—slightly uneven framing, camera angle of view, slight distortion from the front camera, natural skin texture, daylight in the background, an apocalyptic scene with other T-800-style robots, subtle motion blur from hand movements, and authentic depth of field from the iPhone's front camera. Maintain a high level of realism and detail, but with the casual, unpolished look of a real phone photo rather than a professional DSLR. 9:16 aspect ratio",
+    "image": "https://cdn.bananaprompts.xyz/f4f238cc-bb8e-4716-bfde-51c2718d5984/964ff6a2-fe0b-46df-8c6b-05e52e38fc9c.png",
+    "likes": 199,
+    "creatorName": "ROBSON",
+    "model": "Nanobanana",
+    "tags": [
+      "Realistic",
+      "Sci-Fi",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": "db6cd19f-e8de-4e0b-856f-bf17aed0f58c",
+    "title": "Tattoo studio",
+    "prompt": "Imagem super realista, um homem sentado em sua mesa, desenho. Ao fundo vê se uma estudio de tatuagem desfocado com neons  e tons escuros, o homem veste blusa de frio preta, relógio no pulso do tipo smartwatch. A iluminação é dramática e a câmera de altura média ( da mesa para cima). Luzes e texturas são realistas",
+    "image": "https://cdn.bananaprompts.xyz/642d87a0-4570-4edd-9fe2-4bb66744712a/47510d6c-21ea-4c0e-b10a-fbd03837b2a3.png",
+    "likes": 199,
+    "creatorName": "@guezz designer",
+    "model": "Gemini banana",
+    "tags": [
+      "Realistic",
+      "Portrait",
+      "Photography",
+      "Cinematic"
+    ]
+  },
+  {
+    "id": "83cb2ef1-4a07-4527-a893-8731c2aea250",
+    "title": "Homem rico estiloso empresário dirigindo carro chique",
+    "prompt": "Um retrato hiper-realista e ultra detalhado do homem da foto de referência, mantendo 100% dos traços originais do rosto, cabelo, expressão, acessórios e detalhes do corpo. Ele está sentado no banco do motorista de um carro de luxo, usando óculos escuros, casaco preto estiloso e um cachecol cinza elegante, com um relógio no pulso. A mão esquerda repousa sobre o apoio de braço, enquanto a direita segura o volante. O interior do carro é moderno e sofisticado, com estofamento de couro, console central com câmbio automático e detalhes cromados brilhantes. O teto solar deixa a luz natural do dia entrar, iluminando suavemente a cena. Ao fundo, vê-se a natureza com árvores verdes em contraste com o interior escuro do veículo. Qualidade de imagem 8K, fotografia realista com iluminação natural e estilo\r\neditorial automotivo de luxo, capturado com câmera Canon EOS R5 e lente 35mm f/1.4 para máxima nitidez e profundidade",
+    "image": "https://cdn.bananaprompts.xyz/2421e674-fd9e-4375-9d96-79756179b8c1/6b5dd4a0-c61d-44f2-bc70-d6c6cc3962c8.png",
+    "likes": 198,
+    "creatorName": "@cartazhd",
+    "model": "gemini",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Portrait",
+      "Photography",
+      "Corporate",
+      "Business",
+      "Modern",
+      "Elegant",
+      "Sci-Fi"
+    ]
+  },
+  {
+    "id": "e04ffe15-cc4f-44b8-a553-72b432e3d747",
+    "title": "Editorial Theme: “Vermelho em Foco”",
+    "prompt": "🔴🕶️ Editorial Theme: “Vermelho em Foco”\r\n🎭 Conceito\r\nUm retrato editorial masculino capturado de cima, com estética analógica e atmosfera urbana. O modelo — em pé sobre um fundo vermelho vibrante — veste blazer de couro preto sobre camiseta preta, calça escura e tênis vermelho e branco. Ele ajusta os óculos escuros retangulares com uma das mãos, exibindo colares dourados em camadas, anéis e um boné preto com a palavra “PromptStack” em fonte estilizada. A composição transmite confiança, estilo e presença visual, com iluminação suave e uniforme que reforça o mood quente e cinematográfico. A imagem é tratada com granulação realista de filme 35mm, evocando uma estética vintage e editorial.\r\n\r\n🎥 Especificações Técnicas\r\nCâmera: Canon EOS R5\r\n\r\nLente: 35mm f/1.4 — ideal para retratos em plano alto com profundidade suave\r\n\r\nAbertura: f/2.0\r\n\r\nISO: 200\r\n\r\nVelocidade do obturador: 1/250s\r\n\r\nEnquadramento: vertical (formato 4:5), plano alto com foco no rosto e parte superior do corpo\r\n\r\nÂngulo da câmera: alto, diretamente sobre o modelo — reforça composição gráfica e destaque visual\r\n\r\nResolução: Ultra-HD 8K com granulação de filme 35mm — textura da pele, tecido e acessórios capturados com realismo analógico\r\n\r\nIluminação: suave e uniforme, sem sombras duras — reforça o mood quente e estilizado\r\n\r\nEstilo visual: editorial urbano com estética analógica, vibrante e confiante\r\n\r\n🧍‍♂️ Pose Principal: “Ajuste em Vermelho”\r\nPostura: o modelo está em pé, com uma das mãos ajustando os óculos escuros e o corpo levemente inclinado para frente\r\n\r\nExpressão: firme e confiante — transmite atitude e domínio visual\r\n\r\nDestaques: contraste entre o fundo vermelho e o look escuro, acessórios dourados em destaque, foco nítido no rosto e leve vinheta ao redor\r\n\r\n👕 Detalhes do Look\r\nBlazer: couro preto com corte ajustado — visual clássico com pegada rebelde\r\n\r\nCamiseta: preta, lisa — base neutra e urbana\r\n\r\nCalça: escura, corte slim — reforça a silhueta\r\n\r\nTênis: vermelho e branco — ponto de contraste e estilo street\r\n\r\nBoné: preto com texto “PromptStack” em fonte estilizada — toque gráfico e moderno\r\n\r\nÓculos: retangulares pretos — estética futurista e urbana\r\n\r\nAcessórios: colares dourados em camadas, anéis metálicos — complementos visuais marcantes\r\n\r\nCabelo: curto e cacheado\r\n\r\nBarba: aparada — reforça o visual maduro e estilizado\r\n\r\n🌟 Destaques Visuais\r\nFundo vermelho sólido: cria impacto visual e reforça a estética editorial\r\n\r\nGranulação de filme 35mm: textura analógica que adiciona profundidade e autenticidade\r\n\r\nPaleta de Cores: vermelho, preto, dourado e branco — vibrante, urbana e estilizada\r\n\r\nMood: confiante, quente e cinematográfico — ideal para editoriais de moda masculina, campanhas de streetwear ou retratos para redes sociais",
+    "image": "https://cdn.bananaprompts.xyz/28265d9c-19af-4322-a0af-e9beb6fd5839/635282d4-a625-4216-b2ce-09d8458caa3d.jpeg",
+    "likes": 198,
+    "creatorName": "@SamOIIvA",
+    "model": "GEMINI",
+    "tags": [
+      "Realistic",
+      "Fashion",
+      "Photography"
+    ]
+  },
+  {
+    "id": "70af4c2c-4602-44c9-949e-b1bd85f16454",
+    "title": "Desert Wanderer",
+    "prompt": "A fashion and lifestyle photograph with a rugged, adventurous aesthetic, capturing a male figure sitting casually next to a customized motorcycle. The subject is seated on the ground, leaning against the bike's rear wheel, with his legs extended and arms relaxed. His gaze is directed to the side, out of the frame, conveying a pensive and adventurous expression. His hands are slightly clasped or holding rings.\r\n\r\nHe wears a monochromatic, utilitarian ensemble in dark tones: a black tank top, a black sleeveless jacket (vest), and cargo pants or dark, rugged jeans. A pair of vintage aviator sunglasses hangs around his neck. Multiple rings and leather bracelets adorn his hands and wrists, adding an edgy touch. On his feet are dark military-style or motorcycle boots.\r\n\r\nHis hair is dark and styled with texture and a slight quiff, complemented by a short, well-groomed beard.\r\n\r\nThe motorcycle is a matte black custom bike with a brown leather seat, chunky tires, and exposed metal details, reflecting a cafe racer or scrambler style.\r\n\r\nThe background is an arid and desolate environment, like a field with piles of sand or dirt, under a clear, slightly cloudy sky, conveying a sense of vastness. The lighting is natural and diffuse, typical of a clear day outdoors, creating soft shadows that highlight the textures of the clothing, the motorcycle, and the terrain, and sculpt the body.\r\n\r\nCamera Settings: Captured with a standard lens (e.g., 50mm) or slightly wide-angle (e.g., 35mm) on a full-frame camera for a wide perspective that includes the subject and the motorcycle in the environment. Aperture set between f/4.0 and f/5.6 to ensure sharpness across the subject and motorcycle. ISO 100-200 for maximum image quality in abundant natural light. Shutter speeds of 1/250s to 1/500s ensure sharpness. Lighting is exclusively natural, taking advantage of ambient light.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, hair and beard style, eye color, and skin tone with maximum fidelity. The goal is to create a version of the user in this scenario. The clothing (black tank top, vest, dark pants, aviator sunglasses, rings, bracelets, boots), the customized motorcycle, the pose sitting on the ground next to the motorcycle, the pensive expression, the natural lighting, and the sandy terrain background should be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/108d43a5-7fe0-4903-91e4-d3611cb71de8.jpeg",
+    "likes": 198,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "213ba11f-3754-4343-801b-ab864ca3038a",
+    "title": "HAPPY BIRTHDAY",
+    "prompt": "--preserve_identity=100% --no_stylization --no_feature_blending. Sujeto basado en la imagen de referencia. Rasgos faciales exactos; \tEstilo editorial de alta moda, 8K; \tMujer idéntica al rostro de referencia, sentado en el piso frente a globos de cumpleaños y confeti, vistiendo traje beige al cuerpo, resaltando su figura y una camiseta blanca ajustada cuello V; \t fondo decorado con globos metálicos y “HAPPY BIRTHDAY 43”; \tLuz brillante de estudio, contraste medio, atmósfera divertida; \t-- ar 9:16 vertical, 8K RAW, lente 35-85mm f/1.2-f/2.8, ISO 100-400, enfoque nítido en rostro/ojos, profundidad de campo reducida, bokeh suave, HDR, iluminación cinematográfica, gradación cálida/natural, grano de película sutil, texturas hiperrealistas de piel, ropa y accesorios, fondo suavemente desenfocado, nitidez editorial, estilo editorial/alta moda.\t-- sin CGI, 3D, render, caricatura, anime; sin piel de plástico, borroso, artefactos, distorsiones, poses rígidas; evitar saturación o colores irreales, sobreexposición, reflejos falsos; no alterar rostro, expresión, cuerpo ni identidad; mantener realismo y estilo cinematográfico/editorial.",
+    "image": "https://cdn.bananaprompts.xyz/061276f7-260c-46af-b9cb-7bb63cf9a231/228b6401-0401-40eb-b0cc-7304b2603874.png",
+    "likes": 198,
+    "creatorName": "@samvartor",
+    "model": "GEMINI",
+    "tags": [
+      "Realistic",
+      "Fashion"
+    ]
+  },
+  {
+    "id": "fdfd94fa-cbd1-44a5-99a8-116ff12f6998",
+    "title": "Man in Black",
+    "prompt": "Usando a foto de referencia, use meu rosto e Crie um retrato em preto e branco de alta qualidade com iluminação dramática e contraste forte. O fundo deve ser completamente preto, destacando apenas o rosto e parte do tronco da pessoa. A pessoa tem cabelo curto , veste uma camisa com gola e está com uma expressão séria e intensa. A luz deve vir de um ângulo lateral ou superior, criando sombras marcantes que realçam os traços faciais. O estilo deve lembrar fotografia de estúdio com foco artístico e emocional, transmitindo profundidade e introspecção.",
+    "image": "https://cdn.bananaprompts.xyz/5fa59d72-08f3-4d8d-b4f6-d6aa8a034682/a3e5df25-3aa5-4715-a5d5-4f2808d9223a.png",
+    "likes": 197,
+    "creatorName": "@xandyalves19",
+    "model": "Dreamina",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Business",
+      "Corporate",
+      "Dark / Moody",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "10a3eeca-9ca8-4bae-afdc-e65f104f261f",
+    "title": "Repair and restore old photos",
+    "prompt": "By maintaining the original face and without changing anything from the face and hairstyle. A middle-aged man of Asian descent, around the age of 35-39 years, with a very serious, sharp, and intense facial expression.\r\n* His face is genuine as in the picture: a straight and focused eye gaze.\r\n* Her hairstyle is exactly like in the picture\r\n* Pose: Sitting in front of a table, body slightly tilted forward. Both hands are placed on the table, with the left wrist protruding wearing a dark smartwatch, there are red accessories on the watch with silver bezels.\r\n* Clothing: Wearing a dark black casual shirt with long sleeves. The LV brand.\r\nSetting and atmosphere:\r\n* Location in a dimly lit room, giving a feel like an interrogation room, detective office, or a serious meeting room at night.\r\nIn the foreground left of the short-haired man and right woman, there is a blurred silhouette of someone's shoulder, giving the impression that the photo was taken from another person's point of view (over-the-shoulder shot).\r\nOn the table to the left of the subject, there is a dark-covered book.\r\n* Overall atmosphere: Tender, dramatic, serious, and full of concentration.\r\nTechnical details of photography and art:\r\nStyle: Cinematic still, thriller or crime drama style. The image quality is very high and sharp (hyper-detailed, 4K).\r\nAngle: Medium close-up, taken from a slightly low-angle shot, which makes the subject look more dominant and powerful.\r\n* Lighting: Dramatic lighting and high contrast (chiaroscuro style).\r\nDirection of Light: The main light source (key light) comes from the upper right direction (from the photographer's point of view), shining the left side of the man's face strongly.\r\n* Light & Shadow: This light creates a clear highlight on his forehead, cheekbones, and left nose, while the right side of his face is in a deep and dark shadow. This accentuated the contours and expressions of his face. The quality of light is soft but directed.\r\nFocus & Depth of Field: Focus is very sharp on the man's face. The background and elements in the foreground (the shoulders of others) are very blurry, creating a shallow depth of field or bokeh effect, which isolates the subject and draws all attention to it.\r\nColor palette: Dominated by dark colors: black, dark gray, and shadow. The subject's skin color is the only contrasting warm element in the image.",
+    "image": "https://cdn.bananaprompts.xyz/77a48ac3-1062-4b7f-a611-a3ea20c935e1/442b1861-85ab-49c4-9849-4291e7018e3e.jpeg",
+    "likes": 196,
+    "creatorName": "@Mr.Joker",
+    "model": "Gemini",
+    "tags": [
+      "Cinematic",
+      "Fashion",
+      "Landscape",
+      "Photography",
+      "Portrait",
+      "Concept art"
+    ]
+  },
+  {
+    "id": "09b7ce0a-8ef8-4bfa-886f-f356fd7b51ee",
+    "title": "Wildflower",
+    "prompt": "Extreme close-up macro portrait focusing intensely on the right eye of a young man [reference man on the photo]. The man has bright brown eyes and sun-kissed, dewy skin. Harsh, dramatic sunlight casts deep, textured shadows across his face, specifically from tiny blue wildflowers which are blurred in the foreground. The background is a solid, clear sky blue. High-resolution, cinematic, hyper-detailed photography with high contrast, emphasizing skin texture and the intense gaze.",
+    "image": "https://cdn.bananaprompts.xyz/bf7850a0-ceb5-400a-bcbe-9015146985bd/fceb8dd2-b255-4afd-a607-06b9ece0aeff.png",
+    "likes": 193,
+    "creatorName": "Renato",
+    "model": "AI",
+    "tags": [
+      "Photography",
+      "Modern",
+      "Concept art"
+    ]
+  },
+  {
+    "id": "90acd882-7190-4405-b633-eb07374355a3",
+    "title": "Temática vintage",
+    "prompt": "Uma jovem glamourosa, com longos cabelos castanhos ondulados, batom vermelho marcante e maquiagem escura nos olhos, posa sensualmente em um estúdio com temática vermelha dramática. Ela está agachada, vestindo um sobretudo de couro preto brilhante, aberto para revelar a parte superior das coxas, e botas pretas de cano alto acima do joelho ou meias. Ela segura o fone de um telefone de disco vintage vermelho no ouvido, olhando atentamente para o lado. Um telefone fixo vintage vermelho combinando está ao lado dela no chão. Todo o fundo e o piso são de um vermelho sólido vibrante. A iluminação dramática cria destaques em seu casaco e no telefone, enfatizando uma atmosfera elegante, misteriosa e nostálgica.",
+    "image": "https://cdn.bananaprompts.xyz/88d254d9-3df8-4931-a656-b1d11f32ee23/ef17bd71-f8da-41e0-9791-8201dd925d57.jpeg",
+    "likes": 193,
+    "creatorName": "@gleibsonfotografia",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Minimalist",
+      "Retro / Vintage"
+    ]
+  },
+  {
+    "id": "145f1615-4531-4148-beab-9c117699a3ed",
+    "title": "Rio de Janeiro",
+    "prompt": "Ultra-realistic photo of a man sitting on the edge of a high mountain peak overlooking Rio de Janeiro, Brazil. The city, coastline, and Sugarloaf Mountain are visible in the background under a hazy blue sky. The man wears a dark gray t-shirt, light beige cargo shorts, and a black cap worn backward. He sits calmly, looking at the camera, with soft natural morning light illuminating the scene. The photo captures a sense of adventure, height, and tranquility, with a detailed view of the city and the ocean below. Shot in high resolution, DSLR-style realism.",
+    "image": "https://cdn.bananaprompts.xyz/898c52b7-a3c2-49be-9368-a7289cc5b6e7/fdef2355-f94a-4457-ba2a-0c63915c5722.jpeg",
+    "likes": 191,
+    "creatorName": "Ednelson",
+    "model": "Nano-banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Architecture",
+      "Surreal",
+      "Fashion",
+      "Photography",
+      "Portrait",
+      "Corporate",
+      "Business",
+      "Modern",
+      "Product / Poster",
+      "Logo",
+      "Concept art",
+      "Infographic",
+      "Fantasy",
+      "Vibrant / Colorful",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "403a1be4-05f3-4c64-a497-aea462825702",
+    "title": "Closed eyes",
+    "prompt": "Side profile portrait of the person from the input photo, facing right, eyes closed, calm expression, on a pure black background. Plain hoodie with the hood up and Apple silver over-ear headphones.\r\n\r\n\r\n\r\nLighting: Dual Neon - Cyan/Turquoise key light from the front right and vivid red rim light from the opposite side; high contrast, pronounced rim glow, glossy reflections on the headphones, soft cinematic bloom. Photo realistic, subtle beauty retouch, shallow depth of field (F/2), minimal, no other elements.",
+    "image": "https://cdn.bananaprompts.xyz/1ed44664-ba4b-40fa-b28d-9bd3e7da9681/edb6370b-fd21-403c-b627-7f9f585552dd.jpeg",
+    "likes": 191,
+    "creatorName": "Mohammed",
+    "model": "AI",
+    "tags": [
+      "Photography"
+    ]
+  },
+  {
+    "id": "9d01d670-c303-435d-a71c-8e11328f6251",
+    "title": "Modern Posed",
+    "prompt": "A full-length studio photograph capturing a female figure in an elegant and expressive pose on the floor. The subject is seated with her legs bent and crossed (in a semi-squat or relaxed kneeling position), turned slightly to the right. Her head is raised, her gaze direct and penetrating, conveying a serious, confident, and somewhat mysterious expression. Her hands are loosely clasped or resting on her knees.\r\n\r\nShe wears a modern, contrasting ensemble: a white, sleeveless top with a V-neck or turtleneck, which accentuates her upper body. The bottom half consists of black leather (or similar material) shorts or a skirt-short with a high waist and a close-fitting fit, creating an elegant silhouette. On her feet, thin high heels in a nude or pinkish hue complete the look, elongating her legs.\r\n\r\nHer hair is long and dark, with soft, natural waves that fall over her shoulders and chest. The texture is shiny, and the volume is subtle, framing her face.\r\n\r\nThe background is a neutral studio backdrop in a solid, uniform gray tone, allowing the subject to stand out clearly. The lighting is soft and even, typical of a professional studio, with a key light that evenly illuminates the figure, creating soft shadows that define the body's curves and highlight the texture of the clothing, without creating overly harsh or dark highlights.\r\n\r\nCamera Settings: Captured with a standard or medium telephoto lens (e.g., 50mm or 85mm) on a full-frame camera for a natural perspective and a distortion-free full-body portrait. Aperture set between f/5.6 and f/8 to ensure sharpness across the entire subject, from head to toe, while providing a very subtle blur in the background for separation. ISO 100-200 for maximum studio image quality. Shutter speed from 1/160s to 1/250s to ensure sharpness. Studio lighting with one or two large softboxes as key lights, positioned slightly in front and to the sides of the subject for even, flattering lighting, with a fill light to soften shadows and a subtle rim light to separate the figure from the background.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, hair style, color, and texture with maximum fidelity. The goal is to create a version of the user in this studio portrait. The clothing (white top, black leather shorts/short skirt, nude heels), the seated pose with bent legs, the confident expression, the soft lighting, and the uniform gray background should be created as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/cf0840b7-2530-4904-b84b-0582b55391a4.jpeg",
+    "likes": 185,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "4502e0e7-82f2-4fe7-ba26-822efbc0ad80",
+    "title": "Little Princess, Big Smile",
+    "prompt": "A fantasy photograph with a fairytale and magical aesthetic, capturing a child (a girl) dressed as a princess. The subject stands facing the camera with a wide, adorable smile, conveying joy and innocence. She holds in both hands a glass dome containing a single red rose, which appears to be enchanted.\r\n\r\nShe wears a stunning princess gown in a vibrant shade of golden yellow, with a fitted bodice and a very voluminous, flowing skirt adorned with sparkles and floral appliqués, reminiscent of Belle from Beauty and the Beast. On her head is a small, sparkling golden crown.\r\n\r\nHer hair is dark and long, swept to the side or tied in a high ponytail, with straight bangs framing her face.\r\n\r\nThe background is a grand, bright castle hall, with arched windows revealing a soft, golden light, creating a magical and warm atmosphere. The lighting is studio-style, soft, and directional, highlighting the details of the dress and the sparkle of the crown, as well as giving a magical spotlight to the enchanted rose.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm or 50mm) on a full-frame camera for a flattering perspective and soft bokeh. Aperture set between f/2.0 and f/2.8 to isolate the child from the castle backdrop. ISO 100-200 for maximum studio image quality. Shutter speed from 1/160s to 1/250s. Studio lighting with a large softbox or octabox as the main light for a soft, enveloping light, and background lights to illuminate the castle and create depth.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, hair style, and color as accurately as possible, assuming the gender and age of the child in the reference photo. The goal is to create a version of the user (as a child) in this fairytale setting. The clothing (golden-yellow princess dress, crown), the enchanted rose in the dome, the cheerful and smiling pose, the magical lighting, and the castle hall background should be created as described, creating a perfect fusion between the user's (child's) identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/a21a6722-58a5-45d0-a138-51fa1f919aac.jpeg",
+    "likes": 185,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Portrait",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": "2a288329-420e-4334-a1e5-b6cf4941528a",
+    "title": "Exército",
+    "prompt": "Crie uma fotografia realista de um soldado em posição de prontidão, com leve sorriso, em pé ao ar livre. O soldado sou eu, vestindo uniforme militar camuflado em tons de verde, marrom e bege, com colete tático verde-oliva cheio de bolsos e compartimentos. No colete está escrito o nome( SEU NOME). Uso uma boina vinho com distintivo metálico, uma gola de lã verde enrolada no pescoço e luvas marrons. No braço direito há o brasão com a bandeira do Brasil. Estou segurando um rifle preto moderno, calibre 5,56 mm (M16), apoiado na frente do corpo com as duas mãos.\r\n\r\nO fundo mostra arbustos verdes e piso cinza de asfalto. Atrás, complemente a cena com um cenário militar épico, incluindo tanques de guerra, carros de exército, caças voando no céu e soldados em formação ao fundo. A iluminação deve ser equilibrada e realista, transmitindo a atmosfera de uma operação militar. A cena deve combinar prontidão e seriedade com cordialidade e humanidade expressa pelo leve sorriso.",
+    "image": "https://cdn.bananaprompts.xyz/df945b4b-f9b2-4174-905e-1653533057de/cc587e03-41a7-42dc-91c1-2a27e7a9119d.jpeg",
+    "likes": 184,
+    "creatorName": "Marknick2018@gmail.com",
+    "model": "Gemini",
+    "tags": [
+      "Cinematic"
+    ]
+  },
+  {
+    "id": "2e394761-961b-4b8c-8c47-97d7c10983cd",
+    "title": "Between focus and rest.",
+    "prompt": "Modelo masculino em um retrato ultra-realista\r\nem 8k,vestindo um moletom oversized preto\r\ne calças de moletom pretas,combinados\r\ncom tênis brancos.O modelo está sentado\r\nelegantemente em uma cadeira gamer\r\npreta com iluminação LED,em um estúdio\r\nminimalista com fundo preto e uma luz suave\r\ne cinematográfica que destaca as texturas.O\r\nestilo é futurista e editorial,com o modelo em\r\numa pose de moda,com a cabeça levemente\r\ninclinada.O rosto é consistente com o da foto\r\nfornecida.",
+    "image": "https://cdn.bananaprompts.xyz/898c52b7-a3c2-49be-9368-a7289cc5b6e7/2d03a6ca-17ec-4d97-b085-0dd5d1df099b.png",
+    "likes": 184,
+    "creatorName": "Ednelson",
+    "model": "Nano-banana",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Fashion",
+      "Photography",
+      "Portrait",
+      "Corporate",
+      "Business",
+      "Modern",
+      "Infographic",
+      "Dark / Moody",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "fada9275-efca-4496-bdf1-9e67013e625d",
+    "title": "Young man in a charismatic pose",
+    "prompt": "Create a cinematic portrait of the same person as in the uploaded image, sitting confidently in an elegant vintage armchair inside a luxurious 70s-inspired lounge. He is wearing a perfectly tailored grey three-piece suit, black leather gloves, and brown dress shoes. A glass of whiskey rests in his right hand. His expression is thoughtful and composed, exuding power and mystery. The lighting is moody and cinematic, with a mix of cool blue and warm golden tones. On a dark wooden table beside him are a whiskey bottle, an old camera, and a pair of sunglasses, illuminated by soft neon reflections. The atmosphere feels like a stylish movie scene or luxury magazine cover — elegant, masculine, and modern-retro. The background is softly blurred, emphasizing the subject’s face and fashion.",
+    "image": "https://cdn.bananaprompts.xyz/4618f5b7-8396-4e85-a662-c06d87f92390/a3d3c35f-2f25-4b91-80cb-be689f7a7efb.png",
+    "likes": 183,
+    "creatorName": "Eldivin237",
+    "model": "Nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Business",
+      "Modern",
+      "Retro / Vintage",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "1862a959-58c4-4807-96dc-df24604de356",
+    "title": "Retro Ride",
+    "prompt": "A lifestyle photograph with a vintage, sun-drenched aesthetic captures a female figure inside a classic luxury car. The subject sits casually in the driver's seat, angled toward the passenger. The pose is relaxed, with one elbow resting on the center console and her hand gently supporting her chin, while her gaze is direct and captivating to the camera.\r\n\r\nShe wears a casual yet stylish outfit: a dark, faded vintage rock band t-shirt (like Van Halen) and a simple black choker necklace. On her feet are classic white sneakers.\r\n\r\nHer hair is long, with a natural, sun-kissed look, with strands falling over her shoulders. Her makeup is minimal and natural, enhancing the beauty of her features.\r\n\r\nThe car's interior is a key element, featuring cream or beige leather seats and a rich wood dashboard with classic analog dials. The car door is open, revealing a glimpse of the exterior on a sunny day. The scene is bathed in the warm, golden light of late afternoon (golden hour), which filters through the open door and windshield, creating soft highlights on skin and hair, and delicate shadows inside the vehicle.\r\n\r\nCamera Settings: Captured with a prime lens (e.g., 35mm or 50mm) on a full-frame camera to create a sense of intimacy and a natural perspective. Aperture set between f/2.0 and f/2.8 for a shallow depth of field, which keeps the subject in sharp focus and gently blurs the background. ISO 200-400 to capture ambient light with a slight grain that adds to the vintage aesthetic. Exclusively natural lighting, taking advantage of the warm light of the golden hour for a cinematic effect.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, style, and hair color with maximum fidelity. The goal is to create a version of the user in this vintage-style portrait. The clothing (band t-shirt, choker, sneakers), the casual pose inside the classic car, the warm, natural lighting, and the detailed interior of the car should be rendered as described, creating a seamless fusion between the user's identity and the aesthetics of the image.",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/1781039d-c1f6-4082-8c7f-f2fa4ba93a5f.jpeg",
+    "likes": 182,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "0c2621b2-91e2-40e9-87b5-213d53d9094b",
+    "title": "Avião, luxo",
+    "prompt": "Especialista em IA: Crie uma imagem 4K hiper-realista, capturada com uma câmera DSLR de última geração (Canon EOS R5 com lente de 35 mm, f/1.8, ISO 200), mostrando um homem estiloso (com base na foto de referência enviada) na escada de um jato particular de luxo.\r\n\r\nO homem usa óculos escuros Ray-Ban pretos, uma jaqueta azul-marinho de camurça ou veludo com zíper e calças escuras. Seu cabelo castanho curto está bem penteado e ele tem uma expressão séria, confiante e relaxada enquanto olha levemente por cima do ombro em direção à câmera.\r\n\r\nEle segura um smartphone com a tela ligada na mão direita, enquanto a mão esquerda repousa levemente no corrimão da escada.\r\n\r\nAo fundo, o jato particular tem um acabamento metálico brilhante, com detalhes cromados e pintura branca acentuada por linhas prateadas, refletindo a luz natural do dia. O céu está limpo e azul, com algumas nuvens finas, e a grama ao redor da pista está bem cuidada.\r\n\r\nA luz suave do sol projeta sombras realistas e bem definidas, destacando as texturas do tecido, o metal do azeviche e a pele do homem.\r\n\r\nO clima geral da imagem transmite sofisticação moderna, sucesso e luxo discreto, projetando confiança e estilo natural.",
+    "image": "https://cdn.bananaprompts.xyz/16d94dfd-4a02-439a-984e-5e1899b2e909/ab8c2f0e-6326-4f46-8687-2c909b198f84.png",
+    "likes": 180,
+    "creatorName": "Mauro_luiz",
+    "model": "AI",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Surreal",
+      "Fashion",
+      "Photography",
+      "Corporate",
+      "Business",
+      "Minimalist",
+      "Modern",
+      "Product / Poster",
+      "Infographic",
+      "Fantasy",
+      "Vibrant / Colorful",
+      "Elegant",
+      "Neon"
+    ]
+  },
+  {
+    "id": "7ffccd6b-247b-4916-bc1d-b5ba1600fb1e",
+    "title": "Lost in the Melody",
+    "prompt": "A full-length studio photograph capturing a male figure with a relaxed, musical presence. The subject sits on a tall wooden stool, turned slightly to the right, his gaze focused downward on his hands and guitar, immersed in the music.\r\n\r\nHe wears a long-sleeved black dress shirt with the top buttons undone, creating a casual neckline. The sleeves are rolled up at the elbows, revealing detailed tattoos on his forearm. Light or mid-blue jeans that fit comfortably complete the look, adding a casual touch. Multiple thin necklaces and a discreet earring can adorn the look.\r\n\r\nHe holds an acoustic guitar with a glossy black body and light accents on the neck, positioned comfortably for playing. His hands are actively plucking the strings and fretboard, conveying authenticity.\r\n\r\nHis hair is dark and neat, with a subtle quiff and shorter sides. A well-groomed beard frames his face.\r\n\r\nThe background is a very light white or gray studio backdrop, uniform and undistracting, allowing the subject and the guitar to stand out clearly. The lighting is soft and even, typical of a professional studio, coming from a frontal-upward angle, creating very soft shadows that shape the body and the instrument, highlighting textures without being harsh.\r\n\r\nCamera Settings: Captured with a standard lens (e.g., 50mm) or slightly wide-angle (e.g., 35mm) on a full-frame camera for a natural perspective and a well-balanced full-body portrait. Aperture set between f/4.0 and f/5.6 to ensure sharpness across the subject and guitar. ISO 100-200 for maximum studio image quality. Shutter speed of 1/160s to 1/250s to freeze any subtle hand movements. Studio lighting with one or two large softboxes as key lights, positioned in front of and slightly to the sides of the subject for even, flattering lighting.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, hair and beard style, eye color, and skin tone as accurately as possible. The goal is to create a version of the user in this music studio portrait. The clothing (black dress shirt with rolled-up sleeves, jeans), arm tattoos, accessories (necklaces, earrings), black acoustic guitar, seated playing pose, focused expression, soft lighting, and uniform white background should be created as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/3f03f9b2-ea8a-4e87-ade9-56f28ac00fad.jpeg",
+    "likes": 178,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "ebaaa78e-df25-410b-88f2-6441b3760e1e",
+    "title": "enjoying the beach atmosphere",
+    "prompt": "Ultra-realistic 8K cinematic editorial portrait of an Indonesian female model, maintaining 100% likeness to reference photo. She is sitting on engine cover of parked Mercedes AMG GT63 outside a clif mountain. Outfit: white tank top with blue baseball jacket open on her shoulder, blue navy jeans, rugged brown leather boots. One hand gently near her chin, looking intimately at the camera with expressive eyes and subtle smile.  Natural sunlight illuminating her face and outfit, soft cinematic shadows, realistic skin texture. Hair flows naturally with slight movement. \r\nBackground: blurred beach and the ocean with blue sky and heavy clouds. Ultra-detailed fabrics, skin, and environment. \r\nShallow depth of field, cinematic color grading, hyper-detailed textures, sharp focus on face. Fashion editorial vibe, stylish and sophisticated, modern urban aesthetic.",
+    "image": "https://cdn.bananaprompts.xyz/3c21f87c-f6a8-46d8-ae74-01fc038cdb15/a9d1faac-5964-4efd-92b7-dda0a6a82a49.jpeg",
+    "likes": 175,
+    "creatorName": "Dede1970",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "eb778a1f-f009-483e-a57b-1596c682fd68",
+    "title": "foto realista",
+    "prompt": "Using the reference image, recreate the same woman with an identical face, body, and tattoos, in a [The captured environment is a rocky coastal cove or bay, viewed from a luxury boat, under strong sunlight. The sea has an intense and vibrant turquoise blue color, with the calm surface reflecting the sunlight in a sparkling way. In the background, an imposing, light-colored rock formation rises vertically from the water. The lighting is strong and direct (hard light), typical of a sunny day, creating high contrast and enhancing saturation. The photo is taken aboard a leisure boat or speedboat, with a cream-colored upholstered seat and polished dark wood trim on the edge. A metallic handrail is present, and small vessels are visible in the distance. The atmosphere is one of luxury holidays and seaside leisure.]. She is wearing [The model is wearing a two-piece royal blue or cobalt blue bikini set. The top is an asymmetrical strapless model, featuring a unique and wide strap that goes over the right shoulder, while the front has a twisted or knotted central detail, creating a ruching effect. The bottom is a classic or slightly high-cut thong model, with medium to thin side straps, complementing the set's design.], with [The model wears sunglasses with thin frames, possibly metallic and golden, in a hexagonal or slightly rounded shape, with dark and lightly mirrored lenses. She wears small, rectangular earrings, in a discreet hoop style, in a golden tone. Complementing this, there is a mix of layered golden necklaces: a shorter one with a circular or coin pendant and a longer one with a thin chain and a simple pendant. On her right wrist, she wears a thin black bracelet, similar to a hair tie or silicone wristband. Her hair is dark, medium to long length, loose with a subtle central parting, and the front side strands are pulled back behind her ears. The strands have a smooth to slightly wavy texture, with a natural and possibly wet or wet-look appearance at the roots, typical of a marine environment.]. Pose: [The model is kneeling on the boat's seat, with her torso slightly leaning back and her body facing the camera. This kneeling posture elevates her upper body, subtly lengthening her torso. Her arms are relaxed and resting on the boat's structure: the left one is flexed, with her hand resting on the wooden edge near her thigh, and the right one is also resting on the side of the vessel. Her head is upright, and her chin is subtly raised, directing her direct and fixed gaze towards the camera with an expression of confidence and seriousness. The overall pose is relaxed but intentional, fitting the model perfectly into the leisure setting and conveying a tranquil style under the sun.]. Lighting: [The lighting is studio, predominantly soft and diffuse, characterized by the absence of harsh shadows and smooth transitions of light and shadow, indicating the use of large modifiers such as softboxes. The contrast is low to medium, ensuring that the model and clothing details are visible without overly dark shadow areas. The main light is positioned frontally and slightly above the model for even and flattering illumination. It is complemented by a weaker fill light, which lifts shadows and maintains overall low contrast. There is, subtly, an edge light to create a slight separation of the model from the gray background and add dimensionality. The light color is neutral and balanced, ensuring clean and accurate color reproduction. Technically, it is a studio lighting scheme aimed at maximum clarity and detail.]. Ultra-realistic photography, 8K resolution, 50mm lens, shallow depth of field, professional fashion editorial style.",
+    "image": "https://cdn.bananaprompts.xyz/b19b46c2-89c0-499f-bccc-39e2dcb6ee59/9442421b-0e21-43d2-91f6-34672474dec3.png",
+    "likes": 172,
+    "creatorName": "Tiago M Santana",
+    "model": "Gemini",
+    "tags": []
+  },
+  {
+    "id": "30f503d5-e7b1-4f49-a9e2-b0bc48335e51",
+    "title": "White Resort Glam",
+    "prompt": "A medium-length photograph, captured at eye level, with an elegant, vacation-like, and serene aesthetic, set on a floating deck or beachfront restaurant. The female figure is seated on a high bench or stool, with one leg folded over the other and her hands relaxed on her legs. The body is turned slightly to the side, but the head is turned toward the camera, looking with a wide, joyful, and genuine smile. The composition focuses on the figure with the waterscape in the background.\r\n\r\nThe female figure displays a curvaceous and toned physique, with a soft, feminine silhouette. Her breasts are medium-sized, slightly visible under the white top and beach cover-up. The waist is defined but not extremely thin, creating a gentle curve. The hips are wide and rounded, transitioning smoothly into the thighs. The legs are thick and toned, especially the thighs, which are prominent and highly defined, highlighted by the pose. The buttocks are medium to large, subtly outlined by the shorts. Her skin has a soft, even tan with a healthy glow.\r\n\r\nShe wears an elegant, boho-chic summer outfit, all in white. A long, sheer, lightweight beach cover-up with long, loose sleeves (bell bottoms) and ruffled or tie-front details create a V-neckline. Beneath the cover-up, a white bikini top and tight white shorts are visible. On her feet, she wears discreet flat sandals (possibly thong sandals or thin-strap sandals). Accessories include dark sunglasses with round or oval frames, a thin gold necklace with an \"A\" or \"V\" pendant, and multiple rings on her fingers, including a large, eye-catching one. A small straw or wicker bag with brown leather handles and a designer logo (Celine) sits on the counter beside her. Her nails are manicured and painted white or nude.\r\n\r\nHer hair is very long, voluminous, and wavy, dark brown or black. It is draped to the left side, falling generously over the shoulder and chest, framing the face. The makeup is visible and well-done, with dark, well-defined eyebrows and lips plumped with vibrant pink lipstick, contrasting with the white look.\r\n\r\nThe background is a stunning seaside or lakeside setting. The figure is seated on a brown wooden deck. Behind her, a body of emerald green or turquoise water stretches out, with dense tropical vegetation (trees and dark foliage) on the opposite shore, creating a lush natural setting. The sky, partially visible, is a light blue. The lighting is natural and abundant, likely sunny daylight from the front or slightly to the side. This light enhances the radiance of the skin and the lightness of the white fabric, creating a soft contrast with the water and vegetation. Soft shadows are cast, shaping the figure. The overall atmosphere is one of relaxation, understated luxury, and holiday cheer.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm f/1.8 or 50mm f/1.4) on a full-frame camera for a sharp, medium-length portrait with soft bokeh. Aperture set between f/2.0 and f/2.8 to isolate the subject from the water background and vegetation. ISO 100-200 for abundant natural light. Shutter speed 1/250s to 1/500s. Soft, natural lighting, possibly with a reflector to fill in shadows.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, face structure, eye color, skin tone (soft tan), hair style and color (very long, thick, wavy, dark brown/black), as well as the described body shape (curvy and toned, bustline).\" medium-sized, defined waist, wide hips, thick/toned legs, medium/large butt) with maximum fidelity. The goal is to create a version of the user in this vacation scenario. The clothing (white cover-up, white bikini, white shorts, sunglasses, necklace, rings, straw bag), the sitting pose, the cheerful smile, the natural lighting, and the background of water and tropical vegetation should be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/fcdb9d4e-69cc-4c6d-843a-39c9329d1423.jpeg",
+    "likes": 166,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "1264a4aa-040d-42cc-aefd-0f377cf1080e",
+    "title": "Homem elegante de terno com reflexo",
+    "prompt": "Stylized studio portrait of me leaning slightly on a large reflective glass panel. Outfit: tailored grey plaid suit, black loafers. Pose: hand in pocket, soft confident smirk. Reflection captures double perspective. Warm rim lighting adds fashion depth.\"\r\ndon't change the face use 100% face of upload picture.",
+    "image": "https://cdn.bananaprompts.xyz/802a7b47-0c63-4074-bd11-01866e5d259d/d98e36fa-a003-40a0-9204-096534dd3f6d.jpeg",
+    "likes": 164,
+    "creatorName": "@glauco_maccedo",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Corporate",
+      "Business",
+      "Modern",
+      "Elegant",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "f6f6c88d-cf2f-4682-8f7c-fdd8d380bcfc",
+    "title": "Country Roads Style",
+    "prompt": "A vibrant and authentic full-length portrait, captured outdoors in a rustic, country setting. The female figure stands, leaning against a weathered wooden fence, with a confident and slightly contemplative pose, looking to the side. One leg is slightly bent and resting on the fence, and her hands rest casually on her body or on the fence.\r\n\r\nShe wears a modern and stylish western ensemble: a light-colored (beige or straw) felt cowboy hat on her head. Over a light-colored (beige or white) crop top, a long-sleeved denim shirt (or light denim jacket) is open and worn casually. The bottom is a pair of short, frayed denim shorts. The highlight is a wide brown leather belt, richly adorned with a large, ornate metal buckle and carved leather details on the side. On her feet, mid-calf cowboy boots in a dark brown shade complete the look, adding authenticity.\r\n\r\nHer hair is long, platinum blonde with dark highlights, straight and naturally voluminous, falling over her shoulders and framing her face. Her makeup is natural but enhances her features, with nude or soft pink lips.\r\n\r\nThe background consists of a rustic, weathered wooden fence, with a few bales of hay or straw at the base and some dry vegetation or grass below, creating an authentic country atmosphere. The lighting is natural and diffuse, typical of a clear day outdoors, creating soft shadows and a natural glow on the skin and fabrics.\r\n\r\nCamera Settings: Captured with a standard lens (e.g., 50mm or 85mm) on a full-frame camera for a natural perspective and a well-balanced full-body portrait. Aperture set between f/2.8 and f/4.0 to create a soft background blur (bokeh) that isolates the subject while maintaining sharpness on the face and clothing. ISO 100-200 for maximum image quality in abundant natural light. Shutter speed 1/250s to 1/500s to ensure sharpness. White balance should be set to 'Daylight' for accurate and natural colors.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, hair style, and color with maximum fidelity. The goal is to create a version of the user in this country setting. The clothing (cowboy hat, crop top, denim shirt, frayed denim shorts, country belt with a large buckle, cowboy boots), the pose leaning against the fence, the confident expression, the natural lighting, and the rustic fence background should be created as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/1c1f3153-5753-4115-add4-08121f111112.jpeg",
+    "likes": 163,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "b4e6fdea-cb35-45f1-ba4b-f3d18b831c5b",
+    "title": "iPhone 16 Pro Max",
+    "prompt": "Create an ultra-realistic cinematic photo of the person uploaded (preserving the face, hairstyle, skin tone and body identity as they were, without modifications). The scene shows a giant iPhone 16 Pro Max in a dark studio with dim, futuristic lighting. Display screenshot of Instagram profile uploaded to iPhone screen. The person seems to jump off the iPhone screen, half in the digital world and half in the real world, as if he broke a glass. Shards of glass float in the air, with likes, reels and Instagram followers icons gleaming softly around them. Outfit: Oversized red hoodie, black jeans, impeccable white and black Nike sneakers, and AirPods Max 2025 hanging around the neck. Lighting: 40L High-end Cinematic Studio Lighting: Soft lights, sharp shadows, and realistic reflections on the iPhone glass. Camera Angle: Slightly from the bottom (counter-trapped), emphasizing the size and feeling of power. Ambiance: Futuristic, premium, the aesthetics of the Instagram x Apple campaign. Ultra detail, 8K, masterpiece, photorealistic.",
+    "image": "https://cdn.bananaprompts.xyz/68155dad-d783-427e-bb9e-b7254480bf27/b01ef476-d573-4050-abaf-43f22a095170.jpeg",
+    "likes": 161,
+    "creatorName": "KhandujaBoy",
+    "model": "Gemini",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Modern"
+    ]
+  },
+  {
+    "id": "36a7b131-53db-4b95-b9dd-12eda191b8b5",
+    "title": "Horse Rider in Golden Daylight",
+    "prompt": "A realistic outdoor portrait of a man confidently riding a majestic black horse in a green open field. The man wears a stylish casual outfit — a Black shirt with rolled-up sleeves and black jeans. He looks composed and natural, holding the reins with a relaxed posture, sitting upright on the saddle. The background shows soft-focus tall trees and subtle city buildings in the distance. The lighting is bright and natural, with a cinematic depth and warm daylight tones. Use my reference image for the face identity while keeping the same pose, outfit, and overall look. Ultra-realistic, 4K detail, editorial photography style, shallow depth of field, --ar 3:2 --v 6 --style raw --q 2",
+    "image": "https://cdn.bananaprompts.xyz/760c2cfb-2713-46c6-a801-757e3b7cfbe9/fb69c3cb-a41f-451e-8c73-9bb6df994ad6.png",
+    "likes": 160,
+    "creatorName": "h_a_m_m_a_d__r_a_z_a_8_0_0_6",
+    "model": "Gemini 2.5",
+    "tags": []
+  },
+  {
+    "id": "1a30099c-563f-456e-a50f-160b156db527",
+    "title": "Selfie with Football Legends",
+    "prompt": "Ultra-realistic 3D 9:16 vertical format fisheye selfie of me with [Christiano Ronaldo, Messi]. We're all making silly, exaggerated faces. Set in a football stadium, bright conditions, stadium full of viewer, with white tones. low camera angle. Realistic, cinematic lighting integrated with stylized realism.",
+    "image": "https://cdn.bananaprompts.xyz/18973a18-e495-4d7c-b8aa-a7fc55767459/a295e042-afc8-43dc-a446-8b3a9b9a84bd.png",
+    "likes": 159,
+    "creatorName": "@tariqHasanSyed",
+    "model": "ChatGPTSelfie with Football Legends",
+    "tags": [
+      "Portrait"
+    ]
+  },
+  {
+    "id": "aeb29d11-6000-43d4-b06d-5cd7a08610f2",
+    "title": "AI Fashion",
+    "prompt": "**Overall Vibe & Emotion**\r\nA moment of candid, whispered intimacy and playful spontaneity. The atmosphere is one of shared secret, a quick, hushed conversation captured in a fleeting instant. There's a subtle humor in the confinement, a genuine warmth and connection emanating from the subject, caught between the urgency of the moment and the desire to share it. The emotion is authentic and engaging, a small, private world made public, brimming with a lighthearted yet personal energy.\r\n\r\n**Subject's Pose Breakdown**\r\nThe subject is a vibrant individual, their face animated mid-sentence, a genuine, warm smile playing on their lips. Their eyes sparkle with engagement, looking slightly past the camera lens as if addressing someone unseen, their mouth subtly open as if about to utter or having just uttered a word, showcasing authentic expression. One arm is outstretched, holding the smartphone aloft and angled slightly downwards, positioned to capture their own reflection and the immediate surroundings. The other hand might be resting casually on a hip, tucked in a pocket, or subtly gesturing, adding to the natural, unposed feel. Their head is tilted just so, conveying a comfortable, relatable demeanor, perhaps a slight shrug of the shoulders or a gentle lean into the shot, emphasizing the spontaneity.\r\n\r\n**Interaction with Environment**\r\nThe subject is intimately nestled within the polished confines of the elevator. Their image, along with the phone they're holding, is subtly reflected in the glossy, brushed metal doors and panels behind them, creating a mesmerizing interplay of light and distorted form that adds depth and an almost surreal quality. These reflections offer a glimpse into the depth of the small space, hinting at the opposite wall or ceiling. The subject's proximity to the elevator's internal architecture is palpable; perhaps a hand is almost brushing against the call panel, or their silhouette is framed perfectly against the minimalist design elements. The confined space enhances the sense of personal connection, making the selfie feel like a secret shared from a private bubble.\r\n\r\n**Scenery & Lighting**\r\nThe elevator interior is sleek and modern, characterized by cool-toned brushed stainless steel panels that meet seamlessly, perhaps punctuated by subtle dark wood or frosted glass accents. A digital floor display glows softly in the background, a small island of technology in the polished expanse. The primary light source comes from soft, even LED strip lighting integrated into the ceiling, casting a flattering, slightly warm glow that contrasts beautifully with the cooler metallic surfaces. This overhead light creates subtle highlights on the subject's hair and skin, and soft, delicate shadows that define their features without being harsh. The reflections in the polished surfaces scatter and diffuse this light, creating a dreamy, ethereal quality around the edges of the frame. The overall impression is one of sophisticated urban transit, momentarily transformed into a personal portrait studio.",
+    "image": "https://cdn.bananaprompts.xyz/6d72bbbf-6687-4b31-9b68-76cd0a64d879/4bdf9bf2-e4b4-4566-ace4-fc586ce8bac1.png",
+    "likes": 158,
+    "creatorName": "@aifashioncreator",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "ba69e62f-add4-48c6-bf59-41cf4def4491",
+    "title": "Golden Hour Hot Photoshot",
+    "prompt": "Shot on a Canon EOS R5 with an RF 85mm f/1.2L USM lens, A man stands leaning against a window. His right arm is bent, with his right forearm and hand resting on the upper frame or sill of the window, near his head. His head is tilted, and his face is turned in a partial profile to the left, looking out the window. His body is in a relaxed, slightly hunched forward posture, with his weight primarily supported on his right side, leaning towards the window. His left arm hangs naturally by his side. The pose conveys a sense of contemplation or weariness in a modern, sun-drenched loft apartment, poised in a captivating \"Curtain Light Pose.\" Soft, diffused golden hour light streams dramatically through translucent sheer linen curtains, bathing her form in a painterly glow and creating a perfect, creamy bokeh that softens the background of exposed brick and minimalist decor. This exquisite light beautifully carves elegant, elongated shadows, while a precise, soft rectangular catchlight, perfectly mirroring the window's shape, gleams within his captivating eyes. His \"Hot Mirror Selfie Outfit,\" a tailored, shimmering satin button-down dress shirt and tailored trousers both champange color, catches the light with a fluid, delicate sheen that highlights every contour, complementing hyper-realistic skin that showcases visible pores, completely devoid of any airbrushed artificiality. All rendered with the subtle grain and rich, warm tones reminiscent of Portra 800 film, creating an image of unparalleled editorial sophistication and high-fashion allure.. Use the attached image and maintain 100% face consistency.",
+    "image": "https://cdn.bananaprompts.xyz/40ce80ff-9ca3-4e3c-9c3f-ae7ccd157763/375ca3d0-6a11-496a-9332-1fafb2be67fe.png",
+    "likes": 157,
+    "creatorName": "amolossi",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait",
+      "Modern",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "ca64c3f3-594b-4dfc-8b3b-42587291fe01",
+    "title": "The Wolverine",
+    "prompt": "Absolutely! As per your instructions, here is the full analysis of the first image provided (Wolverine).\r\n\r\nPrompt:\r\n\r\n\"An epic, high-resolution, movie-poster-style photograph capturing a male figure as the iconic character Wolverine. The subject is dynamically posed, with his bare torso and muscular, defined physique on display, staring directly at the camera with a fierce, intense expression.\r\n\r\nIn one hand, he holds a Japanese sword (katana), while from the other emerge three long, adamantium-colored metal claws. He wears dark pants (black or cargo) held together by a black tactical belt.\r\n\r\nHis hair is dark, with a rebellious, spiky style characteristic of the character. A full, slightly unkempt beard completes the look.\r\n\r\nThe background is an abstract graphic composition, with a large red circle (reminiscent of the Japanese flag) centered behind the subject, and a stylized cityscape (possibly Tokyo) in black and white with paint-splatter effects around the edges. The lighting is dramatic and contrasty, coming from a side and overhead angle, highlighting the muscles, claws, and skin texture, creating a Deep shadows.\r\n\r\nCamera Settings: Captured with a standard lens (e.g., 50mm) or slightly wide-angle (e.g., 35mm) on a full-frame camera for a dynamic and impactful portrait. Aperture adjusted between f/4.0 and f/5.6 to ensure sharpness on the subject and details on the weapons. ISO 100-200 for maximum quality. Shutter speed from 1/200s to 1/400s. Studio lighting controlled with strong side lights (key lights) and rim lights to create dramatic contrast and separate the subject from the graphic background.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, hair and beard style, eye color, and skin tone with maximum fidelity. The goal is to create a Wolverine-like version of the user. The clothing (dark pants, belt), muscular bare torso, adamantium claws, katana, ferocious expression, dramatic lighting, and graphic background should be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/1abf9948-2fe2-4124-96d1-97414df58514.png",
+    "likes": 155,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Portrait",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": "88562aa3-45c0-4e57-a792-d1e6ae010918",
+    "title": "Man with Neon Lights",
+    "prompt": "A young man with dark hair and glasses, wearing a puffy jacket over a mustard yellow sweater, stands in a low-angle medium shot. Dramatic lighting from warm and cool sources highlights\r\nhis serious expression against a backdrop of angled, linear neon lights. The composition has a shallow depth of field, emphasizing the subject while slightly blurring the vibrant, abstract background.",
+    "image": "https://cdn.bananaprompts.xyz/aade4ced-0fca-4b62-b70e-fb82e654624f/3e0c1763-e93e-41a5-a490-fa54c491f9e4.png",
+    "likes": 155,
+    "creatorName": "Knot Squared",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Portrait",
+      "Corporate",
+      "Minimalist",
+      "Modern",
+      "Flat Design",
+      "Dark / Moody"
+    ]
+  },
+  {
+    "id": "44cff403-6911-4bdc-bc77-e3d691993e8e",
+    "title": "Princesinha",
+    "prompt": "Converta essa imagem para que a menina de 2 anos esteja sentada no centro de uma poltrona de encosto alto em um ambiente de estúdio minimalista e monocrático.\r\nSubstitua o fundo atual por uma parede e piso sem emendas em uma cor sólida, rosa queimado. \r\nVista-a com um vestido de dama de honra e uma coroa com jóias branca. Mantenha seus sapatos limpo e branco com os pés sem tocar o chão devido a altura da poltrona e suas mãos suavemente entrelaçadas em seu colo. A cadeira deve combinar com esquema geral de cores para criar um efeito monocromático sem emendas. A iluminação deve ser suave, e uniforme e estilo de estúdio, com sombras mínimas.\r\nA imagem final deve ser de ultra-alta resolução, elegante, moderna e minimalista, no estilo de fotografia de retrato de alta costura.",
+    "image": "https://cdn.bananaprompts.xyz/a4fe1ff2-8dd8-4f29-8e1a-41522993f4f5/a72f30e9-784d-49b7-af51-4a50b4d018a1.jpeg",
+    "likes": 154,
+    "creatorName": "Tiago Costa",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Photography",
+      "Portrait",
+      "Minimalist",
+      "Fantasy",
+      "Retro / Vintage",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "40e9aa91-a34d-4c4e-8327-46123d85ae76",
+    "title": "Saudi clothing",
+    "prompt": "A REALISTIC PORTRAIT OF A MAN WEARING TRADITIONAL SAUDI ATTIRE - A WHITE THOBE AND GHUTRA, WITH A BLACK BISHT DRAPED OVER THE THOBE. HE IS HOLDING A ROSARY (MISBAHA) IN HIS HAND. THE BACKGROUND IS SOLID BLACK, WITH CINEMATIC LIGHTING AND RICH CONTRAST. THE SCENE SHOULD HAVE A DRAMATIC AND ELEGANT MOOD EMPHASIZING TEXTURE AND DEPTH. MAINTAIN AND PRESERVE THE PERSON'S ORIGINAL FACIAL FEATURES ACCURATELY, WITH A SHARP, DETAILED, AND HIGH-QUALITY LOOK.\r\nSTYLE KEYWORDS: CINEMATIC LIGHTING, DETAILED TEXTURE, REALISTIC PORTRAIT, ELEGANT, HIGH CONTRAST, SAUDI TRADITIONAL CLOTHING, STUDIO PHOTOGRAPHY, NATURAL SKIN TONES.\r\nUse face from uploaded pic",
+    "image": "https://cdn.bananaprompts.xyz/e24f5f58-e4b9-4782-b711-19a532def078/ec1d6462-70c5-4a20-a99c-7e5c8415bcc5.png",
+    "likes": 154,
+    "creatorName": "3li7aleem",
+    "model": "Nano",
+    "tags": [
+      "Portrait",
+      "Fashion"
+    ]
+  },
+  {
+    "id": "92f484b8-7fc6-4f48-ad89-cc9eec58d251",
+    "title": "Garden Swing Serenity",
+    "prompt": "A full-length portrait with a romantic and dreamy aesthetic, captured outdoors in a garden setting. The female figure sits on a rustic wooden swing decorated with ropes and a profusion of colorful flowers (hues of pink, blue, and yellow) and green vines.\r\n\r\nThe subject is elegantly posed, sitting sideways on the swing, barefoot, with one leg crossed over the other. One hand grips the swing's decorated rope, and she looks directly at the camera with a wide, warm smile.\r\n\r\nShe wears a long, flowing red dress with a halter neckline and a high slit in the skirt, revealing her leg. The dress features delicate details, such as embroidery or appliqués on the bodice.\r\n\r\nHer hair is long, dark, and straight, falling over her shoulders and down her back.\r\n\r\nThe background is a lush green lawn with trees in the distance, all bathed in intense, warm sunlight, creating a creamy bokeh effect and a golden hour atmosphere. The lighting is natural and comes from behind and to the side of the subject, creating a beautiful contour of light on the hair and body.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm f/1.8 or 105mm f/1.4) on a full-frame camera for maximum compression and pronounced bokeh. Aperture set between f/1.8 and f/2.8 to isolate the subject from the background. ISO 100-200 for bright sunlight. Shutter speed of 1/500s or faster to avoid overexposure and ensure sharpness. Natural lighting, using the golden hour sun as a backlight and contour light.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, hair style, and color with maximum fidelity. The goal is to create a version of the user in this garden portrait. The clothing (long red dress with a slit), the swing decorated with flowers, the elegant and smiling pose, the warm golden hour lighting and the blurred garden background must be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/1ce393c5-9c20-4d01-a98c-528f1d2acddc.jpeg",
+    "likes": 154,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "aba23a9e-e763-49ef-91cf-5acff256478e",
+    "title": "Winter Textures: B&W Portrait",
+    "prompt": "Preserve the identity, face, and physical characteristics of the original subject with high similarity. Do not alter the face. A black-and-white portrait of a young woman with an intense expression and slightly parted lips. Her clear eyes are fixed on the camera. She is pulling at the high collar of a thick, light-colored knit sweater (gray or white in B&W) with both hands, positioned just below her chin, with her fingers and nails visible. Her long, wavy hair, with light highlights (blonde or light brown), is voluminous and frames her face, with a few loose strands falling over her forehead and temples. The lighting is dramatic, with strong light coming from the right (viewer's left), creating sharp contrasts and deep shadows on the left side of her face and neck, emphasizing the facial contours and the texture of the hair and sweater. There is a light shadow from a vertical line or object projected onto the wall behind her, on the left side. The background is simple, clear, and out of focus, highlighting the subject. The pose is direct and engaging, conveying a sense of vulnerability and strength.\r\n\r\nStyle and Quality Parameters (if applicable):\r\n\r\nStyle: Dramatic, editorial, high-contrast black-and-white portrait photography.\r\n\r\nLighting: Hard, directional light, creating sharp shadows.\r\n\r\nDetails: Hyperrealism, high resolution, 8K, fabric and hair texture.\r\n\r\nCamera: Portrait lens, shallow depth of field.",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/08326242-e0ae-4df9-8816-45792569605a.jpeg",
+    "likes": 154,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "f534e4da-5901-4b41-9131-1a97d61c9a9c",
+    "title": "YOUNG BOY PROMPT",
+    "prompt": "An ultra-detailed 8K hyper-realistic portrait of a young man (use reference face, slim build, height 5'11) standing indoors in a modern, warmly lit room. He has voluminous, perfectly styled black hair, slightly tousled for a casual yet fashionable look. His expression is confident yet relaxed, with a soft half-smile and direct gaze toward the camera. Pose & body language. He leans back casually against the counter with both hands resting on the edge behind him. His head tilts slightly as he looks directly at the camera with a composed, relaxed expression. His stance emphasizes confidence and ease while showcasing his outfit. Outfit details:Oversized graphic sweatshirt in shades of beige, grey, and black with bold geometric typography patterns. Black trousers with a sleek, casual fit.A subtle wristwatch visible on hisleftwrist.Background & lighting: The background features a modern mirror setup with warm yellow LED strip lights embedded horizontally, casting a cinematic glow across the scene",
+    "image": "https://cdn.bananaprompts.xyz/340a0eab-c80c-4c3d-adbc-bd7093aface3/319e07aa-8d8e-4fc7-bbf7-3d9438fae57c.png",
+    "likes": 154,
+    "creatorName": "abhay aryan",
+    "model": "Nano Banana gemini prompt",
+    "tags": [
+      "Photography",
+      "Cinematic"
+    ]
+  },
+  {
+    "id": "7b686741-de0b-401a-afc8-b0c8f267bb38",
+    "title": "The Man and the Light",
+    "prompt": "I am standing close to a plain wall, with my body slightly turned at an angle. One of my arms hangs relaxed, with my hand tucked casually into my pocket, while the other arm rests naturally by my side. My head is turned gently to the side as I look away from the camera, my expression contemplative and distant. The sunlight casts dramatic shadows, including the sharp outline of a window frame across the wall, along with the deep silhouette of my profile. I am wearing a loose, oversized dark T-shirt made of soft cotton, with a wide crew neckline. The shirt drapes naturally over my frame, reinforcing a minimalist, moody style with no accessories or distractions. The camera captures me from a low angle, slightly below eye level, emphasizing height and presence. The focal length resembles an 85mm portrait lens, producing natural compression and cinematic proportions. The lighting is warm, directional late-afternoon sunlight, illuminating part of my face and body while leaving other areas in shadow. The background wall is bathed in contrasting light and shadow, with visible window-frame patterns adding depth and geometry. The overall mood is dark, cinematic, and atmospheric, with strong chiaroscuro contrast and a sense of stillness, mystery, and introspection.",
+    "image": "https://cdn.bananaprompts.xyz/898c52b7-a3c2-49be-9368-a7289cc5b6e7/7714c4e4-7b02-449e-a166-9d07c717efae.png",
+    "likes": 153,
+    "creatorName": "Ednelson",
+    "model": "Nano-banana",
+    "tags": []
+  },
+  {
+    "id": "03fe7e4d-b490-4051-a849-eafe3cf877ef",
+    "title": "Mulher de Negocios",
+    "prompt": "\"Crie Retrato Feminino Elegante e Natural em Ambiente Sofisticado”\r\n\r\nPrompt principal (positivos):\r\n\r\nRetrato feminino realista em estilo lifestyle elegante e profissional, mostrando a mesma mulher da foto de referência (mesmo rosto, cabelo e traços faciais), sentada de forma confiante e serena em uma poltrona moderna.\r\n\r\nEla usa uma blusa sem mangas de gola alta branca, combinada com uma calça social bege clara de tecido leve e fluido. A postura é relaxada, com um braço apoiado na perna e o outro próximo ao rosto, transmitindo calma, inteligência e simpatia.\r\n\r\nO cenário é um ambiente interno iluminado naturalmente, com janelas amplas, vegetação ao fundo e decoração moderna em tons claros e madeira. Há uma mesa de centro de madeira com um laptop fechado sobre ela, complementando o clima de trabalho criativo e sofisticado.\r\n\r\nA luz é suave e natural, destacando a pele e os cabelos de forma delicada, com cores neutras e harmônicas. O foco da câmera é no rosto e nas mãos, mantendo o fundo levemente desfocado para reforçar a profundidade de campo.\r\n\r\nA expressão facial é acolhedora, com um leve sorriso confiante e olhar direto para a câmera. O estilo geral é contemporâneo, natural e feminino, transmitindo profissionalismo, equilíbrio e charme sutil.\r\n\r\nAlta definição, textura de pele realista, tons neutros e quentes, estilo editorial de lifestyle sofisticado.\r\n\r\nDetalhes técnicos e estéticos:\r\n\r\nCenário: ambiente interno moderno e aconchegante, com janelas amplas e vegetação externa\r\n\r\nPersonagem: mesma mulher da referência (mesmo rosto, cabelo e feições)\r\n\r\nRoupas: blusa branca sem mangas de gola alta + calça bege clara de alfaiataria\r\n\r\nAcessórios: brincos dourados, pulseiras finas e relógio elegante\r\n\r\nCabelo: solto e levemente ondulado, penteado para lateral natural\r\n\r\nIluminação: luz natural lateral suave, realçando textura e tons de pele\r\n\r\nComposição: retrato de meio corpo, sentada em posição relaxada e elegante\r\n\r\nExpressão: confiante, simpática e profissional\r\n\r\nEstilo: fotografia editorial de lifestyle moderno\r\n\r\nParâmetros recomendados (para Nano Banana):\r\n--style: lifestyle_elegant\r\n--lighting: soft_natural\r\n--camera: mid_portrait\r\n--focus: face_and_hands\r\n--mood: confident_and_warm\r\n--quality: ultra_realistic\r\n--composition: seated_in_stylish_interior",
+    "image": "https://cdn.bananaprompts.xyz/0c898e9a-5bd9-45d5-8e46-ebf769782295/f4ba2a85-1a3f-48fa-b517-ad7bb4fa48b1.png",
+    "likes": 153,
+    "creatorName": "@Leilane Morias",
+    "model": "gemini nano banana",
+    "tags": [
+      "Corporate",
+      "Business"
+    ]
+  },
+  {
+    "id": "93ea1ec2-dacf-427e-adf6-1b54e2c54bce",
+    "title": "Scarlet Rose",
+    "prompt": "A romantic and dreamy portrait, captured outdoors, shows a female figure lying on the grass. The subject is propped up on her elbows, her body slightly raised, and looks directly at the camera with a seductive and confident expression. One hand holds a vibrant red rose close to her face, as if inhaling its scent, while the other rests on the grass, holding another rose.\r\n\r\nShe wears a simple black T-shirt, which creates a strong contrast with her skin and the red roses. A delicate necklace is visible around her neck.\r\n\r\nHer hair is long, dark, and voluminous, with lush waves falling over one shoulder. Her makeup is dramatic, with a well-defined cat-eye, long lashes, and lips painted a red or wine hue that complements the roses.\r\n\r\nThe background is a green lawn with a softly blurred grove or trees, bathed in soft light. The lighting is natural and diffuse, creating a soft glow on her skin and hair, and highlighting the vibrant colors of the flowers.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm f/1.8 or 50mm f/1.4) on a full-frame camera for creamy bokeh and flattering compression. Aperture set between f/1.8 and f/2.8 to isolate the subject from the background with a shallow depth of field. ISO 100-200 for maximum image quality in natural light. Shutter speed 1/250s to 1/500s. Soft, natural lighting, possibly late afternoon or on a cloudy day.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, style, and hair color with maximum fidelity. The goal is to create a version of the user in this romantic portrait. The clothing (black t-shirt), red roses, dramatic makeup, lying-on-the-grass pose, natural lighting, and grassy background must be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/8cfc279c-b5e1-4201-b7a2-8f941b574674.jpeg",
+    "likes": 153,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "220bfe0c-5b98-421d-b8f0-788a8dc5292b",
+    "title": "Negan - The Walking Dead",
+    "prompt": "Uma fotografia de close-up e médio-busto, capturando uma figura masculina com uma presença imponente e carismática. O sujeito está voltado ligeiramente para a câmera, com um sorriso enigmático nos lábios e um olhar direto e penetrante, transmitindo uma mistura de confiança, astúcia e uma certa frieza.\r\n\r\nEle veste uma jaqueta de couro preta robusta, com zíperes e detalhes que sugerem um estilo utilitário e resistente. Por baixo da jaqueta, um lenço de pescoço vermelho escuro, elegantemente amarrado, adiciona um toque de cor vibrante e personalidade ao conjunto sóbrio. Uma das mãos, parcialmente visível, segura firmemente um taco de beisebol de madeira, enrolado com arame farpado, que repousa sobre o ombro, adicionando um elemento de perigo e poder à composição.\r\n\r\nO fundo é escuro e nebuloso, com pontos de luz difusa e fumaça sutil flutuando no ar, criando uma atmosfera noturna e misteriosa, reminiscentes de um cenário pós-apocalíptico ou urbano sombrio. A iluminação é dramática, com uma luz principal suave que ilumina o rosto e o corpo, destacando os contornos e a textura da pele e da roupa, e um rim light (luz de contorno) sutil nas bordas do sujeito, separando-o do fundo escuro.\r\n\r\nConfigurações de Câmera: Capturada com uma lente telefoto média (ex: 85mm ou 105mm) em uma câmera full-frame, com abertura de f/2.8 a f/4.0 para um bokeh cremoso e separação do sujeito do fundo, mantendo detalhes nítidos. ISO 400-800 para equilibrar a luz ambiente com a iluminação do sujeito, e velocidade do obturador de 1/160s a 1/250s para congelar o movimento e garantir a nitidez. O foco está precisamente nos olhos do sujeito.\"\r\n\r\nInstruções para a \"nano banana\":\r\n\r\n\"Por favor, utilize a imagem de referência fornecida para capturar as características faciais e a estrutura corporal do sujeito com a máxima fidelidade possível. Mantenha a expressão (sorriso enigmático, olhar penetrante), o vestuário (jaqueta de couro preta, lenço vermelho), o acessório (taco de beisebol com arame farpado) e a pose. Preserve a iluminação dramática, o fundo escuro e nebuloso com fumaça sutil, e as configurações de câmera fornecidas para guiar a renderização da profundidade de campo, nitidez e atmosfera geral. Não descreva ou gere detalhes específicos sobre o cabelo ou a barba do sujeito, concentre-se apenas nas outras características visuais descritas e naquelas da imagem de referência.",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/eaeef984-ef2e-4ec1-9d3d-17d8033b67e8.png",
+    "likes": 153,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Portrait",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": "a4916f75-3226-41dd-8672-a9c65b83a0f3",
+    "title": "Canary Style",
+    "prompt": "A medium-length portrait with a casual and stylish aesthetic, captured outdoors in a park setting. The male figure stands, leaning casually against a tree trunk, his body slightly turned and his gaze directed to the side through sunglasses. His expression is confident and relaxed. His muscular arms are prominent, with one hand resting on his thigh.\r\n\r\nHe wears a Brazilian national soccer team jersey and black pants, which accentuate his physique. He also wears dark sunglasses, a wristwatch with a dark band, and a simple metal bracelet.\r\n\r\nThe background is a park or green area with grass, next to a paved path, in bright sunlight. The background is softly blurred (bokeh). The lighting is natural and bright, typical of a sunny day, creating defined highlights and shadows that enhance the physique.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm f/1.8 or 50mm f/1.4) on a full-frame camera for flattering compression and creamy bokeh. Aperture set between f/2.8 and f/4.0 to isolate the subject from the background. ISO 100 for maximum image quality in bright sunlight. Fast shutter speed (e.g., 1/500s to 1/1000s) to compensate for the wide aperture. Natural and direct sunlight.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all their features, keeping their face, hairstyle, beard, skin tone, and body image accurate and unchanged. The goal is to create a version of the user in this scenario. The clothing (Brazilian national soccer team jersey, black pants, sunglasses, watch), the pose leaning against the tree, the natural lighting, and the park background should be generated as described. The prompt does not describe hair or beard; use those in the reference photo entirely.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/e44d4e92-7ee4-4eb8-b884-9525618ed52e.jpeg",
+    "likes": 152,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "cf31ff79-51e7-4d3a-b008-7fedc13757d3",
+    "title": "Urban city",
+    "prompt": "Crie uma imagem minha [foto enviada em anexo com todas as suas características] eu estou usando um boné de beisebol e óculos de sol Ray-Ban. Ele está vestido com uma camiseta branca, calças cargo táticas com detalhes de tiras laterais, uma camisa de flanela de manga comprida preta e branca amarrada na cintura, um relógio esportivo e tênis Converse pretos. Eu estou sentado casualmente no asfalto sob um viaduto da cidade, encostado em um grande pilar de concreto coberto de grafite colorido. Minha perna direita está dobrada, com o tênis Converse posicionado bem próximo à câmera, dominando o primeiro plano para uma perspectiva dramática de olho de peixe de um ângulo muito baixo. Cenário: uma cena noturna realista de uma cidade metrópole, com rastros de luz de carros (listras vermelhas, amarelas e brancas), prédios altos iluminados. Estilo da câmera: lente olho de peixe, ângulo muito baixo, proporção de tela 9:16, iluminação noturna, alto contraste e sombras realistas. O estilo geral é um editorial de moda de rua ultrarrealista, com uma pegada urbana moderna. A qualidade das fotos é ultra HD 8K.",
+    "image": "https://cdn.bananaprompts.xyz/898c52b7-a3c2-49be-9368-a7289cc5b6e7/97e32b94-ebdd-4ce8-90e5-858566cfb2ee.png",
+    "likes": 152,
+    "creatorName": "Ednelson",
+    "model": "AI",
+    "tags": [
+      "Photography",
+      "Fashion",
+      "Realistic",
+      "Elegant",
+      "Dark / Moody",
+      "Modern",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "e42a9124-6d64-4d84-9b1b-e1ccb94dc5c1",
+    "title": "Leather & Gold Gaze",
+    "prompt": "A high-resolution studio portrait capturing a confident and stylish female figure. The subject sits on a dark, understated stool, positioned at a frontal-diagonal angle. Her head is tilted slightly to the side, and her gaze is direct and penetrating, conveying an expression of self-confidence and slight seduction. One hand is raised and gently plays with her hair near her shoulder, while the other rests discreetly.\r\n\r\nShe wears a modern and chic ensemble: a black, lightweight, V-neck blouse, tied at the waist to reveal a small portion of her abdomen, and slim-fitting trousers made of faux leather or a similar material. The blouse design may include loose sleeves or flared cuffs. Thin, delicate necklaces with subtle pendants adorn the neck. Her makeup is dramatic, with cat-eye eyeliner and neutral or slightly reddish lipstick accentuating her eyes.\r\n\r\nThe hair is long and brown, with lighter highlights, and has natural volume and soft waves that fall over the shoulders and chest, conveying an elegant and relaxed air.\r\n\r\nThe background is a dark, minimalist studio backdrop, predominantly black or very dark brown, with a soft gradient that reveals a halo of warm light (amber or orange-gold) coming from above and to the right, creating a dramatic separation from the subject and adding depth. The lighting is low-contrast, with a soft key light that illuminates the face and upper body, highlighting the texture of the clothing and the shine of the hair, and creating soft shadows that sculpt the face without being harsh.\r\n\r\nCamera Settings: Captured with an 85mm or 100mm prime lens on a full-frame camera for a flattering, distortion-free portrait. Aperture set between f/2.8 and f/4.0 for a shallow depth of field that focuses sharply on the subject, with soft bokeh in the background. ISO 200-400 to maintain image quality while enhancing details in the illuminated background. Shutter speeds of 1/160s to 1/250s ensure sharpness. Studio lighting with a large softbox or octabox as the main light, positioned in front and slightly above, and a grid or snoot to create a halo of light in the background, adding dimension and interest.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, style, and hair color with maximum fidelity. The goal is to create a version of the user in this studio portrait. The clothing (black tied-up blouse, black leather pants, necklaces), makeup (cat-eye eyeliner), pose (sitting, hand in hair), soft lighting with a halo of light in the background, and the dark background should be created as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/bf8a5bfc-b9d4-44c0-b5be-b26044056495.jpeg",
+    "likes": 152,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Fashion",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "3072eae3-a7fb-4700-b2c7-a03ecdda8345",
+    "title": "Gravitational Rebellion",
+    "prompt": "A hyper-realistic studio portrait of a man in his mid-twenties with sharp angular features, tousled dark brown hair with subtle golden highlights, intense hazel eyes, defined cheekbones, and a day's worth of stubble. He stands perfectly still in the center of the frame with his arms crossed confidently, wearing a fitted black turtleneck that hugs his athletic build, dark charcoal wool trousers, and polished black leather boots.\r\nAround him, dozens of everyday objects float in perfect orbital patterns as if caught in his personal gravitational field - vintage cameras, leather-bound books, coffee cups with steam still rising, geometric concrete blocks, brass compass instruments, dried flowers, floating droplets of black ink, vintage pocket watches showing different times, and crumpled paper balls. Each object is frozen at different distances and heights, creating concentric circles of suspended chaos that spiral outward from his body.\r\nThe lighting is dramatic and sculptural - a single powerful key light positioned high and to the left creates deep shadows that carve his features, while subtle rim lighting outlines the floating objects, making them glow against the darkness. The background fades to deep charcoal black, with only the faintest suggestion of a concrete wall texture visible in the shadows.\r\nThe floating objects cast intricate overlapping shadows on the floor and walls, creating a complex web of geometric patterns. Some objects are razor-sharp in focus while others blur slightly with motion, suggesting they're still slowly rotating in their invisible orbits. The man's expression is calm and slightly amused, as if this supernatural phenomenon is completely ordinary to him.\r\nShot with a medium format camera, 85mm lens at f/2.8, with ultra-sharp detail that captures every texture from the wool fibers of his clothing to the weathered leather of the floating books. The color palette is predominantly monochromatic - deep blacks, warm grays, and rich browns - with selective golden highlights catching the brass objects and his hair.\r\nAspect ratio: 4:5, ultra-HD resolution, cinematic realism with a touch of magical surrealism.",
+    "image": "https://cdn.bananaprompts.xyz/e6c0a513-c6ad-4edf-8b11-a4abf17dea9e/9dfdd461-56ed-4810-800c-082c1a5f511c.png",
+    "likes": 152,
+    "creatorName": "BKD",
+    "model": "AI",
+    "tags": []
+  },
+  {
+    "id": "6593e0cf-301d-41fb-83bc-83d6633d43da",
+    "title": "Modern Professional",
+    "prompt": "A full-length studio photograph with a professional and elegant aesthetic. It captures a female figure seated in a light wooden chair with a seat and back upholstered in light fabric and straw accents. The subject sits in a confident and relaxed pose, slightly turned toward the camera, with a gentle smile. One hand rests on the arm of the chair, and her legs are crossed at the ankles.\r\n\r\nShe wears a suit (blazer and pants) in a neutral tone (light beige or gray-green) over a white or cream top. On her feet are light-colored high-heeled shoes with ankle straps. She wears delicate jewelry: a necklace with a pendant (possibly a butterfly), earrings, and rings. Her nails are painted a vibrant red.\r\n\r\nHer hair is dark, medium-length, with soft waves and combed to the side.\r\n\r\nThe background is a solid-colored studio backdrop in a uniform, light brown tone. The lighting is studio-style, soft, and directional, coming from a frontal-upward angle, shaping the face and body, highlighting the textures of the fabric and the shine of the jewelry.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm or 50mm) on a full-frame camera for a flattering perspective and natural proportions. Aperture set between f/4.0 and f/5.6 to ensure sharpness across the subject. ISO 100-200 for maximum studio image quality. Shutter speed from 1/160s to 1/250s. Studio lighting with a large softbox or octabox as the main light and a reflector to fill in shadows.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, hairstyle, and skin tone with maximum fidelity. The goal is to create a professional version of the user in this portrait. The clothing (beige suit, light top, heels), jewelry, red nails, sitting pose on the chair, smiling expression, soft lighting and brown background must be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/5b5172b8-d130-4fae-a6f3-b819546aba68.jpeg",
+    "likes": 152,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "ffc7cb2d-07b5-4af9-a270-cfacc37ab484",
+    "title": "Avião carro e homem",
+    "prompt": "“Retrato Masculino Luxuoso com Carro Esportivo e Jato Particular”\r\n\r\nPrompt principal (positivos):\r\n\r\nRetrato masculino em estilo editorial de luxo, mostrando o mesmo homem da referência principal (barba curta bem aparada, cabelo penteado para trás com volume natural, óculos de armação grossa, expressão confiante e madura) em pé ao lado de um carro esportivo vermelho de alto desempenho, com um jato particular branco ao fundo.\r\n\r\nEle veste um terno preto elegante com corte sob medida, camisa branca levemente aberta no colarinho, sapatos de couro pretos e relógio de luxo.\r\n\r\nA cena ocorre em um aeroporto privado sob luz natural intensa, céu azul com nuvens brancas e tonalidades de meio-dia. O chão de asfalto reflete a luz do sol, e o carro exibe reflexos metálicos realistas.\r\n\r\nA composição transmite poder, sucesso e sofisticação, com foco no contraste entre o homem, o carro e o jato. Estilo cinematográfico, nitidez alta, textura realista da pele, dos tecidos e das superfícies metálicas.\r\n\r\nDetalhes técnicos e estéticos:\r\n\r\nCenário: aeroporto privado, com jato executivo e pista visíveis\r\n\r\nPersonagem: mesmo homem da foto original (barba curta, cabelo penteado, óculos)\r\n\r\nRoupa: terno preto sob medida, camisa branca sem gravata, sapatos de couro\r\n\r\nAcessórios: relógio de luxo, óculos de armação grossa\r\n\r\nCarro: esportivo vermelho (Ferrari, Lamborghini ou similar), refletindo o céu\r\n\r\nAvião: jato executivo branco estacionado atrás do carro\r\n\r\nIluminação: luz natural de meio-dia, brilho alto, sombras definidas\r\n\r\nComposição: homem em pé ao lado do carro, jato centralizado ao fundo\r\n\r\nClima/emoção: confiança, sucesso, poder, elegância e exclusividade\r\n\r\nEstilo: fotografia editorial de luxo / lifestyle milionário\r\n\r\nParâmetros recomendados (para Nano Banana):\r\n--style: cinematic_luxury\r\n--lighting: midday_natural\r\n--camera: full_body\r\n--focus: man_car_jet\r\n--mood: confident_powerful\r\n--quality: ultra_detail\r\n--composition: man_next_to_car\r\n\r\nPrompt negativo (para evitar ruídos):\r\n\r\nblurry, cartoonish, oversaturated, low detail, casual clothes, messy background, distorted proportions, harsh lighting, exaggerated reflections, unrealistic shadows, unsharp textures, cluttered scene",
+    "image": "https://cdn.bananaprompts.xyz/d7a105a2-5dde-4cd5-96bf-f5cb83690a1f/8f3821a2-740b-4622-addc-07238f5aef9f.png",
+    "likes": 151,
+    "creatorName": "@cwbarteprodutora",
+    "model": "nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Corporate",
+      "Business",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "e77a4b57-ab8c-4951-a18b-9c58f414d4a0",
+    "title": "Serene Repose",
+    "prompt": "A full-length studio photograph capturing a female figure in an elegant and serene pose. The subject is seated on a matte black cube or podium, with her body turned at a three-quarter angle. Her head is tilted slightly down and to the side, with her eyes closed or looking downward, conveying an expression of calm, satisfaction, and sophistication. Her legs are crossed at the ankles, and her hands rest gently on her thighs, creating a fluid and relaxed composition.\r\n\r\nShe wears a ribbed knit dress in a vibrant shade of burnt orange or terracotta, with an off-the-shoulder design that highlights her cleavage. The dress has a fitted yet elegant fit and a side slit that subtly reveals her leg. On her feet, high-heeled pumps in a pinkish nude shade, with a classic design, complement the warm color palette. The makeup is refined, with smoky eyeshadow and red or burgundy lips, and the nails are painted a dark purple or similar color.\r\n\r\nThe hair is brown with blonde highlights, styled in soft, full waves that frame the face and fall over one shoulder.\r\n\r\nThe background is a solid-colored studio backdrop in a dark gray or charcoal tone, creating an elegant contrast with the vibrant dress. The lighting is soft and directional, in the Rembrandt style or similar, coming from an overhead and side angle, sculpting the body with soft shadows, highlighting the textures of the dress and skin, and creating an intimate and artistic atmosphere.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm or 100mm) on a full-frame camera for a flattering, distortion-free perspective. Aperture adjusted between f/4.0 and f/5.6 to ensure sharpness across the subject, with a depth of field that separates it from the background. ISO 100-200 for maximum studio image quality. Shutter speed from 1/160s to 1/250s to ensure sharpness. Studio lighting with a large gridded softbox as the main light to create directional and controlled lighting, and a reflector on the opposite side to gently fill in the shadows while maintaining the drama.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, style, and hair color with maximum fidelity. The goal is to create a version of the user in this studio portrait. The clothing (burnt orange dress, nude shoes), makeup, sitting pose on the cube, serene expression, soft and directional lighting, and dark gray background must be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/3aa69427-cb52-489e-86ca-ca49bc142b17.jpeg",
+    "likes": 150,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "f809acf3-aa81-49b4-96ff-2b8903753b81",
+    "title": "Vacation Vibes",
+    "prompt": "A full-length portrait (from mid-length down) with a summery, relaxed aesthetic, capturing a female figure seated on a wicker chaise longue or lounge chair outdoors. The subject sits with her legs crossed or bent, looking off to the side, out of the frame, with a relaxed expression and a slight smile. One hand touches her cap.\r\n\r\nShe wears a white bandeau top with subtle horizontal stripes and light-colored crochet or knit shorts. She wears a beige or khaki cap with a white logo (possibly New York Yankees), sunglasses (hanging or in her hair), beaded necklaces and colorful summer bracelets, and an ankle bracelet. Her nails are painted light blue.\r\n\r\nHer hair is long, wavy, and highlighted with blonde balayage, falling to her shoulders.\r\n\r\nThe background is a tropical outdoor setting or a nature view, with dense green foliage and the sky visible in diffuse sunlight. Draped white fabrics suggest a luxurious relaxation area. The lighting is natural and soft, typical of a bright or slightly cloudy day, creating a gentle glow on the skin.\r\n\r\nCamera Settings: Captured with a portrait lens (e.g., 85mm or 50mm) on a full-frame camera for flattering compression and soft bokeh. Aperture set between f/2.8 and f/4.0 to keep the subject in sharp focus and gently blur the background. ISO 100-200 for natural light. Shutter speed 1/250s to 1/500s. Natural and soft lighting.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, style, and hair color with maximum fidelity. The goal is to create a version of the user in this relaxing summer setting.\" The clothing (bandeau top, crochet shorts, cap, summer jewelry), the relaxed pose on the chaise longue, the laid-back expression, the natural lighting and the tropical background with white fabrics must be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/72b60cfb-86e5-4c7b-a38d-8e17774cd97a.jpeg",
+    "likes": 150,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "34e78739-7897-4cf8-aa4f-bde0a45e0538",
+    "title": "Feminino Sofisticado",
+    "prompt": "Prompt Estruturado — “Retrato Feminino Elegante e Natural em Ambiente Sofisticado”\r\n\r\nPrompt principal (positivos):\r\n\r\nRetrato feminino realista em estilo lifestyle elegante e profissional, mostrando a mesma mulher da foto de referência (mesmo rosto, cabelo e traços faciais), sentada de forma confiante e serena em uma poltrona moderna.\r\n\r\nEla usa uma blusa sem mangas de gola alta branca, combinada com uma calça social bege clara de tecido leve e fluido. A postura é relaxada, com um braço apoiado na perna e o outro próximo ao rosto, transmitindo calma, inteligência e simpatia.\r\n\r\nO cenário é um ambiente interno iluminado naturalmente, com janelas amplas, vegetação ao fundo e decoração moderna em tons claros e madeira. Há uma mesa de centro de madeira com um laptop fechado sobre ela, complementando o clima de trabalho criativo e sofisticado.\r\n\r\nA luz é suave e natural, destacando a pele e os cabelos de forma delicada, com cores neutras e harmônicas. O foco da câmera é no rosto e nas mãos, mantendo o fundo levemente desfocado para reforçar a profundidade de campo.\r\n\r\nA expressão facial é acolhedora, com um leve sorriso confiante e olhar direto para a câmera. O estilo geral é contemporâneo, natural e feminino, transmitindo profissionalismo, equilíbrio e charme sutil.\r\n\r\nAlta definição, textura de pele realista, tons neutros e quentes, estilo editorial de lifestyle sofisticado.\r\n\r\nDetalhes técnicos e estéticos:\r\n\r\nCenário: ambiente interno moderno e aconchegante, com janelas amplas e vegetação externa\r\n\r\nPersonagem: mesma mulher da referência (mesmo rosto, cabelo e feições)\r\n\r\nRoupas: blusa branca sem mangas de gola alta + calça bege clara de alfaiataria\r\n\r\nAcessórios: brincos dourados, pulseiras finas e relógio elegante\r\n\r\nCabelo: solto e levemente ondulado, penteado natural\r\n\r\nIluminação: luz natural lateral suave, realçando textura e tons de pele\r\n\r\nComposição: retrato de meio corpo, sentada em posição relaxada e elegante\r\n\r\nExpressão: confiante, simpática e profissional\r\n\r\nEstilo: fotografia editorial de lifestyle moderno\r\n\r\nParâmetros recomendados (para Nano Banana):\r\n--style: lifestyle_elegant\r\n--lighting: soft_natural\r\n--camera: mid_portrait\r\n--focus: face_and_hands\r\n--mood: confident_and_warm\r\n--quality: ultra_realistic\r\n--composition: seated_in_stylish_interior",
+    "image": "https://cdn.bananaprompts.xyz/d7a105a2-5dde-4cd5-96bf-f5cb83690a1f/df389090-17d0-46e6-836e-d42db2e6ed43.png",
+    "likes": 150,
+    "creatorName": "@cwbarteprodutora",
+    "model": "nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Corporate",
+      "Business",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "8cef8d36-fced-4e1a-b8bc-914157ca22c7",
+    "title": "Velvet Indigo Silence",
+    "prompt": "Cinematic portrait, velvet indigo and amber dusk color grading, 35mm film look, shallow depth of field, cinematic lighting. A middle-aged man with a short haircut and gray beard stands near a window, wearing a dark polo shirt under a modern black military-style jacket with a hood that is not being worn. Soft diffused window light outlines his face, casting subtle shadows. The background fades into deep blue and amber hues, film grain and texture visible, slight double reflection in the window glass. Introspective, melancholic, dreamlike mood, Blue Velvet atmosphere --ar 3:2 --v 6 --style raw --chaos 10 --q 2 --s 200 --uplight",
+    "image": "https://cdn.bananaprompts.xyz/9f3db513-1c7c-4fde-bef3-831ed70a80ac/385e540a-0923-4c14-94e5-fc4819ff01aa.jpeg",
+    "likes": 150,
+    "creatorName": "@palimpsestvisuals",
+    "model": "Midjourney v6",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Portrait",
+      "Surreal",
+      "Retro / Vintage",
+      "Dark / Moody"
+    ]
+  },
+  {
+    "id": "63f26b7b-baa8-4700-a9b3-16af198d5203",
+    "title": "vintage 1970s Bollywood-inspired look",
+    "prompt": "Create a vintage 1970s Bollywood-inspired photograph of a stylish man sitting casually on the hood of a random vintage royal-colored classic car (such as deep maroon, royal blue, emerald green, or mustard yellow). He is dressed in a cream pinstriped blazer, cream bell-bottom trousers, and a dark brown shirt with the top buttons open, paired with brown formal shoes, giving a confident mafia-style look. The car has wide whitewall tires, chrome details, and a polished metallic body, reflecting sunlight. In the background, tall green trees and hedges frame the scene. The photograph has the warm, grainy tones of a 1970s film camera, giving it a retro cinematic vibe. Preserve the same face, expressions, and body proportions from the original photo without changing them, and adjust the body styling so it matches naturally with the preserved face.",
+    "image": "https://cdn.bananaprompts.xyz/592c731e-c9ef-45bd-873e-7116b42128ce/31ad4127-ff16-41ee-a452-d924ad1379e2.png",
+    "likes": 149,
+    "creatorName": "@jayesh",
+    "model": "nanobanana",
+    "tags": [
+      "Portrait"
+    ]
+  },
+  {
+    "id": "82883fe8-c9a5-44a6-be41-61e7cdba429b",
+    "title": "Highway Queen",
+    "prompt": "A full-length portrait with a cinematic aesthetic, capturing a confident and independent female figure seated on a classic motorcycle. The subject is positioned on the bike, her body slightly turned, her gaze directed to the side, as if observing the landscape. One hand rests on the handlebars or chrome mirror.\r\n\r\nShe wears a timeless biker-chic ensemble: a well-fitted black leather jacket, skinny pants, or black leggings. The look is complemented by aviator-style sunglasses, which conceal her eyes and add an air of mystery. Lips painted with vibrant red lipstick create a contrasting pop of color.\r\n\r\nHer hair is long and loose, with a natural movement, as if a gentle breeze were blowing, framing her face.\r\n\r\nThe motorcycle is a classic cruiser model, with many shiny chrome details, such as the handlebars, mirrors, and headlight.\r\n\r\nThe setting is a rural, deserted road, with hills or mountains of dry vegetation and earthy tones in the background, under a partly cloudy sky. The lighting is natural and diffuse, typical of late afternoon, creating soft shadows. The color palette of the image is slightly desaturated for a more dramatic and moody effect.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm f/1.8) on a full-frame camera to create flattering compression and excellent background blur (bokeh). Aperture set between f/2.8 and f/4.0 to isolate the subject and the motorcycle from the distant scenery. ISO 100-200 for maximum image quality in natural light. Shutter speed of 1/400s to 1/800s to ensure sharpness and freeze hair movement. The lighting is natural, taking advantage of ambient light for an authentic result.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, hair style, and color with maximum fidelity. The goal is to create a version of the user in this biker-style portrait. The clothing (leather jacket, black pants, sunglasses), cruiser motorcycle, pose, natural lighting, and rural road setting should be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/f16e7873-8c7a-4553-9437-41cd8ad3bc2b.jpeg",
+    "likes": 148,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "bc0f8c62-8ddc-429e-83ed-f7c51c06ee32",
+    "title": "3d anime rap style",
+    "prompt": "Create a 3D cartoon man with a rap style (face inspired by the uploaded image). He should have a big head and large sneakers, an oversized hoodie with a rap-style pattern, black baggy pants, big sunglasses, and a thick chain necklace. Put him in a playful pose, with a white background, cinematic lighting, and highly detailed Pixar-style rendering.",
+    "image": "https://cdn.bananaprompts.xyz/ai-gallery/62d7fcdf-af39-41aa-bba2-3ade96cf3f10/1762799889309-81ynlnwox8r.jpeg",
+    "likes": 147,
+    "creatorName": "@editygram",
+    "model": "Nano banana",
+    "tags": [
+      "Anime",
+      "Cartoon",
+      "3D Render"
+    ]
+  },
+  {
+    "id": "ab0b377e-0fa7-4c09-8f18-82339b7f1d65",
+    "title": "man in a field of weeds",
+    "prompt": "Edit the attached image and do not alter the features. A young man, of Middle Eastern appearance, stands slightly left of center, looking to the right of the frame. His hair is dark and his beard is neatly trimmed. He is wearing a dark green jacket. The man has a medium build and a serious expression. He stands in a field of tall, dry grasses, with an old wooden gate visible in the background. The overcast, red sunset sky provides diffused light, casting a muted color palette dominated by browns and greens. The composition uses a shallow depth of field, blurring the grasses in the foreground, adding a sense of atmosphere. The perspective is taken from a slightly low angle. The overall style is naturalistic and atmospheric, creating a somber atmosphere. Image resolution: 8k",
+    "image": "https://cdn.bananaprompts.xyz/edb339ee-8d88-4f89-b255-b3ae9d19de70/dd09ba86-8815-459b-80d7-821e6b36e65c.jpeg",
+    "likes": 147,
+    "creatorName": "Gemini",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Photography"
+    ]
+  },
+  {
+    "id": "67d6c324-260f-4e40-adb3-da799bc947b8",
+    "title": "Moderns",
+    "prompt": "Dramatic, ultra-realistic close-up in black and white with high-contrast cinematic lighting from the side, highlighting the contours of his face and beard, casting deep shadows. He wears round, reflective sunglasses. He gazes confidently upward into a dark void. The sunglasses reflect a city's towering skyline. The atmosphere is mysterious with a minimalist black background. Details in 4K. Keep the subject's exact facial structure, hair texture, the original photo.",
+    "image": "https://cdn.bananaprompts.xyz/5fd983ca-f390-40fc-8e4b-4a320258843c/0a79f65f-6dc8-4477-a26f-8b83e3390cab.png",
+    "likes": 146,
+    "creatorName": "Miguel",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Photography"
+    ]
+  },
+  {
+    "id": "b45ccf57-5278-45ce-926e-d2a6e17f20ff",
+    "title": "Misterio hermoso",
+    "prompt": "Recrea esta escena usando la foto que envié como referencia, manteniendo el mismo encuadre, pose, iluminación y estilo que la imagen de ejemplo.\r\n\r\nLa composición debe mostrar un retrato femenino de medio cuerpo, con la modelo sentada y ligeramente inclinada hacia adelante. El brazo derecho debe cruzar el cuerpo, con la mano izquierda apoyada suavemente sobre el brazo opuesto, transmitiendo elegancia y seguridad.\r\n\r\nLa expresión facial debe ser serena, segura y ligeramente enigmática. La mirada debe dirigirse a la cámara, con los labios suavemente cerrados y una postura firme.\r\n\r\nEl atuendo consiste en un conjunto oscuro y sofisticado: un blazer negro estructurado sobre una blusa negra ajustada. El cabello debe ser suelto, liso y bien coordinado, cayendo naturalmente sobre un hombro.\r\n\r\nLa iluminación debe ser de estudio, con luz direccional suave y contrastada (estilo Rembrandt o luz lateral), que resalte los contornos del rostro, creando sombras elegantes y un sutil degradado en el fondo.\r\n\r\nEl fondo debe ser liso y neutro, en tonos gris oscuro, con ligera profundidad y sin elementos que distraigan. El estilo final debe ser en blanco y negro, con un contraste refinado, una textura de piel suave y un aspecto realista de retrato editorial.\r\n\r\nFormato vertical (1080x1920), relación de aspecto vertical, calidad fotográfica de estudio profesional y un acabado cinematográfico y realista.",
+    "image": "https://cdn.bananaprompts.xyz/cc3440fa-cbea-4656-8200-46f5da233def/0021b92f-eff2-4abe-83d9-f4b54326b71c.jpeg",
+    "likes": 146,
+    "creatorName": "leon987@gmail.com",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Anime",
+      "Architecture",
+      "3D Render",
+      "Cartoon",
+      "Vector",
+      "Watercolor",
+      "Sketch / Line Art",
+      "Abstract",
+      "Oil Painting",
+      "Portrait",
+      "Photography",
+      "Fashion",
+      "Surreal",
+      "Corporate",
+      "Business",
+      "Modern",
+      "Minimalist",
+      "Product / Poster",
+      "Logo",
+      "Concept art",
+      "Infographic",
+      "Sci-Fi",
+      "Fantasy",
+      "Cyberpunk",
+      "Grunge",
+      "Retro / Vintage",
+      "Vibrant / Colorful",
+      "Dark / Moody",
+      "Elegant",
+      "Neon",
+      "Glitch",
+      "Flat Design"
+    ]
+  },
+  {
+    "id": "4d649ab2-7d82-414b-b557-d03679e64728",
+    "title": "Homem Elegante",
+    "prompt": "Recrie essa cena utilizando minha foto enviada como base, mantendo o mesmo enquadramento, pose, iluminação e atmosfera da foto de referência. A composição deve mostrar um homem sentado sobre um banco alto de madeira com estrutura metálica preta, em um estúdio minimalista de fundo neutro em tons de cinza. O enquadramento deve capturar o corpo inteiro, com leve distância que realce a postura e o cenário limpo. Um modelo deve estar com a perna direita dobrada e aperfeiçoado no degrau do banco, enquanto a esquerda toca o chão com elegante, calçando sapatos social preto com detalhes translúcidos. estatueta é totalente preta e elegante: no dedinho da mão esquerda um anel com uma pedra de circonia, e no pulso um relogio rolex, blazer estruturado, calça de alfaiataria justa e blusa azul musgo por baixo, transmitindo força, estilo e profissionalismo, e a expressão facial deve ser confiante, com o olhar direcionado levemente para o lado, transmitindo poder e serenidade. A iluminação deve ser de estúdio, com luz suave e direcional, criando contraste equilibrado entre sombras e áreas iluminadas, realçando a textura do tecido e o contorno do rosto. O fundo deve permanecer liso, com um degradê sutil em cinza, sem distrações, mantendo o foco totalmente no modelo. O estilo geral deve ser editorial corporativo moderno, com acabamento realista, aparência fotográfica profissional e composição elegante digna de revista. Formato vertical (1080x1920), proporção de retrato, qualidade fotográfica premium, tom sofisticado e iluminação cinematográfica.",
+    "image": "https://cdn.bananaprompts.xyz/191d6216-ec15-4e35-95d6-babcb075f665/809fcc13-9205-42d3-b738-c0372fd2b4ab.png",
+    "likes": 144,
+    "creatorName": "@desista.jamais",
+    "model": "banana pronpt,gemini",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Fashion",
+      "Business",
+      "Portrait",
+      "Modern",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "d45cd36a-00bd-4452-b12e-c18a39ab99dd",
+    "title": "Mumtaz Hashmi",
+    "prompt": "A striking outdoor portrait captures a man of South Asian descent, possibly in his 40s or 50s, holding a falcon on his gloved left hand. He wears traditional Arab attire, including a white thobe and a red and white ghutra secured with an agal, suggesting a connection to Gulf Arab culture or a setting within the region. His weathered face is framed by a full, well-groomed grey beard, and his dark eyes look directly at the viewer with a serious, unsmiling expression.\r\nThe falcon, perched calmly on his hand, is adorned with a hood, indicating it's a trained bird. Its brown and white speckled feathers contrast with the man's white garment and the rich brown leather of the falconry glove.\r\nIn the background, under a clear blue sky, the iconic Burj Khalifa stands tall and prominent, dominating the skyline of what appears to be Dubai. Other modern buildings and the sprawling urban landscape extend into the distance, reinforcing the setting. The lighting suggests a bright, sunny day, with the sun likely coming from the right, casting subtle shadows and highlighting the textures of the man's clothing and the falcon's feathers. The image is a cultural blend, showcasing tradition against a backdrop of modern architectural marvels.Use the face from the uploaded reference image and preserve the same facial features - do not alter the face. Keep my face same 100% same as in the reference imaes",
+    "image": "https://cdn.bananaprompts.xyz/a5e904ad-6fd3-4b8d-ad9d-9f776504f64c/12758741-64f3-44b9-a588-0c0ee6430e1d.jpeg",
+    "likes": 143,
+    "creatorName": "mumtazhashmiali@gmail.com",
+    "model": "Nano banana",
+    "tags": [
+      "Photography"
+    ]
+  },
+  {
+    "id": "7bb0579c-d78c-4949-a7a2-e0112ef62af3",
+    "title": "The Leather Jacket",
+    "prompt": "A black and white, full-length studio portrait capturing a male figure with a casual yet charismatic pose. The subject sits cross-legged on the floor, leaning slightly forward and looking directly at the camera, conveying a relaxed yet confident expression with a slight smile. One hand is raised, fingers gently touching his chin, while the other rests on his knee.\r\n\r\nHe wears a modern, monochromatic ensemble: a black leather jacket with zippers, worn over a black crewneck T-shirt. Black pants and sleek black dress shoes complete the look. Accessories such as a dark wristwatch, a ring, and thin bracelets add a touch of personal style.\r\n\r\nHis hair is dark, with a wavy texture and a casually groomed style. A short, well-groomed beard frames his face.\r\n\r\nThe background is a solid-color studio backdrop in a uniform, medium gray tone, creating a soft, professional contrast. The lighting is soft and directional, typical of a studio, coming from a frontal-upward angle, which sculpts the facial features and highlights the texture of the leather jacket, creating delicate shadows.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm or 50mm) on a full-frame camera for a flattering perspective and natural proportions. Aperture set between f/4.0 and f/5.6 to ensure sharpness across the entire subject, from the face to the shoes, with a depth of field that separates it from the background. ISO 100-200 for maximum black-and-white image quality, without grain. Shutter speed from 1/160s to 1/250s. Studio lighting with a large octabox or softbox as the main light to create soft light and a reflector to fill in shadows.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, hair and beard style, eye color, and skin tone with maximum fidelity. The goal is to create a version of the user in this studio portrait. The clothing (leather jacket, black t-shirt, black pants, shoes), accessories (watch, ring, bracelets), the cross-legged sitting pose, the confident expression, the soft black and white lighting, and the gray background should be created as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/20d26b47-2e73-4e60-9f36-27fe9741be1f.jpeg",
+    "likes": 143,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "fea54b03-7812-41e5-9ed0-3d085091b4a9",
+    "title": "Holy Kaaba in Mecca",
+    "prompt": "A man (Use face from uploaded pic)standing in front of the Holy Kaaba in Mecca, wearing white Ihram clothing, surrounded by pilgrims walking around the Kaaba. The scene is captured in daylight with clear blue sky, showing the sacred atmosphere and the grand architecture of Al-Masjid Al-Haram. The man is centered in the frame, calm and spiritual, realistic cinematic style, natural lighting, high detail, full body shot.",
+    "image": "https://cdn.bananaprompts.xyz/e24f5f58-e4b9-4782-b711-19a532def078/58a85545-2bc7-492f-b309-ce3fb8248048.png",
+    "likes": 142,
+    "creatorName": "3li7aleem",
+    "model": "Nano",
+    "tags": [
+      "Realistic",
+      "Architecture",
+      "Fashion",
+      "Portrait",
+      "Photography"
+    ]
+  },
+  {
+    "id": "1c644059-abdd-4abc-8f24-9baf3b867b61",
+    "title": "Typography portrait style",
+    "prompt": "Create a hyper-detailed black and white portrait artwork where the face is formed entirely from motivational and positive words in bold typography. The words should follow the contours, shadows, and highlights of the uploaded reference face, making the facial features 99.99% identical to the reference photo. Only show the face, clothing is not needed. Use a dark background so the face stands out, with words such as 'GRATEFUL', 'STAY STRONG', 'THINK POSITIVE', 'HEALTHY', 'HARD and other positive English words clearly visible and integrated into the face structure. Artistic, powerful, inspirational, and realistic typographic portrait style",
+    "image": "https://cdn.bananaprompts.xyz/2a901471-ebca-4ea2-92e5-ebc733667848/6416de1e-6798-42c4-86d6-15c6f6521008.jpeg",
+    "likes": 142,
+    "creatorName": "LD graphics",
+    "model": "AI studio",
+    "tags": [
+      "Portrait",
+      "Fantasy",
+      "Dark / Moody"
+    ]
+  },
+  {
+    "id": "4d45bd38-f9e2-427f-8f2f-5df6f8a2451a",
+    "title": "Escritor",
+    "prompt": "Imagem ultra realista de um homem sentado em sua mesa, olhando para uma parede cheia de papéis, notas e desenhos colados de forma desordenada. Ele veste roupas de escritor clássico/modesto, como camisa de manga comprida e colete simples. Sobre a mesa, pilhas de livros, cadernos, papéis espalhados, caneta e tinteiro, criando sensação de trabalho intelectual intenso e fluxo criativo. Iluminação quente e dramática vinda de lâmpadas de mesa, iluminando parcialmente a cena, criando sombras e profundidade. Ambiente intimista, ligeiramente bagunçado, sugerindo intensa concentração e inspiração literária. Câmera de altura média (da mesa para cima), textura hiper-realista em roupas, pele, papéis e objetos. Estilo cinematográfico, cores quentes e terrosas, atmosfera contemplativa, carregada de criatividade, semelhante a um quarto de escritor imerso em sua obra.",
+    "image": "https://cdn.bananaprompts.xyz/b10128d8-c8ff-4dd9-b184-ad6961b9118e/5b2f14dc-a4b9-4e39-8f62-2270f9b51982.png",
+    "likes": 141,
+    "creatorName": "Google AI STUDIO",
+    "model": "AI",
+    "tags": []
+  },
+  {
+    "id": "23ef2bf5-b10e-4487-a1a9-38f8cfbfb575",
+    "title": "AI Studio Portrait",
+    "prompt": "Please generate a top-angle and close-up black and white portrait of my face, focused on the head facing forward. Use a 35mm lens look, 10.7K 4HD quality. Proud expression. Deep black shadow background - only the face, the upper chest, and the shoulder.",
+    "image": "https://cdn.bananaprompts.xyz/e6c0a513-c6ad-4edf-8b11-a4abf17dea9e/1d5da55f-066f-4d27-80c8-d65c7aee974b.png",
+    "likes": 141,
+    "creatorName": "BKD",
+    "model": "AI",
+    "tags": []
+  },
+  {
+    "id": "f699c6fe-766f-4765-964e-8899870cfe9f",
+    "title": "Mulher de Negócios",
+    "prompt": "Use a foto que estou enviando como referência principal para o rosto e aparência da pessoa.\r\n\r\nRecrie esta cena de retrato corporativo profissional em estúdio, mantendo o mesmo enquadramento, iluminação e expressão da imagem de referência.\r\n\r\nCena: retrato de meio corpo em estúdio, com fundo neutro em tom cinza suave e iluminação difusa que destaca a pele e os traços do rosto.\r\n\r\nComposição: a pessoa (substitua pelo meu rosto e aparência) está com uma expressão confiante e elegante, levemente inclinada para a direita, uma mão próxima ao pescoço segurando suavemente o colar.\r\n\r\nRoupa: blazer marrom claro (caramelo) sobre blusa branca texturizada, com colar prateado visível.\r\n\r\nEstilo fotográfico: retrato de estúdio com luz suave, foco nítido no rosto, tons de pele naturais e acabamento profissional.\r\n\r\nEstilo geral: editorial corporativo moderno, clean e sofisticado — aparência de “executiva de sucesso” com um toque fashion.\r\n\r\nQualidade: ultra realista, alta definição, iluminação de estúdio, fundo limpo, textura detalhada e tons de cor equilibrados.",
+    "image": "https://cdn.bananaprompts.xyz/076c11fd-41b9-4ff9-a31b-68d0d255186f/7607a054-c49b-48d5-aeea-c20bdb0a3aca.png",
+    "likes": 138,
+    "creatorName": "@cwbarteprodutora",
+    "model": "nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Corporate",
+      "Business",
+      "Modern",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "916a051c-1584-4e07-859f-59915cd5fad0",
+    "title": "🔵🌌 Editorial Theme: “Luz Azul em Silêncio”",
+    "prompt": "🎭 Conceito\r\nUm retrato editorial masculino em perfil fechado, banhado por iluminação azul dramática. O modelo está com os olhos fechados, cabeça levemente inclinada para cima, expressão serena e introspectiva. Um feixe de luz atravessa diagonalmente o rosto, iluminando olhos, nariz e boca com precisão cirúrgica. O fundo azul sólido reforça a imersão emocional e a estética etérea.\r\n🎥 Especificações Técnicas\r\nCâmera: Canon EOS R5\r\nLente: 85mm f/1.4 — ideal para retratos com profundidade emocional e foco preciso\r\nAbertura: f/2.2\r\nISO: 320\r\nVelocidade do obturador: 1/200s\r\nEnquadramento: close-up em perfil, vertical (formato 4:5), com foco absoluto no rosto\r\nResolução: Ultra-HD 8K — capturando textura da pele, cabelo e transição de luz\r\nIluminação: feixe de luz diagonal com tom branco frio sobre fundo azul profundo\r\nEstilo visual: editorial artístico com estética de silêncio e contraste\r\n🧍‍♂️ Roupa e Estilo\r\nCamisa: azul petróleo com microestampa geométrica em cinza claro — tecido leve com leve brilho sob luz direta\r\nGola: tradicional, com botão superior aberto, revelando parte do pescoço\r\nDetalhes: punhos ajustados, costura visível em azul escuro, caimento elegante e moderno\r\nCabelo: cacheado, volumoso e bem definido, com reflexos azulados sob a luz\r\nAcessórios: nenhum visível — foco total na expressão e na luz\r\n🧍‍♂️ Pose Principal: “Perfil em Azul”\r\nPostura: cabeça levemente inclinada para cima, olhos fechados\r\nExpressão: serena, introspectiva, como se absorvesse a luz\r\nDestaques: feixe de luz cruzando o rosto, contornos faciais realçados, fundo monocromático",
+    "image": "https://cdn.bananaprompts.xyz/28265d9c-19af-4322-a0af-e9beb6fd5839/98eb6d34-09b5-4833-82b6-6fefa14a9b07.png",
+    "likes": 136,
+    "creatorName": "@SamOIIvA",
+    "model": "GEMINI",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Fashion",
+      "Photography"
+    ]
+  },
+  {
+    "id": "c3c30b86-7a53-4e9b-92d4-3da893acc383",
+    "title": "The Actor and The Art: Shah Rukh Khan (SRK)",
+    "prompt": "\"Ultra-realistic 8K full-body portrait of the same man\r\nfrom the reference photo, wearing a clean, pressed white dress shirt with a turned-up collar and a small lapel microphone, dark navy blue trousers, and polished brown dress shoes. He is casually and unpretentiously leaning against a smooth, light gray studio wall; his hands are in his pockets and one leg is crossed over the other, with relaxed and confident body language. Add to the wall next to him a prominent black and white vector portrait of his face and chest - with sharp, angular lines, overlapping polygonal shapes, and a minimalist and modern graphic style, just below the information: Shah Rukh Khan, and below the name: Indian actor and film producer.\"\r\nUse The Face From The Uploaded Reference Image And Preserve The Same Facial Features - Do Not Alter The Face. And Keep My Face 100% Accurate As Shown On Reference Image.",
+    "image": "https://cdn.bananaprompts.xyz/0389052b-6b23-403e-9a1c-a41b5106e382/bfd3050d-bedd-41e0-871e-6aae88a84060.png",
+    "likes": 134,
+    "creatorName": "@visuals",
+    "model": "Nano banana, Gemini",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Sketch / Line Art",
+      "Photography",
+      "Portrait",
+      "Business",
+      "Product / Poster",
+      "Vibrant / Colorful"
+    ]
+  },
+  {
+    "id": "b9be9034-dc6b-4fc3-bcea-f697fd18eae9",
+    "title": "Urban Edge Glow",
+    "prompt": "Edit this image to show a man positioned in a close-up portrait shot, face tilted slightly upward at approximately 15–20 degrees with his chin gently lifted, creating a confident, aspirational angle. His head is centered in the frame with his gaze directed straight toward the camera from behind a pair of classic men’s sunglasses featuring a timeless rectangular design with sleek black frames and subtle metallic accents at the hinges. He has short, neatly, complementing his sharp features and strong jawline. His body is angled slightly (about 30 degrees) to create dimension, with shoulders relaxed and one shoulder subtly closer to the camera. He exudes magnetic confidence with a composed, assertive expression, His outfit is a dark gray and black plaid shirt worn open over a fitted black T-shirt, giving a refined yet modern casual look. The background is a rich, saturated golden-yellow that transitions to deeper amber tones at the edges. Dramatic directional lighting from above-left creates sculptural shadows along his neck and cheekbones, with warm backlighting creating a subtle halo effect. The composition is a high-fashion portrait style with the face taking up roughly 60% of the frame, A cinematic studio portrait with soft creamy lens glow, subtle dreamy bloom effect, light halation around highlights, slightly diffused focus, rich contrast, smooth skin tones, enhanced color depth, clean professional lighting, soft reflections on lens, realistic texture and sharp eyes\r\nKeep the original face and hair from the uploaded photos.",
+    "image": "https://cdn.bananaprompts.xyz/1bce1957-fe6e-48f8-8dd6-ab249a099e62/a27c5d39-f450-4ace-ac35-778666fc028e.jpeg",
+    "likes": 134,
+    "creatorName": "Hamad Ali",
+    "model": "AI",
+    "tags": [
+      "Realistic",
+      "Photography",
+      "Cinematic",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "789cafdc-4d52-4eea-a61e-11ea327f3e35",
+    "title": "Sun-Kissed Serenity",
+    "prompt": "A vibrant, sunny, full-length portrait captured outdoors in a rustic, natural setting. The female figure stands in a confident, crouched pose on a wooden deck or walkway, her body slightly angled, her gaze direct and captivating, with a soft, serene expression. Her arms rest casually on her knees.\r\n\r\nShe wears a casual yet stylish ensemble: a white, short-sleeved cropped top with a deep V-neckline and tie detail. The bottom is a pair of light-wash denim shorts with frayed hems, creating a relaxed look. The highlight of the look is the thigh-high, cognac-brown, gladiator-style lace-up leather boots with an open toe and high heel.\r\n\r\nHer hair is long and brown, with soft waves and a healthy shine, falling naturally to her shoulders. Her makeup is natural, but enhances her features, with coral or soft red lips.\r\n\r\nThe backdrop is a rustic fence made of vertical wooden logs, with a glimpse of green foliage, creating a warm, organic atmosphere. The scene is bathed in soft, golden natural light, typical of late afternoon (golden hour), which creates a warm glow on skin and hair, and a creamy blur in the background.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm f/1.8 or 50mm f/1.4) on a full-frame camera to create flattering compression and pronounced bokeh. Aperture set between f/1.8 and f/2.8 to isolate the subject from the background with a shallow depth of field. ISO 100-200 for maximum image quality in abundant natural light. Shutter speed of 1/250s to 1/500s to ensure sharpness. Warm, natural golden hour lighting, positioned from the side to sculpt the subject with soft light and shadow.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, hair style, and color with maximum fidelity. The goal is to create a version of the user in this rustic setting. The clothing (white lace-up top, denim shorts, braided leather boots), the crouched pose, the confident expression, the warm golden hour lighting, and the wooden background should be rendered as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/6ae96895-5ddf-43a9-bf1e-945b17b00e7c.jpeg",
+    "likes": 131,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "ea9ea1a0-a49d-461f-a5cb-f7a10e3e3ef3",
+    "title": "On Top of Iphone",
+    "prompt": "Create a stylish, modern photo of a male model in a vertical, 9:16 format. Use the provided image for accurate facial features. He stands confidently at the giant screen of an iPhone 16 lying on the floor. The screen displays a Spotify playlist with the song \"Enter Sandman - Metallica.\" He's wearing AirPods Max 2025, an oversized white hoodie, black pants, and crisp white Air Jordans. The scene is shot from a high angle, top-down, to highlight the large size of the phone. The vibe is minimalist, stylish, and futuristic.",
+    "image": "https://cdn.bananaprompts.xyz/f4f238cc-bb8e-4716-bfde-51c2718d5984/5d3fbeb8-0996-42ea-b19e-bb9bb4436963.jpeg",
+    "likes": 131,
+    "creatorName": "ROBSON",
+    "model": "nanobanana",
+    "tags": [
+      "Realistic",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": "5838409b-4e5f-4aa0-8c4a-e6ef176d5741",
+    "title": "Timeless Beauty",
+    "prompt": "A high-quality black and white studio portrait capturing the classic beauty and elegance of a female figure. The subject is photographed in a close-up that encompasses the face, shoulder, and part of the arm, with a slightly tilted pose. Her gaze is direct and captivating, with a soft, serene expression that conveys confidence and sophistication. One arm is slightly raised and resting behind her head or against a surface, creating an elegant line.\r\n\r\nShe wears a sleeveless turtleneck in a solid, dark shade (black), which contrasts dramatically with her fair skin and hair. The turtleneck adds a touch of elegance and elongates the neck.\r\n\r\nHer hair is blonde, long, and voluminous, with defined waves and curls that frame the face and fall over her shoulders, creating a rich texture and luxurious movement.\r\n\r\nThe background is a neutral studio backdrop, with a soft gradient of medium to dark tones that may suggest a wall or surface. The lighting is soft and enveloping, in the beauty light style, using a slightly elevated, frontal main light source to create soft highlights and minimize shadows, resulting in flawless skin and a sparkle in the eyes. The light also flatters the texture of the hair and the curves of the face.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm or 100mm) on a full-frame camera, ideal for an intimate, distortion-free close-up. Aperture set between f/2.0 and f/2.8 for a shallow depth of field, focusing intensely on the eyes and face, with soft bokeh in the background. ISO 100-200 for maximum image quality in black and white, without noise. Shutter speed of 1/160s to 1/250s to ensure sharpness. Studio lighting with a large beauty dish or octabox as the main light, positioned in front and above for soft, enveloping light, with reflectors for fill, creating a flawless and glamorous look.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, and hair style, color, and texture with maximum fidelity. The goal is to create a version of the user in this black and white portrait, with the same elegant pose (arm raised), serene expression, and soft lighting. The dark turtleneck and neutral studio background should be created as described, creating a perfect fusion between the user's identity and the aesthetic of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/7237f323-a939-467d-a49c-d33951e13002.jpeg",
+    "likes": 131,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Fashion",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "7826db20-e869-4fde-9bdc-9f3f3432ce0e",
+    "title": "Newsprint Gaze",
+    "prompt": "A medium-close-up portrait photograph (from the chest up) with a moody, intimate, and slightly vintage aesthetic. It captures a female figure leaning casually against a wall covered in old newspapers. The subject is positioned slightly sideways, with her body close to the wall, and her head tilted to the side, looking directly at the camera with an intense, penetrating expression and a touch of melancholy or sensuality. The composition focuses on the face and its interaction with the textured background.\r\n\r\nThe female figure appears to have a slender build, as evidenced by the visible shoulder line and arms. Her breasts are small to medium, discreetly visible beneath her tank top. Due to the framing, it is impossible to determine the slenderness of her waist, the width of her hips, the thickness of her legs, or the size of her buttocks. Her skin is medium-tanned and appears natural, with a soft glow reflecting the warm light.\r\n\r\nShe wears a simple black tank top with thin straps that leaves her shoulders and arms exposed. She wears a thin, delicate necklace around her neck.\r\n\r\nHer hair is long, straight or in very soft waves, and black or very dark brown. The strands appear soft and fall naturally over one shoulder and down her back, with a few loose strands framing the right side of her face. Her makeup is natural but enhances her features: dark, well-defined eyebrows, expressive dark brown eyes, possibly with light eyeliner or mascara. Her lips are the focal point, with a glossy gloss or lipstick in a light pink or peach shade, which catches the light and adds a touch of sensuality.\r\n\r\nThe background is completely covered in pages of old newspapers, unevenly pasted to the wall. The newspapers appear to be in an Asian language (possibly Chinese or Japanese), with vertical and horizontal text, headlines, and some black and white photographs visible. The paper has a yellowish, aged tone, contributing to the vintage atmosphere. The lighting is soft, warm, and directional (low-key), likely coming from an artificial light source (such as an incandescent bulb or warm LED) positioned in front and slightly to the right of the figure. This light creates a warm glow on the right side of the face, hair, and shoulder, while the left side falls into soft, deep shadows, adding volume and mystery. The general lighting is low, creating an intimate and cinematic atmosphere, highlighting the texture of the newspaper in the background.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 50mm f/1.4 or 85mm f/1.8) on a full-frame camera for an intimate close-up with soft bokeh. Aperture set between f/1.8 and f/2.8 for a shallow depth of field, focusing on the eyes and lips, and softly blurring the newspaper background and distant hair. ISO 400-800 to compensate for low ambient light. Shutter speed from 1/125s to 1/250s. White balance set to warm tones (tungsten or manual) to enhance the vintage atmosphere. Soft and directional artificial lighting.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, and skin tone. (medium/tan), hair style and color (long, straight/wavy, dark), as well as the suggested body shape (slender, small/medium breasts) with maximum fidelity. The goal is to create a version of the user in this moody portrait. The clothing (black tank top, necklace), the pose leaning against the wall, the intense expression, the makeup with glossy lips, the warm and low-key lighting, and the background of a wall covered in old newspapers should be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/f6ee75f8-c6b8-415d-82a6-88f9c65ed36a.jpeg",
+    "likes": 130,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "5e60b1ac-0883-4c13-b2b0-5a74f55e9601",
+    "title": "“Erosion of Self”",
+    "prompt": "A full-body profile of a man facing right, standing on a stark concrete surface in a minimalist, desolate environment. His body is slightly hunched, head bowed, eyes looking down, conveying deep contemplation and melancholy. His hands rest loosely at his sides. The face and hair are rendered with realistic accuracy, faithful to a reference, without alteration.\nHe wears modern street-style casual clothing: a light gray crewneck shirt, light-colored cargo pants, light-colored boots, and a watch on his left wrist.\nThe left half of his body—arm, shoulder, torso, and legs—is actively disintegrating into particles, becoming transparent and partially invisible. Thick, cloud-like gray smoke mixed with large glowing yellow dust particles consumes this side of his body, with a heavy and generous density.\nBehind and slightly surrounding the subject is a massive glowing halo shaped like a large skull, formed from swirling plasma energy. The halo emits a bright, fiery golden-white light, acting as a powerful backlight.\nThe scene is cinematic and dramatic, with high-contrast lighting, strong silhouette highlights, bloom, and glow effects caused by the luminous energy ring. The sky is heavy and dense near the horizon, while the background remains simple to keep focus on the subject.\nColor palette is mostly monochromatic light grays and whites, dominated by intense golden-yellow and amber glow. Shallow depth of field, subject slightly off-center, framed by the circular energy halo. Ultra-sharp 8K resolution, cinematic digital painting aesthetic.",
+    "image": "https://cdn.bananaprompts.xyz/ai-gallery/9e9aa751-162f-4e0d-9b44-1225c7aac2dc/1767415453296-886lhhy5iec.png",
+    "likes": 130,
+    "creatorName": "@Helox33",
+    "model": "DALL·E (OpenAI)  Midjourney v6  Stable Diffusion XL (SDXL)  Adobe Firefly",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Anime",
+      "Architecture",
+      "Cartoon",
+      "3D Render",
+      "Vector",
+      "Watercolor",
+      "Sketch / Line Art",
+      "Oil Painting",
+      "Abstract",
+      "Surreal",
+      "Fashion",
+      "Photography",
+      "Portrait",
+      "Corporate",
+      "Business",
+      "Minimalist",
+      "Product / Poster",
+      "Modern",
+      "Logo",
+      "Infographic",
+      "Concept art",
+      "Sci-Fi",
+      "Fantasy",
+      "Cyberpunk",
+      "Retro / Vintage",
+      "Grunge",
+      "Vibrant / Colorful",
+      "Dark / Moody",
+      "English",
+      "Arabic",
+      "French",
+      "Elegant",
+      "Spanish",
+      "Portuguese",
+      "Glitch",
+      "Neon",
+      "Flat Design"
+    ]
+  },
+  {
+    "id": "bb84b166-76fb-4847-be8d-d62b66e4867f",
+    "title": "A newborn baby, solid brown with bunny toy",
+    "prompt": "A newborn baby, with dark hair, sleeping deeply on a rich, solid brown background. The baby is wearing a fitted, textured brown knitted romper and is lovingly embracing a soft, fluffy white knitted bunny toy. The bunny has long ears and a small brown nose. The baby's bare feet are visible, and their small hands gently hold the toy, conveying a sense of warmth, comfort, and peaceful sleep. The lighting is soft and even, highlighting the textures of the knitwear and the baby's delicate features against the uniform background.",
+    "image": "https://cdn.bananaprompts.xyz/aade4ced-0fca-4b62-b70e-fb82e654624f/3edba731-bbf0-4464-95e0-c30629fd813e.jpeg",
+    "likes": 130,
+    "creatorName": "Knot Squared",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "faf2c89f-9bc5-4cd2-907a-611a3028e84a",
+    "title": "Mulher de Negócios",
+    "prompt": "Use a foto que estou enviando como referência principal para o rosto e aparência da pessoa.\r\n\r\nRecrie esta cena fotográfica profissional de estúdio, mantendo a mesma pose, enquadramento, iluminação e estilo da imagem de referência.\r\n\r\nCena: retrato de corpo inteiro em estúdio, com fundo neutro em tons de cinza e iluminação suave, criando sombras elegantes.\r\n\r\nComposição: a pessoa (substitua pelo meu rosto e aparência da foto enviada) está sentada em um banco alto, com uma perna apoiada e a outra cruzada levemente. Uma das mãos repousa sobre o joelho, e a outra toca suavemente o cabelo, transmitindo confiança e sofisticação.\r\n\r\nRoupa: conjunto preto elegante — blazer estruturado e calça de alfaiataria justa — com salto alto.\r\n\r\nEstilo fotográfico: retrato de estúdio com iluminação lateral suave, sombras sutis e contraste profissional, estilo “ensaio corporativo premium” ou “business fashion editorial”.\r\n\r\nQualidade: fotografia realista de alta resolução, estilo editorial contemporâneo, foco nítido, fundo limpo e acabamento refinado.",
+    "image": "https://cdn.bananaprompts.xyz/076c11fd-41b9-4ff9-a31b-68d0d255186f/3a74aadb-54a2-4a64-b350-364ee65804dc.png",
+    "likes": 130,
+    "creatorName": "@cwbarteprodutora",
+    "model": "nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Fashion",
+      "Corporate",
+      "Business",
+      "Modern",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "f870f316-eaad-4505-afed-3d9d93c61060",
+    "title": "Photo profi",
+    "prompt": "\"Une illustration numérique très détaillée dans un style moderne d'art vectoriel, présentant une ressemblance hyper précise de 99,99 % avec le visage de la photo de référence. Le portrait est en tons de base noir et blanc avec des traits audacieux et vifs de couleurs néon et pastel (rouge, bleu, orange, jaune) accentuant les contours des cheveux, des joues et des vêtements. L'expression de la personne est neutre et calme, avec des proportions faciales réalistes fidèles à la référence. Les cheveux sont illustrés avec des lignes nettes et fluides, et les lunettes (si présentes dans la référence) sont incluses avec des contours audacieux. Fond blanc propre, donnant un aspect éditorial poli et contemporain. Format portrait 3:4.\"",
+    "image": "https://cdn.bananaprompts.xyz/4481fb44-3d62-406b-a17f-097325f3991b/270ea305-8a79-4ec3-a188-9f74caae1c7d.jpeg",
+    "likes": 129,
+    "creatorName": "Benjamin ABI",
+    "model": "Nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Portrait",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "6ce1e1a3-00f8-4cc1-92b4-0c4d525d3510",
+    "title": "Terminator Redux",
+    "prompt": "A cinematic, somber, medium-length portrait in the iconic Terminator style. The subject is a robust male figure, with half of his face (right side) revealing a cybernetic structure of metal and wires, with a glowing red mechanical eye. The other half of his face (left side) is human, with a serious, determined expression, furrowed brows, and a thin beard.\r\n\r\nHe wears a worn black leather jacket over a dark T-shirt.\r\n\r\nHis hair is short, dark, and slicked back.\r\n\r\nThe background is dark and smoky, with a mysterious and menacing atmosphere, enhanced by subtle smoke or fog. The lighting is dramatic and low-key, with sidelights highlighting the leather texture and metallic details of the cybernetic face, and a red light emanating from the mechanical eye.\r\n\r\nCamera Settings: Captured with a portrait lens (e.g., 85mm f/1.4) on a full-frame camera for a sharp close-up with flattering compression. Aperture adjusted between f/2.0 and f/2.8 for a shallow depth of field, focusing on the face and blurring the background. ISO 400-800 for low light. Shutter speed from 1/125s to 1/250s. Studio lighting controlled with sidelights and backlighting (rim light) to create a dramatic effect and highlight the red eye.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all their facial features, facial structure, eye color, hair and beard style, and skin tone with maximum fidelity. The goal is to create a Terminator-like version of the user. The clothing (black leather jacket), the cybernetic part of the face with the red eye, the serious expression, the dramatic lighting, and the dark, smoky background should be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/fcee873a-abd0-48c4-b947-efc8863946fd.png",
+    "likes": 129,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Portrait",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": "3b5c5672-974a-479c-a8a9-c5a7cf70ce46",
+    "title": "Studio",
+    "prompt": "A confident man in a navy blue tailored suit with a white shirt, no tie, adjusting his cufflinks. He wears aviator sunglasses, a gold wristwatch, and a small lapel pin. The background is a smooth warm brown/olive studio backdrop with soft gradient lighting. Studio lighting is dramatic yet balanced, with a key light from the upper left casting subtle shadows. Editorial fashion portrait, waist-up, cinematic and luxurious style.",
+    "image": "https://cdn.bananaprompts.xyz/2496885e-a4f4-4272-b0a1-b151dc67510f/430f005b-339d-4802-b9fc-0d333c7e8068.jpeg",
+    "likes": 129,
+    "creatorName": "Evandro Martinez",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Corporate",
+      "Business",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "9256d2cf-f46b-4ffd-be72-5f07605cf139",
+    "title": "Human form technology",
+    "prompt": "Uma mulher vista de perfil, olhando para o alto e para a direita, com o rosto iluminado por circuitos digitais e diagramas futuristas que se sobrepõem à sua pele. A iluminação é de um tom quente, com luzes brilhantes e pontos de luz em tons de laranja e branco, criando um efeito de bioluminescência tecnológica. O fundo está desfocado com bokeh de luzes urbanas e futuristas. A atmosfera é de alta tecnologia e mistério, com elementos de ficção científica e cibernética. A imagem tem uma estética detalhada e luminosa, com foco na fusão entre a forma humana e a tecnologia",
+    "image": "https://cdn.bananaprompts.xyz/f4f238cc-bb8e-4716-bfde-51c2718d5984/9650fa34-c8b4-4837-af35-2b90755d5baf.png",
+    "likes": 129,
+    "creatorName": "ROBSON",
+    "model": "Gemini",
+    "tags": [
+      "Sci-Fi"
+    ]
+  },
+  {
+    "id": "11c43faa-ac37-41b7-a0e2-f30c7735bb53",
+    "title": "Amazonian Might",
+    "prompt": "A professional, medium-length studio portrait capturing a female figure as a powerful Amazon warrior. The subject is posed at a three-quarter angle, with a strong, confident posture and a direct, determined gaze toward the camera, conveying courage and strength.\r\n\r\nShe wears iconic battle armor: a tight-fitting corset with a metallic finish in bronze and red tones, with a gold eagle-shaped emblem or 'WW' on the chest. The lower part is a layered battle skirt of dark gray or navy blue leather. A brown leather harness crosses her chest, and silver-colored metal bracelets (Bracelets of Submission) adorn her wrists.\r\n\r\nA shiny gold Lasso of Truth is attached to the belt at her hip. The edge of a large, round bronze shield with classical engravings is visible at her side.\r\n\r\nHer hair is long, dark, and voluminous, with natural waves that fall over her shoulders, framing her face.\r\n\r\nThe background is a solid-color studio backdrop in a light, neutral gray tone, keeping the focus on the character. The lighting is dramatic yet soft, sculpting the facial features and highlighting the metallic and leather textures of the armor, with a key light that creates depth and a fill light that softens the shadows.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm) on a full-frame camera for a heroic, distortion-free perspective. Aperture set between f/4.0 and f/5.6 to ensure sharpness across the subject and armor. ISO 100-200 for maximum studio image quality. Shutter speed 1/160s to 1/250s. Studio lighting with a large softbox or octabox as the main light to create soft, directional light, and a reflector to fill in the shadows.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, hair style, and color with maximum fidelity. The goal is to create a version of the user as this Amazon warrior. The armor, accessories, pose, dramatic lighting, and studio background should be generated as described, creating a perfect fusion between the user's identity and the character's aesthetic.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/eb7d7835-4595-496f-a1cb-508326668881.jpeg",
+    "likes": 128,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Photography",
+      "Portrait",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": "18cee7a8-d332-46c6-ab35-497d0fad14ed",
+    "title": "The flight",
+    "prompt": "Ultra-realistic cinematic portrait of a young man, keeping the same facial features as reference. He is wearing black sunglasses, a black jacket, slim black track pants with red stripes, and white sneakers. The man is sitting casually on a weathered concrete edge, one leg bent and the other hanging, with his arms resting on his knee. His head is turned slightly to the right, showing a confident and calm expression. Above him, a massive airplane flies extremely low under an overcast cloudy sky. Shot in wide-angle and low-angle perspective, creating a dramatic and surreal atmosphere. 8k, ultra-detailed, cinematic lighting.",
+    "image": "https://cdn.bananaprompts.xyz/898c52b7-a3c2-49be-9368-a7289cc5b6e7/88ef8e19-b7fa-4f5e-92f2-e7ac28292d12.jpeg",
+    "likes": 128,
+    "creatorName": "Ednelson",
+    "model": "Nano-banana",
+    "tags": [
+      "Realistic",
+      "Photography",
+      "Corporate",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "9926f297-6202-4c35-8d00-e31f28756eda",
+    "title": "Spiral stairs and lightning",
+    "prompt": "create a Realistic 8K portrait, 24mm wide-angle lens. Scene on a majestic spiral staircase with imposing architecture. Soft natural light enters from the circular top, creating ethereal beams. Subject in upward motion, slightly tilted, expressing ascension and transcendence. Gaze directed upward, deep and poetic.\r\n\r\nSophisticated editorial look: tailored graphite-gray linen blazer, open-collar white shirt, deep navy slim-fit trousers, polished leather shoes. Perfect fabric drape highlighted by natural light, contrasting architectural hardness with fashion softness.\r\n\r\nHigh-impact details: light reflections on face and shoulders, spiral staircase curves framing the background, cinematic and artistic composition. Vogue-style editorial atmosphere — fusion of architecture, fashion, and timeless emotion.",
+    "image": "https://cdn.bananaprompts.xyz/5588117e-bbab-4511-9778-4e53587aea37/1a3cb39b-f637-4085-bddc-bc78f6b0f5ad.jpeg",
+    "likes": 128,
+    "creatorName": "https://www.tiktok.com/@rbenitez53",
+    "model": "Sora",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Modern",
+      "Business",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "ad344416-c280-4127-a351-18dafac9b062",
+    "title": "Edgy Glamour",
+    "prompt": "A high-resolution studio photograph with a dramatic atmosphere and a touch of glamour. The subject is a female figure captured in a dynamic three-quarter pose, with her body slightly turned and her head tilted to the side, looking directly at the camera with an intense and inviting expression. Her hands delicately grip the lapel or zipper of a jacket, adding an element of attitude and style.\r\n\r\nShe wears a black leather jacket with zippers and details, conveying a rocker or edgy vibe. Underneath, a subtle black top or dress and a pleated black miniskirt complete the look, creating an elegant and youthful silhouette. The makeup is prominent, with a dramatic cat-eye liner and shimmery or smoky blue eyeshadow that accentuates the eyes, complemented by lips with a neutral or soft coral lipstick. Her nails are long and well-groomed, painted white or a light shade.\r\n\r\nThe hair is long and coppery red, with voluminous waves and a half-up style (a high ponytail or half-up) that adds height and glamour. The strands fall over the shoulders and chest, framing the face and highlighting the vibrant color.\r\n\r\nThe background is completely black and uniform, eliminating any distractions and focusing all attention on the subject's figure and the contrasting colors. The lighting is dramatic and sculptural, using a directional key light from above and slightly to the side, which creates highlights in the textures of the leather jacket and hair, and a sparkle in the eyes. A subtle rim light illuminates the edges of the hair and body, separating the figure from the dark background and adding depth.\r\n\r\nCamera Settings: Captured with an 85mm or 100mm prime lens on a full-frame camera for a flattering, distortion-free portrait. Aperture set between f/2.8 and f/4.0 for a depth of field that focuses sharply on the subject, with the background completely black. ISO 200-400 to maintain image quality in a low-contrast environment. Shutter speed of 1/160s to 1/250s to ensure sharpness. Studio lighting with a stripbox or softbox as the main light, positioned to create a dramatic look, and a grid to control light spill. A strong rim light is essential to separate the subject from the background.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, style, and hair color with maximum fidelity. The goal is to create a version of the user in this studio portrait. The clothing (black leather jacket, black top/dress, pleated miniskirt), dramatic makeup (cat-eye eyeliner, blue eyeshadow), pose (holding the jacket), light nails, dramatic rim lighting, and uniform black background should be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/65936336-b701-47f3-8c05-57b4dda58cfa.jpeg",
+    "likes": 128,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "dfddcdf0-f9d8-4f09-bb41-5d84abfe5115",
+    "title": "هدية الوردية",
+    "prompt": "A woman in a pink sweater and white shorts, sits in a clear hanging chair with pink my melody head at the center top in a room filled with pink my melody stuffed and pink led lights. She wears pink my melody slippers and knee-high socks, pink my melody bunny ears headband and holding a pink my melody wand. Behind her, a neon sign spells \"naim\" in pink. The room is overwhelmingly pink, with shelves of toys and a fluffy pink rug. Copy the face and do not alter it.",
+    "image": "https://cdn.bananaprompts.xyz/3ada8605-2681-47fe-b9e6-1a71288159bb/c6fa0593-d615-4702-ab88-b3eb13730be2.jpeg",
+    "likes": 128,
+    "creatorName": "نسيم البحر",
+    "model": "AI",
+    "tags": [
+      "Realistic",
+      "Vibrant / Colorful"
+    ]
+  },
+  {
+    "id": "26494bc4-cc72-4bd6-976a-9ea870e80869",
+    "title": "Retrato estilo Platon",
+    "prompt": "Transforma esta imagen en un Retrato editorial de moda en estudio, inspirado en el estilo de Platon Antoniou: fondo neutro blanco puro, modelo masculino posando de frente, mirada directa a cámara, encuadre cerrado (rostro + hombros) llenando el marco. Iluminación de estudio simple pero dramática: una fuente única suave-dura ligeramente lateral-frontal alta, creando sombras definidas que modelan las facciones y resaltan textura de piel y cabello. Contraste medio-alto, nitidez en los detalles del rostro, ojos intensos. Cámara de formato medio (Hasselblad) equivalente a lente ~80mm (formato medio) o ~50mm en full-frame, profundidad de campo moderadamente reducida para aislar al sujeto del fondo, pero manteniendo textura visible en piel y vestuario. Vestuario de moda sofisticado, minimalista en color (tonos neutros o un solo acento de color fuerte), estilo limpio y refinado. Atmósfera de presencia, fuerza interior y elegancia sobria. Estética editorial de alta gama, sin distracciones de fondo, enfoque al sujeto. Alta resolución, detalle fino, retoque mínimo para preservar textura auténtica.",
+    "image": "https://cdn.bananaprompts.xyz/f2d01c1e-0366-4642-9ac5-aeb0f6d8e8fc/84096e33-10fc-498d-aaf8-5c3a8a302ac1.png",
+    "likes": 128,
+    "creatorName": "@FEpERICO",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Photography",
+      "Portrait",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "2146d0b5-23f0-4d66-8f1f-7db964db9ce1",
+    "title": "Shelby GT500 Night Portrait",
+    "prompt": "A hyper-realistic cinematic portrait of a 190cm tall man (same face as reference) leaning casually against a modified orange Ford Mustang Shelby gt500 with neon under glow. The photo is taken at night under a single warm streetlight, with reflections glimmering on the car’s polished surface. The man faces directly toward the camera with a calm, confident expression. Shot from a high angle looking down, captured using a Canon EOS R5 with 85mm lens, f/1.4, ISO 400, 8K resolution. Neon blue and magenta hues blend across the car body and pavement, creating a deep cinematic atmosphere with soft shadows and lens bokeh.",
+    "image": "https://cdn.bananaprompts.xyz/af3287be-40b2-4295-a4d6-098329d910d1/73e8665c-6386-4f9a-aacc-ba5e8b054aa3.png",
+    "likes": 127,
+    "creatorName": "@WEarchitects",
+    "model": "AI",
+    "tags": []
+  },
+  {
+    "id": "82c59fdd-1c75-4142-acec-1b29457ea63c",
+    "title": "Amber Contemplation",
+    "prompt": "Create a realistic moody, cinematic, and candid portrait of a man(from uploaded image) wearing a light crewneck sweater, jacket with hoodie. Marshall over-ear headphones, viewed in profile with a contemplative gaze. Rich, warm amber lighting dominates the scene, creating dramatic low-key contrast and deep shadows. The composition features an extremely shallow depth of field with sharp focus on the subject and intentional, dark, blurry foreground elements and bokeh.",
+    "image": "https://cdn.bananaprompts.xyz/597aec9d-7b2c-4840-aeb6-71731295f0b6/500559ef-78e6-41e2-8c49-0dfd4150ba63.png",
+    "likes": 127,
+    "creatorName": "@thecapboi7",
+    "model": "GEMINI",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Corporate"
+    ]
+  },
+  {
+    "id": "0abb8c46-7647-4488-a6d2-cf4cf89d44e4",
+    "title": "Look urbano Casual",
+    "prompt": "“Look Urbano Casual Sentado”\r\n\r\nPrompt principal (positivos):\r\n\r\nMulher com o mesmo rosto, cabelo e características físicas da pessoa de referência principal, retratada em uma rua estreita de paralelepípedo com arquitetura antiga e atmosfera urbana europeia.\r\n\r\nA mulher está sentada no chão, em pose descontraída e natural, com uma perna dobrada e a outra cruzada levemente sobre ela.\r\n\r\nEla veste um suéter grosso de lã na cor laranja mostarda, com textura macia e mangas longas, e uma calça jeans clara levemente ajustada.\r\n\r\nNos pés, tênis brancos simples e limpos, estilo casual, reforçando o clima urbano e jovem.\r\n\r\nO cabelo está solto, levemente despenteado e natural, com movimento suave pelo vento. O olhar é direto e confiante, com uma leve expressão pensativa e espontânea.\r\n\r\nA iluminação é suave e difusa, típica de um fim de tarde nublado, criando um clima cinematográfico e íntimo.\r\n\r\nO fundo mostra prédios de pedra e arquitetura clássica, com perspectiva em profundidade que leva o olhar pelo corredor urbano.\r\n\r\nO enquadramento é meio corpo até corpo inteiro, com foco nítido no rosto e no look, e leve desfoque de fundo.\r\n\r\nEstilo fotográfico editorial de moda urbana, equilibrando naturalidade e sofisticação.\r\n\r\nDetalhes técnicos e estéticos:\r\n\r\nCenário: rua de paralelepípedo estreita, prédios de pedra, estilo europeu\r\n\r\nLuz: natural difusa (fim de tarde ou luz nublada)\r\n\r\nPose: sentada no chão, perna cruzada, uma mão próxima ao rosto\r\n\r\nRoupa: suéter laranja mostarda + jeans azul claro + tênis branco\r\n\r\nCabelo: solto, levemente bagunçado, natural e volumoso\r\n\r\nExpressão: leve sorriso, olhar relaxado e confiante\r\n\r\nComposição: perspectiva de profundidade, foco no sujeito com fundo levemente desfocado\r\n\r\nAtmosfera: casual, autêntica, cinematográfica, natural\r\n\r\nParâmetros sugeridos (para Nano Banana):\r\n--style: cinematic_street_portrait\r\n--camera: medium_full_body\r\n--lighting: soft_natural\r\n--composition: urban_depth\r\n--mood: relaxed_confident\r\n--quality: ultra_realistic",
+    "image": "https://cdn.bananaprompts.xyz/d7a105a2-5dde-4cd5-96bf-f5cb83690a1f/b1db89bd-f6be-480f-9c6e-cd36eacd832e.png",
+    "likes": 127,
+    "creatorName": "@cwbarteprodutora",
+    "model": "nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Corporate",
+      "Business",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "1d155f5c-6251-4385-9fab-c3621e780be0",
+    "title": "Foto de metade humeno e metade Venon",
+    "prompt": "Crie uma imagem hiper-realista baseada na minha foto de referência (Imagem 1), mantendo meus traços originais e reconhecíveis, mas recriando fielmente o enquadramento, iluminação, contraste e intensidade emocional da imagem modelo.\r\nA composição mostra metade do rosto humano e metade do personagem Venon— uma fusão perfeita entre homem e criatura simbiótica de aparência alienígena.\r\n\r\nO rosto humano ocupa o lado direito do quadro, enquanto o lado esquerdo é tomado por uma massa viva negra e líquida, com textura viscosa e reflexos metálicos, que se integra à pele de forma realista.\r\nEssa entidade é original — sua superfície parece uma mistura de óleo vivo, sombra e metal derretido, com formas orgânicas sutis e contornos quase reptilianos.\r\n\r\nNo limite entre humano e criatura, há transição perfeita de textura, mostrando veios de energia sombria e brilho discreto.\r\nO olhar humano é intenso e firme, transmitindo poder e controle sobre a simbiose.\r\n\r\nO olho da entidade é grande, brilhante e branco prateado, refletindo luz de forma cinematográfica.\r\n\r\nO ambiente é neutro e escuro, com fundo preto acinzentado e leve névoa difusa para dar profundidade.\r\n💡 Iluminação cinematográfica (estilo Rembrandt dramático):\r\n\r\nLuz principal lateral fria (vinda da esquerda), com temperatura de cor azul-acinzentada.\r\nLuz secundária quente suave (fill light) do lado direito, equilibrando tons da pele.\r\nSombras profundas e bem controladas, mantendo textura na pele e nos detalhes da entidade.\r\nReflexos pontuais nos olhos e nas partes metálicas da criatura para realismo máximo.\r\n📷 Câmera e Lente:\r\n\r\nCanon EOS R5, lente 85mm f/1.4, ISO 200, obturador 1/160s, abertura f/1.4.\r\n\r\nFoco nítido no rosto, fundo suavemente desfocado (bokeh suave e difuso).\r\n🎨 Color grading e estilo visual:\r\n\r\nEstilo Dark Symbiosis Cinematic:\r\ntons pretos e azul petróleo, com destaques metálicos prateados e reflexos azulados;\r\npele humana quente e natural, criando contraste de temperatura entre vida e trevas;\r\ncontraste alto, preto profundo e textura de pele ultra detalhada;\r\ngranulação de filme leve para toque cinematográfico realista.\r\nTom visual: sombrio, intenso e realista — um retrato de dualidade e poder interno.\r\nFiltro: Cinematic Low-Key HDR com realces metálicos e sombras profundas.\r\nAmbiente: fundo escuro e neutro, atmosfera densa e cinematográfica.\r\nPalavras-chave visuais:\r\n--ultra realistic --cinematic lighting --HDR contrast --8k --photo realism --depth of field --film grain fine --soft shadows --dark neutral background --metallic reflections --symbiotic fusion --alien organic texture --sharp focus --studio portrait --dramatic tone --texture fidelity --bokeh background\r\n🎬 Notas do Diretor de Fotografia:\r\n\r\nA força dessa imagem está no contraste entre o humano e o inumano.\r\n\r\nA iluminação lateral fria e o fundo neutro escuro criam profundidade e tensão.\r\n\r\nA transição de textura entre pele e matéria orgânica deve parecer real e viva, sem parecer fantasia — algo entre fotografia fashion e arte cinematográfica de ficção científica.\r\nO resultado final será épico, sombrio e de altíssima qualidade técnica, com aparência de pôster de filme de ficção de elite, mas com sua identidade preservada.",
+    "image": "https://cdn.bananaprompts.xyz/2421e674-fd9e-4375-9d96-79756179b8c1/7448a17c-a4fe-46f0-b098-6ea8a048ddaa.png",
+    "likes": 127,
+    "creatorName": "@cartazhd",
+    "model": "gemini",
+    "tags": [
+      "Cinematic",
+      "Surreal",
+      "Fantasy",
+      "Sci-Fi",
+      "Vibrant / Colorful"
+    ]
+  },
+  {
+    "id": "14198ca1-9392-4dcd-a579-c4cb664e77a0",
+    "title": "3 frame Winter",
+    "prompt": "A cinematic vertical photo collage composed of three horizontal frames stacked top to bottom, each frame featuring one woman (face 100% inspired by the uploaded reference photo) in a snowy outdoor scene.\nShe wears a trending oversized winter coat, fur-lined and stylish, in a light beige or cream color.\nSoft snowfall, natural cold light, elegant fashion editorial tone, ultra-high detail.\nTop Frame:\nShe poses confidently facing the camera, one hand near the coat collar, hair tousled by the wind, expression calm and poised.\nMiddle Frame:\nShe stands with her back to the camera, coat flowing naturally, surrounded by snow - her silhouette and posture create a cinematic sense of distance and solitude.\nBottom Frame:\nA side-profile upper-body shot, she looks thoughtfully upward toward the sky, snowflakes resting on her face, expression introspective and serene.\nSoft cinematic lighting, cohesive winter color palette, editorial fashion mood, high resolution, realistic texture.",
+    "image": "https://cdn.bananaprompts.xyz/ai-gallery/62d7fcdf-af39-41aa-bba2-3ade96cf3f10/1763036099849-35etfqqisf1.jpeg",
+    "likes": 127,
+    "creatorName": "@editygram",
+    "model": "Nano banana",
+    "tags": [
+      "Realistic",
+      "Photography",
+      "Portrait",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "11e86c86-1544-4439-91a6-efaf2632937b",
+    "title": "City sunset",
+    "prompt": "Ultra-realistic urban portrait of me standing with my back gently resting against a mirrored glass building facade. Body positioned in side profile, head turned toward the camera with a confident, calm expression. Legs slightly crossed, both hands in pockets. A red Ferrari is parked on the perpendicular street beside me, with its front facing the camera, clearly visible in the composition. Outfit: black tailored suit, white shirt, and Adidas sneakers completely white, including the stripes. The glass reflection is soft and slightly diffused, subtly blurred for realism. Scene captured during golden hour, with warm sunlight casting golden highlights on the buildings, car, and reflection. Long soft shadows, cinematic warm tones, glowing light contours. Add subtle natural glow on both the car and me, caused by the sun rays, enhancing the highlights and warmth. Ultra-detailed 8K realism, lifelike skin tones, realistic fabric texture, and professional editorial look. Keep 100% of the uploaded face, no changes to facial features or identity.",
+    "image": "https://cdn.bananaprompts.xyz/e3d97129-78a1-48dd-a7b2-12fa6ba2bf06/0a67eecb-50e2-4f1d-b1f4-e12fe15f9543.png",
+    "likes": 127,
+    "creatorName": "Diego",
+    "model": "Gemini Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Portrait",
+      "Modern",
+      "Business",
+      "Corporate"
+    ]
+  },
+  {
+    "id": "35084dc6-8172-4f27-bbd9-91f602df0a9c",
+    "title": "Homem sentado estiloso",
+    "prompt": "Ultra-realistic full-body portrait of a stylish young man (whose face is based on the provided image) casually seated on the floor indoors, leaning against a plain off-white wall. Sunlight streams in, casting a soft shadow on the wall.\r\n​Outfit: A black crew-neck t-shirt paired with an open, faded gray denim puffer jacket, distressed black jeans, and white sneakers.\r\n​Accessories: An Apple Watch, a silver bracelet, and rings.\r\n​Pose: The pose is relaxed, with one knee bent upward. The face and hands (including the general position and beard style) must follow the look and style of the sent reference photo.",
+    "image": "https://cdn.bananaprompts.xyz/802a7b47-0c63-4074-bd11-01866e5d259d/397f8f87-c3c6-4f52-b11b-a2d2c1a42fd0.jpeg",
+    "likes": 126,
+    "creatorName": "@Glauco_Maccedo",
+    "model": "GEMINI",
+    "tags": [
+      "Realistic",
+      "Portrait",
+      "Modern",
+      "Dark / Moody"
+    ]
+  },
+  {
+    "id": "b34d82d9-3e93-4c50-a131-d462efaa083c",
+    "title": "Artistic Portrait",
+    "prompt": "Ultrarealistic artistic portrait of the model in the reference photo, preserving all real features. [uploaded image], [do not alter the face in the submitted photo], wearing a stylish black sweatshirt, hair glowing with golden backlighting, contrasted by cool green light on the face and chest, against a deep black background. The model is posed slightly in profile, head turned gently to the side with a thoughtful expression, avoiding direct eye contact with the camera.",
+    "image": "https://cdn.bananaprompts.xyz/59e6f935-de7d-44db-97b4-f578f025f7b1/1eeda00c-def8-40bf-aa63-e2ac45a7ecc2.jpeg",
+    "likes": 125,
+    "creatorName": "@syedtiseefulhassan",
+    "model": "Nano Bnana",
+    "tags": [
+      "Cinematic"
+    ]
+  },
+  {
+    "id": "f4ee497b-d55d-4ec5-a25d-742f1bc2b02b",
+    "title": "fashion",
+    "prompt": "(Identical to the reference photo, retaining original facial features) A ​​young Asian woman wearing a black baseball cap with \"PRO\" emblazoned on it and a white baseball-style shirt with the number \"0.00\" printed on the front. She adopts a confident S-curve pose with her head slightly tilted, giving a playful wink and a flirtatious smile, while touching her cheek with her right hand in a half-heart pose. Her long brown hair, decorated with a small pink bow, is visible under the cap. She has bright and cute makeup, featuring gray lenses that make her eyes appear larger, pink blush that accentuates her cheeks, and glossy pink lipstick on her full lips. The background is a soft light pink.\r\n\r\nStyle: Photorealistic, cinematic photography\r\nLighting: Natural light, soft, even lighting that highlights the details of the makeup and the model's facial expressions, with a sharp focus on the model's face and clothing.\r\n\r\nComposition: Medium shot, subject centered\r\nDetails: Realistic fabric texture on baseball cap and shirt, fine hair strand detail, subtle shine on glossy pink lipstick, soft texture of pink ribbon, realistic skin texture with visible pink blush, clear contact lens detail.\r\nQuality: High detail, 8K, masterpiece, cinematic photography.",
+    "image": "https://cdn.bananaprompts.xyz/99c098b7-b5ff-45f0-a9a9-3b48a46ed638/9e5c8d29-d749-448e-8276-7b5a822e29f1.jpeg",
+    "likes": 125,
+    "creatorName": "by @BangPro",
+    "model": "gemini",
+    "tags": [
+      "Portrait",
+      "Fashion"
+    ]
+  },
+  {
+    "id": "ad4b69b7-c9a8-41b7-9ab1-5922b8e7e401",
+    "title": "AI Fashion",
+    "prompt": "Shot on a Hasselblad X2D 100C with a 90mm f/2.5 lens, delivering an exceptionally sharp subject against a gorgeously creamy bokeh, capturing a captivating woman with a confident, slightly enigmatic expression that hints at untold stories. She embodies high-fashion allure, seated in the plush, contoured leather seat of a vintage midnight-blue luxury sports car, its interior a symphony of rich, dark tones and polished chrome accents. Her pose is natural and powerful: one leg bent, her elegant foot resting flat on the car seat, the other extended casually forward, her body subtly twisted towards the camera, with one arm draped languidly along the door sill. She wears a meticulously tailored black silk corset top, its lustrous fabric shimmering with a subtle, structured sheen, perfectly sculpted to her torso with delicate, almost invisible boning and fine, barely-there lace-up detailing at the back. This is paired with high-waisted, wide-leg indigo denim jeans, their premium, raw denim fabric showcasing a distinct, tactile weave and a soft, effortless drape that flows gracefully with her movement. The scene is bathed in the dramatic, moody light of blue hour, with the ambient glow of a distant, twinkling city skyline filtering through the car's window, casting long, soft shadows and defining highlights across the car's interior. A specific, warm, directional streetlamp from just outside the vehicle catches her profile, creating a sharp, exquisite highlight along her cheekbone and jawline, and most critically, a distinct, perfectly rendered catchlight reflecting that specific light source visible deep within her captivating eyes. Every detail is hyper-realistic: visible pores on her skin, the individual strands of her artfully styled hair, the minute texture of the silk corset and the subtle grain of the leather interior, explicitly avoiding any airbrushed or overly smoothed aesthetic, all rendered with the subtle grain and rich, deep tones characteristic of Portra 400 film.. Use the attached image and maintain 100% face consistency.",
+    "image": "https://cdn.bananaprompts.xyz/6d72bbbf-6687-4b31-9b68-76cd0a64d879/fe22f312-05cd-485c-ac91-73462c2107d3.png",
+    "likes": 124,
+    "creatorName": "@aifashioncreator",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Minimalist",
+      "Modern",
+      "Cyberpunk",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "762c0328-d293-4786-ad38-3ae8db8f4134",
+    "title": "The moon",
+    "prompt": "Generate an ultra-realistic editorial studio photograph based on the reference image provided. \r\nPreserve the subject’s real facial features, expression, skin tone, and hair color, but restyle her hair into loose rock-style waves with volume and texture. \r\nKeep her face natural and true to the reference image, with cinematic realism and professional lighting.\r\n\r\nScene description:\r\nThe setting is a photography studio with a neutral gray backdrop. \r\nAt the center of the background, a soft white light glows behind the subject, creating a subtle halo effect and depth. \r\nThe overall mood is dramatic yet elegant — a balance between rebellious energy and editorial sophistication.\r\n\r\nThe subject stands confidently in the center, facing forward, both hands raised toward the sky in a powerful and expressive gesture. \r\nBeneath her feet lies a pile of plastic waste — bottles, wrinkled bags, and discarded packaging — symbolizing rebellion and environmental awareness. \r\nThe contrast between her elegance and the chaotic floor creates a visually arresting, symbolic composition.\r\n\r\nOutfit:\r\nShe wears a long, form-fitting gown worthy of a rock queen — luxurious golden fabric with subtle shimmer and textured metallic highlights. \r\nThe dress features modern, asymmetrical lines, a slightly plunging neckline, and soft draping that enhances her silhouette. \r\nAccessories include bold jewelry (rings, metallic cuffs, and statement earrings) that echo the rebellious rock aesthetic while keeping it refined.\r\n\r\nLighting & studio setup:\r\n- Lighting: three-point setup  \r\n   • Key light: softbox at 45° (slightly above, right side), warm tone (4500K)  \r\n   • Rim light: cold edge light (5600K) from behind for silhouette definition  \r\n   • Background light: subtle white glow behind subject for separation  \r\n- Camera: Canon EOS R5  \r\n- Lens: 70mm f/2.8  \r\n- Aperture: f/2.8  \r\n- ISO: 100  \r\n- Shutter speed: 1/160s  \r\n- Focus: full-body sharpness, slight bokeh on background edges  \r\n- Aspect ratio: 4:5 portrait orientation  \r\n- Composition: vertical frame, centered subject, full body visible, slight upward camera angle for empowerment perspective.\r\n\r\nStyle:\r\nUltra-realistic editorial photography, reminiscent of high-end fashion magazines like Vogue or Harper’s Bazaar. \r\nCinematic contrast, controlled highlights, soft shadows, and perfect studio realism. \r\nThe atmosphere conveys confidence, rebellion, and elegance — the aura of a modern rock queen surrounded by the remnants of a decaying world. \r\nDo not stylize or illustrate; keep full photorealism with authentic studio lighting physics.",
+    "image": "https://cdn.bananaprompts.xyz/e25ec1b2-7645-48f2-8d70-4e4ac23a51ae/01e01500-8376-463a-83fa-0f1b0a10dd82.jpeg",
+    "likes": 123,
+    "creatorName": "@Bessymeadows",
+    "model": "AI",
+    "tags": [
+      "Photography",
+      "Realistic",
+      "Cinematic",
+      "Architecture",
+      "Anime",
+      "3D Render",
+      "Watercolor",
+      "Vector",
+      "Cartoon",
+      "Oil Painting",
+      "Abstract",
+      "Portrait",
+      "Fashion",
+      "Sketch / Line Art",
+      "Business",
+      "Modern",
+      "Corporate",
+      "Minimalist",
+      "Product / Poster",
+      "Logo",
+      "Infographic",
+      "Concept art",
+      "Fantasy",
+      "Sci-Fi",
+      "Cyberpunk",
+      "Retro / Vintage",
+      "Grunge",
+      "Vibrant / Colorful",
+      "Dark / Moody",
+      "Elegant",
+      "Glitch",
+      "Neon",
+      "Flat Design"
+    ]
+  },
+  {
+    "id": "853383f8-52ab-4598-bd3d-2fb966d212e4",
+    "title": "tukacell3@gmail.com",
+    "prompt": "Dramatic, ultra-realistic close-up in black and white with high-contrast cinematic lighting from the side, highlighting the contours of his face and beard, casting deep shadows. He wears round, reflective sunglasses. He gazes confidently upward into a dark void. The sunglasses reflect a city's towering skyline. The atmosphere is mysterious with a minimalist black background. Details in 4K. Keep the subject's exact facial structure, hair texture, the original photo.",
+    "image": "https://cdn.bananaprompts.xyz/460c437d-701f-4a0e-81d4-b90bf1b2d47c/fb1df401-9613-412a-8f90-8abe9a06e954.jpeg",
+    "likes": 123,
+    "creatorName": "Dacio",
+    "model": "tukinhatuka779@gmail.com",
+    "tags": [
+      "Cartoon",
+      "3D Render",
+      "Sci-Fi",
+      "Elegant",
+      "Dark / Moody",
+      "Neon",
+      "Modern",
+      "Product / Poster",
+      "Business",
+      "Corporate",
+      "Minimalist",
+      "Infographic",
+      "Logo",
+      "Concept art",
+      "Oil Painting",
+      "Cinematic"
+    ]
+  },
+  {
+    "id": "dfd14899-6ca3-4d00-b24c-b41de444a0d8",
+    "title": "Fairy Tale Swing",
+    "prompt": "An ethereal, magical fantasy photograph, capturing a female figure like a princess or fairy in an enchanted garden setting. The subject sits on a swing lushly decorated with a profusion of pink, white, and purple flowers and foliage. The swing is suspended over a pool of calm, blue-green water, reflecting the surrounding foliage.\r\n\r\nThe figure sits sideways on the swing, legs crossed or extended, one foot touching the water or a rock. She looks directly at the camera with a serene expression and a slight smile.\r\n\r\nShe wears a stunning ball gown in shades of pink or peach, with a bodice adorned with lace or glittering details and a high collar. The skirt is flowing and voluminous, with a high side slit that reveals her legs.\r\n\r\nHer hair is long, wavy, and golden blonde, with strands falling over her shoulders and chest, complementing the fantasy aesthetic.\r\n\r\nThe backdrop is a lush garden or forest, with dense, dark green foliage surrounding the lake, creating a mystical atmosphere. The lighting is natural and soft, typical of a clear or slightly cloudy day, with reflections from the water and a gentle glow on the skin and hair, enhancing the beauty of the dress and flowers.\r\n\r\nCamera Settings: Captured with a portrait lens (e.g., 85mm or 100mm) on a full-frame camera for flattering compression and pronounced bokeh. Aperture set between f/2.8 and f/4.0 to isolate the subject from the background and create a shallow depth of field that keeps the figure sharp and the surroundings softly blurred. ISO 100-200 for maximum image quality in abundant natural light. Shutter speed of 1/250s to 1/500s to ensure sharpness. Soft, natural lighting, taking advantage of ambient light for an ethereal result.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, hair style, and color with maximum fidelity. The goal is to create a version of the user in this fantasy scene. The clothing (pink evening dress with a slit, detailed bodice), the floral swing, the pose over the lake, the serene expression, the soft lighting, and the enchanted garden background should be generated as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/6abeb10d-d19f-44ca-ac4f-fa11eb83c7ed.jpeg",
+    "likes": 123,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Portrait",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": "97b4ee06-a42c-4198-aa5a-038640cbe58d",
+    "title": "Tangerine Dream",
+    "prompt": "A high-fashion studio photograph featuring a female figure seated on a tall, rust-colored or vibrant orange metal stool, striking an elegant and expressive pose. The subject is positioned at a frontal-diagonal angle, with her body turned and her head tilted back and to the side, with her eyes closed or half-open, conveying a sense of confidence, sensuality, and artistic attitude. Her hands are delicately clasped or resting in her lap, with her legs crossed or casually positioned.\r\n\r\nShe wears a sleek and modern monochromatic ensemble: a fitted black tank top (camisole style) and skinny black pants or leggings. Over her shoulders, a vibrant jacket or coat in a deep reddish-orange (tangerine or coral), partially draped, adds dramatic contrast and a pop of color. On her feet, black ankle boots with a thick heel complete the look, lending a sophisticated and modern air. Long, thin earrings and discreet rings can adorn the look.\r\n\r\nThe background is a minimalist studio backdrop in a light, uniform bluish-gray tone, with a gentle gradient that becomes slightly darker at the top. There is a subtle reflection of the subject and the bench on the shiny floor, adding depth. The lighting is soft and directional, coming from the front and above, highlighting the contours of the body, the textures of the clothing, and the skin, and creating a subtle glow that emphasizes the pose and expression.\r\n\r\nCamera Settings: Captured with a portrait lens (e.g., 85mm or 100mm) on a full-frame camera for a flattering, distortion-free portrait. Aperture set between f/2.8 and f/4.0 to create a soft bokeh that isolates the subject from the background while maintaining sharpness on the face and clothing. ISO 100-200 for maximum studio image quality. Shutter speed of 1/125s to 1/200s to ensure sharpness. Studio lighting with a large softbox or octabox as the main light, positioned in front and slightly above, and a soft fill light to soften shadows, creating a polished fashion look.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, and eye color with maximum fidelity. The goal is to create a version of the user in this fashion scenario. The clothing (black top, black pants, bright orange jacket, boots), accessories (earrings, rings), the elegant and expressive pose (head tilted back, delicate hands), the studio lighting, and the blue-gray background should be generated as described, creating a seamless fusion between the user's identity and the aesthetics of the image. Do not describe or generate specific details about the subject's hair; focus only on the other visual characteristics described and those in the reference image, applying them to the user's facial features.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/3f7938e8-b48d-4c5b-b051-25abf5810795.jpeg",
+    "likes": 122,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Portrait",
+      "Photography",
+      "Fashion"
+    ]
+  },
+  {
+    "id": "7c24831e-c2f4-4dc7-919c-2fd74f5c55dd",
+    "title": "Wizard of wizards",
+    "prompt": "A studio photograph with a dynamic and powerful pose, capturing the male figure of an archmage in full use of his magic. The subject is positioned at a frontal-diagonal angle, with his body slightly leaning forward and one hand extended directly toward the camera, fingers spread, as if casting a spell. The other hand is also raised, with the fingers more withdrawn, preparing or completing a magical movement. His gaze is intense and focused, conveying concentration, determination, and great power.\r\n\r\nHe wears wizard robes in shades of blue-gray or lavender, which appear fluid and draped with dramatic folds due to the movement. The sleeves are long and full, and beneath the robes are layers of other clothing. An ornate wizard hat, in dark tones and with metal details, crowns his head. Distinctive, ornate rings are visible on the fingers of both hands, adding a touch of wisdom and antiquity.\r\n\r\nThe hair is white/silver, long, and flowing, as is the beard, which is thick and extensive.\r\n\r\nThe background is a simple studio backdrop in medium gray tones, allowing the subject to stand out without distraction. The lighting is dramatic and directional, with a light source coming from above and slightly from the front, creating sharp shadows that add volume and intensity to the figure. There is a special highlight on the hands and face, emphasizing the focus of the action.\r\n\r\nCamera Settings: Captured with a wide-angle lens (e.g., 24mm or 35mm) on a full-frame camera to exaggerate the perspective and emphasize the hand extended toward the camera, creating an immersive and powerful effect. Aperture set between f/8 and f/11 to ensure sharpness across the entire subject, including the hand in the foreground and the face. ISO 200-400 to maintain image quality while allowing for a faster shutter speed. Shutter speed of 1/250s to 1/400s to freeze the dynamic movement of the pose and hair/garments. Studio flash with a grid or snoot to direct light precisely on the hands and face, and a soft fill light to soften shadows without eliminating drama.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, hair and beard color and texture as faithfully as possible to the character described. The goal is to create a version of the user as this archmage in action. The user's hair and beard should be adapted to dramatic length and volume. The wizard's robes, hat, rings, dynamic pose (hand extended to the camera, magical gesture), dramatic lighting, and studio background should be generated as described, creating a perfect fusion between the user's identity and the character's aesthetic.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/86c959e7-2ff1-4cca-9093-fea0902d101a.png",
+    "likes": 122,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Portrait",
+      "Photography",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": "9b7c28db-9d87-4fb1-9de2-7e71567743ba",
+    "title": "Golden Hour Dreams 💎",
+    "prompt": "Handsome young man standing in a golden wheat field during sunset, soft golden sunlight on his face, curly dark brown hair, short beard, confident warm smile, looking slightly to the side. wearing a white linen shirt with rolled-up sleeves, top buttons open, tucked into dark trousers with a brown leather belt. classic wristwatch on left wrist. both hands in pockets, relaxed natural pose. wheat surrounding him glows under the evening light. sky painted with orange, peach, and light blue tones, soft scattered clouds, faint stars and a single shooting star above. cinematic lighting, dreamy mood, ultra-realistic detail, warm color tones, shallow depth of field, bokeh background, soft lens flare, golden hour portrait photography.",
+    "image": "https://cdn.bananaprompts.xyz/a3b6c1d5-9d4e-43a6-8931-c51e364731cf/93b0faad-bf2e-433c-8b08-213a89835998.png",
+    "likes": 121,
+    "creatorName": "VFX",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography"
+    ]
+  },
+  {
+    "id": "7acd378f-7def-4d19-ba5e-1bae64639246",
+    "title": "Quiet Confidence",
+    "prompt": "By maintaining the original face and without changing anything from the face and hairstyle. Please create an ultra-realistic full-body shot of a man in his early 35s with a height of 167cm and a weight of 70kg. His expression was confident and calm, staring straight at the camera.\r\nThe man leaned casually against the wall in the corner of a minimalist room. His right leg was crossed in front of his left leg, and both hands were put into his pants pocket. He wears a short-sleeved polo shirt in maroon with a small white 'LV' logo on his left chest. She also wore dark blue slim-fit denim jeans and black casual sneakers with white soles. A black watch was seen on his left wrist.\r\nThe background is a modern interior with matte gray walls and dark wood floors with matching plints. On the wall to his right, hung a large artwork in a thin black frame. The artwork is an illustration of the man's own face in black-and-white graphic style (stencil art/vector portrait), with the inscription \"no limits\" in capital letters at the bottom.\r\nTechnical specifications of photography:\r\nStyle: Professional portrait photography, cinematic, sharp, and highly detailed (hyper-detailed).\r\n* Lighting: Dramatic lighting with high contrast (Chiaroscuro style). One main source of hard light came from the top-left direction, creating a spotlight-like effect on the man and the wall behind him. This light highlighted the left side of his face and body strongly, while producing a deep and sharp shadow on his right side.\r\n* Angle of Image Capture: Eye-level shot, showing the entire body. Composition is balanced with the subject on the left side and the artwork on the right side.\r\n* Color palette: A controlled and cool color palette, dominated by gray, black, and dark blue, with a maroon shirt as the only strong and striking color accent.\r\nQuality: 8K resolution, ultra-realistic, sharp detail on the texture of clothing, skin, and hair.",
+    "image": "https://cdn.bananaprompts.xyz/77a48ac3-1062-4b7f-a611-a3ea20c935e1/6a557dee-d638-4c56-82ff-ab648af4e9bd.jpeg",
+    "likes": 120,
+    "creatorName": "@MrJoker",
+    "model": "Gemini",
+    "tags": [
+      "Architecture",
+      "Cinematic",
+      "Fashion",
+      "Landscape",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "2984b729-2490-4408-8b57-27cf402ed214",
+    "title": "Walking on the street",
+    "prompt": "A man (use the provided image for accurate facial features) walking down a city street at night, with neon reflections on the wet pavement. The scene is set on a city street at night. The asphalt is wet, reflecting the surrounding lights as if it had just rained. The background is filled with vibrant, out-of-focus lights (bokeh effect) from neon signs, storefronts, and streetlights, creating a cinematic and melancholic atmosphere. He walks confidently toward the camera. He wears a black leather motorcycle jacket over a black t-shirt and black pants, with his hands in his pockets. Photo taken with a Sony Alpha a7 III, 50mm lens, f/1.8, ISO 800, natural street lighting, slight motion blur, cinematic grain, hyper-realistic details. Vertical format, 9:16.",
+    "image": "https://cdn.bananaprompts.xyz/f4f238cc-bb8e-4716-bfde-51c2718d5984/9e3558d4-85b6-431e-9f92-5a1695ef892e.png",
+    "likes": 120,
+    "creatorName": "Robson",
+    "model": "nanobanana",
+    "tags": [
+      "Realistic",
+      "Photography"
+    ]
+  },
+  {
+    "id": "3dab1723-b61b-4398-a798-58e0cf46a375",
+    "title": "Animation",
+    "prompt": "Converta essa imagem para que a menina de 2 anos esteja sentada no centro de uma poltrona de encosto alto em um ambiente de estúdio minimalista e monocrático.\r\nSubstitua o fundo atual por uma parede e piso sem emendas em uma cor sólida, rosa queimado. \r\nVista-a com um vestido de dama de honra e uma coroa com jóias branca. Mantenha seus sapatos limpo e branco com os pés sem tocar o chão devido a altura da poltrona e suas mãos suavemente entrelaçadas em seu colo. A cadeira deve combinar com esquema geral de cores para criar um efeito monocromático sem emendas. A iluminação deve ser suave, e uniforme e estilo de estúdio, com sombras mínimas.\r\nA imagem final deve ser de ultra-alta resolução, elegante, moderna e minimalista, no estilo de fotografia de retrato de alta costura.",
+    "image": "https://cdn.bananaprompts.xyz/33eb7dd7-bef7-450c-a52c-9a7ca134b625/c48d8014-70ac-4a6c-ad51-c4fd8223594c.png",
+    "likes": 119,
+    "creatorName": "Etienne",
+    "model": "Marie",
+    "tags": [
+      "Photography",
+      "Fashion",
+      "Business",
+      "Modern",
+      "Logo",
+      "Product / Poster",
+      "Infographic",
+      "Concept art",
+      "Fantasy",
+      "Dark / Moody",
+      "Elegant",
+      "Glitch",
+      "Neon",
+      "Realistic",
+      "Anime",
+      "Architecture",
+      "Cartoon"
+    ]
+  },
+  {
+    "id": "a288626a-ea47-44b1-b6d4-f40718041a3f",
+    "title": "Mulher de Megócios",
+    "prompt": "Recrie esta cena utilizando a minha foto, substituindo completamente a pessoa original pela minha imagem, mantendo meus traços faciais, tons reais de pele e cabelo, expressão e textura natural, sem estilizar ou alterar minha fisionomia.\r\nA cena mostra uma pessoa sentada em um café moderno e iluminado, trabalhando em um notebook prateado, com uma xícara de café com espuma artística (latte art) sobre a mesa. Há também um caderno e uma caneta próximos, compondo um ambiente de trabalho aconchegante e sofisticado.\r\nO gesto e postura devem ser mantidos: corpo levemente inclinado para frente, mãos sobre o teclado, olhar voltado para a câmera com uma expressão tranquila, confiante e acolhedora.\r\nA pessoa veste uma camisa social bege ou areia, levemente folgada, com o colarinho aberto e as mangas parcialmente dobradas, transmitindo elegância natural e conforto.\r\nO cenário deve manter o mesmo clima de cafeteria urbana, com grandes janelas de vidro ao fundo, pelas quais entra luz dourada de fim de tarde. Elementos como plantas, luzes pendentes e tons de madeira devem estar presentes para preservar o ambiente quente e natural.\r\nA iluminação deve ser suave, com luz solar natural incidindo lateralmente sobre o rosto, destacando os traços de forma delicada e criando um brilho quente sobre o cabelo e o fundo.\r\nO estilo geral deve ser fotográfico, realista e natural, com paleta de cores dourada, marrom-claro, bege e verde suave.\r\nA imagem deve ter proporção vertical (1080x1920) e aparência profissional e cinematográfica, transmitindo calma, produtividade e elegância casual.",
+    "image": "https://cdn.bananaprompts.xyz/076c11fd-41b9-4ff9-a31b-68d0d255186f/adda685f-900f-4a60-a352-ecc8214000db.png",
+    "likes": 118,
+    "creatorName": "@cwbarteprodutora",
+    "model": "nano banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Corporate",
+      "Business",
+      "Elegant"
+    ]
+  },
+  {
+    "id": "20ccdf4d-6e18-4acc-9394-d9e38a311b0a",
+    "title": "Sophisticated, cinematic studio portrait of a man",
+    "prompt": "Use my face from attached photo,A sophisticated, cinematic studio portrait of a man in a sharp, bespoke, charcoal grey double-breasted suit. The suit has broad, peaked lapels and a six-button closure (4 functioning). He is wearing a crisp white dress shirt and a solid black or very dark grey tie. A white pocket square is neatly folded in his breast pocket.\r\nThe man is posed leaning on a rich, cognac brown leather armchair with a well-worn, textured patina. His right hand rests on the chair, holding a pair of dark brown leather gloves. He has a confident, slightly intense gaze, looking off-camera to the upper right.\r\nDetails and Style:\r\nAesthetics: Classic menswear, dapper, timeless, powerful, high fashion, tailored elegance.\r\nLighting: Dramatic, low-key, and moody. Strong chiaroscuro effect with a single directional key light creating deep shadows and highlighting the texture of the suit and the leather. A soft rim light separates the subject from the background.\r\nColor Palette: Dominated by rich greys, deep blacks, and warm, earthy browns (leather).\r\nBackground: Dark, subtle, and indistinct, possibly a muted, dark painting or textured wall to suggest a luxurious, private study or gentleman's club.\r\nCamera and Composition:\r\nShot Type: Medium full-length portrait.\r\nComposition: Rule of thirds, with the subject filling most of the frame, slightly off-center for dynamic balance.\r\nLens: Prime portrait lens, approximately 85mm to 100mm, for a natural, slightly compressed perspective.\r\nDepth of Field: Shallow (\\text{f}/2.8 to \\text{f}/4) to keep the subject razor-sharp while softly blurring the background and foreground elements (like the far side of the chair).\r\nQuality: Ultra-high detail, professional studio quality, incredibly sharp focus on the face and suit texture, film grain simulation for a classic, sophisticated feel.",
+    "image": "https://cdn.bananaprompts.xyz/2496885e-a4f4-4272-b0a1-b151dc67510f/5c1bbd06-bb40-49f5-8c95-1dbb138829fe.png",
+    "likes": 117,
+    "creatorName": "Evandro Martinez",
+    "model": "gemini",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Business",
+      "Corporate"
+    ]
+  },
+  {
+    "id": "99bf8d01-8b0c-41e3-8c2d-c03337eadaf9",
+    "title": "Back-to-Back Romance",
+    "prompt": "A full-length studio portrait with a romantic and elegant aesthetic. It captures a couple in a symmetrical and stylish pose, back to back, both holding a red heart-shaped balloon. The male figure is turned toward the camera with a subtle, confident smile. The female figure has her back turned, but looks over her shoulder at the camera with a sweet smile.\r\n\r\nThe woman wears an elegant, short, strapless red dress and matching red high heels. Her hair is long and red, with soft waves falling down her back.\r\n\r\nThe man wears a well-cut navy suit, a white dress shirt, and black dress shoes. His hair is dark and slicked back, with a short, well-trimmed beard.\r\n\r\nThe background is a solid-color studio backdrop in a very light cream or beige tone. The lighting is bright and even (high-key) studio lighting, coming from a frontal angle, which eliminates harsh shadows and highlights the vibrant colors of the clothing and balloons.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm) or a standard lens (e.g., 50mm) on a full-frame camera for a distortion-free full-body portrait. Aperture set between f/8 and f/11 to ensure exceptional sharpness on both figures, from head to toe. ISO 100 for maximum studio image quality. Shutter speed from 1/160s to 1/250s. High-key studio lighting with multiple softboxes to ensure soft, enveloping light.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the male user's reference photo to capture and apply all of his facial features, facial structure, hairstyle, beard, eye color, and skin tone to the male figure in the image. Likewise, use the female user's reference photo to apply all of her facial features, facial structure, hairstyle, eye color, and skin tone to the female figure in the image. The goal is to create a version of the couple in this studio portrait. The clothing (blue suit for him, red dress for her), the heart balloons, the back-to-back pose, the bright lighting, and the cream background should be generated as described, creating a perfect fusion between the identity of both users and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/5010988d-7fab-4737-8baa-644a9bfa5549.jpeg",
+    "likes": 114,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "7c616e67-d00e-4ee5-a954-f199a0f55c90",
+    "title": "Hand-drawn portrait illustration",
+    "prompt": "Generate a hand-drawn portrait illustration in red and yellow pen on notebook paper, inspired by doodle art and comic annotations. Keep full likeness of the subject, expressive lines, spontaneous gestures, bold outline glow, handwritten notes around, realistic pen stroke texture, 4K resolution",
+    "image": "https://cdn.bananaprompts.xyz/ai-gallery/6fb6082c-ad6a-4aeb-bc4f-ec4fba294226/1762982118002-nk2tqkxqb3l.png",
+    "likes": 112,
+    "creatorName": "George",
+    "model": "GoogleWhisk",
+    "tags": [
+      "Vector",
+      "Cartoon",
+      "Watercolor",
+      "Sketch / Line Art"
+    ]
+  },
+  {
+    "id": "72c749b3-59fd-4e6d-b9ad-3b4815294663",
+    "title": "tired heart",
+    "prompt": "Um retrato cinematográfico em preto e branco de um homem com barba curta e cabelo escuro, de perfil, encostado em uma parede escura e lisa em um corredor ou saguão iluminado por luzes de parede elegantes. Ele está com os olhos fechados, a cabeça ligeiramente inclinada para cima, transmitindo uma sensação de introspecção e calma. Ele veste uma camisa social de manga longa escura (preta ou cinza muito escuro), com as mangas arregaçadas nos antebraços, e calças escuras presas por um cinto. A iluminação é dramática e de alto contraste, com fontes de luz quente visíveis ao fundo, criando realces sutis no rosto, cabelo e camisa, enquanto as sombras profundas intensificam o clima melancólico e sofisticado. A profundidade de campo é rasa, focando no homem e desfocando o corredor ao fundo. O estilo é atemporal, elegante e com uma estética de fotografia de moda profissional. --ar 9:16",
+    "image": "https://cdn.bananaprompts.xyz/aa620976-b24c-4c6e-98be-ca6e2544489a/f506e129-d9bf-4727-a811-fd7bf98f9452.jpeg",
+    "likes": 112,
+    "creatorName": "ENT.FADI HIMOUR",
+    "model": "The wall",
+    "tags": [
+      "Cinematic",
+      "Dark / Moody",
+      "Realistic"
+    ]
+  },
+  {
+    "id": "02495f41-1bea-4a74-b526-cba428a2fc50",
+    "title": "Babyboy blue style",
+    "prompt": "Artistic full-body portrait of a 3-year-old boy with 99% facial resemblance to the original. He is standing confidently in the foreground, wearing a modern light blue hoodie with matching baggy pants and white sneakers with gray details. Hair color should match the uploaded photo. He is wearing several bracelets, a finger ring, and a modern wristwatch. In the background, there is a large black-and-white close-up side profile of the same boy. Dramatic lighting with cinematic soft shadows, ultra-realistic 4K detail.",
+    "image": "https://cdn.bananaprompts.xyz/ai-gallery/62d7fcdf-af39-41aa-bba2-3ade96cf3f10/1762800147236-ob122avhdbk.jpeg",
+    "likes": 112,
+    "creatorName": "@editygram",
+    "model": "Nano banan",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "8a3879c6-03e7-4aa9-88b1-506c7b672a08",
+    "title": "Contratando, Redes Sociais",
+    "prompt": "Incitar\r\nEdite esta imagem para mostrar um homem profissional inovador em uma pose de pensamento criativo com uma mão tocando seu queixo pensativamente, a outra mão segurando um laptop aberto na altura da cintura, em pé em uma postura de três quartos com uma expressão visionária e entusiasmada. Ele está vestindo um blazer azul elétrico moderno sobre uma camisa henley branca casual para um apelo profissional criativo. O fundo é branco imaculado desbotando para um gradiente suave de verde menta. Elementos visuais de marketing digital flutuam ao redor dele: ícones de plataformas de mídia social (Instagram, LinkedIn, Facebook, logotipos do TikTok) em suas cores características, gráficos minimalistas de megafone, símbolos de gráfico de análise ascendente, ícones de engajamento como corações e balões de comentários, símbolos de alvo/alvo e símbolos de arroba. Emblemas métricos coloridos mostrando números de crescimento (+2,5 mil, +850). Linhas de conexão e nós entre os ícones sugerem campanhas integradas. Pequenos detalhes de relâmpago e estrela em azul e verde adicionam energia criativa. O lado esquerdo exibe uma tipografia atraente: \"ESTAMOS CONTRATANDO\" com \"CONTRATANDO\" destacado em uma caixa azul brilhante, seguido por \"marketing digital\" e \"#mentes criativas procuradas\" em fonte sem serifa contemporânea. O canto superior esquerdo apresenta um ícone de campanha ou estratégia. A estética geral é inovadora, orientada por dados, mas criativa, com a energia do recrutamento profissional do LinkedIn. Renderização fotorrealista com iluminação vibrante e envolvente, estilo de agência digital e estética moderna de aquisição de talentos de marketing.",
+    "image": "https://cdn.bananaprompts.xyz/16d94dfd-4a02-439a-984e-5e1899b2e909/e59336ff-712a-452b-84e5-77a08dceaa6d.png",
+    "likes": 110,
+    "creatorName": "Mauro_luiz",
+    "model": "AI",
+    "tags": [
+      "Neon",
+      "Vibrant / Colorful",
+      "Elegant",
+      "Fantasy",
+      "Infographic",
+      "Logo",
+      "Minimalist",
+      "Corporate",
+      "Business",
+      "Modern",
+      "Photography",
+      "Surreal",
+      "Fashion",
+      "Abstract",
+      "Cartoon",
+      "Realistic",
+      "Cinematic"
+    ]
+  },
+  {
+    "id": "fdcdde49-b886-4225-b299-b845eac15b5a",
+    "title": "Hermione Granger",
+    "prompt": "A full-length studio photograph capturing a female figure in a dynamic and determined pose, ready for action. The subject is positioned at a three-quarter angle, her body slightly turned and her head held high, looking straight ahead with a focused and courageous expression. One hand is extended forward, firmly grasping a wooden wand, pointed out of the frame in a spell-casting gesture.\r\n\r\nShe wears the classic Hogwarts uniform: a long, flowing black robe with a vibrant burgundy or deep red lining that reveals itself at the edges. Underneath is a dark gray sweater, a white collared shirt, and a striped tie in the Gryffindor house colors. Dark tights and black flat shoes complete the ensemble, maintaining the authenticity of school attire.\r\n\r\nHer hair is light brown, styled in voluminous waves and conveying an intelligent, yet slightly wild, air.\r\n\r\nThe background is a neutral studio, with a soft gradient of mid-to-dark tones that can suggest a subtle haze or smoke without distracting from the subject. The lighting is soft but directional, with a main light source illuminating the face and body, creating a subtle glow on the clothing and hair, and highlighting the focus on the face and wand.\r\n\r\nCamera Settings: Captured with a standard lens (e.g., 50mm or 70mm) on a full-frame camera for a natural perspective. Aperture set between f/4.0 and f/5.6 to maintain sharpness across the subject, from the wand to the feet, while providing a slight blur in the background. ISO 200-400 to ensure noise-free detail in a studio environment. Shutter speed of 1/160s to 1/250s to freeze the dynamic pose. Studio lighting with a large softbox positioned in front of and above the subject, and a reflector to fill in shadows, creating a balanced and slightly dramatic look.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, hair color, and texture as accurately as possible to the character described. The goal is to create a version of the user as this young witch. The costume (Hogwarts robe, sweater, shirt, tie), wand, dynamic pose, soft lighting, and studio background should be generated as described, creating a perfect fusion between the user's identity and the character's aesthetic.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/282f4ef1-15e8-4e31-8bd8-a31456218610.png",
+    "likes": 109,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Photography",
+      "Portrait",
+      "Fantasy"
+    ]
+  },
+  {
+    "id": "e744f291-9ce0-48a4-aa42-0e60ca425a6e",
+    "title": "Submerged Portrait",
+    "prompt": "Hyper realistic ultra detailed close up portrait showing only the left side of the face submerged, eye on the far left of the frame in pin sharp focus. Underwater macro perspective with extreme details; individual skin pores, wet eyelashes, wet lips, suspended droplets and bubbles, and golden light rays creating caustic patterns on the subject. Cinematic lighting with soft shadows and sharp highlights and a focused specular highlight to emphasize wet texture. Subsurface scattering, photorealistic textures, shallow depth of field, photorealistic color grade. Surreal and dreamlike atmosphere.",
+    "image": "https://cdn.bananaprompts.xyz/6a8efaf2-dbec-4e64-b7fe-d8027a301786/ac0a2c16-d6d0-43a8-a4f9-4440db84bfc5.png",
+    "likes": 108,
+    "creatorName": "Pikoxa",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Surreal",
+      "Photography",
+      "Portrait",
+      "Vibrant / Colorful",
+      "Dark / Moody"
+    ]
+  },
+  {
+    "id": "6e173a70-9799-4dc0-956d-9d047b1c18d5",
+    "title": "Sophisticated Style",
+    "prompt": "A full-length studio photograph with a sophisticated and professional aesthetic. It captures a female figure sitting elegantly in a modern brown leather armchair with a metal swivel base. The subject sits confidently, with her body at a slight angle, looking directly at the camera with a serene expression. One hand is resting on the knee or arm of the chair, while the other is close to her face. Her legs are crossed or elegantly positioned.\r\n\r\nShe wears a dark brown or chocolate suit (blazer and wide-leg pants) over a light (white or cream) top. On her feet are light-colored (nude or off-white) high-heeled shoes with buckle or jewel details. She wears several pieces of gold jewelry: earrings, rings, and a wide bracelet. Her nails are painted a vibrant red.\r\n\r\nHer hair is dark, medium-length, with soft waves and swept to the side. Her makeup is polished and professional.\r\n\r\nThe background is a solid-colored studio backdrop in a shade of brown that complements the suit and armchair, creating a sophisticated, monochromatic color palette. The lighting is studio-grade, soft, and directional, coming from a front-to-side angle, shaping the face and body, highlighting the textures of the fabric and the shine of the jewelry.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 85mm or 100mm) on a full-frame camera for a flattering perspective and natural proportions. Aperture set between f/4.0 and f/5.6 to ensure sharpness across the subject. ISO 100-200 for maximum studio image quality. Shutter speed from 1/160s to 1/250s. Studio lighting with a large softbox or octabox as the main light and a reflector to fill in shadows.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, hairstyle, and skin tone with maximum fidelity. The goal is to create a professional version of the user in this portrait. The clothing (brown suit, light top, heels), jewelry, red nails, the pose sitting in the leather chair, the serene expression, the soft lighting, and the brown background should be created as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/bc08a6d6-946a-4e9b-af99-c41cc843e487.jpeg",
+    "likes": 104,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "f74b8831-5fe5-4a9a-8a36-55450158023e",
+    "title": "Colors of Silence",
+    "prompt": "Ultra-realistic portrait of a young man standing inside the Nasir al-Mulk Mosque (the Pink Mosque) in Shiraz, Iran.\r\nThe man stands with arms folded, facing slightly upward with eyes closed, as colorful sunlight from stained glass windows falls across his face and upper body.\r\n\r\nLighting: Bright, multicolored rays of sunlight in blue, red, yellow, and green tones streaming diagonally through stained glass windows, casting vivid reflections on the wall and person.\r\nThe lighting should be natural yet dramatic, with realistic rainbow-like highlights on the skin and clothes.\r\n\r\nLocation: Traditional Persian tile wall background with intricate floral and calligraphic Islamic patterns in blue, pink, and gold tones.\r\nMaintain full cultural and architectural accuracy of Nasir al-Mulk Mosque’s interior — ornate tiles, geometric floral motifs, and warm ambient light.\r\n\r\nPose: The man stands relaxed with arms crossed over his chest, shoulders slightly leaned back, and head tilted upward toward the light source. His expression is calm and contemplative.\r\n\r\nOutfit: A dark casual jacket or shirt, matching pants, and a cap. Keep the tones neutral (navy, dark gray, or black) to contrast with the vivid colored light.\r\n\r\nCamera & Composition: Medium shot from a slightly low angle (waist up), cinematic composition with natural depth and focus on light and emotion.\r\n\r\nFace: Replace the person’s face with the one from the uploaded image while keeping lighting consistency and realistic skin tone blending.\r\n\r\nMood & Style: Photorealistic, spiritual, calm, and vibrant; high dynamic range, crisp detail, cinematic lighting, ultra high resolution.",
+    "image": "https://cdn.bananaprompts.xyz/397b9e40-c56c-4a2b-a9bb-22813d6d3cc5/fc1a4648-1c69-4687-9c3e-45b877e1b604.png",
+    "likes": 103,
+    "creatorName": "@mrzic",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Oil Painting",
+      "Abstract",
+      "Photography",
+      "Portrait",
+      "Flat Design"
+    ]
+  },
+  {
+    "id": "d58c5fe9-a3c9-41c8-9731-041a5e8a820d",
+    "title": "Urban Muse",
+    "prompt": "A professional studio portrait with a streetwear aesthetic and a touch of nostalgia. The subject is a female figure seated in a confident, thoughtful pose, her body angled and her gaze directed upward and out of the frame. One hand is raised, gently touching her cheek, while the other rests on a skateboard.\r\n\r\nShe wears a black or dark denim jacket, worn stylishly and draped over one shoulder, revealing a light-colored top underneath. Her bottoms are high-waisted, light-wash jeans, held in place by a black belt.\r\n\r\nHer hair has a modern wet look, with textured waves falling around her face and shoulders, lending an edgy, high-fashion feel. A classic wooden skateboard is casually held, complementing the urban vibe.\r\n\r\nThe background is a minimalist studio backdrop in a solid gray tone. The image features distinctive color processing, with a film-like aesthetic characterized by visible grain, slightly desaturated colors, and an overall tone that adds depth and a moody atmosphere. The lighting is soft yet directional, creating delicate shadows that sculpt the features of the face and body.\r\n\r\nCamera Settings: Captured with a prime portrait lens (e.g., 50mm or 85mm) on a full-frame camera for a natural and flattering perspective. Aperture set between f/2.8 and f/4.0 to keep the subject in sharp focus with smooth separation from the background. ISO 200-400 to emulate the texture of film without excessive digital noise. Shutter speed from 1/160s to 1/250s. Studio lighting with a large softbox or octabox as the main light, positioned to create a soft, shaping light.\r\n\r\nInstructions for the \"nano banana\":\r\n\r\n\"Please use the user's reference image to capture and apply all of their facial features, facial structure, eye color, skin tone, style, and hair color with maximum fidelity. The goal is to create a version of the user in this studio portrait. The clothing (dark denim jacket, light denim, black belt), skateboard, pose, lighting, wet-look hair, and film grain color treatment should be created as described, creating a perfect fusion between the user's identity and the aesthetics of the image.\"",
+    "image": "https://cdn.bananaprompts.xyz/1a9193f2-4d4f-402a-b1fa-89f89b391554/7a9c4797-623f-42cb-b9b2-bdfe0c5a2fed.jpeg",
+    "likes": 103,
+    "creatorName": "TonyFortem",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Portrait"
+    ]
+  },
+  {
+    "id": "ebd93a83-88d4-4f7c-87be-e268b8818b6a",
+    "title": "AI Fashion",
+    "prompt": "Shot on a Hasselblad X2D 100C with a 90mm f/2.5 lens, delivering an exceptionally shallow depth of field with creamy bokeh that gently blurs the luxurious backdrop. The scene captures a woman of elegant confidence, with a captivating expression, performing a mirror selfie in a minimalist yet opulent walk-in closet bathed in a dramatic, directional light. She wears a high-fashion ensemble: a meticulously tailored, jet-black patent leather mini skirt that gleams under the light, its subtle creasing and smooth, almost liquid texture exquisitely rendered. Paired with it is a sleek, form-fitting tube top crafted from a fine-gauge silk knit in a muted charcoal, hugging her form with a delicate, soft drape that contrasts beautifully with the skirt's structure. Her pose is natural yet poised; one hand holds a sophisticated smartphone angled to capture her reflection in the vast, frameless mirror, while the other rests casually and confidently on her hip. The setting is an ultra-modern space defined by polished concrete floors and understated, architectural elements, with subtle recessed LED strips casting a gentle, atmospheric glow in the periphery. The primary light source, an unseen large softbox positioned high and to her left, rakes across her body, creating exquisite highlights on the patent leather and sculpting her figure with soft, elongated shadows. This dramatic illumination accentuates the individual strands of her perfectly styled hair, casts a luminous sheen on her skin revealing visible pores and a natural texture, entirely devoid of any airbrushed artificiality. Crucially, a distinct, rectangular catchlight from the softbox is perfectly mirrored within the depths of her eyes, giving them a lifelike sparkle and intensity. The entire image is imbued with the subtle grain and rich, nuanced tones reminiscent of Portra 400 film, enhancing its high-fashion editorial quality and photorealistic depth.. Use the attached image and maintain 100% face consistency.",
+    "image": "https://cdn.bananaprompts.xyz/6d72bbbf-6687-4b31-9b68-76cd0a64d879/bcefb0fa-7a4f-49e4-9141-3916c21cb306.png",
+    "likes": 103,
+    "creatorName": "@aifashioncreator",
+    "model": "Nano Banana",
+    "tags": [
+      "Realistic",
+      "Cinematic",
+      "Fashion",
+      "Photography",
+      "Business",
+      "Elegant",
+      "Retro / Vintage"
+    ]
+  },
+  {
+    "id": "56ccc78f-0ecd-402e-9c0f-97013f3cd423",
+    "title": "Arte moderna",
+    "prompt": "Use o modelo (a pessoa da imagem)\r\nPara criar uma foto, com a avenida time square de fundo, no meio da foto uma lamborghini urus preta e a pessoa da foto sentada no chão na frente do carro, apoiando suas costas nela, com a perna direita dobrada e seu braço direito apoiado nela, com a perna esquerda esticada e sua mão esquerda apoiada no chão, a pessoa da foto deve estar usando uma camiseta preta básica apertada e de manga curta, calça preta social justa e cinto preto, sapatos pretos sociais, relógio social na mão direita, a pessoa deve estar usando óculos escuros e olhando para frente, o dia deve estar de noite e a time square toda iluminada. Mantenha o rosto e as tatuagens da pessoa, sem mudar o estilo do cabelo e que a imagem seja o mais realista possível.",
+    "image": "https://cdn.bananaprompts.xyz/f6c03043-ed27-46ba-bc8d-6090ecb54b78/8997d531-5ed6-480c-842b-dbd128d50c7a.jpeg",
+    "likes": 103,
+    "creatorName": "@kennymoraesofc",
+    "model": "Gemini",
+    "tags": [
+      "Cinematic",
+      "Surreal",
+      "Modern",
+      "Vibrant / Colorful",
+      "Neon"
+    ]
+  },
+  {
+    "id": "a9f3603e-85fb-4926-b311-f97a3ac20dd5",
+    "title": "Atletic swiiming shot",
+    "prompt": "A hyper-realistic close-up portrait of a highly muscular man standing in a swimming pool, with water reaching just below his chest. He has short dark hair, a well-groomed beard, and is wearing sunglasses which he is currently holding in his right hand, slightly lowered from his face. His expression is a broad, genuine smile, and he is looking off to his right (viewer's left), suggesting he's engaged in conversation or enjoying a moment. His physique is exceptionally defined, showcasing prominent chest muscles, deltoids, and abdominal definition, all glistening with water droplets under bright, natural sunlight.\r\n\r\nPose and Composition:\r\n\r\nThe man is positioned slightly off-center to the left, allowing for some background visibility. His shoulders are broad and relaxed, and his pose in the water appears natural and unforced. The upward angle of the shot emphasizes his strong jawline and muscularity. The water in the pool is clear and turquoise, with small ripples, reflecting the sunlight.\r\n\r\nBackground:\r\n\r\nThe background suggests an outdoor, luxurious setting, likely a resort or a private villa. There's a light-colored building with large windows or doors visible, hinting at modern architecture. Woven rattan chairs and a wooden table are partially visible, indicating an outdoor seating area. The bright sunlight creates stark shadows and highlights, contributing to a vibrant and inviting atmosphere.",
+    "image": "https://cdn.bananaprompts.xyz/40ce80ff-9ca3-4e3c-9c3f-ae7ccd157763/adc94eda-09e8-4eeb-b694-d3810bba98d7.png",
+    "likes": 103,
+    "creatorName": "amolossi",
+    "model": "Gemini",
+    "tags": [
+      "Realistic",
+      "Anime",
+      "Portrait",
+      "Photography",
+      "Vibrant / Colorful"
+    ]
+  },
+  {
+    "id": "7cca7d18-0a73-4386-bf11-7cb14a9e3926",
+    "title": "Batom Rouge",
+    "prompt": "Hello Gemini, I would like you to use the reference photo and make an ultra-realistic close-up portrait of a young woman wearing an elegant strapless black suit, seductive and confident expression, striking red lipstick, flawless and radiant skin, clean face, dramatic fashion lighting with a soft circular spotlight in the background, cinematic aesthetic of beauty editorial photography, ultra HD.",
+    "image": "https://cdn.bananaprompts.xyz/433a6adc-3bb9-4054-9fc9-72cae93fc378/79077c72-9ed1-490d-8aa8-80b1ff372371.png",
+    "likes": 102,
+    "creatorName": "@leohnt92",
+    "model": "Gemini",
+    "tags": [
+      "Cinematic",
+      "Realistic",
+      "Modern",
+      "Elegant"
+    ]
+  }
+];
+
+export async function fetchLiveBananaPrompts(limit = 50, offset = 0): Promise<BananaPromptItem[]> {
+  try {
+    const res = await fetch(`https://www.bananaprompts.xyz/api/prompts?limit=${limit}&offset=${offset}`);
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!Array.isArray(data.items)) return [];
+    return data.items
+      .filter((i: any) => i.prompt && i.prompt.trim() && !i.isPremium)
+      .map((i: any) => ({
+        id: String(i.id),
+        title: String(i.title || "Prompt"),
+        prompt: String(i.prompt).trim(),
+        image: String(i.image || ""),
+        likes: Number(i.likes || 0),
+        creatorName: String(i.creatorName || "Community"),
+        model: String(i.model || "AI"),
+        tags: Array.isArray(i.tags) ? i.tags.map(String) : [],
+      }));
+  } catch (err) {
+    console.warn("Failed to fetch live banana prompts:", err);
+    return [];
+  }
+}

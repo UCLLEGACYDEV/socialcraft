@@ -3,10 +3,20 @@ import { Download, ImageIcon, Loader2, Sparkles, Trash2, UserCheck } from "lucid
 import { mockGenerateImage } from "../mock-api";
 import type { HistoryEntry } from "../types";
 
-export function DirectPromptView() {
-  const [prompt, setPrompt] = useState("");
+interface DirectPromptViewProps {
+  initialPrompt?: string;
+}
+
+export function DirectPromptView({ initialPrompt }: DirectPromptViewProps = {}) {
+  const [prompt, setPrompt] = useState(initialPrompt ?? "");
   const [loading, setLoading] = useState(false);
   const [images, setImages] = useState<string[]>([]);
+
+  // Update prompt if initialPrompt changes
+  const prevInitRef = useState(initialPrompt)[0];
+  if (initialPrompt && initialPrompt !== prompt && initialPrompt !== prevInitRef) {
+    setPrompt(initialPrompt);
+  }
 
   const run = async () => {
     if (!prompt.trim()) return;
@@ -73,37 +83,7 @@ export function AiCloneView() {
   );
 }
 
-const PROMPTS = [
-  "Photorealistic obsidian monolith, ember rim light, volumetric fog",
-  "Marble statue cracking open, molten gold inside, dark studio",
-  "Single chair in an empty concrete hall, hard shadow, cinematic",
-  "Macro shot of a mechanical watch made of black stone",
-  "Silhouette climbing stairs of light in total darkness",
-  "Broken mirror reflecting one glowing ember eye, high contrast",
-];
-
-export function PromptGallery() {
-  return (
-    <div className="space-y-4">
-      <h1 className="flex items-center gap-2 text-lg font-semibold">
-        <Sparkles className="h-4 w-4 text-primary-bright" /> Prompt Hub
-      </h1>
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {PROMPTS.map((p) => (
-          <button
-            key={p}
-            type="button"
-            onClick={() => navigator.clipboard?.writeText(p)}
-            className="glass-card hover:ember-glow p-4 text-left text-xs sm:text-sm leading-relaxed text-foreground/90 transition-colors hover:text-foreground"
-          >
-            {p}
-            <span className="mt-2.5 block text-xs font-semibold text-primary-bright">Klicken zum Kopieren</span>
-          </button>
-        ))}
-      </div>
-    </div>
-  );
-}
+export { PromptHubView as PromptGallery } from "./PromptHubView";
 
 export function HistoryView({
   entries,
