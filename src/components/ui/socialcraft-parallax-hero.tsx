@@ -88,6 +88,9 @@ export function SocialcraftParallaxHero({
       smoothWheel: true,
     });
 
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    lenis.scrollTo(0, { immediate: true });
+
     lenis.on('scroll', ScrollTrigger.update);
     const tickerCallback = (time: number) => {
       lenis.raf(time * 1000);

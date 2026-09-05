@@ -20,7 +20,8 @@ import {
 import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
 import { AdminDashboard } from "@/onyx/components/AdminDashboard";
 import { AuthModal } from "@/onyx/components/AuthModal";
-import { type User, getStoredCurrentUser, saveStoredCurrentUser } from "@/onyx/auth";
+import { CreditUpgradeModal } from "@/onyx/components/CreditUpgradeModal";
+import { type User, getStoredCurrentUser, getStoredUsers, saveStoredCurrentUser } from "@/onyx/auth";
 
 import {
   DEFAULT_API_SETTINGS,
@@ -100,6 +101,50 @@ function OnyxStudio() {
       description: "Deine 500 Erstellungs-Credits sind sofort einsatzbereit.",
     });
   };
+
+  const [showCreditUpgrade, setShowCreditUpgrade] = useState(false);
+
+  // 1-Click Universal Admin Switcher
+  const handleOpenAdmin = () => {
+    if (currentUser?.role !== "admin") {
+      const users = getStoredUsers();
+      const adminUser = users.find((u) => u.role === "admin") ?? {
+        id: "usr-admin-1",
+        name: "Alexander Weber (Admin)",
+        email: "admin@socialcraft.ai",
+        role: "admin" as const,
+        credits: 99999,
+        createdAt: new Date().toISOString(),
+        avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+        status: "active" as const,
+      };
+      saveStoredCurrentUser(adminUser);
+      setCurrentUser(adminUser);
+      toast.success("Als Administrator angemeldet! 🛡️", {
+        description: "Willkommen im Admin Control Center mit 99.999 Credits.",
+      });
+    }
+    setCurrentView("admin");
+  };
+
+  // Prevent automatic downward scroll on reload and tab switch
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      if ("scrollRestoration" in window.history) {
+        window.history.scrollRestoration = "manual";
+      }
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      if (window.location.hash) {
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
+  }, [currentView]);
 
   const [activeTab, setActiveTab] = usePersistentState<TabKey>(LS.activeTab, "carousel");
   const [collapsed, setCollapsed] = usePersistentState<boolean>(LS.sidebarCollapsed, false);
@@ -378,7 +423,8 @@ function OnyxStudio() {
             setShowAuthModal(true);
           }}
           onNavigateStudio={() => setCurrentView("studio")}
-          onNavigateAdmin={() => setCurrentView("admin")}
+          onNavigateAdmin={handleOpenAdmin}
+          onOpenCreditsUpgrade={() => setShowCreditUpgrade(true)}
           onLogout={handleLogout}
         />
         {showAuthModal && (
@@ -386,6 +432,19 @@ function OnyxStudio() {
             initialMode={authModalMode}
             onClose={() => setShowAuthModal(false)}
             onSuccess={handleAuthSuccess}
+          />
+        )}
+        {showCreditUpgrade && (
+          <CreditUpgradeModal
+            currentUser={currentUser}
+            onClose={() => setShowCreditUpgrade(false)}
+            onCreditsUpdated={(newTotal) => {
+              if (currentUser) {
+                setCurrentUser((prev) => (prev ? { ...prev, credits: newTotal } : null));
+              }
+              void refreshCredits();
+            }}
+            onNavigateAdmin={handleOpenAdmin}
           />
         )}
         <Toaster />
@@ -429,7 +488,7 @@ function OnyxStudio() {
           activeTab={activeTab}
           onNavigate={setActiveTab}
           onNavigateLanding={() => setCurrentView("landing")}
-          onNavigateAdmin={() => setCurrentView("admin")}
+          onNavigateAdmin={handleOpenAdmin}
           currentUser={currentUser}
           onOpenAuth={(mode) => {
             setAuthModalMode(mode);
@@ -438,6 +497,7 @@ function OnyxStudio() {
           onLogout={handleLogout}
           creditStatus={creditStatus}
           onRefreshCredits={() => void refreshCredits()}
+          onOpenCreditsUpgrade={() => setShowCreditUpgrade(true)}
           onOpenBrandKit={() => setShowBrandKit(true)}
           onOpenSettings={() => setShowSettings(true)}
           onOpenMcp={() => setShowMcp(true)}
@@ -589,6 +649,19 @@ function OnyxStudio() {
           initialMode={authModalMode}
           onClose={() => setShowAuthModal(false)}
           onSuccess={handleAuthSuccess}
+        />
+      )}
+      {showCreditUpgrade && (
+        <CreditUpgradeModal
+          currentUser={currentUser}
+          onClose={() => setShowCreditUpgrade(false)}
+          onCreditsUpdated={(newTotal) => {
+            if (currentUser) {
+              setCurrentUser((prev) => (prev ? { ...prev, credits: newTotal } : null));
+            }
+            void refreshCredits();
+          }}
+          onNavigateAdmin={handleOpenAdmin}
         />
       )}
 

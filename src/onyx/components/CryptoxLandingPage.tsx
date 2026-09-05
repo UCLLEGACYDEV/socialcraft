@@ -9,6 +9,7 @@ import {
   ChevronDown,
   ChevronRight,
   Clock,
+  Coins,
   Cpu,
   Eye,
   Flame,
@@ -34,6 +35,7 @@ interface CryptoxLandingPageProps {
   onOpenAuth: (mode: "login" | "register") => void;
   onNavigateStudio: () => void;
   onNavigateAdmin: () => void;
+  onOpenCreditsUpgrade?: () => void;
   onLogout: () => void;
 }
 
@@ -42,10 +44,19 @@ export function CryptoxLandingPage({
   onOpenAuth,
   onNavigateStudio,
   onNavigateAdmin,
+  onOpenCreditsUpgrade,
   onLogout,
 }: CryptoxLandingPageProps) {
   const [activeSlideFilter, setActiveSlideFilter] = useState<string>("Gesamt");
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
+
+  // Smooth scroll without altering window.location.hash (prevents jump on reload)
+  const scrollToSection = (id: string) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   const faqs = [
     {
@@ -91,60 +102,80 @@ export function CryptoxLandingPage({
             </span>
           </div>
 
-          {/* Center Floating Pill Nav */}
+          {/* Center Floating Pill Nav (Programmatic Scroll without Hash) */}
           <nav className="hidden md:flex items-center gap-1 rounded-full border border-white/10 bg-[#120F17]/80 p-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-            <a
-              href="#hero"
-              className="rounded-full bg-[#FF4D17] px-4 py-1.5 text-xs font-semibold text-white shadow-[0_0_18px_-2px_#FF4D17]"
+            <button
+              type="button"
+              onClick={() => scrollToSection("hero")}
+              className="rounded-full bg-[#FF4D17] px-4 py-1.5 text-xs font-semibold text-white shadow-[0_0_18px_-2px_#FF4D17] cursor-pointer"
             >
               Startseite
-            </a>
-            <a
-              href="#showcase"
-              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("showcase")}
+              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
             >
               Showcase
-            </a>
-            <a
-              href="#features"
-              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("features")}
+              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
             >
               Features
-            </a>
-            <a
-              href="#why-choose"
-              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("why-choose")}
+              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
             >
               Vorteile
-            </a>
-            <a
-              href="#testimonials"
-              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("testimonials")}
+              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
             >
               Kundenstimmen
-            </a>
-            <a
-              href="#faq"
-              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors"
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection("faq")}
+              className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-white/70 hover:text-white hover:bg-white/[0.06] transition-colors cursor-pointer"
             >
               FAQ
-            </a>
+            </button>
           </nav>
 
           {/* Right Action Buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
+            {/* Universal Admin Button */}
+            <button
+              type="button"
+              onClick={onNavigateAdmin}
+              className="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary-bright hover:bg-primary/25 transition-all shadow-[0_0_15px_-4px_#FF4D17] cursor-pointer"
+              title="Admin Dashboard öffnen"
+            >
+              <Shield className="h-3.5 w-3.5" />
+              <span>Admin-Bereich</span>
+            </button>
+
+            {/* Credits Upgrade Button */}
+            {onOpenCreditsUpgrade && (
+              <button
+                type="button"
+                onClick={onOpenCreditsUpgrade}
+                className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1.5 text-xs font-semibold text-white/80 hover:text-white hover:bg-white/[0.08] transition-all cursor-pointer"
+                title="Credits aufladen & upgraden"
+              >
+                <Coins className="h-3.5 w-3.5 text-[#FF6A1F]" />
+                <span>Credits aufladen</span>
+              </button>
+            )}
+
             {currentUser ? (
               <div className="flex items-center gap-2">
-                {currentUser.role === "admin" && (
-                  <button
-                    type="button"
-                    onClick={onNavigateAdmin}
-                    className="flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/20 px-3.5 py-1.5 text-xs font-semibold text-primary-bright hover:bg-primary/30 transition-all shadow-[0_0_15px_-4px_#FF4D17]"
-                  >
-                    <Shield className="h-3.5 w-3.5" />
-                    <span>Admin</span>
-                  </button>
-                )}
                 <button
                   type="button"
                   onClick={onNavigateStudio}
@@ -176,14 +207,14 @@ export function CryptoxLandingPage({
                 <button
                   type="button"
                   onClick={() => onOpenAuth("login")}
-                  className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs font-semibold text-white/80 hover:text-white hover:bg-white/[0.08] transition-all"
+                  className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-1.5 text-xs font-semibold text-white/80 hover:text-white hover:bg-white/[0.08] transition-all cursor-pointer"
                 >
                   Anmelden
                 </button>
                 <button
                   type="button"
                   onClick={() => onOpenAuth("register")}
-                  className="cryptox-orange-btn rounded-full px-4 py-1.5 text-xs font-semibold shadow-[0_0_20px_-3px_#FF4D17]"
+                  className="cryptox-orange-btn rounded-full px-4 py-1.5 text-xs font-semibold shadow-[0_0_20px_-3px_#FF4D17] cursor-pointer"
                 >
                   Registrieren
                 </button>
@@ -761,12 +792,24 @@ export function CryptoxLandingPage({
           </div>
 
           <div className="flex items-center gap-6">
-            <a href="#features" className="hover:text-white transition-colors">Features</a>
-            <a href="#why-choose" className="hover:text-white transition-colors">Vorteile</a>
-            <a href="#testimonials" className="hover:text-white transition-colors">Kundenstimmen</a>
-            <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
-            <button type="button" onClick={onNavigateStudio} className="hover:text-primary-bright transition-colors font-semibold">
+            <button type="button" onClick={() => scrollToSection("features")} className="hover:text-white transition-colors cursor-pointer">
+              Features
+            </button>
+            <button type="button" onClick={() => scrollToSection("why-choose")} className="hover:text-white transition-colors cursor-pointer">
+              Vorteile
+            </button>
+            <button type="button" onClick={() => scrollToSection("testimonials")} className="hover:text-white transition-colors cursor-pointer">
+              Kundenstimmen
+            </button>
+            <button type="button" onClick={() => scrollToSection("faq")} className="hover:text-white transition-colors cursor-pointer">
+              FAQ
+            </button>
+            <button type="button" onClick={onNavigateStudio} className="hover:text-primary-bright transition-colors font-semibold cursor-pointer">
               Studio
+            </button>
+            <button type="button" onClick={onNavigateAdmin} className="text-primary-bright hover:underline font-semibold flex items-center gap-1 cursor-pointer">
+              <Shield className="h-3 w-3" />
+              <span>Admin-Bereich</span>
             </button>
           </div>
 

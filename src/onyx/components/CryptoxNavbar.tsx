@@ -25,6 +25,7 @@ interface CryptoxNavbarProps {
   onLogout?: () => void;
   creditStatus?: CreditStatus | undefined;
   onRefreshCredits: () => void;
+  onOpenCreditsUpgrade?: () => void;
   onOpenBrandKit: () => void;
   onOpenSettings: () => void;
   onOpenMcp: () => void;
@@ -49,6 +50,7 @@ export function CryptoxNavbar({
   onLogout,
   creditStatus,
   onRefreshCredits,
+  onOpenCreditsUpgrade,
   onOpenBrandKit,
   onOpenSettings,
   onOpenMcp,
@@ -115,35 +117,46 @@ export function CryptoxNavbar({
 
         {/* ── Right: Quick Controls, Credits & User Profile ─────── */}
         <div className="flex items-center gap-2">
-          {/* Admin Switcher (Visible if user is Admin) */}
-          {currentUser?.role === "admin" && onNavigateAdmin && (
+          {/* Universal Admin Button */}
+          {onNavigateAdmin && (
             <button
               type="button"
               onClick={onNavigateAdmin}
-              className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/15 px-3 py-1.5 text-xs font-semibold text-primary-bright hover:bg-primary/25 transition-all shadow-[0_0_15px_-4px_#FF4D17]"
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-all shadow-[0_0_15px_-4px_#FF4D17]",
+                currentUser?.role === "admin"
+                  ? "border-primary/50 bg-primary/20 text-primary-bright hover:bg-primary/30"
+                  : "border-white/15 bg-white/[0.04] text-white/80 hover:text-white hover:border-primary/40 hover:bg-primary/10",
+              )}
               title="Admin Dashboard öffnen"
             >
-              <Shield className="h-3.5 w-3.5" />
-              <span>Admin</span>
+              <Shield className="h-3.5 w-3.5 text-[#FF6A1F]" />
+              <span>{currentUser?.role === "admin" ? "Admin" : "Admin-Bereich"}</span>
             </button>
           )}
 
-          {/* Credits pill */}
-          <div
-            onClick={onRefreshCredits}
-            className="hidden sm:flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs font-medium text-white/80 backdrop-blur-xl hover:border-white/20 transition-colors cursor-pointer shadow-[0_10px_25px_-5px_rgba(0,0,0,0.5)]"
-            title="Klicken zum Aktualisieren"
-          >
-            <Coins className="h-3.5 w-3.5 text-[#FF6A1F]" />
-            <span className="font-semibold text-white">
-              {currentUser ? `${currentUser.credits.toLocaleString()} cr` : (creditStatus?.kie.formatted ?? "4.320 cr")}
-            </span>
-            <RefreshCw
-              className={cn(
-                "h-3 w-3 text-white/40 hover:text-white transition-colors",
-                creditStatus?.loading && "animate-spin text-[#FF6A1F]",
-              )}
-            />
+          {/* Interactive Credits Pill & Instant Upgrade Trigger */}
+          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] p-1 pl-3 text-xs font-medium text-white/80 backdrop-blur-xl hover:border-white/20 transition-colors shadow-[0_10px_25px_-5px_rgba(0,0,0,0.5)]">
+            <div
+              onClick={onRefreshCredits}
+              className="flex items-center gap-1.5 cursor-pointer hover:text-white"
+              title="Klicken zum Aktualisieren"
+            >
+              <Coins className="h-3.5 w-3.5 text-[#FF6A1F]" />
+              <span className="font-semibold text-white font-mono">
+                {currentUser ? `${currentUser.credits.toLocaleString()} cr` : (creditStatus?.kie.formatted ?? "4.320 cr")}
+              </span>
+            </div>
+            {onOpenCreditsUpgrade && (
+              <button
+                type="button"
+                onClick={onOpenCreditsUpgrade}
+                className="flex items-center gap-1 rounded-full bg-[#FF4D17] hover:bg-[#FF6A1F] text-white px-2.5 py-1 text-[11px] font-bold shadow-[0_0_12px_#FF4D17] transition-all cursor-pointer"
+                title="Credits aufladen & upgraden"
+              >
+                <span>+ Aufladen</span>
+              </button>
+            )}
           </div>
 
           {/* Brand Kit */}
