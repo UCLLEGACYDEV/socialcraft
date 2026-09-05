@@ -193,10 +193,10 @@ function OnyxStudio() {
       slides: c.slides.map((s) => ({
         id: makeId(),
         slideNumber: s.slideNumber,
-        role: "concept",
+        role: s.slideNumber === 1 ? "hook" : s.slideNumber === c.slides.length ? "closing" : "concept",
         roleLabel: s.title,
-        headline: s.title,
-        subtext: "",
+        headline: s.headline || s.title,
+        subtext: s.subtext || "",
         coreMetaphor: c.title,
         primaryProps: [],
         visualPrompt: s.prompt,

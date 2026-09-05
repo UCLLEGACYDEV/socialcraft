@@ -121,6 +121,8 @@ export interface CreditStatus {
 export interface ParsedSlide {
   slideNumber: number;
   title: string;
+  headline?: string;
+  subtext?: string;
   prompt: string;
 }
 
