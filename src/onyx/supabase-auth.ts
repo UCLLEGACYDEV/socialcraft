@@ -180,6 +180,7 @@ export async function registerUser(
         password,
         options: {
           data: {
+            app: "socialcraft",
             name: cleanName,
             role,
           },

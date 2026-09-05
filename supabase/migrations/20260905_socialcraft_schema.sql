@@ -134,7 +134,16 @@ DECLARE
   assigned_role TEXT;
   assigned_credits INTEGER;
 BEGIN
-  -- Special admin detection (e.g. for admin email or metadata)
+  -- Strict isolation: Only handle users registering for Socialcraft or the specific Admin
+  -- Users created by other projects in this same Supabase instance are completely ignored
+  IF NOT (
+    NEW.email = 'admin@socialcraft.ai' OR
+    NEW.raw_user_meta_data->>'app' = 'socialcraft' OR
+    NEW.raw_user_meta_data->>'role' = 'admin'
+  ) THEN
+    RETURN NEW;
+  END IF;
+
   IF NEW.email = 'admin@socialcraft.ai' OR NEW.raw_user_meta_data->>'role' = 'admin' THEN
     assigned_role := 'admin';
     assigned_credits := 99999;
