@@ -1,7 +1,9 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
+  ArrowRight,
   Camera,
   Check,
+  CheckCircle2,
   ChevronDown,
   Copy,
   Download,
@@ -15,9 +17,11 @@ import {
   Maximize2,
   Plus,
   RefreshCw,
+  RotateCcw,
   Share2,
   ShieldCheck,
   Shirt,
+  SlidersHorizontal,
   Sparkles,
   SunMedium,
   Trash2,
@@ -26,6 +30,7 @@ import {
   UserCheck,
   Wand2,
   X,
+  Zap,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -54,6 +59,7 @@ export interface DirectPromptImageRecord {
   createdAt: string;
   cloneUsed?: string;
   savedToCloud?: boolean;
+  inspirationUsed?: string;
 }
 
 interface DirectPromptViewProps {
@@ -64,7 +70,7 @@ interface DirectPromptViewProps {
 }
 
 const ASPECT_RATIOS = [
-  { id: "4:5", label: "4:5", sub: "Instagram Porträt", widthClass: "h-8 w-6.5" },
+  { id: "4:5", label: "4:5", sub: "Instagram Porträt (Standard)", widthClass: "h-8 w-6.5" },
   { id: "1:1", label: "1:1", sub: "Quadrat", widthClass: "h-7 w-7" },
   { id: "16:9", label: "16:9", sub: "Querformat / Banner", widthClass: "h-6 w-9" },
   { id: "9:16", label: "9:16", sub: "Story / Reels", widthClass: "h-9 w-5" },
@@ -148,6 +154,13 @@ export function DirectPromptView({
   const [showUrlInput, setShowUrlInput] = useState(false);
   const multiFileInputRef = useRef<HTMLInputElement>(null);
 
+  // 1-Click Fast-Flow & Blitz-Modus State
+  const [autoBlitzMode, setAutoBlitzMode] = useState<boolean>(false);
+  const [isOneClickRunning, setIsOneClickRunning] = useState(false);
+  const [oneClickStage, setOneClickStage] = useState<
+    "idle" | "scanning" | "fusing" | "rendering" | "uploading" | "done"
+  >("idle");
+
   // Fusion Progress & Results State
   const [isFusing, setIsFusing] = useState(false);
   const [fusionProgress, setFusionProgress] = useState<PersonaAnalysisProgress | null>(
@@ -157,10 +170,13 @@ export function DirectPromptView({
     null,
   );
 
-  // Gallery of generated images
+  // Gallery & Spotlight State
   const [historyImages, setHistoryImages] = usePersistentState<
     DirectPromptImageRecord[]
   >(LS.directPromptImages, []);
+  const [spotlightRecord, setSpotlightRecord] = useState<DirectPromptImageRecord | null>(
+    () => (historyImages.length > 0 ? historyImages[0] : null),
+  );
   const [previewImage, setPreviewImage] = useState<DirectPromptImageRecord | null>(
     null,
   );
@@ -178,6 +194,9 @@ export function DirectPromptView({
     }
 
     const filesToProcess = Array.from(files).slice(0, remainingSlots);
+    const readUrls: string[] = [];
+    let completed = 0;
+
     filesToProcess.forEach((file) => {
       if (!file.type.startsWith("image/")) {
         toast.error(`"${file.name}" ist keine gültige Bilddatei.`);
@@ -187,8 +206,13 @@ export function DirectPromptView({
       reader.onload = (e) => {
         const result = e.target?.result;
         if (typeof result === "string") {
+          readUrls.push(result);
           setInspirationImages((prev) => [...prev, result]);
           toast.success(`Inspiration hinzugefügt: ${file.name}`);
+        }
+        completed++;
+        if (completed === filesToProcess.length && autoBlitzMode && readUrls.length > 0) {
+          void handleOneClickFlow([...inspirationImages, ...readUrls]);
         }
       };
       reader.readAsDataURL(file);
@@ -202,27 +226,31 @@ export function DirectPromptView({
       toast.error("Bitte gib eine gültige Bild-URL ein.");
       return;
     }
-    setInspirationImages((prev) => [...prev, trimmed]);
+    const nextImages = [...inspirationImages, trimmed];
+    setInspirationImages(nextImages);
     setUrlInput("");
     setShowUrlInput(false);
     toast.success("Inspirations-URL hinzugefügt!");
+    if (autoBlitzMode) {
+      void handleOneClickFlow(nextImages);
+    }
   };
 
   const handleSelectPreset = (url: string, title: string) => {
-    if (inspirationImages.includes(url)) {
-      toast.info(`Preset „${title}“ ist bereits ausgewählt.`);
-      return;
+    const nextImages = [url];
+    setInspirationImages(nextImages);
+    toast.success(`Preset „${title}“ geladen.`);
+    if (autoBlitzMode) {
+      void handleOneClickFlow(nextImages);
     }
-    setInspirationImages((prev) => [...prev, url]);
-    toast.success(`Inspirations-Preset hinzugefügt: ${title}`);
   };
 
   const handleRemoveImage = (index: number) => {
     setInspirationImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Run AI Vision Analysis & Persona Style-Transfer
-  const handleAnalyzeAndFuse = async () => {
+  // STEP-BY-STEP: Vision Style-Transfer Only
+  const handleAnalyzeAndFuseOnly = async () => {
     if (inspirationImages.length === 0) {
       toast.error("Bitte lade zuerst mindestens ein Inspirationsbild hoch.");
       return;
@@ -243,7 +271,6 @@ export function DirectPromptView({
       );
 
       setFusionResult(result);
-      // Auto-populate prompt and negative prompt
       setPrompt(result.fusedPrompt);
       if (result.negativePrompt) {
         setNegativePrompt(result.negativePrompt);
@@ -263,8 +290,100 @@ export function DirectPromptView({
     }
   };
 
-  // Generate Image
-  const handleGenerate = async () => {
+  // THE ULTIMATE 1-CLICK ALL-IN-ONE FLOW
+  // Combines: Gemini/Vision Analysis -> Persona Fusion -> Instant Generation -> Mega S4 Cloud Save
+  const handleOneClickFlow = async (overrideImages?: string[]) => {
+    const imagesToUse = overrideImages || inspirationImages;
+    if (imagesToUse.length === 0) {
+      toast.error("Bitte lade zuerst mindestens ein Inspirationsbild hoch oder wähle ein Preset.");
+      return;
+    }
+
+    setIsOneClickRunning(true);
+    setOneClickStage("scanning");
+    setFusionResult(null);
+
+    try {
+      const settings = readLS<ApiSettings>(LS.apiSettings, DEFAULT_API_SETTINGS);
+
+      // Phase 1 & 2: Multi-Inspiration Vision Scan & Clone Style Adaptation
+      setOneClickStage("fusing");
+      const fusion = await analyzeInspirationAndFuseWithClone(
+        imagesToUse,
+        activeClone,
+        {
+          apiKey: settings.kieApiKey,
+          onProgress: (p) => setFusionProgress(p),
+        },
+      );
+
+      setFusionResult(fusion);
+      setPrompt(fusion.fusedPrompt);
+      if (fusion.negativePrompt) {
+        setNegativePrompt(fusion.negativePrompt);
+      }
+
+      // Phase 3: Immediate High-End Rendering (Nano-Banana 2 / KIE Unified)
+      setOneClickStage("rendering");
+      const res = await generateImageUnified({
+        slideNumber: historyImages.length + 1,
+        prompt: fusion.fusedPrompt,
+        settings,
+      });
+
+      const generatedUrl = res.imageUrl;
+
+      // Phase 4: Automatic Mega S4 Cloud Storage Upload
+      setOneClickStage("uploading");
+      let s4Result: S4CloudImage | null = null;
+      try {
+        s4Result = await saveImageToS4({
+          imageUrl: generatedUrl,
+          prompt: fusion.fusedPrompt,
+          category: "direct-prompt",
+          aspectRatio,
+          user: currentUser || null,
+        });
+      } catch (s4Err) {
+        console.warn("[OneClickFlow] S4 upload failed:", s4Err);
+      }
+
+      const newRecord: DirectPromptImageRecord = {
+        id: `dp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        url: s4Result?.url || generatedUrl,
+        s4Url: s4Result?.url,
+        prompt: fusion.fusedPrompt,
+        negativePrompt: fusion.negativePrompt,
+        aspectRatio,
+        createdAt: new Date().toISOString(),
+        cloneUsed: useClone ? activeClone.name : undefined,
+        savedToCloud: !!s4Result,
+        inspirationUsed: imagesToUse[0],
+      };
+
+      setHistoryImages((prev) => [newRecord, ...prev]);
+      setSpotlightRecord(newRecord);
+
+      if (onDeductCredits) {
+        onDeductCredits(5);
+      }
+
+      setOneClickStage("done");
+      toast.success(
+        `⚡ 1-Click Klon-Flow abgeschlossen! Bild fertig gerendert & in Mega S4 Cloud gesichert! 🎉`,
+      );
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error ? err.message : "Fehler während des 1-Click Flows";
+      toast.error(msg);
+    } finally {
+      setIsOneClickRunning(false);
+      setFusionProgress(null);
+    }
+  };
+
+  // Manual Generate Image
+  const handleGenerateManual = async () => {
     const trimmed = prompt.trim();
     if (!trimmed) {
       toast.error("Bitte gib zuerst einen Bild-Prompt ein.");
@@ -275,7 +394,6 @@ export function DirectPromptView({
     const settings = readLS<ApiSettings>(LS.apiSettings, DEFAULT_API_SETTINGS);
 
     try {
-      // 1. Generate image unified
       const res = await generateImageUnified({
         slideNumber: historyImages.length + 1,
         prompt: trimmed,
@@ -284,7 +402,6 @@ export function DirectPromptView({
 
       const generatedUrl = res.imageUrl;
 
-      // 2. Upload to Mega S4 Cloud automatically
       let s4Result: S4CloudImage | null = null;
       try {
         s4Result = await saveImageToS4({
@@ -298,7 +415,6 @@ export function DirectPromptView({
         console.warn("[DirectPrompt] S4 upload failed:", s4Err);
       }
 
-      // 3. Store in history record
       const newRecord: DirectPromptImageRecord = {
         id: `dp_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
         url: s4Result?.url || generatedUrl,
@@ -309,21 +425,17 @@ export function DirectPromptView({
         createdAt: new Date().toISOString(),
         cloneUsed: useClone ? activeClone.name : undefined,
         savedToCloud: !!s4Result,
+        inspirationUsed: inspirationImages[0],
       };
 
       setHistoryImages((prev) => [newRecord, ...prev]);
+      setSpotlightRecord(newRecord);
 
       if (onDeductCredits) {
         onDeductCredits(5);
       }
 
-      if (res.fromRealApi) {
-        toast.success(
-          "Einzelbild via Nano-Banana 2 gerendert und in Cloud gespeichert! 🍌☁️",
-        );
-      } else {
-        toast.success("Einzelbild berechnet & gesichert!");
-      }
+      toast.success("Einzelbild gerendert & in Mega S4 gesichert! ☁️");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Fehler beim Rendern";
       toast.error(msg);
@@ -352,21 +464,21 @@ export function DirectPromptView({
   };
 
   return (
-    <div className="space-y-7 pb-16">
+    <div className="space-y-7 pb-20 max-w-7xl mx-auto">
       {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-              <ImageIcon className="h-6 w-6 text-[#FF4D17]" />
-              <span>Einzelbild-Studio</span>
+              <Zap className="h-6 w-6 text-[#FF4D17]" />
+              <span>Einzelbild-Studio & 1-Click Klon-Flow</span>
             </h1>
-            <span className="rounded-full bg-[#FF4D17]/10 px-2.5 py-0.5 text-[10px] font-semibold text-[#FF4D17] border border-[#FF4D17]/25">
-              1-Click Render
+            <span className="rounded-full bg-gradient-to-r from-[#FF4D17]/20 to-amber-500/20 px-3 py-0.5 text-[10px] font-bold text-[#FF4D17] border border-[#FF4D17]/30 shadow-[0_0_15px_rgba(255,77,23,0.2)]">
+              All-In-One Pipeline
             </span>
           </div>
-          <p className="text-xs text-zinc-400 mt-1">
-            Generiere hochauflösende Einzelbilder mit Nano-Banana 2 – mit Stil-Transfer von Inspirationsfotos auf deinen KI-Klon.
+          <p className="text-xs text-zinc-400 mt-1 max-w-2xl">
+            Inspirationsfoto reinwerfen → Die KI analysiert Outfit, Pose & Licht → adaptiert alles auf deinen Klon → rendert das Bild sofort mit Nano-Banana 2 in deine Mega S4 Cloud.
           </p>
         </div>
 
@@ -385,13 +497,13 @@ export function DirectPromptView({
           <div className="flex items-center gap-3">
             <div
               className={cn(
-                "h-10 w-10 rounded-xl flex items-center justify-center transition-all",
+                "h-11 w-11 rounded-xl flex items-center justify-center transition-all",
                 useClone
-                  ? "bg-[#FF4D17]/15 text-[#FF4D17] border border-[#FF4D17]/30 shadow-[0_0_15px_rgba(255,77,23,0.2)]"
+                  ? "bg-[#FF4D17]/15 text-[#FF4D17] border border-[#FF4D17]/30 shadow-[0_0_20px_rgba(255,77,23,0.25)]"
                   : "bg-white/[0.04] text-zinc-500 border border-white/[0.06]",
               )}
             >
-              {useClone ? <UserCheck className="h-5 w-5" /> : <User className="h-5 w-5" />}
+              {useClone ? <UserCheck className="h-6 w-6" /> : <User className="h-6 w-6" />}
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -406,7 +518,7 @@ export function DirectPromptView({
               </div>
               <p className="text-xs text-zinc-400">
                 {useClone
-                  ? "Bilder werden mit der festen Identität deines KI-Klons (Gesicht, Bart, Tattoos) generiert."
+                  ? `Jede Generation wird auf die feste Identität von „${activeClone.name}“ (Gesicht, Bart, Tattoos) angepasst.`
                   : "Freier Prompt-Modus ohne Klon-Bindung."}
               </p>
             </div>
@@ -505,18 +617,21 @@ export function DirectPromptView({
             <div className="flex items-center gap-2.5 rounded-lg border border-emerald-500/20 bg-emerald-500/[0.06] px-3.5 py-2 text-xs text-emerald-300">
               <ShieldCheck className="h-4 w-4 text-emerald-400 shrink-0" />
               <span>
-                <strong>Hautfilter garantiert aktiv:</strong> Pickel, Rötungen und temporäre Hautunreinheiten werden automatisch herausgefiltert. Deine Gesichtsgeometrie, Bart und Tattoos bleiben 100% fotorealistisch erhalten.
+                <strong>Hautfilter aktiv:</strong> Pickel, Rötungen und temporäre Hautunreinheiten werden eliminiert. Dein Gesicht, Bart und Tattoos bleiben 100% fotorealistisch und konsistent.
               </span>
             </div>
           </div>
         )}
       </div>
 
-      {/* SECTION 2: INSPIRATIONS- & STYLE-TRANSFER UPLOADER */}
-      <div className="cryptox-card relative overflow-hidden p-5 sm:p-6 border border-white/[0.08]">
+      {/* SECTION 2: INSPIRATIONS- & 1-CLICK KLON-FLOW */}
+      <div className="cryptox-card relative overflow-hidden p-5 sm:p-6 border border-[#FF4D17]/25 shadow-[0_0_40px_rgba(255,77,23,0.06)]">
+        {/* Glow ambient background accent */}
+        <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-[#FF4D17]/10 blur-3xl" />
+
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-4 border-b border-white/[0.06]">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#FF4D17]/20 to-amber-500/20 border border-[#FF4D17]/30 flex items-center justify-center text-[#FF4D17]">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#FF4D17] to-amber-500 flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,77,23,0.4)]">
               <Sparkles className="h-5 w-5" />
             </div>
             <div>
@@ -524,23 +639,41 @@ export function DirectPromptView({
                 <h2 className="text-sm sm:text-base font-semibold text-white">
                   Inspirations- & Style-Transfer
                 </h2>
-                <span className="rounded bg-[#FF4D17]/15 px-2 py-0.5 text-[10px] font-semibold text-[#FF4D17] border border-[#FF4D17]/30">
-                  Multi-Foto Vision
+                <span className="rounded bg-[#FF4D17]/20 px-2 py-0.5 text-[10px] font-bold text-[#FF4D17] border border-[#FF4D17]/40">
+                  Automatisierter Flow
                 </span>
               </div>
               <p className="text-xs text-zinc-400">
-                Lade ein oder mehrere Fotos einer Person/Vorlage hoch. Die KI analysiert Kleidung, Pose, Licht und Schnitt und passt den Style auf deinen Klon an.
+                Lade ein oder mehrere Fotos einer Person/Vorlage hoch. Die KI adaptiert Kleidung, Schnitt, Pose & Licht auf deinen Klon.
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          {/* Action buttons & Blitz-Modus Toggle */}
+          <div className="flex items-center gap-2.5">
+            {/* Blitz-Modus Toggle */}
+            <label
+              className="flex items-center gap-2 cursor-pointer bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 px-2.5 py-1.5 rounded-lg text-xs transition-colors"
+              title="Wenn aktiv: Uploading startet sofort die automatische Analyse & Bildgenerierung"
+            >
+              <input
+                type="checkbox"
+                checked={autoBlitzMode}
+                onChange={(e) => setAutoBlitzMode(e.target.checked)}
+                className="rounded border-white/20 bg-zinc-900 text-[#FF4D17] focus:ring-[#FF4D17] h-3.5 w-3.5"
+              />
+              <span className="text-zinc-300 font-medium flex items-center gap-1">
+                <Zap className="h-3 w-3 text-amber-400" />
+                <span>Blitz-Modus (Auto-Render)</span>
+              </span>
+            </label>
+
             <button
               type="button"
               onClick={() => setShowUrlInput(!showUrlInput)}
               className="cryptox-ghost-btn !py-1.5 !px-3 text-xs text-zinc-300 border border-white/10 hover:text-white"
             >
-              <span>+ Bild-URL</span>
+              <span>+ URL</span>
             </button>
             <button
               type="button"
@@ -548,7 +681,7 @@ export function DirectPromptView({
               className="cryptox-orange-btn !py-1.5 !px-3 text-xs flex items-center gap-1.5"
             >
               <Upload className="h-3.5 w-3.5" />
-              <span>Fotos hochladen</span>
+              <span>Fotos wählen</span>
             </button>
           </div>
         </div>
@@ -589,9 +722,12 @@ export function DirectPromptView({
           {inspirationImages.length > 0 ? (
             <div className="space-y-2">
               <div className="flex items-center justify-between text-xs text-zinc-400">
-                <span>
-                  {inspirationImages.length} Inspirationsbild
-                  {inspirationImages.length > 1 ? "er" : ""} bereit zur Analyse:
+                <span className="font-medium text-white flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                  <span>
+                    {inspirationImages.length} Inspirationsbild
+                    {inspirationImages.length > 1 ? "er" : ""} bereit zur Klon-Fusion:
+                  </span>
                 </span>
                 <button
                   type="button"
@@ -665,17 +801,17 @@ export function DirectPromptView({
                   Klicke hier oder ziehe 1 bis 6 Inspirationsfotos hinein
                 </p>
                 <p className="text-xs text-zinc-400 mt-1 max-w-md">
-                  Fotos von Models, Outfits, Schnitten, Posen oder Beleuchtungen, deren Style du auf deinen Klon übertragen willst.
+                  Fotos von Models, Outfits, Schnitten, Posen oder Beleuchtungen, deren Style du 1:1 auf deinen KI-Klon übertragen willst.
                 </p>
               </div>
             </div>
           )}
 
-          {/* Quick Presets for Instant Testing */}
+          {/* Quick Presets for Instant 1-Click Testing */}
           <div className="pt-2">
             <p className="text-xs font-medium text-zinc-400 mb-2 flex items-center gap-1.5">
               <Lightbulb className="h-3.5 w-3.5 text-amber-400" />
-              <span>Oder wähle ein High-End Style-Preset:</span>
+              <span>Oder klicke ein High-End Style-Preset:</span>
             </p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               {INSPIRATION_PRESETS.map((preset) => (
@@ -683,7 +819,7 @@ export function DirectPromptView({
                   key={preset.title}
                   type="button"
                   onClick={() => handleSelectPreset(preset.url, preset.title)}
-                  className="flex items-center gap-2 p-2 rounded-lg border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#FF4D17]/30 transition-all text-left group"
+                  className="flex items-center gap-2 p-2 rounded-lg border border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05] hover:border-[#FF4D17]/40 transition-all text-left group"
                 >
                   <img
                     src={preset.url}
@@ -703,7 +839,7 @@ export function DirectPromptView({
             </div>
           </div>
 
-          {/* Trigger Button: Analyse & Fuse */}
+          {/* THE HERO ACTIONS: 1-CLICK FLOW vs. STEP-BY-STEP */}
           <div className="pt-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 border-t border-white/[0.06]">
             <div className="text-xs text-zinc-400">
               {useClone ? (
@@ -715,43 +851,111 @@ export function DirectPromptView({
               )}
             </div>
 
-            <button
-              type="button"
-              onClick={handleAnalyzeAndFuse}
-              disabled={isFusing || inspirationImages.length === 0}
-              className="cryptox-orange-btn !py-2.5 !px-5 text-xs font-semibold disabled:opacity-40 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,77,23,0.3)]"
-            >
-              {isFusing ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Analysiere & Fusiere…</span>
-                </>
-              ) : (
-                <>
-                  <Wand2 className="h-4 w-4" />
-                  <span>Inspiration(en) analysieren & auf KI-Klon übertragen</span>
-                </>
-              )}
-            </button>
+            <div className="flex flex-col sm:flex-row items-center gap-2">
+              {/* Option A: Only Analyze and place prompt in textarea */}
+              <button
+                type="button"
+                onClick={handleAnalyzeAndFuseOnly}
+                disabled={isOneClickRunning || isFusing || inspirationImages.length === 0}
+                className="w-full sm:w-auto cryptox-ghost-btn !py-2.5 !px-4 text-xs text-zinc-300 hover:text-white border border-white/10 disabled:opacity-30"
+              >
+                {isFusing ? (
+                  <span className="flex items-center gap-1.5">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Analysiere…</span>
+                  </span>
+                ) : (
+                  <span>Nur Prompt analysieren</span>
+                )}
+              </button>
+
+              {/* Option B: THE 1-CLICK FLOW (Analyzes, Fuses, Generates & Saves in S4) */}
+              <button
+                type="button"
+                onClick={() => void handleOneClickFlow()}
+                disabled={isOneClickRunning || isFusing || inspirationImages.length === 0}
+                className="w-full sm:w-auto cryptox-orange-btn !py-2.5 !px-6 text-xs font-bold disabled:opacity-40 flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(255,77,23,0.45)] bg-gradient-to-r from-[#FF4D17] to-amber-500 hover:from-[#ff6229] hover:to-amber-400"
+              >
+                {isOneClickRunning ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>
+                      {oneClickStage === "scanning" && "1/4 Scanne Inspiration…"}
+                      {oneClickStage === "fusing" && "2/4 Fusiere mit Klon…"}
+                      {oneClickStage === "rendering" && "3/4 Rendere Bild (Nano-Banana 2)…"}
+                      {oneClickStage === "uploading" && "4/4 Speichere in Mega S4…"}
+                      {oneClickStage === "done" && "Fertiggestellt!"}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Zap className="h-4 w-4 fill-white" />
+                    <span>⚡ 1-Click Klon-Flow: Analysieren & Sofort Rendern</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
 
-          {/* Live Progress Display */}
-          {isFusing && fusionProgress && (
-            <div className="mt-3 p-4 rounded-xl border border-[#FF4D17]/30 bg-[#FF4D17]/[0.05] space-y-2 animate-fadeIn">
+          {/* Live One-Click Multi-Step Progress Tracker */}
+          {isOneClickRunning && (
+            <div className="mt-4 p-4 rounded-xl border border-[#FF4D17]/40 bg-[#FF4D17]/[0.08] space-y-3 animate-fadeIn">
               <div className="flex items-center justify-between text-xs text-white">
-                <span className="font-medium flex items-center gap-2">
-                  <Sparkles className="h-3.5 w-3.5 text-[#FF4D17] animate-pulse" />
-                  {fusionProgress.label}
+                <span className="font-semibold flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-[#FF4D17] animate-pulse" />
+                  <span>
+                    {oneClickStage === "scanning" && "Phase 1: Kleidung, Schnitt & Pose der Vorlage scannen…"}
+                    {oneClickStage === "fusing" && `Phase 2: Auf Klon-Profil (${activeClone.name}) übertragen & Hautfilter anwenden…`}
+                    {oneClickStage === "rendering" && "Phase 3: High-Res Bild mit Nano-Banana 2 Engine berechnen…"}
+                    {oneClickStage === "uploading" && "Phase 4: Automatisch in Mega S4 Cloud sichern…"}
+                    {oneClickStage === "done" && "Erfolgreich abgeschlossen!"}
+                  </span>
                 </span>
-                <span className="font-mono text-[#FF4D17]">
-                  {fusionProgress.percent}%
+                <span className="font-mono text-[#FF4D17] font-bold">
+                  {oneClickStage === "scanning" && "25%"}
+                  {oneClickStage === "fusing" && "50%"}
+                  {oneClickStage === "rendering" && "75%"}
+                  {oneClickStage === "uploading" && "95%"}
+                  {oneClickStage === "done" && "100%"}
                 </span>
               </div>
-              <div className="h-1.5 w-full bg-black/40 rounded-full overflow-hidden">
+
+              <div className="h-2 w-full bg-black/50 rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-[#FF4D17] to-amber-400 transition-all duration-300 rounded-full"
-                  style={{ width: `${fusionProgress.percent}%` }}
+                  className="h-full bg-gradient-to-r from-[#FF4D17] via-amber-400 to-emerald-400 transition-all duration-500 rounded-full"
+                  style={{
+                    width:
+                      oneClickStage === "scanning"
+                        ? "25%"
+                        : oneClickStage === "fusing"
+                          ? "50%"
+                          : oneClickStage === "rendering"
+                            ? "75%"
+                            : oneClickStage === "uploading"
+                              ? "95%"
+                              : "100%",
+                  }}
                 />
+              </div>
+
+              {/* Progress Steps Indicators */}
+              <div className="grid grid-cols-4 gap-2 pt-1 text-[11px] text-zinc-400">
+                <div className={cn("flex items-center gap-1", oneClickStage !== "idle" && "text-white")}>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#FF4D17]" />
+                  <span>1. Vision Scan</span>
+                </div>
+                <div className={cn("flex items-center gap-1", (oneClickStage === "fusing" || oneClickStage === "rendering" || oneClickStage === "uploading" || oneClickStage === "done") && "text-white")}>
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#FF4D17]" />
+                  <span>2. Klon-Fusion</span>
+                </div>
+                <div className={cn("flex items-center gap-1", (oneClickStage === "rendering" || oneClickStage === "uploading" || oneClickStage === "done") && "text-white")}>
+                  <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                  <span>3. Render Engine</span>
+                </div>
+                <div className={cn("flex items-center gap-1", (oneClickStage === "uploading" || oneClickStage === "done") && "text-emerald-400 font-semibold")}>
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                  <span>4. Mega S4 Cloud</span>
+                </div>
               </div>
             </div>
           )}
@@ -761,7 +965,7 @@ export function DirectPromptView({
             <div className="mt-4 p-5 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.03] space-y-4 animate-fadeIn">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Check className="h-4 w-4 text-emerald-400" />
+                  <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                   <span className="text-sm font-semibold text-white">
                     Style erfolgreich auf deinen Klon adaptiert
                   </span>
@@ -817,12 +1021,143 @@ export function DirectPromptView({
         </div>
       </div>
 
-      {/* SECTION 3: PROMPT EDITOR & GENERATION CONTROLS */}
+      {/* FEATURED SPOTLIGHT: SOFORT-ERGEBNIS DES 1-CLICK FLOWS */}
+      {spotlightRecord && (
+        <div className="cryptox-card relative overflow-hidden p-6 border border-emerald-500/30 bg-gradient-to-b from-emerald-950/20 via-black/40 to-black/60 shadow-[0_0_50px_rgba(16,185,129,0.08)]">
+          <div className="flex items-center justify-between pb-4 border-b border-white/[0.08]">
+            <div className="flex items-center gap-2.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
+              <h2 className="text-base font-bold text-white">
+                Aktuelles Klon-Ergebnis (Live Spotlight)
+              </h2>
+              {spotlightRecord.savedToCloud && (
+                <span className="rounded bg-emerald-500/15 px-2 py-0.5 text-[10px] font-semibold text-emerald-400 border border-emerald-500/30">
+                  ☁️ Gesichert in Mega S4
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPreviewImage(spotlightRecord)}
+                className="cryptox-ghost-btn !py-1.5 !px-3 text-xs text-zinc-300 border border-white/10 hover:text-white flex items-center gap-1.5"
+              >
+                <Maximize2 className="h-3.5 w-3.5" />
+                <span>Vollbild</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDownload(spotlightRecord.url, `spotlight_${spotlightRecord.id}.jpg`)}
+                className="cryptox-orange-btn !py-1.5 !px-3 text-xs flex items-center gap-1.5"
+              >
+                <Download className="h-3.5 w-3.5" />
+                <span>Download</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Spotlight Content: Side-by-Side Comparison if Inspiration was used */}
+          <div className="mt-5 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+            {/* Left: Original Inspiration (if available) */}
+            {spotlightRecord.inspirationUsed ? (
+              <div className="md:col-span-4 flex flex-col gap-2">
+                <span className="text-xs font-semibold text-zinc-400 flex items-center gap-1.5">
+                  <Camera className="h-3.5 w-3.5" />
+                  <span>Original-Inspiration:</span>
+                </span>
+                <div className="aspect-[4/5] rounded-xl overflow-hidden border border-white/10 bg-zinc-900 shadow-md">
+                  <img
+                    src={spotlightRecord.inspirationUsed}
+                    alt="Inspiration"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            {/* Right / Main: Fused Clone Visual */}
+            <div
+              className={cn(
+                "flex flex-col gap-2",
+                spotlightRecord.inspirationUsed ? "md:col-span-8" : "md:col-span-12",
+              )}
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  <span>Dein KI-Klon im adaptierten Look:</span>
+                </span>
+                {spotlightRecord.cloneUsed && (
+                  <span className="text-[11px] text-zinc-400">
+                    Klon: <strong className="text-white">{spotlightRecord.cloneUsed}</strong>
+                  </span>
+                )}
+              </div>
+
+              <div className="relative aspect-[4/5] max-h-[500px] rounded-xl overflow-hidden border border-emerald-500/30 bg-zinc-950 shadow-2xl group cursor-pointer">
+                <img
+                  src={spotlightRecord.url}
+                  alt={spotlightRecord.prompt}
+                  className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onClick={() => setPreviewImage(spotlightRecord)}
+                />
+
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-between p-4">
+                  <div className="max-w-md">
+                    <p className="text-xs text-white line-clamp-2 leading-relaxed">
+                      {spotlightRecord.prompt}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(spotlightRecord.prompt)}
+                    className="h-8 w-8 rounded-lg bg-white/20 text-white flex items-center justify-center hover:bg-[#FF4D17] transition-colors"
+                    title="Prompt kopieren"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Actions below spotlight */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => void handleOneClickFlow()}
+                    disabled={isOneClickRunning || inspirationImages.length === 0}
+                    className="cryptox-ghost-btn !py-1.5 !px-3 text-xs text-zinc-300 border border-white/10 hover:text-white flex items-center gap-1.5"
+                  >
+                    <RotateCcw className="h-3.5 w-3.5" />
+                    <span>Nochmal rendern (Reroll)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleCopy(spotlightRecord.prompt)}
+                    className="cryptox-ghost-btn !py-1.5 !px-3 text-xs text-zinc-300 border border-white/10 hover:text-white flex items-center gap-1.5"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                    <span>Prompt kopieren</span>
+                  </button>
+                </div>
+
+                <span className="text-[11px] text-zinc-500 font-mono">
+                  {spotlightRecord.aspectRatio} • Nano-Banana 2 • KIE
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 3: PROMPT EDITOR & GENERATION CONTROLS (EXPANDABLE/FINE-TUNE) */}
       <div className="cryptox-card relative overflow-hidden p-5 sm:p-6 border border-white/[0.08] space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4 text-[#FF4D17]" />
             <h2 className="text-sm sm:text-base font-semibold text-white">
-              Prompt & Rendering
+              Prompt & Rendering Feintuning
             </h2>
             <span className="text-xs text-zinc-400">
               (Nano-Banana 2 • KIE AI Engine)
@@ -896,12 +1231,12 @@ export function DirectPromptView({
             ))}
           </div>
 
-          {/* Action: Generate */}
+          {/* Action: Generate Manual */}
           <div className="flex items-center gap-3">
             <span className="text-xs text-zinc-400">Kosten: 5 Credits</span>
             <button
               type="button"
-              onClick={handleGenerate}
+              onClick={handleGenerateManual}
               disabled={isGenerating || !prompt.trim()}
               className="cryptox-orange-btn !py-2.5 !px-6 text-xs font-semibold disabled:opacity-40 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,77,23,0.3)] min-w-[170px]"
             >
@@ -913,7 +1248,7 @@ export function DirectPromptView({
               ) : (
                 <>
                   <ImageIcon className="h-4 w-4" />
-                  <span>Einzelbild generieren</span>
+                  <span>Manuell rendern</span>
                 </>
               )}
             </button>
@@ -927,7 +1262,7 @@ export function DirectPromptView({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <h2 className="text-base font-bold text-white">
-                Generierte Einzelbilder ({historyImages.length})
+                Bisherige Einzelbilder ({historyImages.length})
               </h2>
               <span className="rounded bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400 border border-emerald-500/20">
                 In Mega S4 Cloud
@@ -939,6 +1274,7 @@ export function DirectPromptView({
               onClick={() => {
                 if (confirm("Möchtest du die lokale Einzelbild-Historie leeren?")) {
                   setHistoryImages([]);
+                  setSpotlightRecord(null);
                   toast.success("Historie geleert.");
                 }
               }}
@@ -1004,13 +1340,13 @@ export function DirectPromptView({
                       <button
                         type="button"
                         onClick={() => {
-                          setInspirationImages((p) => [...p, item.url]);
-                          toast.success("Als neue Inspiration hinzugefügt!");
+                          setSpotlightRecord(item);
+                          toast.success("Im Spotlight geöffnet!");
                         }}
                         className="h-8 w-8 rounded-lg bg-white/15 backdrop-blur-md text-white flex items-center justify-center hover:bg-[#FF4D17] transition-colors"
-                        title="Als Style-Inspiration nutzen"
+                        title="Im Spotlight anzeigen"
                       >
-                        <Wand2 className="h-4 w-4" />
+                        <Eye className="h-4 w-4" />
                       </button>
                     </div>
                   </div>
