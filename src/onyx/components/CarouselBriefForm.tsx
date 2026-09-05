@@ -1,7 +1,23 @@
-import { Check, KeyRound, Minus, Plus, UserCheck, X } from "lucide-react";
+import { useState } from "react";
+import { ArrowRight, Check, KeyRound, Minus, Plus, Sparkles, UserCheck, Users, X } from "lucide-react";
 import { DESIGN_TEMPLATES, LLM_PROVIDERS } from "../defaults";
 import type { BriefValues, CarouselLlmProvider } from "../types";
+import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
+
+const SUGGESTED_TOPICS = [
+  "10 Zeichen für verdeckten Narzissmus",
+  "7 Denkfehler kluger Köpfe",
+  "Warum Disziplin Motivation schlägt",
+  "5 Schritte zum profitablen B2B-Angebot",
+];
+
+const PRESET_SLIDE_COUNTS = [
+  { count: 4, label: "4 Slides (Quick Tip)" },
+  { count: 6, label: "6 Slides" },
+  { count: 7, label: "7 Slides (Empfohlen)" },
+  { count: 10, label: "10 Slides (Deep Dive)" },
+];
 
 interface CarouselBriefFormProps {
   values: BriefValues;
@@ -20,11 +36,177 @@ export function CarouselBriefForm({
   isGenerating,
   keySaved,
 }: CarouselBriefFormProps) {
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const providerMeta = LLM_PROVIDERS.find((p) => p.id === values.provider) ?? LLM_PROVIDERS[0];
 
+  const slideTip =
+    values.slideCount <= 4
+      ? "Kurzer Snack-Content · Ideal für schnelle Tipps"
+      : values.slideCount <= 7
+        ? "Optimaler Instagram-Standard · Höchste Save- & Share-Rate"
+        : "Ausführlicher Deep-Dive · Ideal für Step-by-Step Guides & Stories";
+
   return (
-    <div className="glass-card-hero space-y-5 p-5 sm:p-6">
-      <section className="space-y-2">
+    <div className="glass-card-hero space-y-6 p-5 sm:p-7">
+      {/* ── Chat / Prompt Input Bar ───────────────────────────────── */}
+      <section className="space-y-2.5">
+        <div className="flex items-center justify-between">
+          <label htmlFor="topic-chat-input" className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5 text-primary-bright" />
+            Karussell-Prompt & Thema
+          </label>
+          <span className="hidden text-[11px] text-muted-foreground sm:inline-block">
+            Tipp: <kbd className="rounded bg-foreground/10 px-1.5 py-0.5 font-mono text-[10px] text-foreground">Strg</kbd> + <kbd className="rounded bg-foreground/10 px-1.5 py-0.5 font-mono text-[10px] text-foreground">Enter</kbd> zum Starten
+          </span>
+        </div>
+
+        <div className="relative rounded-2xl border border-border/80 bg-foreground/[0.03] p-3.5 transition-all duration-200 focus-within:border-primary/60 focus-within:bg-foreground/[0.04] focus-within:shadow-[0_0_35px_-10px_var(--primary)]">
+          <textarea
+            id="topic-chat-input"
+            rows={3}
+            value={values.topic}
+            onChange={(e) => onChange({ topic: e.target.value })}
+            onKeyDown={(e) => {
+              if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                e.preventDefault();
+                if (values.topic.trim() && !isGenerating) onSubmit();
+              }
+            }}
+            placeholder="Worüber möchtest du ein Karussell erstellen? Beschreibe deine Idee, Stichpunkte oder füge deinen Entwurf ein…"
+            className="w-full resize-none bg-transparent text-sm sm:text-base leading-relaxed text-foreground placeholder:text-muted-foreground/60 outline-none"
+          />
+
+          {/* Quick suggestions if empty */}
+          {!values.topic && (
+            <div className="flex flex-wrap items-center gap-1.5 pt-2 pb-1 border-t border-border/40">
+              <span className="text-[11px] font-medium text-muted-foreground">Vorschläge:</span>
+              {SUGGESTED_TOPICS.map((sug) => (
+                <button
+                  key={sug}
+                  type="button"
+                  onClick={() => onChange({ topic: sug })}
+                  className="rounded-full border border-border bg-foreground/[0.04] px-2.5 py-0.5 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-foreground"
+                >
+                  {sug}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Chat input footer bar */}
+          <div className="mt-2.5 flex flex-wrap items-center justify-between gap-3 border-t border-border/40 pt-3">
+            <div className="flex flex-1 items-center gap-2 min-w-56">
+              <Users className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              <input
+                value={values.audience}
+                onChange={(e) => onChange({ audience: e.target.value })}
+                placeholder="Zielgruppe (optional, z. B. Gründer:innen)"
+                className="w-full bg-transparent text-xs text-foreground placeholder:text-muted-foreground/60 outline-none"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onSubmit}
+                disabled={isGenerating || !values.topic.trim()}
+                className="inline-flex items-center gap-2 rounded-full bg-primary py-1.5 pl-4 pr-1.5 text-xs font-semibold text-primary-foreground shadow-[0_8px_24px_-8px_var(--primary)] transition-all hover:bg-primary-bright disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                <span>{isGenerating ? "Erzeuge…" : `${values.slideCount} Slides generieren`}</span>
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary-foreground/20">
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Slide Count Slider Section ───────────────────────────── */}
+      <section className="rounded-2xl border border-border/70 bg-foreground/[0.02] p-4 sm:p-5 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Karussell-Umfang
+              </span>
+              <span className="rounded-full border border-primary/40 bg-primary/15 px-2.5 py-0.5 text-xs font-bold text-primary-bright">
+                {values.slideCount} {values.slideCount === 1 ? "Slide" : "Slides"}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground/90">{slideTip}</p>
+          </div>
+
+          {/* Stepper buttons for precision fine-tuning */}
+          <div className="flex items-center gap-1.5 rounded-full border border-border/80 bg-foreground/[0.03] p-1">
+            <button
+              type="button"
+              onClick={() => onChange({ slideCount: Math.max(2, values.slideCount - 1) })}
+              disabled={values.slideCount <= 2}
+              className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground disabled:opacity-30"
+              aria-label="Eine Slide weniger"
+            >
+              <Minus className="h-3.5 w-3.5" />
+            </button>
+            <span className="w-6 text-center text-xs font-bold text-foreground">
+              {values.slideCount}
+            </span>
+            <button
+              type="button"
+              onClick={() => onChange({ slideCount: Math.min(10, values.slideCount + 1) })}
+              disabled={values.slideCount >= 10}
+              className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground disabled:opacity-30"
+              aria-label="Eine Slide mehr"
+            >
+              <Plus className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        </div>
+
+        {/* The interactive range slider */}
+        <div className="pt-2 px-1">
+          <Slider
+            value={[values.slideCount]}
+            min={2}
+            max={10}
+            step={1}
+            onValueChange={([val]) => val !== undefined && onChange({ slideCount: val })}
+            aria-label="Anzahl der Slides"
+          />
+
+          {/* Slider scale markers */}
+          <div className="mt-2 flex justify-between text-[11px] font-medium text-muted-foreground/70">
+            <span>2 Slides</span>
+            <span>4</span>
+            <span className="font-semibold text-primary-bright">6 (Standard)</span>
+            <span>8</span>
+            <span>10 Slides</span>
+          </div>
+        </div>
+
+        {/* Quick-select presets */}
+        <div className="flex flex-wrap gap-2 pt-1 border-t border-border/40">
+          <span className="text-[11px] font-medium text-muted-foreground self-center">Schnellauswahl:</span>
+          {PRESET_SLIDE_COUNTS.map((p) => (
+            <button
+              key={p.count}
+              type="button"
+              onClick={() => onChange({ slideCount: p.count })}
+              className={cn(
+                "rounded-full border px-3 py-1 text-xs font-medium transition-colors",
+                values.slideCount === p.count
+                  ? "border-primary bg-primary/20 text-primary-bright font-semibold shadow-[0_0_15px_-4px_var(--primary)]"
+                  : "border-border bg-foreground/[0.02] text-muted-foreground hover:border-border hover:text-foreground",
+              )}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Design Templates ─────────────────────────────────────── */}
+      <section className="space-y-2.5">
         <h2 className="mono-label">Design Library</h2>
         <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
           {DESIGN_TEMPLATES.map((tpl) => (
@@ -35,8 +217,8 @@ export function CarouselBriefForm({
               className={cn(
                 "w-52 shrink-0 rounded-xl border p-3 text-left transition-colors",
                 values.designId === tpl.id
-                  ? "border-primary bg-primary/10"
-                  : "border-border bg-foreground/[0.02] hover:border-border",
+                  ? "border-primary bg-primary/10 shadow-[0_0_24px_-10px_var(--primary)]"
+                  : "border-border bg-foreground/[0.02] hover:border-border hover:bg-foreground/[0.04]",
               )}
             >
               <div className="flex gap-1">
@@ -55,55 +237,39 @@ export function CarouselBriefForm({
         </div>
       </section>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <Field label="Thema">
-          <input
-            className="field-input"
-            value={values.topic}
-            onChange={(e) => onChange({ topic: e.target.value })}
-            placeholder="z. B. Disziplin schlägt Motivation"
-          />
-        </Field>
-        <Field label="Zielgruppe">
-          <input
-            className="field-input"
-            value={values.audience}
-            onChange={(e) => onChange({ audience: e.target.value })}
-            placeholder="z. B. Gründer:innen zwischen 25 und 40"
-          />
-        </Field>
-      </section>
-
-      <section className="grid grid-cols-1 gap-4 sm:grid-cols-[auto_1fr_1fr]">
-        <Field label="Slides">
-          <div className="flex items-center gap-2">
-            <StepBtn onClick={() => onChange({ slideCount: Math.max(1, values.slideCount - 1) })}>
-              <Minus className="h-3.5 w-3.5" />
-            </StepBtn>
-            <span className="w-8 text-center text-sm font-bold text-foreground">{values.slideCount}</span>
-            <StepBtn onClick={() => onChange({ slideCount: Math.min(10, values.slideCount + 1) })}>
-              <Plus className="h-3.5 w-3.5" />
-            </StepBtn>
-          </div>
-        </Field>
-        <Field label="CTA">
+      {/* ── Secondary Brief Settings (CTA, Handle) ───────────────── */}
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Field label="CTA Button-Text">
           <input
             className="field-input"
             value={values.ctaText}
             onChange={(e) => onChange({ ctaText: e.target.value })}
+            placeholder="z. B. folge für mehr"
           />
         </Field>
-        <Field label="Handle">
+        <Field label="Social Handle">
           <input
             className="field-input"
             value={values.handle}
             onChange={(e) => onChange({ handle: e.target.value })}
+            placeholder="@dein.profil"
           />
         </Field>
       </section>
 
-      <section className="space-y-2">
-        <h2 className="mono-label">Text-Engine</h2>
+      {/* ── Text Engine & AI Clone ───────────────────────────────── */}
+      <section className="space-y-3 pt-1 border-t border-border/50">
+        <div className="flex items-center justify-between">
+          <span className="mono-label">Text-Engine & Provider</span>
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="text-xs text-muted-foreground hover:text-primary-bright"
+          >
+            {showAdvanced ? "Weniger Details" : "API-Optionen anzeigen"}
+          </button>
+        </div>
+
         <div className="flex flex-wrap gap-2">
           {LLM_PROVIDERS.map((p) => (
             <button
@@ -113,43 +279,45 @@ export function CarouselBriefForm({
               className={cn(
                 "rounded-full border px-4 py-1.5 text-xs font-medium transition-colors",
                 values.provider === p.id
-                  ? "border-primary bg-primary/20 text-primary-bright"
-                  : "border-border text-muted-foreground hover:text-foreground",
+                  ? "border-primary bg-primary/20 text-primary-bright font-semibold shadow-[0_0_15px_-4px_var(--primary)]"
+                  : "border-border text-muted-foreground hover:text-foreground hover:border-border/80",
               )}
             >
               {p.label}
             </button>
           ))}
         </div>
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1">
-            <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
-            <input
-              type="password"
-              className="field-input pl-9"
-              value={values.apiKey}
-              onChange={(e) => onChange({ apiKey: e.target.value })}
-              placeholder="API-Key (optional — Demo läuft ohne)"
-            />
-          </div>
-          {keySaved ? (
-            <span className="flex items-center gap-1 text-xs text-success">
-              <Check className="h-3.5 w-3.5" /> gespeichert
-            </span>
-          ) : (
-            <a
-              href={providerMeta?.url}
-              target="_blank"
-              rel="noreferrer"
-              className="text-xs text-primary-bright hover:underline"
-            >
-              Key holen ↗
-            </a>
-          )}
-        </div>
-      </section>
 
-      <section>
+        {showAdvanced && (
+          <div className="flex items-center gap-2 pt-1">
+            <div className="relative flex-1">
+              <KeyRound className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="password"
+                className="field-input pl-9"
+                value={values.apiKey}
+                onChange={(e) => onChange({ apiKey: e.target.value })}
+                placeholder="API-Key (optional — Demo läuft ohne)"
+              />
+            </div>
+            {keySaved ? (
+              <span className="flex items-center gap-1 text-xs text-success">
+                <Check className="h-3.5 w-3.5" /> gespeichert
+              </span>
+            ) : (
+              <a
+                href={providerMeta?.url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs text-primary-bright hover:underline"
+              >
+                Key holen ↗
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* AI Clone Toggle */}
         <button
           type="button"
           onClick={() => onChange({ useClone: !values.useClone })}
@@ -157,14 +325,14 @@ export function CarouselBriefForm({
             "flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors",
             values.useClone
               ? "border-primary bg-primary/15 shadow-[0_0_30px_-12px_var(--primary)]"
-              : "border-border bg-foreground/[0.02]",
+              : "border-border bg-foreground/[0.02] hover:bg-foreground/[0.04]",
           )}
         >
           <UserCheck
             className={cn("h-4 w-4", values.useClone ? "text-primary-bright" : "text-muted-foreground")}
           />
           <span className="flex-1">
-            <span className="block text-[13px] font-medium">AI Clone verwenden</span>
+            <span className="block text-xs font-medium text-foreground">AI Clone verwenden</span>
             <span className="block text-xs text-muted-foreground">
               Dein Gesicht/Stil als wiederkehrendes Motiv in allen Slides
             </span>
@@ -199,17 +367,5 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="mono-label">{label}</span>
       {children}
     </label>
-  );
-}
-
-function StepBtn({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex h-8 w-8 items-center justify-center rounded-lg border border-border text-muted-foreground transition-colors hover:text-foreground"
-    >
-      {children}
-    </button>
   );
 }
