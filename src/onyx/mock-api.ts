@@ -44,11 +44,33 @@ export async function mockGenerateCarousel(
   slideCount: number,
   topic = "Disziplin schlägt Motivation",
   audience = "",
+  clonePrefix = "",
+  clonePlacement = "hook_closing",
 ): Promise<SlideContent[]> {
   await delay(600);
   return Array.from({ length: slideCount }, (_, i) => {
     const role = ROLES[i % ROLES.length]!;
     const metaphor = METAPHORS[i % METAPHORS.length]!;
+    const isFirst = i === 0;
+    const isLast = i === slideCount - 1;
+    const isEven = (i + 1) % 2 === 0;
+
+    const includeClone =
+      Boolean(clonePrefix) &&
+      (clonePlacement === "all_slides" ||
+        (clonePlacement === "hook_closing" && (isFirst || isLast)) ||
+        (clonePlacement === "even_slides" && isEven));
+
+    const visualPromptBase = `Photorealistic 3D ${metaphor.toLowerCase()}, violet rim light (#9333EA), dark background #060509, cinematic, slide ${i + 1} of ${slideCount} — ${topic}`;
+    const visualPrompt = includeClone
+      ? `${clonePrefix.trim()} — featuring ${visualPromptBase}`
+      : visualPromptBase;
+
+    const props = ["Violettes Rimlight", "Dunkler Hintergrund", "Dramatisches Licht"];
+    if (includeClone) {
+      props.unshift("Konsistente AI Persona");
+    }
+
     return {
       id: makeId(),
       slideNumber: i + 1,
@@ -58,10 +80,10 @@ export async function mockGenerateCarousel(
       subtext: audience
         ? `Für ${audience}: Motivation ist ein Gefühl. Ein System funktioniert auch ohne.`
         : "Motivation ist ein Gefühl. Disziplin ist ein System, das funktioniert.",
-      ...(i === 0 ? { badge: "Der Unterschied" } : {}),
-      coreMetaphor: metaphor,
-      primaryProps: ["Violettes Rimlight", "Dunkler Hintergrund", "Dramatisches Licht"],
-      visualPrompt: `Photorealistic 3D ${metaphor.toLowerCase()}, violet rim light (#9333EA), dark background #060509, cinematic, slide ${i + 1} of ${slideCount} — ${topic}`,
+      ...(isFirst ? { badge: "Der Unterschied" } : {}),
+      coreMetaphor: includeClone ? "AI Persona Porträt" : metaphor,
+      primaryProps: props,
+      visualPrompt,
     } satisfies SlideContent;
   });
 }

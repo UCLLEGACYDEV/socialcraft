@@ -17,6 +17,8 @@ export const LS = {
   sidebarCollapsed: "onyx_sidebar_collapsed",
   motifHistory: "onyx_motif_history",
   history: "onyx_history",
+  cloneProfiles: "onyx_ai_clone_profiles",
+  activeCloneId: "onyx_ai_clone_active_id",
 } as const;
 
 export function readLS<T>(key: string, fallback: T): T {

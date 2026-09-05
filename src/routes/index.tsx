@@ -20,11 +20,18 @@ import {
   PromptGallery,
 } from "@/onyx/components/SimpleViews";
 
-import { DEFAULT_API_SETTINGS, DEFAULT_BRAND_KIT, DEFAULT_BRIEF } from "@/onyx/defaults";
+import {
+  DEFAULT_API_SETTINGS,
+  DEFAULT_BRAND_KIT,
+  DEFAULT_BRIEF,
+  DEFAULT_CLONE_PROFILES,
+  assembleClonePrompt,
+} from "@/onyx/defaults";
 import { LS, usePersistentState } from "@/onyx/storage";
 import { makeId, mockGenerateCarousel, mockGenerateImage, mockGetCredits } from "@/onyx/mock-api";
 import { downloadSlide, exportCarouselAsZip } from "@/onyx/export-zip";
 import type {
+  AiCloneProfile,
   ApiSettings,
   BrandKit,
   BriefValues,
@@ -81,6 +88,18 @@ function OnyxStudio() {
   const [history, setHistory] = usePersistentState<HistoryEntry[]>(LS.history, []);
   const [brief, setBrief] = usePersistentState<BriefValues>(LS.brief, DEFAULT_BRIEF);
   const [directPrompt, setDirectPrompt] = usePersistentState<string>("onyx.directPrompt", "");
+  const [cloneProfiles] = usePersistentState<AiCloneProfile[]>(
+    LS.cloneProfiles,
+    DEFAULT_CLONE_PROFILES,
+  );
+  const [activeCloneId] = usePersistentState<string>(
+    LS.activeCloneId,
+    DEFAULT_CLONE_PROFILES[0]?.id ?? "",
+  );
+
+  const activeClone = useMemo(() => {
+    return cloneProfiles.find((p) => p.id === activeCloneId) ?? cloneProfiles[0];
+  }, [cloneProfiles, activeCloneId]);
 
   const [isGeneratingCarousel, setIsGeneratingCarousel] = useState(false);
   const [isGeneratingImages, setIsGeneratingImages] = useState(false);
@@ -120,11 +139,20 @@ function OnyxStudio() {
   const generateCarousel = async () => {
     setIsGeneratingCarousel(true);
     try {
-      const next = await mockGenerateCarousel(brief.slideCount, brief.topic, brief.audience);
+      const clonePrefix =
+        brief.useClone && activeClone ? assembleClonePrompt(activeClone) : "";
+      const clonePlacement = activeClone?.placement ?? "hook_closing";
+      const next = await mockGenerateCarousel(
+        brief.slideCount,
+        brief.topic,
+        brief.audience,
+        clonePrefix,
+        clonePlacement,
+      );
       setSlides(next);
       setTopic(brief.topic);
       rememberMotifs(next);
-      toast.success(`${next.length} Prompts erzeugt`);
+      toast.success(`${next.length} Prompts erzeugt${brief.useClone ? " (mit KI Clone)" : ""}`);
     } finally {
       setIsGeneratingCarousel(false);
     }
@@ -408,7 +436,20 @@ function OnyxStudio() {
           )}
 
           {activeTab === "direct-prompt" && <DirectPromptView initialPrompt={directPrompt} />}
-          {activeTab === "ai-clone" && <AiCloneView />}
+          {activeTab === "ai-clone" && (
+            <AiCloneView
+              onUseInCarousel={() => {
+                patchBrief({ useClone: true });
+                setActiveTab("carousel");
+                toast.success("KI Clone für Karussell aktiviert!");
+              }}
+              onUseInDirectPrompt={(clonePrompt) => {
+                setDirectPrompt(clonePrompt);
+                setActiveTab("direct-prompt");
+                toast.success("KI Clone ins Einzelbild übertragen!");
+              }}
+            />
+          )}
           {activeTab === "prompt-gallery" && (
             <PromptGallery
               onUseInCarousel={(promptText, title) => {

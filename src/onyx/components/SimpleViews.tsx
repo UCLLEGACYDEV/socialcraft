@@ -61,27 +61,7 @@ export function DirectPromptView({ initialPrompt }: DirectPromptViewProps = {}) 
   );
 }
 
-export function AiCloneView() {
-  const [desc, setDesc] = useState("");
-  return (
-    <div className="glass-card-hero space-y-3 p-5">
-      <h1 className="flex items-center gap-2 text-lg font-semibold">
-        <UserCheck className="h-4 w-4 text-primary-bright" /> AI Clone
-      </h1>
-      <p className="text-xs text-muted-foreground">
-        Beschreibe dein wiederkehrendes Motiv. Wird bei aktivem Clone jedem Prompt vorangestellt.
-      </p>
-      <textarea
-        rows={6}
-        className="field-input text-xs sm:text-sm leading-relaxed"
-        value={desc}
-        onChange={(e) => setDesc(e.target.value)}
-        placeholder="Mann, Ende 30, kurzer Bart, schwarzer Rollkragen, dramatisches Seitenlicht…"
-      />
-      <p className="text-xs text-muted-foreground">Lokal gespeichert, sobald du weiter tippst.</p>
-    </div>
-  );
-}
+export { AiCloneView } from "./AiCloneView";
 
 export { PromptHubView as PromptGallery } from "./PromptHubView";
 

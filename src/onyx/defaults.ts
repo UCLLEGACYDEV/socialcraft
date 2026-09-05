@@ -1,4 +1,4 @@
-import type { ApiSettings, BrandKit, BriefValues } from "./types";
+import type { AiCloneProfile, ApiSettings, BrandKit, BriefValues } from "./types";
 
 export const DEFAULT_BRAND_KIT: BrandKit = {
   handle: "@dein.name",
@@ -97,3 +97,76 @@ export const LLM_PROVIDERS = [
   { id: "openai", label: "ChatGPT", url: "https://platform.openai.com/api-keys" },
   { id: "anthropic", label: "Claude", url: "https://console.anthropic.com/settings/keys" },
 ] as const;
+
+export const DEFAULT_CLONE_PROFILES: AiCloneProfile[] = [
+  {
+    id: "founder-dark-ember",
+    name: "Founder Dark Ember",
+    isActive: true,
+    avatarUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
+    referenceImages: [
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80",
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&q=80",
+    ],
+    genderAge: "Mann, Anfang 30, mitteleuropäischer Typ",
+    hairFace: "Kurze dunkle Haare, gepflegter 3-Tage-Bart, markante Kieferlinie, fokussierter Blick",
+    wardrobe: "Schwarzer minimalistischer Merinowolle-Rollkragenpullover",
+    lightingLook: "Dramatisches Seitenlicht (Rembrandt), warmes orange-rotes Rimlight (#F04A20), tiefe Schatten",
+    framingCamera: "Close-up Porträt, 85mm Linse, f/1.8 Bokeh, Blick leicht an der Kamera vorbei ins Leere",
+    negativePrompt: "Kein künstliches breites Grinsen, keine Cartoon-Ästhetik, kein greller Hintergrund",
+    customPrefix: "Consistent recurring persona: Man in early 30s, short dark hair, neat stubble beard, wearing black turtleneck, cinematic dramatic side lighting, warm ember rimlight, dark studio background, 85mm portrait.",
+    placement: "hook_closing",
+    updatedAt: "2026-09-05T06:00:00.000Z",
+  },
+  {
+    id: "editorial-minimalist",
+    name: "Editorial Minimalist",
+    isActive: false,
+    avatarUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80",
+    referenceImages: [
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80",
+    ],
+    genderAge: "Frau, Ende 20",
+    hairFace: "Glatte braune Haare nach hinten gesteckt, natürliche Gesichtszüge, neutraler selbstbewusster Ausdruck",
+    wardrobe: "Dunkelgrauer Oversize-Wollblazer, schlichtes weißes Seidentop",
+    lightingLook: "Weiches diffuses Studio-Licht, kühle Schattentöne, neutraler Beton-Hintergrund",
+    framingCamera: "Halbporträt, 50mm, High-End Modemagazin-Ästhetik, natürliche Hauttextur",
+    negativePrompt: "Keine Überbelichtung, kein unnatürliches Plastik-Haut-Glätten",
+    customPrefix: "Consistent recurring persona: Woman in late 20s, slicked-back brown hair, wearing dark grey oversized blazer, soft high-end studio lighting, minimalist editorial aesthetic.",
+    placement: "hook_closing",
+    updatedAt: "2026-09-05T06:00:00.000Z",
+  },
+  {
+    id: "cyber-visionary",
+    name: "Cyberpunk Visionary",
+    isActive: false,
+    avatarUrl: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80",
+    referenceImages: [
+      "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&q=80",
+    ],
+    genderAge: "Person, Anfang 30",
+    hairFace: "Kurze dunkle Haare, futuristische runde Sonnenbrille mit Stadtspiegelung",
+    wardrobe: "Matte schwarze Techwear-Jacke mit dezentem Kragen",
+    lightingLook: "Kühles blau-violettes Kantenlicht (#8B5CF6), volumetrischer Dunst, dunkles Interieur",
+    framingCamera: "Nahaufnahme, dramatischer Untersicht-Winkel, 35mm Weitwinkel-Porträt",
+    negativePrompt: "Kein bunter Anime-Look, keine grellen Neonschilder",
+    customPrefix: "Consistent recurring persona: Person wearing round reflective sunglasses and black techwear jacket, violet rimlight, dark atmospheric studio, cinematic high contrast.",
+    placement: "all_slides",
+    updatedAt: "2026-09-05T06:00:00.000Z",
+  },
+];
+
+export function assembleClonePrompt(clone: AiCloneProfile): string {
+  if (clone.customPrefix && clone.customPrefix.trim()) {
+    return clone.customPrefix.trim();
+  }
+  const parts = [
+    clone.genderAge,
+    clone.hairFace,
+    clone.wardrobe,
+    clone.lightingLook,
+    clone.framingCamera,
+  ].filter(Boolean);
+  return parts.join(", ");
+}
+

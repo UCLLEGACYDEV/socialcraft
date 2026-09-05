@@ -132,3 +132,22 @@ export interface ParsedCarousel {
   raw: string;
   slides: ParsedSlide[];
 }
+
+export type ClonePlacement = "hook_closing" | "all_slides" | "even_slides" | "custom";
+
+export interface AiCloneProfile {
+  id: string;
+  name: string;
+  isActive: boolean;
+  avatarUrl?: string;
+  referenceImages: string[];
+  genderAge: string;
+  hairFace: string;
+  wardrobe: string;
+  lightingLook: string;
+  framingCamera: string;
+  negativePrompt: string;
+  customPrefix: string;
+  placement: ClonePlacement;
+  updatedAt: string;
+}
