@@ -223,6 +223,7 @@ export function CloudGalleryView({
 
   const [galleryViewMode, setGalleryViewMode] = useState<"folders" | "grid">("folders");
   const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
+  const [viewerProject, setViewerProject] = useState<string | null>(null);
 
   const toggleProjectExpand = (projectName: string) => {
     setExpandedProjects((prev) => ({
@@ -875,7 +876,6 @@ export function CloudGalleryView({
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {Object.entries(folderTree.series).map(([projectName, slides]) => {
-                      const isExpanded = expandedProjects[projectName] !== false; // default open
                       const totalSizeMB = (slides.reduce((acc, s) => acc + s.sizeBytes, 0) / (1024 * 1024)).toFixed(1);
                       const cover = slides[0];
                       const title = prettyProjectName(projectName);
@@ -889,7 +889,7 @@ export function CloudGalleryView({
                           {/* Cover-Bild */}
                           <div
                             className="relative aspect-[4/3] w-full overflow-hidden bg-black/40 cursor-pointer"
-                            onClick={() => toggleProjectExpand(projectName)}
+                            onClick={() => setViewerProject(projectName)}
                           >
                             {cover && (
                               <img
@@ -919,11 +919,11 @@ export function CloudGalleryView({
                           <div className="flex items-center gap-2 p-3 border-t border-white/[0.06]">
                             <button
                               type="button"
-                              onClick={() => toggleProjectExpand(projectName)}
+                              onClick={() => setViewerProject(projectName)}
                               className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-white/5 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/10 transition-colors cursor-pointer"
                             >
-                              {isExpanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
-                              <span>{isExpanded ? "Einklappen" : "Ansehen"}</span>
+                              <Eye className="h-3.5 w-3.5" />
+                              <span>Ansehen</span>
                             </button>
                             <button
                               type="button"
@@ -935,64 +935,102 @@ export function CloudGalleryView({
                               <span>ZIP</span>
                             </button>
                           </div>
-
-                          {/* Expanded: alle Slides */}
-                          {isExpanded && (
-                            <div className="p-3 bg-black/30 border-t border-white/[0.06]">
-                              <div className="grid grid-cols-3 gap-2">
-                                {slides.map((slide) => {
-                                  const isSelected = selectedIds.includes(slide.id);
-                                  return (
-                                    <div
-                                      key={slide.id}
-                                      className={cn(
-                                        "group/slide relative overflow-hidden rounded-lg border bg-[#14111C] transition-all",
-                                        isSelected
-                                          ? "border-blue-500 ring-1 ring-blue-500"
-                                          : "border-white/[0.08] hover:border-white/20"
-                                      )}
-                                    >
-                                      <div
-                                        className="relative aspect-square w-full cursor-pointer bg-black/40 overflow-hidden"
-                                        onClick={() => toggleSelect(slide.id)}
-                                      >
-                                        <img
-                                          src={slide.displayUrl || slide.url}
-                                          alt={slide.filename}
-                                          className="h-full w-full object-cover transition-transform duration-300 group-hover/slide:scale-105"
-                                          loading="lazy"
-                                        />
-                                        {isSelected && (
-                                          <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center backdrop-blur-[1px]">
-                                            <div className="rounded-full bg-blue-500 p-1 shadow-lg shadow-black/50">
-                                              <Check className="h-3 w-3 text-white" />
-                                            </div>
-                                          </div>
-                                        )}
-                                        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover/slide:opacity-100 transition-opacity">
-                                          <button
-                                            type="button"
-                                            onClick={(e) => {
-                                              e.stopPropagation();
-                                              handleDownloadSingle(slide);
-                                            }}
-                                            className="rounded-md bg-black/70 p-1 text-white hover:bg-black backdrop-blur-md border border-white/10"
-                                            title="Herunterladen"
-                                          >
-                                            <Download className="h-3 w-3" />
-                                          </button>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
                         </div>
                       );
                     })}
                   </div>
+
+                  {/* Serien-Viewer: öffnet alle Slides als Overlay, ohne die Grid-Karten zu verziehen */}
+                  {viewerProject && folderTree.series[viewerProject] && (
+                    <div
+                      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+                      onClick={() => setViewerProject(null)}
+                    >
+                      <div
+                        className="w-full max-w-4xl max-h-[85vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#100E17] shadow-2xl"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 bg-[#100E17]/95 backdrop-blur-xl border-b border-white/[0.06] px-5 py-4">
+                          <div className="min-w-0">
+                            <h3 className="text-sm sm:text-base font-bold text-white truncate">
+                              {prettyProjectName(viewerProject)}
+                            </h3>
+                            <p className="text-[11px] text-zinc-500">
+                              {folderTree.series[viewerProject]!.length} Slides
+                              {projectDate(viewerProject) ? ` · ${projectDate(viewerProject)}` : ""}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadProjectZip(viewerProject, folderTree.series[viewerProject]!)}
+                              disabled={isZipping}
+                              className="flex items-center gap-1.5 rounded-lg bg-blue-500/15 border border-blue-500/30 px-3 py-1.5 text-xs font-medium text-blue-300 hover:bg-blue-500/25 transition-colors disabled:opacity-50 cursor-pointer"
+                            >
+                              {isZipping ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                              <span>ZIP</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => setViewerProject(null)}
+                              className="rounded-lg bg-white/5 p-2 text-zinc-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                              aria-label="Schließen"
+                            >
+                              <X className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 p-5">
+                          {folderTree.series[viewerProject]!.map((slide) => {
+                            const isSelected = selectedIds.includes(slide.id);
+                            return (
+                              <div
+                                key={slide.id}
+                                className={cn(
+                                  "group/slide relative overflow-hidden rounded-lg border bg-[#14111C] transition-all",
+                                  isSelected
+                                    ? "border-blue-500 ring-1 ring-blue-500"
+                                    : "border-white/[0.08] hover:border-white/20"
+                                )}
+                              >
+                                <div
+                                  className="relative aspect-square w-full cursor-pointer bg-black/40 overflow-hidden"
+                                  onClick={() => toggleSelect(slide.id)}
+                                >
+                                  <img
+                                    src={slide.displayUrl || slide.url}
+                                    alt={slide.filename}
+                                    className="h-full w-full object-cover transition-transform duration-300 group-hover/slide:scale-105"
+                                    loading="lazy"
+                                  />
+                                  {isSelected && (
+                                    <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center backdrop-blur-[1px]">
+                                      <div className="rounded-full bg-blue-500 p-1 shadow-lg shadow-black/50">
+                                        <Check className="h-4 w-4 text-white" />
+                                      </div>
+                                    </div>
+                                  )}
+                                  <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover/slide:opacity-100 transition-opacity">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleDownloadSingle(slide);
+                                      }}
+                                      className="rounded-md bg-black/70 p-1.5 text-white hover:bg-black backdrop-blur-md border border-white/10"
+                                      title="Herunterladen"
+                                    >
+                                      <Download className="h-3 w-3" />
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
