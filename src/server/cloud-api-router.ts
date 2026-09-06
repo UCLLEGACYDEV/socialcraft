@@ -7,12 +7,20 @@ import {
   testCloudConnection,
   getCloudFileObject,
 } from "./cloud-storage";
+import {
+  resolveCloudIdentity,
+  normalizeKey,
+  isInOwnScope,
+  isTrustedAdmin,
+  resolveListPrefix,
+} from "./cloud-identity";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers":
-    "Content-Type, x-cloud-access-key, x-cloud-secret-key, x-cloud-endpoint, x-cloud-bucket, x-cloud-region",
+    "Content-Type, Authorization, x-cloud-access-key, x-cloud-secret-key, x-cloud-endpoint, x-cloud-bucket, x-cloud-region, x-onyx-user-id, x-onyx-user-role",
+  "Access-Control-Allow-Credentials": "true",
 };
 
 function jsonResponse(data: unknown, status = 200) {
@@ -166,7 +174,13 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
         return jsonResponse({ error: "Cloud-Zugangsdaten fehlen" }, 401);
       }
 
-      const res = await deleteCloudObjects(cfg, body.keys);
+      const keys = body.keys.map((k) => normalizeKey(String(k)));
+      const forbidden = keys.filter((k) => !isInOwnScope(identity, k) && !isTrustedAdmin(identity));
+      if (forbidden.length > 0) {
+        return jsonResponse({ error: "Kein Zugriff auf diese Dateien." }, 403);
+      }
+
+      const res = await deleteCloudObjects(cfg, keys);
       return jsonResponse(res);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Löschen fehlgeschlagen";
@@ -208,7 +222,12 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
         return new Response("Cloud credentials missing", { status: 401 });
       }
 
-      const fileObj = await getCloudFileObject(cfg, key);
+      const cleanKey = normalizeKey(key);
+      if (!isInOwnScope(identity, cleanKey) && !isTrustedAdmin(identity)) {
+        return new Response("Forbidden", { status: 403, headers: corsHeaders });
+      }
+
+      const fileObj = await getCloudFileObject(cfg, cleanKey);
       if (!fileObj) {
         return new Response("Object not found", { status: 404 });
       }
