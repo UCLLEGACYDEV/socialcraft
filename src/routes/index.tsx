@@ -655,6 +655,7 @@ function OnyxStudio() {
                 customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
                 subfolder: `series/${_seriesFolder}`,
                 projectName: _seriesFolder,
+                onError: (msg) => toast.error(`Slide ${slide.slideNumber} nicht in Cloud gesichert: ${msg}`),
               });
       }
 
@@ -762,6 +763,7 @@ function OnyxStudio() {
                 customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
                 subfolder: `series/${_qSeriesFolder}`,
                 projectName: _qSeriesFolder,
+                onError: (msg) => toast.error(`Slide ${slide.slideNumber} nicht in Cloud gesichert: ${msg}`),
               });
             }
 
