@@ -9,14 +9,15 @@ interface CarouselViewerProps {
   onCancelGeneration: () => void;
   onRerollImage: (slideId: string) => void;
   onEditSlide: (slideId: string) => void;
-  onDownloadSingle: (slideId: string) => void;
-  onExportZip: () => void;
+  onDownloadSingle: (slideId: string, withOverlay?: boolean) => void;
+  onExportZip: (withOverlay?: boolean) => void;
   onReset: () => void;
   settings: ApiSettings;
   brandKit: BrandKit;
 }
 
 import { SlideCard } from "./SlideCard";
+import { useState } from "react";
 
 export function CarouselViewer({
   slides,
@@ -32,6 +33,7 @@ export function CarouselViewer({
   settings,
   brandKit,
 }: CarouselViewerProps) {
+  const [withOverlay, setWithOverlay] = useState(true);
   const done = slides.filter((s) => s.imageUrl).length;
   const ratio = brandKit.aspectRatio === "1:1" ? "1 / 1" : "4 / 5";
 
@@ -45,6 +47,17 @@ export function CarouselViewer({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* Toggle for typography overlay */}
+          <label className="flex items-center gap-2 cursor-pointer text-xs text-zinc-300 hover:text-white px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.04] transition-colors">
+            <input
+              type="checkbox"
+              checked={withOverlay}
+              onChange={(e) => setWithOverlay(e.target.checked)}
+              className="h-3.5 w-3.5 rounded border-zinc-700 text-[#FF4D17] accent-[#FF4D17] cursor-pointer"
+            />
+            <span className="font-medium">Text & Branding einbetten</span>
+          </label>
+
           <button
             type="button"
             onClick={onReset}
@@ -73,7 +86,7 @@ export function CarouselViewer({
           )}
           <button
             type="button"
-            onClick={onExportZip}
+            onClick={() => onExportZip(withOverlay)}
             disabled={done === 0}
             className="cryptox-orange-btn !py-2 !px-4 text-xs font-semibold disabled:opacity-40"
           >
@@ -91,7 +104,7 @@ export function CarouselViewer({
             modelName={settings.provider === "mock" ? "Studio Preset" : settings.kieModel}
             onReroll={() => onRerollImage(slide.id)}
             onEdit={() => onEditSlide(slide.id)}
-            onDownload={() => onDownloadSingle(slide.id)}
+            onDownload={() => onDownloadSingle(slide.id, withOverlay)}
             {...(isGeneratingImages ? { onCancel: onCancelGeneration } : {})}
           />
         ))}

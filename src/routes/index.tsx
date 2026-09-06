@@ -419,9 +419,9 @@ function OnyxStudio() {
     setTopic("");
   };
 
-  const exportZip = async () => {
-    const count = await exportCarouselAsZip(slides, topic);
-    if (count) toast.success(`${count} Bilder als ZIP exportiert`);
+  const exportZip = async (withOverlay = true) => {
+    const count = await exportCarouselAsZip(slides, topic, { brandKit, withOverlay });
+    if (count) toast.success(`${count} Bilder ${withOverlay ? "mit Branding " : ""}als ZIP exportiert`);
   };
 
   // ── Series queue ───────────────────────────────────────────────────────
@@ -914,11 +914,11 @@ function OnyxStudio() {
                   onCancelGeneration={() => abortRef.current?.abort()}
                   onRerollImage={(id) => void rerollImage(id)}
                   onEditSlide={(id) => setEditing({ slideId: id })}
-                  onDownloadSingle={(id) => {
+                  onDownloadSingle={(id, withOverlay) => {
                     const slide = slides.find((s) => s.id === id);
-                    if (slide) void downloadSlide(slide);
+                    if (slide) void downloadSlide(slide, brandKit, withOverlay);
                   }}
-                  onExportZip={() => void exportZip()}
+                  onExportZip={(withOverlay) => void exportZip(withOverlay)}
                   onReset={resetCarousel}
                   settings={settings}
                   brandKit={brandKit}
