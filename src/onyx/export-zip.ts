@@ -177,9 +177,42 @@ export async function downloadSlide(
     console.warn("Canvas-Overlay Download fehlgeschlagen, lade Original-Bild:", err);
   }
 
-  const res = await fetch(slide.imageUrl);
-  const blob = await res.blob();
-  saveAs(blob, `Slide_${slide.slideNumber}_${safeName(slide.roleLabel)}.png`);
+  const filename = `Slide_${slide.slideNumber}_${safeName(slide.roleLabel)}.png`;
+  try {
+    let blob: Blob;
+    if (slide.imageUrl.startsWith("data:")) {
+      const parts = slide.imageUrl.split(",");
+      const mime = parts[0]?.match(/:(.*?);/)?.[1] || "image/png";
+      const bstr = atob(parts[1] || "");
+      let n = bstr.length;
+      const u8arr = new Uint8Array(n);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      blob = new Blob([u8arr], { type: mime });
+    } else {
+      // Cloud URLs may block cross-origin fetch — route them through the proxy endpoint
+      let fetchUrl = slide.imageUrl;
+      let headers: Record<string, string> | undefined;
+      try {
+        const u = new URL(slide.imageUrl);
+        const key = decodeURIComponent(u.pathname.replace(/^\/+/, ""));
+        if (key && (u.hostname.includes("s3") || u.hostname.includes("mega"))) {
+          fetchUrl = `/api/cloud/file?key=${encodeURIComponent(key)}`;
+          headers = getCloudHeaders();
+        }
+      } catch {
+        // not a parseable URL — fetch as-is
+      }
+      const res = await fetch(fetchUrl, { headers });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      blob = await res.blob();
+    }
+    saveAs(blob, filename);
+  } catch (err) {
+    console.warn("Direkter Download fehlgeschlagen, öffne Bild in neuem Tab:", err);
+    window.open(slide.imageUrl, "_blank", "noopener,noreferrer");
+  }
 }
 
 export interface ExportZipOptions {
