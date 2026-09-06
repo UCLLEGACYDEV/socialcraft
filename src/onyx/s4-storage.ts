@@ -324,9 +324,12 @@ export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4Clou
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({})) as { error?: string };
-      console.warn("[CloudStorage] Upload failed:", err.error || res.statusText);
+      const message = err.error || res.statusText || `HTTP ${res.status}`;
+      console.warn("[CloudStorage] Upload failed:", message);
+      onError?.(message);
       return null;
     }
+
 
     const data = await res.json() as { success: boolean; url: string; key: string; size: number };
 
