@@ -46,15 +46,30 @@ export function writeLS(key: string, value: unknown) {
 /**
  * localStorage-backed state. Reads after mount so SSR and hydration match.
  */
-export function usePersistentState<T>(key: string, initial: T) {
+export function usePersistentState<T>(key: string, initial: T, mergeDefaults = false) {
   const [value, setValue] = useState<T>(initial);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    setValue(readLS<T>(key, initial));
+    const stored = readLS<T>(key, initial);
+    if (
+      mergeDefaults &&
+      stored && typeof stored === "object" && !Array.isArray(stored) &&
+      initial && typeof initial === "object" && !Array.isArray(initial)
+    ) {
+      // Fill in fields that were added after the value was first persisted
+      const merged = { ...(initial as object) } as Record<string, unknown>;
+      for (const [k, v] of Object.entries(stored as Record<string, unknown>)) {
+        if (v !== undefined && v !== null && v !== "") merged[k] = v;
+      }
+      setValue(merged as T);
+    } else {
+      setValue(stored);
+    }
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
+
 
   useEffect(() => {
     if (hydrated) writeLS(key, value);
