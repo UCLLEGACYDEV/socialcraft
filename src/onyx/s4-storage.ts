@@ -262,13 +262,15 @@ export interface SaveImageToS4Params {
   customFilename?: string | undefined;
   subfolder?: string | undefined;
   projectName?: string | undefined;
+  onError?: ((message: string) => void) | undefined;
 }
 
 /**
  * Saves an image to the user's cloud folder hierarchy
  */
 export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4CloudImage | null> {
-  const { imageUrl, prompt = "Generiertes Visual", category, aspectRatio = "4:5", user, customFilename, subfolder, projectName } = params;
+  const { imageUrl, prompt = "Generiertes Visual", category, aspectRatio = "4:5", user, customFilename, subfolder, projectName, onError } = params;
+
   const settings = getSettings();
   const bucket = settings.s4Bucket || S4_DEFAULT_BUCKET;
   const endpoint = settings.s4Endpoint || S4_DEFAULT_ENDPOINT;
