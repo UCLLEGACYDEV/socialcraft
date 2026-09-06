@@ -197,6 +197,31 @@ function OnyxStudio() {
     DEFAULT_CLONE_PROFILES[0]?.id ?? "",
   );
 
+  // Restore history from the user's private cloud folder when local history is empty
+  useEffect(() => {
+    if (history.length > 0) return;
+    let cancelled = false;
+    void loadHistoryFromS4<HistoryEntry>(currentUser).then((cloudHistory) => {
+      if (!cancelled && cloudHistory && cloudHistory.length > 0) {
+        setHistory(cloudHistory);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser]);
+
+  // Sync history into the user's private cloud folder (debounced)
+  useEffect(() => {
+    if (!settings.s4AutoSave || history.length === 0) return;
+    const timer = setTimeout(() => {
+      void saveHistoryToS4(history, currentUser);
+    }, 2000);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [history, currentUser, settings.s4AutoSave]);
+
   const activeClone = useMemo(() => {
     return cloneProfiles.find((p) => p.id === activeCloneId) ?? cloneProfiles[0];
   }, [cloneProfiles, activeCloneId]);
