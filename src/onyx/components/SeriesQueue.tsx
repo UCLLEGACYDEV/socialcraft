@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, Cpu, Loader2, Play, Sparkles, X } from "lucide-react";
 import { parseBlock } from "../parse-prompt-block";
 import { mockNameTopic } from "../mock-api";
