@@ -67,6 +67,21 @@ export function SeriesQueue({
   const [selectedSlideIds, setSelectedSlideIds] = useState<Record<string, string[]>>({});
   const [naming, setNaming] = useState(false);
 
+  // Neue Jobs: alle Slides standardmäßig auswählen (manuell geänderte Auswahl bleibt erhalten)
+  useEffect(() => {
+    setSelectedSlideIds((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const job of jobs) {
+        if (next[job.id] === undefined && job.slides && job.slides.length > 0) {
+          next[job.id] = job.slides.map((s) => s.id);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [jobs]);
+
   const parsed = useMemo(() => parseBlock(text), [text]);
 
   const carouselsWithTitles = parsed.map((c, i) => ({ ...c, title: titles[i] ?? c.title }));
