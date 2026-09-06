@@ -223,6 +223,7 @@ export function CloudGalleryView({
 
   const [galleryViewMode, setGalleryViewMode] = useState<"folders" | "grid">("folders");
   const [expandedProjects, setExpandedProjects] = useState<Record<string, boolean>>({});
+  const [viewerProject, setViewerProject] = useState<string | null>(null);
 
   const toggleProjectExpand = (projectName: string) => {
     setExpandedProjects((prev) => ({
