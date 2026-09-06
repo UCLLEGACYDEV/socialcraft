@@ -40,6 +40,27 @@ import { LS } from "../storage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+/** Wandelt technische Ordnernamen (2026-09-06_WARUM_DEINE_GESPRAeCHE..._c8bc6f) in lesbare Titel um. */
+function prettyProjectName(raw: string): string {
+  let s = raw.replace(/^\d{4}-\d{2}-\d{2}_/, ""); // Datums-Präfix weg
+  s = s.replace(/_[0-9a-f]{6}$/i, ""); // Hash-Suffix weg
+  s = s
+    .replace(/Ae/g, "Ä").replace(/Oe/g, "Ö").replace(/Ue/g, "Ü")
+    .replace(/ae/g, "ä").replace(/oe/g, "ö").replace(/ue/g, "ü");
+  s = s.replace(/_/g, " ").trim();
+  return s
+    .toLowerCase()
+    .split(" ")
+    .map((w) => (w.length > 0 ? w[0]!.toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
+/** Kurzes Datum aus dem Ordner-Präfix, falls vorhanden. */
+function projectDate(raw: string): string | null {
+  const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})_/);
+  return m ? `${m[3]}.${m[2]}.${m[1]}` : null;
+}
+
 interface CloudGalleryViewProps {
   currentUser: User | null;
   historyEntries: HistoryEntry[];
