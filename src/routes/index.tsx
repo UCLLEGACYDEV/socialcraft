@@ -163,7 +163,9 @@ function OnyxStudio() {
 
   // Ensure the cloud storage folder exists in the background (also for guests!)
   useEffect(() => {
+    syncCloudIdentityCookie(currentUser);
     void ensureUserS4Folder(currentUser).then((res) => {
+
       if (res.success) {
         console.log(`[CloudStorage] User folder verified/created: ${res.folder}`);
       } else {
