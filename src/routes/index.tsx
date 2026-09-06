@@ -18,7 +18,7 @@ import {
   PromptGallery,
 } from "@/onyx/components/SimpleViews";
 import { CloudGalleryView } from "@/onyx/components/CloudGalleryView";
-import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder } from "@/onyx/s4-storage";
+import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder, saveHistoryToS4, loadHistoryFromS4 } from "@/onyx/s4-storage";
 import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
 import { AdminDashboard } from "@/onyx/components/AdminDashboard";
 import { AuthModal } from "@/onyx/components/AuthModal";
@@ -196,6 +196,31 @@ function OnyxStudio() {
     LS.activeCloneId,
     DEFAULT_CLONE_PROFILES[0]?.id ?? "",
   );
+
+  // Restore history from the user's private cloud folder when local history is empty
+  useEffect(() => {
+    if (history.length > 0) return;
+    let cancelled = false;
+    void loadHistoryFromS4<HistoryEntry>(currentUser).then((cloudHistory) => {
+      if (!cancelled && cloudHistory && cloudHistory.length > 0) {
+        setHistory(cloudHistory);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser]);
+
+  // Sync history into the user's private cloud folder (debounced)
+  useEffect(() => {
+    if (!settings.s4AutoSave || history.length === 0) return;
+    const timer = setTimeout(() => {
+      void saveHistoryToS4(history, currentUser);
+    }, 2000);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [history, currentUser, settings.s4AutoSave]);
 
   const activeClone = useMemo(() => {
     return cloneProfiles.find((p) => p.id === activeCloneId) ?? cloneProfiles[0];
