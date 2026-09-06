@@ -283,12 +283,14 @@ export function CloudGalleryView({
   const handleManualUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!uploadUrl.trim()) return;
-    await saveImageToS4({
+    const saved = await saveImageToS4({
       imageUrl: uploadUrl.trim(),
       prompt: uploadPrompt.trim() || "Manuell hinzugefügtes Bild",
       category: "upload",
       user: currentUser,
+      onError: (msg) => toast.error(`Cloud-Speicherung fehlgeschlagen: ${msg}`),
     });
+    if (!saved) return;
     setUploadUrl("");
     setUploadPrompt("");
     setShowUploadModal(false);
