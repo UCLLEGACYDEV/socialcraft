@@ -39,6 +39,7 @@ interface SeriesQueueProps {
   onCancelSlide?: ((jobId: string, slideId: string) => void) | undefined;
   onRunSelectedSlides?: ((jobId: string, slideIds: string[]) => void) | undefined;
   onCancelJobSlides?: ((jobId: string) => void) | undefined;
+  onSaveJobToCloud?: ((jobId: string) => void) | undefined;
   settings: ApiSettings;
   onChangeSettings: (patch: Partial<ApiSettings>) => void;
 }
@@ -58,6 +59,7 @@ export function SeriesQueue({
   onCancelSlide,
   onRunSelectedSlides,
   onCancelJobSlides,
+  onSaveJobToCloud,
   settings,
   onChangeSettings,
 }: SeriesQueueProps) {
@@ -418,6 +420,17 @@ export function SeriesQueue({
                         >
                           <Play className="h-3 w-3 fill-current" />
                           Auswahl starten ({selectedCount})
+                        </button>
+                      )}
+
+                      {onSaveJobToCloud && (job.slides ?? []).some((s) => Boolean(s.imageUrl)) && (
+                        <button
+                          type="button"
+                          onClick={() => onSaveJobToCloud(job.id)}
+                          className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-zinc-200 transition-all hover:bg-white/10 hover:text-white"
+                        >
+                          <CloudUpload className="h-3.5 w-3.5" />
+                          In Cloud speichern
                         </button>
                       )}
 
