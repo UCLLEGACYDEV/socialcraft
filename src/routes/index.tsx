@@ -18,7 +18,7 @@ import {
   PromptGallery,
 } from "@/onyx/components/SimpleViews";
 import { CloudGalleryView } from "@/onyx/components/CloudGalleryView";
-import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder, saveHistoryToS4, loadHistoryFromS4 } from "@/onyx/s4-storage";
+import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder, saveHistoryToS4, loadHistoryFromS4, makeProjectFolderName, syncCloudIdentityCookie } from "@/onyx/s4-storage";
 import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
 import { AdminDashboard } from "@/onyx/components/AdminDashboard";
 import { AuthModal } from "@/onyx/components/AuthModal";
@@ -163,7 +163,9 @@ function OnyxStudio() {
 
   // Ensure the cloud storage folder exists in the background (also for guests!)
   useEffect(() => {
+    syncCloudIdentityCookie(currentUser);
     void ensureUserS4Folder(currentUser).then((res) => {
+
       if (res.success) {
         console.log(`[CloudStorage] User folder verified/created: ${res.folder}`);
       } else {
@@ -292,9 +294,7 @@ function OnyxStudio() {
     abortRef.current = controller;
     setIsGeneratingImages(true);
     let realNanoCount = 0;
-    const cleanTopic = (brief.topic || "karussell").replace(/[^a-zA-Z0-9-_\s]/g, "").trim().replace(/\s+/g, "_") || "karussell";
-    const dateStr = new Date().toISOString().slice(0, 10);
-    const carouselFolder = `${dateStr}_${cleanTopic}`;
+    const carouselFolder = makeProjectFolderName(brief.topic || "karussell");
     // Keep an up-to-date copy of the slides including the freshly rendered images
     const renderedSlides: SlideContent[] = slides.map((s) => ({ ...s }));
     try {
@@ -406,9 +406,7 @@ function OnyxStudio() {
       setSlideFlag(slideId, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
       if (settings.s4AutoSave) {
         const effectiveUser = currentUser || getStoredCurrentUser();
-        const cleanTopic = (brief.topic || "karussell").replace(/[^a-zA-Z0-9-_\s]/g, "").trim().replace(/\s+/g, "_") || "karussell";
-        const dateStr = new Date().toISOString().slice(0, 10);
-        const carouselFolder = `${dateStr}_${cleanTopic}`;
+        const carouselFolder = makeProjectFolderName(brief.topic || "karussell");
         void saveImageToS4({
           imageUrl: res.imageUrl,
           prompt: slide.visualPrompt,
@@ -618,12 +616,7 @@ function OnyxStudio() {
       });
 
       if (settings.s4AutoSave) {
-        const _seriesTopic = (job?.topic ?? "series")
-          .replace(/[^a-zA-Z0-9-_\s]/g, "")
-          .trim()
-          .replace(/\s+/g, "_")
-          .slice(0, 40);
-        const _seriesFolder = `${new Date().toISOString().slice(0, 10)}_${_seriesTopic}_${jobId.slice(0, 6)}`;
+        const _seriesFolder = makeProjectFolderName(job?.topic ?? "series", jobId);
               void saveImageToS4({
                 imageUrl: res.imageUrl,
                 prompt: slide.visualPrompt,
@@ -730,12 +723,7 @@ function OnyxStudio() {
             });
 
             if (settings.s4AutoSave) {
-              const _qSeriesTopic = (job.topic || "series")
-                .replace(/[^a-zA-Z0-9-_\s]/g, "")
-                .trim()
-                .replace(/\s+/g, "_")
-                .slice(0, 40);
-              const _qSeriesFolder = `${new Date().toISOString().slice(0, 10)}_${_qSeriesTopic}_${id.slice(0, 6)}`;
+              const _qSeriesFolder = makeProjectFolderName(job?.topic ?? "series", id);
               void saveImageToS4({
                 imageUrl: res.imageUrl,
                 prompt: slide.visualPrompt,
