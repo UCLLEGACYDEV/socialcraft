@@ -324,7 +324,7 @@ export function SeriesQueue({
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
         {queue.length === 0 && (
           <p className="cryptox-card p-6 text-center text-xs text-zinc-400">
             Noch keine Jobs in der Warteschlange.
