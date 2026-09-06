@@ -28,14 +28,40 @@ export async function exportCarouselAsZip(slides: SlideContent[], topic: string)
   if (withImages.length === 0) return 0;
 
   const zip = new JSZip();
+  let addedCount = 0;
   for (const slide of withImages) {
-    const res = await fetch(slide.imageUrl as string);
-    const blob = await res.blob();
-    zip.file(`Slide_${String(slide.slideNumber).padStart(2, "0")}_${safeName(slide.roleLabel)}.png`, blob);
+    if (!slide.imageUrl) continue;
+    try {
+      let blob: Blob;
+      if (slide.imageUrl.startsWith("data:")) {
+        const parts = slide.imageUrl.split(",");
+        const mime = parts[0]?.match(/:(.*?);/)?.[1] || "image/png";
+        const bstr = atob(parts[1] || "");
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+          u8arr[n] = bstr.charCodeAt(n);
+        }
+        blob = new Blob([u8arr], { type: mime });
+      } else {
+        const res = await fetch(slide.imageUrl);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        blob = await res.blob();
+      }
+      zip.file(`Slide_${String(slide.slideNumber).padStart(2, "0")}_${safeName(slide.roleLabel)}.png`, blob);
+      addedCount++;
+    } catch (err) {
+      console.warn(`[exportCarouselAsZip] Slide ${slide.slideNumber} image fetch failed:`, err);
+    }
   }
-  const content = await zip.generateAsync({ type: "blob" });
-  saveAs(content, `${safeName(topic || "ONYX_Karussell")}.zip`);
-  return withImages.length;
+
+  if (addedCount > 0) {
+    const content = await zip.generateAsync({ type: "blob" });
+    saveAs(content, `${safeName(topic || "ONYX_Karussell")}.zip`);
+    return addedCount;
+  }
+
+  return 0;
 }
 
 import { getCloudHeaders } from "./s4-storage";

@@ -10,6 +10,7 @@ import {
   Folder,
   FolderDown,
   FolderOpen,
+  Images,
   Layers,
   LayoutGrid,
   Maximize2,
@@ -919,7 +920,7 @@ export function CloudGalleryView({
                                       {/* Image Box */}
                                       <div
                                         className="relative aspect-square w-full cursor-pointer bg-black/40 overflow-hidden"
-                                        onClick={() => toggleSelection(slide.id)}
+                                        onClick={() => toggleSelect(slide.id)}
                                       >
                                         <img
                                           src={slide.displayUrl || slide.url}

@@ -33,10 +33,12 @@ export interface S4CloudImage {
 export const S4_DEFAULT_ENDPOINT = ANCHORED_S4_ENDPOINT;
 export const S4_DEFAULT_BUCKET = ANCHORED_S4_BUCKET;
 
+import { LS } from "./storage";
+
 function getSettings(): ApiSettings {
   if (typeof window === "undefined") return DEFAULT_API_SETTINGS;
   try {
-    const raw = localStorage.getItem("onyx.apiSettings");
+    const raw = localStorage.getItem(LS.apiSettings) || localStorage.getItem("onyx.apiSettings");
     return raw ? { ...DEFAULT_API_SETTINGS, ...JSON.parse(raw) } : DEFAULT_API_SETTINGS;
   } catch {
     return DEFAULT_API_SETTINGS;
