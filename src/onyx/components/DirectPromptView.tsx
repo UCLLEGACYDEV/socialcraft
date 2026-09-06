@@ -448,6 +448,7 @@ export function DirectPromptView({
           category: "direct-prompt",
           aspectRatio,
           user: currentUser || null,
+          onError: (msg) => toast.error(`Cloud-Speicherung fehlgeschlagen: ${msg}`),
         });
       } catch (s4Err) {
         console.warn("[OneClickFlow] S4 upload failed:", s4Err);
@@ -516,6 +517,7 @@ export function DirectPromptView({
           category: "direct-prompt",
           aspectRatio,
           user: currentUser || null,
+          onError: (msg) => toast.error(`Cloud-Speicherung fehlgeschlagen: ${msg}`),
         });
       } catch (s4Err) {
         console.warn("[DirectPrompt] S4 upload failed:", s4Err);
@@ -623,6 +625,7 @@ export function DirectPromptView({
             category: "direct-prompt",
             aspectRatio,
             user: currentUser || null,
+            onError: (msg) => toast.error(`Cloud-Speicherung fehlgeschlagen: ${msg}`),
           });
         } catch (s4Err) {
           console.warn("[DirectPrompt] Cloud upload failed:", s4Err);

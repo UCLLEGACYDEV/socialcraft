@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  CloudUpload,
   Download,
   Grid3X3,
   Plus,

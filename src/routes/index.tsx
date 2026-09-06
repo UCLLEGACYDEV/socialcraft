@@ -416,6 +416,7 @@ function OnyxStudio() {
           customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
           subfolder: `carousels/${carouselFolder}`,
           projectName: carouselFolder,
+          onError: (msg) => toast.error(`Slide ${slide.slideNumber} nicht in Cloud gesichert: ${msg}`),
         }).then((cloudImg) => {
           if (cloudImg) {
             toast.success(`Slide ${slide.slideNumber} in Cloud aktualisiert ☁️`, { duration: 2500 });
@@ -578,6 +579,49 @@ function OnyxStudio() {
     );
     setIsRunningQueue(false);
     toast.info("Queue und alle aktiven Slides abgebrochen");
+  };
+
+  /** Lädt alle fertigen Karussell-Slides in den privaten Cloud-Ordner */
+  const saveCarouselToCloud = async () => {
+    const rendered = slides.filter((s) => Boolean(s.imageUrl));
+    if (rendered.length === 0) {
+      toast.error("Keine fertigen Slides zum Speichern gefunden");
+      return;
+    }
+    const folder = makeProjectFolderName(brief.topic || "karussell");
+    const effectiveUser = currentUser || getStoredCurrentUser();
+    toast.info(`Speichere ${rendered.length} Slides in die Cloud ...`);
+    let ok = 0;
+    for (const slide of rendered) {
+      const saved = await saveImageToS4({
+        imageUrl: slide.imageUrl as string,
+        prompt: slide.visualPrompt,
+        category: "carousel",
+        aspectRatio: brandKit.aspectRatio,
+        user: effectiveUser,
+        customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
+        subfolder: `carousels/${folder}`,
+        projectName: folder,
+        onError: (msg) => toast.error(`Slide ${slide.slideNumber}: ${msg}`),
+      });
+      if (saved) ok++;
+    }
+    await saveCarouselToS4({
+      user: effectiveUser,
+      carouselId: `car_${Date.now()}`,
+      topic: brief.topic || "Instagram Karussell",
+      folderName: folder,
+      skipImages: true,
+      slides: rendered.map((s) => ({
+        id: s.id,
+        slideNumber: s.slideNumber,
+        headline: s.headline,
+        subtext: s.subtext,
+        imageUrl: s.imageUrl,
+        visualPrompt: s.visualPrompt,
+      })),
+    });
+    if (ok > 0) toast.success(`${ok} von ${rendered.length} Slides gespeichert: carousels/${folder}`);
   };
 
   /** Lädt alle bereits gerenderten Slides einer Serie in den privaten Cloud-Ordner */
@@ -991,6 +1035,7 @@ function OnyxStudio() {
                     if (slide) void downloadSlide(slide, brandKit, withOverlay);
                   }}
                   onExportZip={(withOverlay) => void exportZip(withOverlay)}
+                  onSaveToCloud={() => void saveCarouselToCloud()}
                   onReset={resetCarousel}
                   settings={settings}
                   brandKit={brandKit}
