@@ -23,6 +23,7 @@ interface CarouselViewerProps {
   onEditSlide: (slideId: string) => void;
   onDownloadSingle: (slideId: string, withOverlay?: boolean) => void;
   onExportZip: (withOverlay?: boolean) => void;
+  onSaveToCloud?: (() => void) | undefined;
   onReset: () => void;
   settings: ApiSettings;
   brandKit: BrandKit;
@@ -40,6 +41,7 @@ export function CarouselViewer({
   onEditSlide,
   onDownloadSingle,
   onExportZip,
+  onSaveToCloud,
   onReset,
   settings,
   brandKit,
@@ -136,6 +138,16 @@ export function CarouselViewer({
               className="flex items-center gap-1.5 rounded-full border border-orange-500/40 bg-orange-500/15 px-4 py-2 text-xs font-semibold text-orange-400 hover:bg-orange-500/25 transition-colors"
             >
               <Sparkles className="h-3.5 w-3.5 text-orange-400" /> Alle {slides.length} Visuals laden
+            </button>
+          )}
+          {onSaveToCloud && (
+            <button
+              type="button"
+              onClick={() => onSaveToCloud()}
+              disabled={done === 0}
+              className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-zinc-200 transition-all hover:bg-white/10 hover:text-white disabled:opacity-40"
+            >
+              <CloudUpload className="h-3.5 w-3.5" /> In Cloud speichern
             </button>
           )}
           <button
