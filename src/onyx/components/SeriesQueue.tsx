@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, ChevronRight, Cpu, Loader2, Play, Sparkles, X } from "lucide-react";
 import { parseBlock } from "../parse-prompt-block";
 import { mockNameTopic } from "../mock-api";
@@ -66,6 +66,21 @@ export function SeriesQueue({
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [selectedSlideIds, setSelectedSlideIds] = useState<Record<string, string[]>>({});
   const [naming, setNaming] = useState(false);
+
+  // Neue Jobs: alle Slides standardmäßig auswählen (manuell geänderte Auswahl bleibt erhalten)
+  useEffect(() => {
+    setSelectedSlideIds((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const job of queue) {
+        if (next[job.id] === undefined && job.slides && job.slides.length > 0) {
+          next[job.id] = job.slides.map((s: { id: string }) => s.id);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [queue]);
 
   const parsed = useMemo(() => parseBlock(text), [text]);
 
