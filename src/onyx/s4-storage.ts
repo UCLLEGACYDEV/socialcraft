@@ -385,6 +385,10 @@ export interface SaveCarouselToS4Params {
   user?: User | null;
   carouselId: string;
   topic: string;
+  /** Use an existing project folder name instead of generating a new one */
+  folderName?: string | undefined;
+  /** Skip re-uploading the slide images (when they were already uploaded individually) */
+  skipImages?: boolean | undefined;
   slides: Array<{
     id: string;
     slideNumber: number;
@@ -404,7 +408,7 @@ export async function saveCarouselToS4(params: SaveCarouselToS4Params): Promise<
   manifestUrl?: string;
   uploadedSlides: number;
 }> {
-  const { user, carouselId, topic, slides } = params;
+  const { user, carouselId, topic, slides, folderName, skipImages } = params;
   const effectiveUser = user || getStoredCurrentUser();
   const userRoot = getUserS4Folder(effectiveUser);
   const dateStr = new Date().toISOString().slice(0, 10);
@@ -413,27 +417,32 @@ export async function saveCarouselToS4(params: SaveCarouselToS4Params): Promise<
     .trim()
     .replace(/\s+/g, "_")
     .slice(0, 40);
-  const projectFolderName = `${dateStr}_${cleanTopic}_${carouselId.slice(0, 6)}`;
+  const projectFolderName = folderName || `${dateStr}_${cleanTopic}_${carouselId.slice(0, 6)}`;
   const subfolderPath = `carousels/${projectFolderName}`;
   const fullFolderPath = `${userRoot}/${subfolderPath}`;
 
   let uploadedCount = 0;
 
   // 1. Upload slides with images
-  for (const s of slides) {
-    if (s.imageUrl) {
-      const res = await saveImageToS4({
-        imageUrl: s.imageUrl,
-        prompt: s.visualPrompt || s.headline,
-        category: "carousel",
-        user,
-        customFilename: `slide_${String(s.slideNumber).padStart(2, "0")}.jpg`,
-        subfolder: subfolderPath,
-        projectName: projectFolderName,
-      });
-      if (res) uploadedCount++;
+  if (!skipImages) {
+    for (const s of slides) {
+      if (s.imageUrl) {
+        const res = await saveImageToS4({
+          imageUrl: s.imageUrl,
+          prompt: s.visualPrompt || s.headline,
+          category: "carousel",
+          user,
+          customFilename: `slide_${String(s.slideNumber).padStart(2, "0")}.jpg`,
+          subfolder: subfolderPath,
+          projectName: projectFolderName,
+        });
+        if (res) uploadedCount++;
+      }
     }
+  } else {
+    uploadedCount = slides.filter((s) => s.imageUrl).length;
   }
+
 
   // 2. Upload manifest JSON as data URL
   const manifestData = JSON.stringify(
