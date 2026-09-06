@@ -221,7 +221,9 @@ export async function listS4Images(
 
   const scope = !effectiveUser || effectiveUser.role !== "admin" ? "my" : folderFilter;
 
+  try {
     const res = await fetch(`/api/cloud/list?scope=${encodeURIComponent(scope)}`, {
+
       method: "GET",
       headers: getCloudHeaders(),
     });
