@@ -580,6 +580,36 @@ function OnyxStudio() {
     toast.info("Queue und alle aktiven Slides abgebrochen");
   };
 
+  /** Lädt alle bereits gerenderten Slides einer Serie in den privaten Cloud-Ordner */
+  const saveJobToCloud = async (jobId: string) => {
+    const job = queue.find((j) => j.id === jobId);
+    const rendered = (job?.slides ?? []).filter((s) => Boolean(s.imageUrl));
+    if (!job || rendered.length === 0) {
+      toast.error("Keine gerenderten Slides zum Speichern gefunden");
+      return;
+    }
+    const folder = makeProjectFolderName(job.topic ?? "series", job.id);
+    const effectiveUser = currentUser || getStoredCurrentUser();
+    toast.info(`Speichere ${rendered.length} Slides in die Cloud ...`);
+    let ok = 0;
+    for (const slide of rendered) {
+      const saved = await saveImageToS4({
+        imageUrl: slide.imageUrl as string,
+        prompt: slide.visualPrompt,
+        category: "series",
+        user: effectiveUser,
+        customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
+        subfolder: `series/${folder}`,
+        projectName: folder,
+        onError: (msg) => toast.error(`Slide ${slide.slideNumber}: ${msg}`),
+      });
+      if (saved) ok++;
+    }
+    if (ok > 0) {
+      toast.success(`${ok} von ${rendered.length} Slides gespeichert: series/${folder}`);
+    }
+  };
+
   const runSingleJobSlide = async (jobId: string, slideId: string) => {
     const job = queue.find((j) => j.id === jobId);
     const slide = job?.slides?.find((s) => s.id === slideId);
@@ -984,6 +1014,7 @@ function OnyxStudio() {
               onCancelSlide={(jobId, slideId) => cancelJobSlide(jobId, slideId)}
               onRunSelectedSlides={(jobId, slideIds) => void runSelectedJobSlides(jobId, slideIds)}
               onCancelJobSlides={(jobId) => cancelJobSlides(jobId)}
+              onSaveJobToCloud={(jobId) => void saveJobToCloud(jobId)}
               settings={settings}
               onChangeSettings={patchSettings}
             />
