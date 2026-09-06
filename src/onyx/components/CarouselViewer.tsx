@@ -1,5 +1,17 @@
-import { ArrowLeft, Download, RotateCcw, Sparkles, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Download,
+  Grid3X3,
+  Plus,
+  RotateCcw,
+  Sparkles,
+  X,
+} from "lucide-react";
 import type { ApiSettings, BrandKit, SlideContent } from "../types";
+import { SlideCard } from "./SlideCard";
+import { useState } from "react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface CarouselViewerProps {
   slides: SlideContent[];
@@ -14,10 +26,9 @@ interface CarouselViewerProps {
   onReset: () => void;
   settings: ApiSettings;
   brandKit: BrandKit;
+  onUpdateSlides?: (slides: SlideContent[]) => void;
+  onAddSlide?: () => void;
 }
-
-import { SlideCard } from "./SlideCard";
-import { useState } from "react";
 
 export function CarouselViewer({
   slides,
@@ -32,10 +43,37 @@ export function CarouselViewer({
   onReset,
   settings,
   brandKit,
+  onUpdateSlides,
+  onAddSlide,
 }: CarouselViewerProps) {
   const [withOverlay, setWithOverlay] = useState(true);
+  const [showSquareGuide, setShowSquareGuide] = useState(false);
   const done = slides.filter((s) => s.imageUrl).length;
   const ratio = brandKit.aspectRatio === "1:1" ? "1 / 1" : "4 / 5";
+
+  const handleMoveSlide = (index: number, direction: -1 | 1) => {
+    if (!onUpdateSlides) return;
+    const target = index + direction;
+    if (target < 0 || target >= slides.length) return;
+    const next = [...slides];
+    const temp = next[index]!;
+    next[index] = next[target]!;
+    next[target] = temp;
+    const updated = next.map((s, i) => ({ ...s, slideNumber: i + 1 }));
+    onUpdateSlides(updated);
+  };
+
+  const handleDeleteSlide = (index: number) => {
+    if (!onUpdateSlides) return;
+    if (slides.length <= 2) {
+      toast.error("Ein Karussell benötigt mindestens 2 Slides.");
+      return;
+    }
+    const next = slides.filter((_, i) => i !== index);
+    const updated = next.map((s, i) => ({ ...s, slideNumber: i + 1 }));
+    onUpdateSlides(updated);
+    toast.success("Slide gelöscht");
+  };
 
   return (
     <div className="space-y-5">
@@ -47,6 +85,22 @@ export function CarouselViewer({
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
+          {/* 1:1 Instagram Feed Cut Guide Toggle */}
+          <button
+            type="button"
+            onClick={() => setShowSquareGuide((prev) => !prev)}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-colors cursor-pointer",
+              showSquareGuide
+                ? "border-orange-500/50 bg-orange-500/15 text-orange-300"
+                : "border-white/10 bg-white/[0.04] text-zinc-400 hover:text-white hover:bg-white/[0.08]"
+            )}
+            title="Instagram 1:1 Profilraster-Beschnitt einblenden"
+          >
+            <Grid3X3 className="h-3.5 w-3.5" />
+            <span>1:1 Feed-Vorschau</span>
+          </button>
+
           {/* Toggle for typography overlay */}
           <label className="flex items-center gap-2 cursor-pointer text-xs text-zinc-300 hover:text-white px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.04] transition-colors">
             <input
@@ -96,7 +150,7 @@ export function CarouselViewer({
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-        {slides.map((slide) => (
+        {slides.map((slide, idx) => (
           <SlideCard
             key={slide.id}
             slide={slide}
@@ -105,9 +159,31 @@ export function CarouselViewer({
             onReroll={() => onRerollImage(slide.id)}
             onEdit={() => onEditSlide(slide.id)}
             onDownload={() => onDownloadSingle(slide.id, withOverlay)}
+            canMoveLeft={idx > 0}
+            canMoveRight={idx < slides.length - 1}
+            onMoveLeft={() => handleMoveSlide(idx, -1)}
+            onMoveRight={() => handleMoveSlide(idx, 1)}
+            onDelete={() => handleDeleteSlide(idx)}
+            showSquareGuide={showSquareGuide}
             {...(isGeneratingImages ? { onCancel: onCancelGeneration } : {})}
           />
         ))}
+
+        {/* Append New Slide Button */}
+        {onAddSlide && (
+          <button
+            type="button"
+            onClick={onAddSlide}
+            className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-4 text-zinc-400 hover:text-white hover:border-orange-500/40 hover:bg-white/[0.04] transition-all cursor-pointer group"
+            style={{ aspectRatio: ratio }}
+            title="Weitere Slide anfügen"
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/5 border border-white/10 group-hover:border-orange-500/30 group-hover:bg-orange-500/15 group-hover:text-orange-400 transition-colors">
+              <Plus className="h-5 w-5" />
+            </div>
+            <span className="text-xs font-semibold text-center">Folie anfügen</span>
+          </button>
+        )}
       </div>
     </div>
   );

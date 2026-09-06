@@ -1,4 +1,15 @@
-import { Check, Download, Loader2, Pencil, Play, RefreshCw, X } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  Loader2,
+  Pencil,
+  Play,
+  RefreshCw,
+  Trash2,
+  X,
+} from "lucide-react";
 import type { SlideContent } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +25,12 @@ interface SlideCardProps {
   onEdit: () => void;
   onDownload: () => void;
   onCancel?: (() => void) | undefined;
+  canMoveLeft?: boolean | undefined;
+  canMoveRight?: boolean | undefined;
+  onMoveLeft?: (() => void) | undefined;
+  onMoveRight?: (() => void) | undefined;
+  onDelete?: (() => void) | undefined;
+  showSquareGuide?: boolean | undefined;
 }
 
 export function SlideCard({
@@ -28,6 +45,12 @@ export function SlideCard({
   onEdit,
   onDownload,
   onCancel,
+  canMoveLeft,
+  canMoveRight,
+  onMoveLeft,
+  onMoveRight,
+  onDelete,
+  showSquareGuide,
 }: SlideCardProps) {
   const done = Boolean(slide.imageUrl) && !slide.isGeneratingImage;
   const progress = Math.min(100, Math.max(0, slide.renderProgress ?? 0));
@@ -61,6 +84,61 @@ export function SlideCard({
         >
           <Check className={cn("h-3.5 w-3.5 stroke-[3]", isSelected ? "text-white" : "opacity-0")} />
         </button>
+      )}
+
+      {/* ── Top-Right Slide Reordering & Delete Controls ────────────── */}
+      <div className="absolute right-2 top-2 z-20 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        {canMoveLeft && onMoveLeft && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMoveLeft();
+            }}
+            title="Nach links verschieben"
+            className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/20 bg-black/70 text-zinc-300 hover:text-white hover:bg-black/90 transition-colors"
+          >
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {canMoveRight && onMoveRight && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMoveRight();
+            }}
+            title="Nach rechts verschieben"
+            className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/20 bg-black/70 text-zinc-300 hover:text-white hover:bg-black/90 transition-colors"
+          >
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        )}
+        {onDelete && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            title="Slide löschen"
+            className="flex h-6 w-6 items-center justify-center rounded-lg border border-white/20 bg-black/70 text-zinc-400 hover:text-rose-400 hover:bg-black/90 transition-colors"
+          >
+            <Trash2 className="h-3 w-3" />
+          </button>
+        )}
+      </div>
+
+      {/* ── 1:1 Instagram Feed Grid Overlay Guide ─────────────────────── */}
+      {showSquareGuide && aspectRatio !== "1 / 1" && (
+        <div className="pointer-events-none absolute inset-0 z-15 flex flex-col justify-between">
+          <div className="h-[10%] w-full bg-black/50 border-b border-dashed border-orange-500/60 flex items-center justify-center">
+            <span className="text-[8px] font-mono text-orange-400 uppercase tracking-widest">Feed Crop</span>
+          </div>
+          <div className="h-[10%] w-full bg-black/50 border-t border-dashed border-orange-500/60 flex items-center justify-center">
+            <span className="text-[8px] font-mono text-orange-400 uppercase tracking-widest">Feed Crop</span>
+          </div>
+        </div>
       )}
 
       {/* ── Slide Visual or Placeholder ─────────────────────────────── */}

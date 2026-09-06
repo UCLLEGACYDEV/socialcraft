@@ -424,6 +424,23 @@ function OnyxStudio() {
     if (count) toast.success(`${count} Bilder ${withOverlay ? "mit Branding " : ""}als ZIP exportiert`);
   };
 
+  const handleAddSlide = () => {
+    const nextNum = slides.length + 1;
+    const newSlide: SlideContent = {
+      id: makeId(),
+      slideNumber: nextNum,
+      role: "expansion",
+      roleLabel: `Slide ${nextNum}`,
+      headline: `${topic || "Thema"} — Schritt ${nextNum}`,
+      subtext: "Vertiefende Information für deine Zielgruppe.",
+      coreMetaphor: "Visual",
+      primaryProps: ["Minimalistisch", "Dunkles Licht"],
+      visualPrompt: `High quality cinematic 3D portrait, dark background, 85mm portrait, slide ${nextNum} of ${nextNum} — ${topic || "Visual Story"}`,
+    };
+    setSlides([...slides, newSlide]);
+    toast.success(`Slide ${nextNum} hinzugefügt`);
+  };
+
   // ── Series queue ───────────────────────────────────────────────────────
   const addJobs = (carousels: ParsedCarousel[]) => {
     const jobs: SeriesJob[] = carousels.map((c) => ({
@@ -922,6 +939,8 @@ function OnyxStudio() {
                   onReset={resetCarousel}
                   settings={settings}
                   brandKit={brandKit}
+                  onUpdateSlides={setSlides}
+                  onAddSlide={handleAddSlide}
                 />
               </div>
             ))}
