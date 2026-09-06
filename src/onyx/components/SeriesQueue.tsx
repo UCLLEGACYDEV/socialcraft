@@ -72,15 +72,15 @@ export function SeriesQueue({
     setSelectedSlideIds((prev) => {
       let changed = false;
       const next = { ...prev };
-      for (const job of jobs) {
+      for (const job of queue) {
         if (next[job.id] === undefined && job.slides && job.slides.length > 0) {
-          next[job.id] = job.slides.map((s) => s.id);
+          next[job.id] = job.slides.map((s: { id: string }) => s.id);
           changed = true;
         }
       }
       return changed ? next : prev;
     });
-  }, [jobs]);
+  }, [queue]);
 
   const parsed = useMemo(() => parseBlock(text), [text]);
 
