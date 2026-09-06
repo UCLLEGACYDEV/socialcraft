@@ -380,8 +380,10 @@ export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4Clou
     };
   } catch (error) {
     console.error("Fehler beim Speichern des Bildes in Cloud:", error);
+    onError?.(error instanceof Error ? error.message : "Unbekannter Fehler");
     return null;
   }
+
 }
 
 export interface SaveCarouselToS4Params {
