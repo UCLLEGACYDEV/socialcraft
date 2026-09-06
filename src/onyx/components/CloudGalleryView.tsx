@@ -401,7 +401,7 @@ export function CloudGalleryView({
                 <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
                   <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-black/40 px-3 py-1 font-semibold text-xs text-orange-400">
                     <Folder className="h-3.5 w-3.5 text-orange-400" />
-                    Ordner: {stats.folder || (currentUser?.role === "admin" ? `USERCONTENT/admins/${currentUser.id}` : `USERCONTENT/users/${currentUser?.id || "guest"}`)}
+                    Dein privater Cloud-Ordner
                   </span>
                   <button
                     type="button"
