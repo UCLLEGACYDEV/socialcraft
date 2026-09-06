@@ -262,13 +262,15 @@ export interface SaveImageToS4Params {
   customFilename?: string | undefined;
   subfolder?: string | undefined;
   projectName?: string | undefined;
+  onError?: ((message: string) => void) | undefined;
 }
 
 /**
  * Saves an image to the user's cloud folder hierarchy
  */
 export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4CloudImage | null> {
-  const { imageUrl, prompt = "Generiertes Visual", category, aspectRatio = "4:5", user, customFilename, subfolder, projectName } = params;
+  const { imageUrl, prompt = "Generiertes Visual", category, aspectRatio = "4:5", user, customFilename, subfolder, projectName, onError } = params;
+
   const settings = getSettings();
   const bucket = settings.s4Bucket || S4_DEFAULT_BUCKET;
   const endpoint = settings.s4Endpoint || S4_DEFAULT_ENDPOINT;
@@ -322,9 +324,12 @@ export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4Clou
 
     if (!res.ok) {
       const err = await res.json().catch(() => ({})) as { error?: string };
-      console.warn("[CloudStorage] Upload failed:", err.error || res.statusText);
+      const message = err.error || res.statusText || `HTTP ${res.status}`;
+      console.warn("[CloudStorage] Upload failed:", message);
+      onError?.(message);
       return null;
     }
+
 
     const data = await res.json() as { success: boolean; url: string; key: string; size: number };
 
@@ -375,14 +380,20 @@ export async function saveImageToS4(params: SaveImageToS4Params): Promise<S4Clou
     };
   } catch (error) {
     console.error("Fehler beim Speichern des Bildes in Cloud:", error);
+    onError?.(error instanceof Error ? error.message : "Unbekannter Fehler");
     return null;
   }
+
 }
 
 export interface SaveCarouselToS4Params {
   user?: User | null;
   carouselId: string;
   topic: string;
+  /** Use an existing project folder name instead of generating a new one */
+  folderName?: string | undefined;
+  /** Skip re-uploading the slide images (when they were already uploaded individually) */
+  skipImages?: boolean | undefined;
   slides: Array<{
     id: string;
     slideNumber: number;
@@ -402,7 +413,7 @@ export async function saveCarouselToS4(params: SaveCarouselToS4Params): Promise<
   manifestUrl?: string;
   uploadedSlides: number;
 }> {
-  const { user, carouselId, topic, slides } = params;
+  const { user, carouselId, topic, slides, folderName, skipImages } = params;
   const effectiveUser = user || getStoredCurrentUser();
   const userRoot = getUserS4Folder(effectiveUser);
   const dateStr = new Date().toISOString().slice(0, 10);
@@ -411,27 +422,32 @@ export async function saveCarouselToS4(params: SaveCarouselToS4Params): Promise<
     .trim()
     .replace(/\s+/g, "_")
     .slice(0, 40);
-  const projectFolderName = `${dateStr}_${cleanTopic}_${carouselId.slice(0, 6)}`;
+  const projectFolderName = folderName || `${dateStr}_${cleanTopic}_${carouselId.slice(0, 6)}`;
   const subfolderPath = `carousels/${projectFolderName}`;
   const fullFolderPath = `${userRoot}/${subfolderPath}`;
 
   let uploadedCount = 0;
 
   // 1. Upload slides with images
-  for (const s of slides) {
-    if (s.imageUrl) {
-      const res = await saveImageToS4({
-        imageUrl: s.imageUrl,
-        prompt: s.visualPrompt || s.headline,
-        category: "carousel",
-        user,
-        customFilename: `slide_${String(s.slideNumber).padStart(2, "0")}.jpg`,
-        subfolder: subfolderPath,
-        projectName: projectFolderName,
-      });
-      if (res) uploadedCount++;
+  if (!skipImages) {
+    for (const s of slides) {
+      if (s.imageUrl) {
+        const res = await saveImageToS4({
+          imageUrl: s.imageUrl,
+          prompt: s.visualPrompt || s.headline,
+          category: "carousel",
+          user,
+          customFilename: `slide_${String(s.slideNumber).padStart(2, "0")}.jpg`,
+          subfolder: subfolderPath,
+          projectName: projectFolderName,
+        });
+        if (res) uploadedCount++;
+      }
     }
+  } else {
+    uploadedCount = slides.filter((s) => s.imageUrl).length;
   }
+
 
   // 2. Upload manifest JSON as data URL
   const manifestData = JSON.stringify(

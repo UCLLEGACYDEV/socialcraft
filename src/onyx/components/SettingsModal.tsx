@@ -41,6 +41,39 @@ export function SettingsModal({
   const [kieStatus, setKieStatus] = useState<KieCreditResult | null>(null);
 
   const currentUser = getStoredCurrentUser();
+  const [cloudStatus, setCloudStatus] = useState<"unknown" | "ok" | "error">("unknown");
+  const [cloudMessage, setCloudMessage] = useState<string | null>(null);
+  const [isTestingCloud, setIsTestingCloud] = useState(false);
+  const targetFolder = currentUser
+    ? `USERCONTENT/${currentUser.role === "admin" ? "admins" : "users"}/${currentUser.id}`
+    : "USERCONTENT/users/guest";
+
+  const checkCloud = async () => {
+    setIsTestingCloud(true);
+    try {
+      const res = await testCloudConnection();
+      if (res.success) {
+        const folder = await ensureUserS4Folder(currentUser);
+        setCloudStatus("ok");
+        setCloudMessage(
+          folder.success
+            ? `${res.message} — Ordner „${folder.folder}“ bereit.`
+            : `${res.message} — Ordner konnte nicht angelegt werden: ${folder.error}`,
+        );
+        toast.success("Cloud-Speicher verbunden ☁️");
+      } else {
+        setCloudStatus("error");
+        setCloudMessage(res.message);
+        toast.error(res.message);
+      }
+    } catch (err) {
+      setCloudStatus("error");
+      setCloudMessage(err instanceof Error ? err.message : "Verbindungstest fehlgeschlagen");
+    } finally {
+      setIsTestingCloud(false);
+    }
+  };
+
 
   const testKieBalance = async () => {
     setIsTestingKie(true);
@@ -137,15 +170,41 @@ export function SettingsModal({
                 <Cloud className="h-4 w-4 text-emerald-400" />
                 <span className="text-xs font-semibold text-white">Integrierte Cloud-Synchronisation</span>
               </div>
-              <span className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-400 flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Aktiv & Verbunden
+              <span
+                className={cn(
+                  "text-[11px] font-semibold px-2.5 py-0.5 rounded-full border flex items-center gap-1.5",
+                  cloudStatus === "ok"
+                    ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-400"
+                    : cloudStatus === "error"
+                      ? "border-red-500/30 bg-red-500/10 text-red-400"
+                      : "border-white/10 bg-white/5 text-zinc-400",
+                )}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-current animate-pulse" />
+                {cloudStatus === "ok" ? "Verbunden" : cloudStatus === "error" ? "Nicht verbunden" : "Status unbekannt"}
               </span>
             </div>
 
             <p className="text-xs text-zinc-400 leading-relaxed">
               Deine generierten Visuals, Karussells und Serien werden vollautomatisch in deinem persönlichen Cloud-Ordner gespeichert. Du kannst deine Galerie jederzeit durchsuchen oder ganze Ordner als ZIP herunterladen.
             </p>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[11px] text-zinc-500">Zielordner:</span>
+              <code className="text-[11px] text-zinc-300 bg-white/[0.04] rounded px-2 py-0.5">{targetFolder}</code>
+              <button
+                type="button"
+                disabled={isTestingCloud}
+                onClick={checkCloud}
+                className="ml-auto rounded-xl border border-white/[0.12] px-3 py-1.5 text-[11px] font-semibold text-zinc-200 hover:text-white cursor-pointer disabled:opacity-50"
+              >
+                {isTestingCloud ? "Prüfe…" : "Verbindung prüfen & Ordner anlegen"}
+              </button>
+            </div>
+            {cloudMessage && (
+              <p className={cn("text-[11px]", cloudStatus === "error" ? "text-red-400" : "text-emerald-400")}>{cloudMessage}</p>
+            )}
+
 
             <div className="flex items-center justify-between pt-2 border-t border-white/[0.06]">
               <div className="space-y-0.5">

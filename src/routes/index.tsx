@@ -161,24 +161,26 @@ function OnyxStudio() {
     }
   }, [currentView]);
 
-  // Ensure user's cloud storage folder exists in the background (especially when admin is active!)
+  // Ensure the cloud storage folder exists in the background (also for guests!)
   useEffect(() => {
-    if (currentUser) {
-      void ensureUserS4Folder(currentUser).then((res) => {
-        if (res.success) {
-          console.log(`[CloudStorage] User folder verified/created: ${res.folder}`);
-        }
-      });
-    }
+    void ensureUserS4Folder(currentUser).then((res) => {
+      if (res.success) {
+        console.log(`[CloudStorage] User folder verified/created: ${res.folder}`);
+      } else {
+        console.warn(`[CloudStorage] Folder could not be created: ${res.error}`);
+      }
+    });
   }, [currentUser]);
 
   const [activeTab, setActiveTab] = usePersistentState<TabKey>(LS.activeTab, "carousel");
   const [collapsed, setCollapsed] = usePersistentState<boolean>(LS.sidebarCollapsed, false);
-  const [brandKit, setBrandKit] = usePersistentState<BrandKit>(LS.brandKit, DEFAULT_BRAND_KIT);
+  const [brandKit, setBrandKit] = usePersistentState<BrandKit>(LS.brandKit, DEFAULT_BRAND_KIT, true);
   const [settings, setSettings] = usePersistentState<ApiSettings>(
     LS.apiSettings,
     DEFAULT_API_SETTINGS,
+    true,
   );
+
   const [slides, setSlides] = usePersistentState<SlideContent[]>(LS.activeSlides, []);
   const [topic, setTopic] = usePersistentState<string>(LS.currentTopic, "");
   const [queue, setQueue] = usePersistentState<SeriesJob[]>(LS.seriesQueue, []);
@@ -265,6 +267,11 @@ function OnyxStudio() {
     abortRef.current = controller;
     setIsGeneratingImages(true);
     let realNanoCount = 0;
+    const cleanTopic = (brief.topic || "karussell").replace(/[^a-zA-Z0-9-_\s]/g, "").trim().replace(/\s+/g, "_") || "karussell";
+    const dateStr = new Date().toISOString().slice(0, 10);
+    const carouselFolder = `${dateStr}_${cleanTopic}`;
+    // Keep an up-to-date copy of the slides including the freshly rendered images
+    const renderedSlides: SlideContent[] = slides.map((s) => ({ ...s }));
     try {
       for (const slide of slides) {
         if (controller.signal.aborted) break;
@@ -286,11 +293,10 @@ function OnyxStudio() {
             },
           });
           setSlideFlag(slide.id, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
+          const idx = renderedSlides.findIndex((s) => s.id === slide.id);
+          if (idx !== -1 && renderedSlides[idx]) renderedSlides[idx].imageUrl = res.imageUrl;
           if (settings.s4AutoSave) {
             const effectiveUser = currentUser || getStoredCurrentUser();
-            const cleanTopic = (brief.topic || "karussell").replace(/[^a-zA-Z0-9-_\s]/g, "").trim().replace(/\s+/g, "_") || "karussell";
-            const dateStr = new Date().toISOString().slice(0, 10);
-            const carouselFolder = `${dateStr}_${cleanTopic}`;
 
             void saveImageToS4({
               imageUrl: res.imageUrl,
@@ -301,6 +307,7 @@ function OnyxStudio() {
               customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
               subfolder: `carousels/${carouselFolder}`,
               projectName: carouselFolder,
+              onError: (msg) => toast.error(`Slide ${slide.slideNumber} nicht in Cloud gesichert: ${msg}`),
             }).then((cloudImg) => {
               if (cloudImg) {
                 toast.success(`Slide ${slide.slideNumber} in Cloud gesichert ☁️`, { duration: 2500 });
@@ -326,7 +333,9 @@ function OnyxStudio() {
             user: effectiveUser,
             carouselId: `car_${Date.now()}`,
             topic: brief.topic || "Instagram Karussell",
-            slides: slides.map((s) => ({
+            folderName: carouselFolder,
+            skipImages: true,
+            slides: renderedSlides.map((s) => ({
               id: s.id,
               slideNumber: s.slideNumber,
               headline: s.headline,
@@ -336,6 +345,7 @@ function OnyxStudio() {
             })),
           });
         }
+
         if (realNanoCount > 0) {
           toast.success(`${realNanoCount} Visuals via Nano-Banana 2 gerendert! 🍌`);
           void refreshCredits();
