@@ -512,6 +512,59 @@ export async function saveCarouselToS4(params: SaveCarouselToS4Params): Promise<
 }
 
 /**
+ * Saves the user's generation history as history.json into their private cloud folder
+ */
+export async function saveHistoryToS4(
+  entries: unknown[],
+  user?: User | null,
+): Promise<boolean> {
+  const effectiveUser = user || getStoredCurrentUser();
+  const userRoot = getUserS4Folder(effectiveUser);
+  try {
+    const json = JSON.stringify(
+      { updatedAt: new Date().toISOString(), entries },
+      null,
+      2,
+    );
+    const dataUrl = `data:application/json;base64,${typeof btoa !== "undefined" ? btoa(unescape(encodeURIComponent(json))) : Buffer.from(json).toString("base64")}`;
+    const res = await saveImageToS4({
+      imageUrl: dataUrl,
+      prompt: "Verlauf (history.json)",
+      category: "history",
+      user: effectiveUser,
+      customFilename: "history.json",
+      subfolder: "history",
+      projectName: "history",
+    });
+    return !!res;
+  } catch (error) {
+    console.warn("[CloudStorage] Verlauf konnte nicht gespeichert werden:", error);
+    return false;
+  }
+}
+
+/**
+ * Loads the user's generation history from their private cloud folder
+ */
+export async function loadHistoryFromS4<T = unknown>(
+  user?: User | null,
+): Promise<T[] | null> {
+  const effectiveUser = user || getStoredCurrentUser();
+  const userRoot = getUserS4Folder(effectiveUser);
+  try {
+    const res = await fetch(
+      `/api/cloud/file?key=${encodeURIComponent(`${userRoot}/history/history.json`)}`,
+      { headers: getCloudHeaders() },
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as { entries?: T[] };
+    return Array.isArray(data.entries) ? data.entries : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Deletes a single image from cloud storage
  */
 export async function deleteS4Image(key: string): Promise<boolean> {
