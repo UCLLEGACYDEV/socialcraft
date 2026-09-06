@@ -41,6 +41,39 @@ export function SettingsModal({
   const [kieStatus, setKieStatus] = useState<KieCreditResult | null>(null);
 
   const currentUser = getStoredCurrentUser();
+  const [cloudStatus, setCloudStatus] = useState<"unknown" | "ok" | "error">("unknown");
+  const [cloudMessage, setCloudMessage] = useState<string | null>(null);
+  const [isTestingCloud, setIsTestingCloud] = useState(false);
+  const targetFolder = currentUser
+    ? `USERCONTENT/${currentUser.role === "admin" ? "admins" : "users"}/${currentUser.id}`
+    : "USERCONTENT/users/guest";
+
+  const checkCloud = async () => {
+    setIsTestingCloud(true);
+    try {
+      const res = await testCloudConnection();
+      if (res.success) {
+        const folder = await ensureUserS4Folder(currentUser);
+        setCloudStatus("ok");
+        setCloudMessage(
+          folder.success
+            ? `${res.message} — Ordner „${folder.folder}“ bereit.`
+            : `${res.message} — Ordner konnte nicht angelegt werden: ${folder.error}`,
+        );
+        toast.success("Cloud-Speicher verbunden ☁️");
+      } else {
+        setCloudStatus("error");
+        setCloudMessage(res.message);
+        toast.error(res.message);
+      }
+    } catch (err) {
+      setCloudStatus("error");
+      setCloudMessage(err instanceof Error ? err.message : "Verbindungstest fehlgeschlagen");
+    } finally {
+      setIsTestingCloud(false);
+    }
+  };
+
 
   const testKieBalance = async () => {
     setIsTestingKie(true);
