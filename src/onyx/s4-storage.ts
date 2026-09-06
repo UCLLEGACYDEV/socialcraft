@@ -45,6 +45,69 @@ function getSettings(): ApiSettings {
   }
 }
 
+
+/** Transliterates umlauts and builds a short, readable folder title. */
+export function slugifyTitle(input: string, maxLen = 40): string {
+  const map: Record<string, string> = {
+    "ä": "ae", "ö": "oe", "ü": "ue", "Ä": "Ae", "Ö": "Oe", "Ü": "Ue", "ß": "ss",
+  };
+  const transliterated = (input || "").replace(/[äöüÄÖÜß]/g, (c) => map[c] ?? c);
+  const slug = transliterated
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-zA-Z0-9-_\s]/g, "")
+    .trim()
+    .replace(/\s+/g, "_")
+    .slice(0, maxLen)
+    .replace(/^_+|_+$/g, "");
+  return slug || "projekt";
+}
+
+/** Builds the shared project folder name (date + readable title [+ short id]). */
+export function makeProjectFolderName(topic: string, shortId?: string): string {
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const title = slugifyTitle(topic);
+  return shortId ? `${dateStr}_${title}_${shortId.slice(0, 6)}` : `${dateStr}_${title}`;
+}
+
+/** Writes a readable identity cookie so the server can scope cloud access (also for <img> requests). */
+export function syncCloudIdentityCookie(user?: User | null): void {
+  if (typeof document === "undefined") return;
+  const effectiveUser = user || getStoredCurrentUser();
+  if (!effectiveUser) {
+    document.cookie = "onyx_identity=; path=/; max-age=0; SameSite=Lax";
+    return;
+  }
+  try {
+    const payload = btoa(
+      unescape(encodeURIComponent(JSON.stringify({ id: effectiveUser.id, role: effectiveUser.role }))),
+    );
+    document.cookie = `onyx_identity=${encodeURIComponent(payload)}; path=/; max-age=2592000; SameSite=Lax`;
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Reads the current Supabase access token from local storage (sync). */
+function getSupabaseAccessToken(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (!k || !/^sb-.*-auth-token$/.test(k)) continue;
+      const raw = localStorage.getItem(k);
+      if (!raw) continue;
+      const parsed = JSON.parse(raw.startsWith("base64-") ? atob(raw.slice(7)) : raw) as {
+        access_token?: string;
+      };
+      if (parsed?.access_token) return parsed.access_token;
+    }
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
 /** Build request headers containing cloud storage credentials from local settings or master anchored fallback */
 export function getCloudHeaders(): Record<string, string> {
   const settings = getSettings();
@@ -62,6 +125,17 @@ export function getCloudHeaders(): Record<string, string> {
   if (endpoint) headers["x-cloud-endpoint"] = endpoint;
   if (bucket) headers["x-cloud-bucket"] = bucket;
   if (region) headers["x-cloud-region"] = region;
+
+  // Identity so the server can restrict access to the caller's own folder
+  const currentUser = getStoredCurrentUser();
+  if (currentUser) {
+    headers["x-onyx-user-id"] = currentUser.id;
+    headers["x-onyx-user-role"] = currentUser.role;
+    syncCloudIdentityCookie(currentUser);
+  }
+  const token = getSupabaseAccessToken();
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
   return headers;
 }
 
@@ -145,21 +219,9 @@ export async function listS4Images(
 
   const effectiveUser = user || getStoredCurrentUser();
 
-  let prefix = "";
-  if (!effectiveUser) {
-    prefix = "USERCONTENT/users/guest/";
-  } else if (effectiveUser.role !== "admin" || folderFilter === "my") {
-    prefix = `${getUserS4Folder(effectiveUser)}/`;
-  } else if (folderFilter === "users") {
-    prefix = "USERCONTENT/users/";
-  } else if (folderFilter === "admins") {
-    prefix = "USERCONTENT/admins/";
-  } else {
-    prefix = "USERCONTENT/";
-  }
+  const scope = !effectiveUser || effectiveUser.role !== "admin" ? "my" : folderFilter;
 
-  try {
-    const res = await fetch(`/api/cloud/list?prefix=${encodeURIComponent(prefix)}`, {
+    const res = await fetch(`/api/cloud/list?scope=${encodeURIComponent(scope)}`, {
       method: "GET",
       headers: getCloudHeaders(),
     });
@@ -416,13 +478,7 @@ export async function saveCarouselToS4(params: SaveCarouselToS4Params): Promise<
   const { user, carouselId, topic, slides, folderName, skipImages } = params;
   const effectiveUser = user || getStoredCurrentUser();
   const userRoot = getUserS4Folder(effectiveUser);
-  const dateStr = new Date().toISOString().slice(0, 10);
-  const cleanTopic = (topic || "Karussell")
-    .replace(/[^a-zA-Z0-9-_\s]/g, "")
-    .trim()
-    .replace(/\s+/g, "_")
-    .slice(0, 40);
-  const projectFolderName = folderName || `${dateStr}_${cleanTopic}_${carouselId.slice(0, 6)}`;
+  const projectFolderName = folderName || makeProjectFolderName(topic || "Karussell", carouselId);
   const subfolderPath = `carousels/${projectFolderName}`;
   const fullFolderPath = `${userRoot}/${subfolderPath}`;
 
