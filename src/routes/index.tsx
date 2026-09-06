@@ -18,7 +18,7 @@ import {
   PromptGallery,
 } from "@/onyx/components/SimpleViews";
 import { CloudGalleryView } from "@/onyx/components/CloudGalleryView";
-import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder, saveHistoryToS4, loadHistoryFromS4 } from "@/onyx/s4-storage";
+import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder, saveHistoryToS4, loadHistoryFromS4, makeProjectFolderName, syncCloudIdentityCookie } from "@/onyx/s4-storage";
 import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
 import { AdminDashboard } from "@/onyx/components/AdminDashboard";
 import { AuthModal } from "@/onyx/components/AuthModal";
