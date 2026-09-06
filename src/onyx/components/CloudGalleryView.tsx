@@ -695,14 +695,14 @@ export function CloudGalleryView({
                               </div>
                               <div className="min-w-0">
                                 <h3 className="text-xs sm:text-sm font-bold text-white truncate flex items-center gap-2">
-                                  <span>{projectName}</span>
+                                  <span>{prettyProjectName(projectName)}</span>
                                   <span className="text-[10px] font-normal text-zinc-500">
                                     ({slides.length} Slides · {totalSizeMB} MB)
                                   </span>
                                 </h3>
-                                <p className="text-[11px] text-zinc-400 truncate">
-                                  Pfad: <code className="text-zinc-300 font-mono text-[10px]">{stats.folder || "USERCONTENT"}/carousels/{projectName}/</code>
-                                </p>
+                                {projectDate(projectName) && (
+                                  <p className="text-[11px] text-zinc-500">{projectDate(projectName)}</p>
+                                )}
                               </div>
                             </div>
 
