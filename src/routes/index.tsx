@@ -161,24 +161,26 @@ function OnyxStudio() {
     }
   }, [currentView]);
 
-  // Ensure user's cloud storage folder exists in the background (especially when admin is active!)
+  // Ensure the cloud storage folder exists in the background (also for guests!)
   useEffect(() => {
-    if (currentUser) {
-      void ensureUserS4Folder(currentUser).then((res) => {
-        if (res.success) {
-          console.log(`[CloudStorage] User folder verified/created: ${res.folder}`);
-        }
-      });
-    }
+    void ensureUserS4Folder(currentUser).then((res) => {
+      if (res.success) {
+        console.log(`[CloudStorage] User folder verified/created: ${res.folder}`);
+      } else {
+        console.warn(`[CloudStorage] Folder could not be created: ${res.error}`);
+      }
+    });
   }, [currentUser]);
 
   const [activeTab, setActiveTab] = usePersistentState<TabKey>(LS.activeTab, "carousel");
   const [collapsed, setCollapsed] = usePersistentState<boolean>(LS.sidebarCollapsed, false);
-  const [brandKit, setBrandKit] = usePersistentState<BrandKit>(LS.brandKit, DEFAULT_BRAND_KIT);
+  const [brandKit, setBrandKit] = usePersistentState<BrandKit>(LS.brandKit, DEFAULT_BRAND_KIT, true);
   const [settings, setSettings] = usePersistentState<ApiSettings>(
     LS.apiSettings,
     DEFAULT_API_SETTINGS,
+    true,
   );
+
   const [slides, setSlides] = usePersistentState<SlideContent[]>(LS.activeSlides, []);
   const [topic, setTopic] = usePersistentState<string>(LS.currentTopic, "");
   const [queue, setQueue] = usePersistentState<SeriesJob[]>(LS.seriesQueue, []);
