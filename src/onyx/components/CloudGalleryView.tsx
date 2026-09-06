@@ -40,6 +40,27 @@ import { LS } from "../storage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
+/** Wandelt technische Ordnernamen (2026-09-06_WARUM_DEINE_GESPRAeCHE..._c8bc6f) in lesbare Titel um. */
+function prettyProjectName(raw: string): string {
+  let s = raw.replace(/^\d{4}-\d{2}-\d{2}_/, ""); // Datums-Präfix weg
+  s = s.replace(/_[0-9a-f]{6}$/i, ""); // Hash-Suffix weg
+  s = s
+    .replace(/Ae/g, "Ä").replace(/Oe/g, "Ö").replace(/Ue/g, "Ü")
+    .replace(/ae/g, "ä").replace(/oe/g, "ö").replace(/ue/g, "ü");
+  s = s.replace(/_/g, " ").trim();
+  return s
+    .toLowerCase()
+    .split(" ")
+    .map((w) => (w.length > 0 ? w[0]!.toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
+/** Kurzes Datum aus dem Ordner-Präfix, falls vorhanden. */
+function projectDate(raw: string): string | null {
+  const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})_/);
+  return m ? `${m[3]}.${m[2]}.${m[1]}` : null;
+}
+
 interface CloudGalleryViewProps {
   currentUser: User | null;
   historyEntries: HistoryEntry[];
@@ -674,14 +695,14 @@ export function CloudGalleryView({
                               </div>
                               <div className="min-w-0">
                                 <h3 className="text-xs sm:text-sm font-bold text-white truncate flex items-center gap-2">
-                                  <span>{projectName}</span>
+                                  <span>{prettyProjectName(projectName)}</span>
                                   <span className="text-[10px] font-normal text-zinc-500">
                                     ({slides.length} Slides · {totalSizeMB} MB)
                                   </span>
                                 </h3>
-                                <p className="text-[11px] text-zinc-400 truncate">
-                                  Pfad: <code className="text-zinc-300 font-mono text-[10px]">{stats.folder || "USERCONTENT"}/carousels/{projectName}/</code>
-                                </p>
+                                {projectDate(projectName) && (
+                                  <p className="text-[11px] text-zinc-500">{projectDate(projectName)}</p>
+                                )}
                               </div>
                             </div>
 
@@ -852,74 +873,85 @@ export function CloudGalleryView({
                     </div>
                   </div>
 
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {Object.entries(folderTree.series).map(([projectName, slides]) => {
                       const isExpanded = expandedProjects[projectName] !== false; // default open
                       const totalSizeMB = (slides.reduce((acc, s) => acc + s.sizeBytes, 0) / (1024 * 1024)).toFixed(1);
-                      const latestSlide = slides[0];
+                      const cover = slides[0];
+                      const title = prettyProjectName(projectName);
+                      const date = projectDate(projectName);
 
                       return (
                         <div
                           key={projectName}
-                          className="rounded-2xl border border-white/[0.08] bg-[#100E17]/90 backdrop-blur-xl overflow-hidden shadow-lg transition-all"
+                          className="group rounded-2xl border border-white/[0.08] bg-[#100E17]/90 backdrop-blur-xl overflow-hidden shadow-lg transition-all hover:border-blue-500/40"
                         >
-                          {/* Folder Header Row */}
+                          {/* Cover-Bild */}
                           <div
+                            className="relative aspect-[4/3] w-full overflow-hidden bg-black/40 cursor-pointer"
                             onClick={() => toggleProjectExpand(projectName)}
-                            className="flex flex-wrap items-center justify-between gap-3 p-4 bg-white/[0.02] border-b border-white/[0.06] cursor-pointer hover:bg-white/[0.04] transition-colors"
                           >
-                            <div className="flex items-center gap-3 min-w-0">
-                              <button
-                                type="button"
-                                className="text-zinc-400 hover:text-white p-0.5"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  toggleProjectExpand(projectName);
+                            {cover && (
+                              <img
+                                src={cover.displayUrl || cover.url}
+                                alt={title}
+                                loading="lazy"
+                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                onError={(e) => {
+                                  const proxy = `/api/cloud/file?key=${encodeURIComponent(cover.key)}`;
+                                  if (e.currentTarget.src !== proxy) e.currentTarget.src = proxy;
                                 }}
-                              >
-                                {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-                              </button>
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 border border-blue-500/20">
-                                <Images className="h-5 w-5 text-blue-400" />
-                              </div>
-                              <div className="min-w-0">
-                                <h3 className="text-sm font-bold text-white truncate pr-4">{projectName}</h3>
-                                <p className="text-xs text-zinc-400">
-                                  {slides.length} Slides • {totalSizeMB} MB
-                                </p>
-                              </div>
+                              />
+                            )}
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                            <div className="absolute top-2 left-2 rounded-md bg-black/70 border border-white/15 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+                              {slides.length} Slides
                             </div>
-
-                            <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                              <button
-                                type="button"
-                                onClick={() => handleDownloadProjectZip(projectName, slides)}
-                                disabled={isZipping}
-                                className="flex items-center gap-1.5 rounded-lg bg-white/5 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/10 transition-colors disabled:opacity-50"
-                              >
-                                {isZipping ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-                                <span>ZIP Download</span>
-                              </button>
+                            <div className="absolute bottom-2 left-3 right-3">
+                              <h3 className="text-sm font-bold text-white leading-snug line-clamp-2">{title}</h3>
+                              <p className="text-[10px] text-zinc-400 mt-0.5">
+                                {date ? `${date} · ` : ""}{totalSizeMB} MB
+                              </p>
                             </div>
                           </div>
 
-                          {/* Expanded Content: Reveal all slides in the folder */}
+                          {/* Aktionen */}
+                          <div className="flex items-center gap-2 p-3 border-t border-white/[0.06]">
+                            <button
+                              type="button"
+                              onClick={() => toggleProjectExpand(projectName)}
+                              className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-white/5 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/10 transition-colors cursor-pointer"
+                            >
+                              {isExpanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+                              <span>{isExpanded ? "Einklappen" : "Ansehen"}</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDownloadProjectZip(projectName, slides)}
+                              disabled={isZipping}
+                              className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-blue-500/15 border border-blue-500/30 px-3 py-1.5 text-xs font-medium text-blue-300 hover:bg-blue-500/25 transition-colors disabled:opacity-50 cursor-pointer"
+                            >
+                              {isZipping ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+                              <span>ZIP</span>
+                            </button>
+                          </div>
+
+                          {/* Expanded: alle Slides */}
                           {isExpanded && (
-                            <div className="p-4 bg-black/30">
-                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                            <div className="p-3 bg-black/30 border-t border-white/[0.06]">
+                              <div className="grid grid-cols-3 gap-2">
                                 {slides.map((slide) => {
                                   const isSelected = selectedIds.includes(slide.id);
                                   return (
                                     <div
                                       key={slide.id}
                                       className={cn(
-                                        "group relative flex flex-col overflow-hidden rounded-xl border bg-[#14111C] transition-all",
+                                        "group/slide relative overflow-hidden rounded-lg border bg-[#14111C] transition-all",
                                         isSelected
                                           ? "border-blue-500 ring-1 ring-blue-500"
                                           : "border-white/[0.08] hover:border-white/20"
                                       )}
                                     >
-                                      {/* Image Box */}
                                       <div
                                         className="relative aspect-square w-full cursor-pointer bg-black/40 overflow-hidden"
                                         onClick={() => toggleSelect(slide.id)}
@@ -927,27 +959,27 @@ export function CloudGalleryView({
                                         <img
                                           src={slide.displayUrl || slide.url}
                                           alt={slide.filename}
-                                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                          className="h-full w-full object-cover transition-transform duration-300 group-hover/slide:scale-105"
                                           loading="lazy"
                                         />
                                         {isSelected && (
                                           <div className="absolute inset-0 bg-blue-500/20 flex items-center justify-center backdrop-blur-[1px]">
-                                            <div className="rounded-full bg-blue-500 p-1.5 shadow-lg shadow-black/50">
-                                              <Check className="h-4 w-4 text-white" />
+                                            <div className="rounded-full bg-blue-500 p-1 shadow-lg shadow-black/50">
+                                              <Check className="h-3 w-3 text-white" />
                                             </div>
                                           </div>
                                         )}
-                                        <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover/slide:opacity-100 transition-opacity">
                                           <button
                                             type="button"
                                             onClick={(e) => {
                                               e.stopPropagation();
                                               handleDownloadSingle(slide);
                                             }}
-                                            className="rounded-lg bg-black/70 p-1.5 text-white hover:bg-black backdrop-blur-md border border-white/10"
+                                            className="rounded-md bg-black/70 p-1 text-white hover:bg-black backdrop-blur-md border border-white/10"
                                             title="Herunterladen"
                                           >
-                                            <Download className="h-3.5 w-3.5" />
+                                            <Download className="h-3 w-3" />
                                           </button>
                                         </div>
                                       </div>
