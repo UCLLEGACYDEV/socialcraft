@@ -1670,6 +1670,43 @@ export function PostSchedulerView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, insightsAccountId]);
 
+  // ── Pinterest board auto-detect (from the account's recent pins) ──
+  const [pinterestBoards, setPinterestBoards] = useState<Array<{ id: string; name: string }>>([]);
+  const [pinterestBoardsLoading, setPinterestBoardsLoading] = useState(false);
+
+  const handleLoadPinterestBoards = async () => {
+    const channel = selectedChannel;
+    const accountId = channel.postForMeAccountId || channel.channelId;
+    if (!accountId || !activePostForMeKey) {
+      toast.error("Pinterest-Profil ist nicht verbunden.");
+      return;
+    }
+    setPinterestBoardsLoading(true);
+    try {
+      const client = new PostForMeApiClient(activePostForMeKey);
+      const feed = await client.getAccountFeed(accountId, { limit: 50, expandMetrics: false });
+      const items = Array.isArray(feed?.data) ? feed.data : [];
+      const seen = new Map<string, string>();
+      for (const item of items) {
+        const pd: any = item.platform_data || {};
+        const id = pd.board_id || pd.board?.id || pd.boardId;
+        const name = pd.board_name || pd.board?.name || pd.boardName || "Pinnwand";
+        if (id && !seen.has(String(id))) seen.set(String(id), String(name));
+      }
+      const boards = Array.from(seen, ([id, name]) => ({ id, name }));
+      setPinterestBoards(boards);
+      if (boards.length === 0) {
+        toast.info("Keine Board-IDs in den letzten Pins gefunden. Bitte manuell eintragen (Quelltext der Board-Seite → „type\":\"board\").");
+      } else {
+        toast.success(`${boards.length} Pinnwand${boards.length > 1 ? "e" : ""} gefunden.`);
+      }
+    } catch (err: any) {
+      toast.error(`Boards konnten nicht geladen werden: ${err?.message || err}`);
+    } finally {
+      setPinterestBoardsLoading(false);
+    }
+  };
+
   // ── Post preview / validation (POST /social-post-previews) ─────────
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewLoading, setPreviewLoading] = useState(false);
@@ -3252,9 +3289,51 @@ export function PostSchedulerView({
                   {selectedChannel.platform === "pinterest" && (
                     <div className="space-y-2.5 pt-2 border-t border-white/5 text-xs">
                       <div>
-                        <label className="text-[11px] text-zinc-400 block mb-1">
-                          Board-ID(s) (Pinnwand) <span className="text-rose-400">*</span>
-                        </label>
+                        <div className="flex items-center justify-between mb-1">
+                          <label className="text-[11px] text-zinc-400">
+                            Board-ID(s) (Pinnwand) <span className="text-rose-400">*</span>
+                          </label>
+                          <button
+                            type="button"
+                            onClick={handleLoadPinterestBoards}
+                            disabled={pinterestBoardsLoading}
+                            className="text-[10px] font-semibold text-rose-300 hover:text-rose-200 flex items-center gap-1 disabled:opacity-50"
+                          >
+                            <RefreshCw className={cn("h-3 w-3", pinterestBoardsLoading && "animate-spin")} />
+                            Boards laden
+                          </button>
+                        </div>
+
+                        {pinterestBoards.length > 0 && (
+                          <div className="flex flex-wrap gap-1.5 mb-2">
+                            {pinterestBoards.map((b) => {
+                              const active = (selectedChannel.pinterestBoardId || "").split(/[\s,]+/).includes(b.id);
+                              return (
+                                <button
+                                  key={b.id}
+                                  type="button"
+                                  onClick={() =>
+                                    onUpdateChannels(
+                                      channels.map((c) =>
+                                        c.id === selectedChannel.id ? { ...c, pinterestBoardId: b.id } : c
+                                      )
+                                    )
+                                  }
+                                  className={cn(
+                                    "text-[10px] px-2 py-1 rounded-lg border transition",
+                                    active
+                                      ? "bg-rose-500/20 border-rose-500/50 text-rose-200"
+                                      : "bg-white/5 border-white/10 text-zinc-300 hover:border-rose-500/40"
+                                  )}
+                                  title={b.id}
+                                >
+                                  {b.name}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+
                         <input
                           type="text"
                           value={selectedChannel.pinterestBoardId || ""}
@@ -3269,10 +3348,9 @@ export function PostSchedulerView({
                           className="w-full bg-[#120F17] border border-white/10 rounded-lg px-3 py-1.5 text-xs font-mono text-white"
                         />
                         <p className="text-[10px] text-zinc-500 mt-1">
-                          Pflichtfeld – ohne Pinnwand kann Pinterest keinen Pin erstellen. Die numerische ID findest du
-                          in der Board-URL (<span className="font-mono">pinterest.com/&lt;user&gt;/&lt;board&gt;/</span> →
-                          beim Board auf „Bearbeiten“, die Zahl steht in der Adresszeile). Post for Me bietet keine
-                          Board-Liste per API, daher die manuelle Eingabe. Mehrere Boards mit Komma trennen.
+                          Pflichtfeld. <strong>„Boards laden"</strong> holt die IDs aus deinen letzten Pins. Sonst manuell:
+                          Board-Seite öffnen → Strg+U → nach <span className="font-mono">"type":"board"</span> suchen, die
+                          ~18-stellige <span className="font-mono">"id"</span> kopieren. Mehrere mit Komma trennen.
                         </p>
                       </div>
                       <div>
