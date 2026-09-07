@@ -58,6 +58,7 @@ interface PostSchedulerViewProps {
   onNavigateToCarousel?: () => void;
   settings?: ApiSettings;
   onOpenZernioSetup?: () => void;
+  onOpen30DayBatch?: () => void;
 }
 
 const PLATFORM_ICONS: Record<SocialPlatform, React.ElementType> = {
@@ -161,6 +162,7 @@ export function PostSchedulerView({
   onNavigateToCarousel,
   settings,
   onOpenZernioSetup,
+  onOpen30DayBatch,
 }: PostSchedulerViewProps) {
   const [activeTab, setActiveTab] = useState<"queue" | "composer" | "channels">(
     initialScheduledItem ? "composer" : "queue"
@@ -741,6 +743,17 @@ export function PostSchedulerView({
 
           {/* Quick Action Navigation Buttons */}
           <div className="flex flex-wrap items-center gap-2">
+            {onOpen30DayBatch && (
+              <button
+                type="button"
+                onClick={onOpen30DayBatch}
+                className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border border-[#FF4D17]/50 bg-gradient-to-r from-[#FF4D17]/25 via-red-600/20 to-orange-500/15 hover:from-[#FF4D17]/35 hover:to-orange-500/25 text-orange-300 hover:text-white shadow-[0_0_20px_-3px_rgba(255,77,23,0.35)]"
+              >
+                <Sparkles className="h-4 w-4 text-[#FF4D17] animate-pulse" />
+                <span>30-Tage Batch Generator</span>
+              </button>
+            )}
+
             {onOpenZernioSetup && (
               <button
                 type="button"

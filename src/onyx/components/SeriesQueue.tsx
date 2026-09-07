@@ -41,6 +41,7 @@ interface SeriesQueueProps {
   onRunSelectedSlides?: ((jobId: string, slideIds: string[]) => void) | undefined;
   onCancelJobSlides?: ((jobId: string) => void) | undefined;
   onSaveJobToCloud?: ((jobId: string) => void) | undefined;
+  onOpen30DayBatch?: (() => void) | undefined;
   settings: ApiSettings;
   onChangeSettings: (patch: Partial<ApiSettings>) => void;
 }
@@ -61,6 +62,7 @@ export function SeriesQueue({
   onRunSelectedSlides,
   onCancelJobSlides,
   onSaveJobToCloud,
+  onOpen30DayBatch,
   settings,
   onChangeSettings,
 }: SeriesQueueProps) {
@@ -138,27 +140,39 @@ export function SeriesQueue({
           <div>
             <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">Serien-Generator</h1>
             <p className="text-xs text-zinc-400">
-              Prompt-Blöcke einfügen, Titel prüfen, Warteschlange abarbeiten.
+              Prompt-Blöcke einfügen, Titel prüfen, Warteschlange abarbeiten oder 30-Tage Monats-Batch laden.
             </p>
           </div>
-          {isRunning ? (
-            <button
-              type="button"
-              onClick={onStopQueue}
-              className="flex items-center gap-1.5 rounded-full border border-destructive/60 bg-destructive/20 px-4 py-2 text-xs font-bold text-destructive hover:bg-destructive/30 hover:text-white transition-all shadow-[0_0_15px_rgba(239,68,68,0.25)] cursor-pointer"
-            >
-              <X className="h-3.5 w-3.5" /> Queue & Slides abbrechen
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={onRunQueue}
-              disabled={!queue.some((j) => j.status === "queued")}
-              className="cryptox-orange-btn !py-2 !px-4 text-xs font-semibold"
-            >
-              <Play className="h-3.5 w-3.5" /> Queue starten
-            </button>
-          )}
+          <div className="flex flex-wrap items-center gap-2">
+            {onOpen30DayBatch && (
+              <button
+                type="button"
+                onClick={onOpen30DayBatch}
+                className="flex items-center gap-1.5 rounded-full border border-orange-500/40 bg-gradient-to-r from-orange-500/20 to-red-500/20 px-3.5 py-2 text-xs font-bold text-orange-300 hover:from-orange-500/30 hover:to-red-500/30 hover:text-white shadow-[0_0_15px_rgba(255,77,23,0.3)] transition-all cursor-pointer"
+              >
+                <Sparkles className="h-3.5 w-3.5 text-orange-400 animate-pulse" />
+                <span>30-Tage Monats-Batch</span>
+              </button>
+            )}
+            {isRunning ? (
+              <button
+                type="button"
+                onClick={onStopQueue}
+                className="flex items-center gap-1.5 rounded-full border border-destructive/60 bg-destructive/20 px-4 py-2 text-xs font-bold text-destructive hover:bg-destructive/30 hover:text-white transition-all shadow-[0_0_15px_rgba(239,68,68,0.25)] cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5" /> Queue & Slides abbrechen
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onRunQueue}
+                disabled={!queue.some((j) => j.status === "queued")}
+                className="cryptox-orange-btn !py-2 !px-4 text-xs font-semibold"
+              >
+                <Play className="h-3.5 w-3.5" /> Queue starten
+              </button>
+            )}
+          </div>
         </div>
 
 

@@ -20,6 +20,7 @@ import {
 import { CloudGalleryView } from "@/onyx/components/CloudGalleryView";
 import { PostSchedulerView } from "@/onyx/components/PostSchedulerView";
 import { ZernioOnboardingModal } from "@/onyx/components/ZernioOnboardingModal";
+import { ThirtyDayBatchModal } from "@/onyx/components/ThirtyDayBatchModal";
 import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder, saveHistoryToS4, loadHistoryFromS4, makeProjectFolderName, syncCloudIdentityCookie } from "@/onyx/s4-storage";
 import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
 import { AdminDashboard } from "@/onyx/components/AdminDashboard";
@@ -256,6 +257,7 @@ function OnyxStudio() {
   const [showSettings, setShowSettings] = useState(false);
   const [showBrandKit, setShowBrandKit] = useState(false);
   const [showZernioSetup, setShowZernioSetup] = useState(false);
+  const [show30DayBatch, setShow30DayBatch] = useState(false);
   const [showMcp, setShowMcp] = useState(false);
   const [editing, setEditing] = useState<{ jobId?: string; slideId: string } | null>(null);
 
@@ -1040,6 +1042,7 @@ function OnyxStudio() {
           onOpenMcp={() => setShowMcp(true)}
           onOpenDatenschutz={() => setShowDatenschutz(true)}
           onOpenZernioSetup={() => setShowZernioSetup(true)}
+          onOpen30DayBatch={() => setShow30DayBatch(true)}
         />
 
         <main className="mx-auto w-full flex-1 p-4 sm:p-6 max-w-[1600px]">
@@ -1104,6 +1107,7 @@ function OnyxStudio() {
               onRunSelectedSlides={(jobId, slideIds) => void runSelectedJobSlides(jobId, slideIds)}
               onCancelJobSlides={(jobId) => cancelJobSlides(jobId)}
               onSaveJobToCloud={(jobId) => void saveJobToCloud(jobId)}
+              onOpen30DayBatch={() => setShow30DayBatch(true)}
               settings={settings}
               onChangeSettings={patchSettings}
             />
@@ -1140,6 +1144,7 @@ function OnyxStudio() {
               onNavigateToCarousel={() => setActiveTab("carousel")}
               settings={settings}
               onOpenZernioSetup={() => setShowZernioSetup(true)}
+              onOpen30DayBatch={() => setShow30DayBatch(true)}
             />
           )}
           {activeTab === "ai-clone" && (
@@ -1256,6 +1261,15 @@ function OnyxStudio() {
         channels={socialChannels}
         onUpdateChannels={setSocialChannels}
         onComplete={() => setActiveTab("scheduler")}
+      />
+      <ThirtyDayBatchModal
+        isOpen={show30DayBatch}
+        onClose={() => setShow30DayBatch(false)}
+        settings={settings}
+        onChangeSettings={patchSettings}
+        channels={socialChannels}
+        onUpdatePosts={setScheduledPosts}
+        existingPosts={scheduledPosts}
       />
       {showMcp && (
         <ModalShell title="Claude Desktop MCP" onClose={() => setShowMcp(false)} maxHeight="70vh">

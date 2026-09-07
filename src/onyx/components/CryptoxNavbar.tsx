@@ -46,6 +46,7 @@ interface CryptoxNavbarProps {
   onOpenMcp: () => void;
   onOpenDatenschutz?: () => void;
   onOpenZernioSetup?: () => void;
+  onOpen30DayBatch?: () => void;
 }
 
 // Group 1: Creation Tools
@@ -79,6 +80,7 @@ export function CryptoxNavbar({
   onOpenSettings,
   onOpenDatenschutz,
   onOpenZernioSetup,
+  onOpen30DayBatch,
 }: CryptoxNavbarProps) {
   const isAdmin = currentUser?.role === "admin";
 
@@ -175,6 +177,20 @@ export function CryptoxNavbar({
 
         {/* ── Right: Consolidated Actions & User Hub ───────────────── */}
         <div className="flex items-center gap-2 sm:gap-2.5">
+          {/* 30-Day Content Batch Generator Trigger */}
+          {onOpen30DayBatch && (
+            <button
+              type="button"
+              onClick={onOpen30DayBatch}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-[#FF4D17]/50 bg-gradient-to-r from-[#FF4D17]/25 via-red-600/20 to-orange-500/15 hover:from-[#FF4D17]/35 hover:to-orange-500/25 px-3 py-1.5 text-xs font-bold text-orange-300 hover:text-white shadow-[0_0_20px_-3px_rgba(255,77,23,0.4)] hover:shadow-[0_0_25px_rgba(255,77,23,0.6)] transition-all cursor-pointer group"
+              title="30-Tage Monats-Content Batch & Auto-Planer"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-[#FF6A1F] group-hover:scale-110 transition-transform animate-pulse" />
+              <span className="hidden sm:inline font-sans">30-Tage Batch</span>
+              <span className="sm:hidden font-sans">30d</span>
+            </button>
+          )}
+
           {/* Direct Admin Pill (when admin) */}
           {isAdmin && onNavigateAdmin && (
             <button
@@ -348,6 +364,16 @@ export function CryptoxNavbar({
                   <Cloud className="h-4 w-4 text-[#FF6A1F]" />
                   <span>Cloud-Galerie & Ordner</span>
                 </DropdownMenuItem>
+
+                {onOpen30DayBatch && (
+                  <DropdownMenuItem
+                    onClick={onOpen30DayBatch}
+                    className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold text-[#FF6A1F] bg-[#FF4D17]/10 hover:bg-[#FF4D17]/20 hover:text-white cursor-pointer transition-colors"
+                  >
+                    <Sparkles className="h-4 w-4 text-[#FF4D17]" />
+                    <span>30-Tage Content Batch Generator</span>
+                  </DropdownMenuItem>
+                )}
 
                 {onOpenZernioSetup && (
                   <DropdownMenuItem
