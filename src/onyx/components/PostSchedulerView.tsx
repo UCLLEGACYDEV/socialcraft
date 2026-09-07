@@ -260,6 +260,7 @@ export function PostSchedulerView({
   const [tiktokAllowStitch, setTiktokAllowStitch] = useState(true);
   const [tiktokAiDisclosure, setTiktokAiDisclosure] = useState(false);
   const [tiktokAutoMusic, setTiktokAutoMusic] = useState(true);
+  const [tiktokDraft, setTiktokDraft] = useState(false);
   const [selectedSound, setSelectedSound] = useState<TikTokSoundItem | null>(null);
   const [showMusicLibraryModal, setShowMusicLibraryModal] = useState(false);
 
@@ -509,6 +510,7 @@ export function PostSchedulerView({
           allowStitch: tiktokAllowStitch,
           videoMadeWithAi: tiktokAiDisclosure,
           autoAddMusic: tiktokAutoMusic,
+          draft: tiktokDraft,
         },
         instagramOptions: {
           shareToFeed: instagramShareToFeed,
@@ -549,9 +551,14 @@ export function PostSchedulerView({
       }
       
       if (publishNow) {
-        toast.success("🚀 Erfolgreich live veröffentlicht!", {
-          description: `Status: ${postResult.status} (ID: ${postResult._id})`,
-        });
+        toast.success(
+          tiktokDraft && channel.platform === "tiktok"
+            ? "📥 Als TikTok-Entwurf übertragen! Öffne deine TikTok-App zur Freigabe."
+            : "🚀 Erfolgreich live veröffentlicht!",
+          {
+            description: `Status: ${postResult.status} (ID: ${postResult._id})`,
+          }
+        );
       } else {
         toast.success("📅 Erfolgreich im Direct Hub terminiert!", {
           description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")}`,
@@ -563,7 +570,28 @@ export function PostSchedulerView({
       setSelectedSound(null);
       setActiveTab("queue");
     } catch (err: any) {
-      toast.error(`Veröffentlichung fehlgeschlagen: ${err.message}`);
+      const isCapacityError =
+        err.message?.toLowerCase().includes("capacity") ||
+        err.message?.toLowerCase().includes("limit") ||
+        err.message?.toLowerCase().includes("direct posting");
+
+      if (isCapacityError && channel.platform === "tiktok" && !tiktokDraft) {
+        toast.error("TikTok Direct-Posting Tageslimit erreicht!", {
+          description: "Tipp: Als Entwurf senden (Creator Inbox) oder nach dem Reset (Mitternacht UTC) erneut versuchen.",
+          action: {
+            label: "Als Entwurf senden",
+            onClick: () => {
+              setTiktokDraft(true);
+              setTimeout(() => {
+                handlePublishViaZernio(publishNow);
+              }, 100);
+            },
+          },
+          duration: 10000,
+        });
+      } else {
+        toast.error(`Veröffentlichung fehlgeschlagen: ${err.message}`);
+      }
     } finally {
       setIsPublishingZernio(false);
     }
@@ -1506,6 +1534,18 @@ export function PostSchedulerView({
                               className="accent-orange-500 rounded"
                             />
                             <span>Automatische Trend-Musik (TikTok)</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer text-zinc-300">
+                            <input
+                              type="checkbox"
+                              checked={tiktokDraft}
+                              onChange={(e) => setTiktokDraft(e.target.checked)}
+                              className="accent-orange-500 rounded"
+                            />
+                            <span className="flex items-center gap-1.5">
+                              <span>Als Entwurf senden (Creator Inbox)</span>
+                              <span className="text-[9px] font-mono px-1 rounded bg-orange-500/20 text-orange-300 border border-orange-500/30 font-bold">Umgeht App-Limit</span>
+                            </span>
                           </label>
                         </div>
                       </div>
