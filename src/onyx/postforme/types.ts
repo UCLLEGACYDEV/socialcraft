@@ -1,6 +1,6 @@
 /**
  * Post for Me (https://api.postforme.dev) TypeScript Interface Definitions
- * Reference: https://api.postforme.dev/docs
+ * Reference: https://api.postforme.dev/docs (OpenAPI 3.0 Specification)
  */
 
 export type PostForMePlatform =
@@ -32,6 +32,10 @@ export interface PostForMeMediaItem {
   url: string;
 }
 
+export interface PostForMePlatformConfiguration {
+  [key: string]: any;
+}
+
 export interface PostForMeCreatePostDto {
   /** Array of social account IDs (e.g. ['spc_...']) to publish or schedule to */
   social_accounts: string[];
@@ -41,8 +45,8 @@ export interface PostForMeCreatePostDto {
   scheduled_at?: string | null;
   /** Media URLs to attach (images, carousels, videos) */
   media?: PostForMeMediaItem[];
-  /** Optional platform specific configuration overrides */
-  platform_configurations?: Record<string, any>;
+  /** Optional platform specific content variations or configurations */
+  platform_configurations?: PostForMePlatformConfiguration;
 }
 
 export interface PostForMeSocialPost {
@@ -64,6 +68,52 @@ export interface PostForMePostResult {
   status: "success" | "failure" | "pending";
   platform_url?: string;
   error_message?: string;
+  created_at?: string;
+}
+
+export interface PostForMePlatformPostMetrics {
+  views?: number;
+  likes?: number;
+  comments?: number;
+  shares?: number;
+  impressions?: number;
+  saves?: number;
+  [key: string]: any;
+}
+
+export interface PostForMePlatformPost {
+  id: string;
+  platform: string;
+  caption?: string;
+  url?: string;
+  media?: PostForMeMediaItem[];
+  created_at?: string;
+  metrics?: PostForMePlatformPostMetrics;
+}
+
+export interface PostForMeFeedResponse {
+  data: PostForMePlatformPost[];
+  meta: {
+    cursor?: string;
+    limit: number;
+    next?: string | null;
+    has_more?: boolean;
+  };
+}
+
+export interface PostForMeSocialPostPreview {
+  social_account_id: string;
+  platform: string;
+  caption: string;
+  media?: PostForMeMediaItem[];
+  preview_html?: string;
+}
+
+export interface PostForMeWebhookDto {
+  id: string; // e.g. "wbh_xxxxxx"
+  url: string;
+  event_type: string;
+  secret?: string;
   created_at?: string;
 }
 

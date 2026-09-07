@@ -5,6 +5,10 @@ import type {
   PostForMePostResult,
   PostForMePlatform,
   PostForMePaginatedResponse,
+  PostForMeUploadUrlResponse,
+  PostForMeFeedResponse,
+  PostForMeSocialPostPreview,
+  PostForMeWebhookDto,
 } from "./types";
 
 export const POSTFORME_API_BASE_URL = "https://api.postforme.dev/v1";
@@ -50,22 +54,79 @@ export class PostForMeApiClient {
     return data as T;
   }
 
+  // --- MEDIA UPLOAD (Signed URLs) ---
+
+  /**
+   * Generates a signed upload URL and public media URL
+   * POST /v1/media/create-upload-url
+   */
+  async createUploadUrl(): Promise<PostForMeUploadUrlResponse> {
+    const res = await this.request<any>("/media/create-upload-url", {
+      method: "POST",
+    });
+    return res?.data || res;
+  }
+
+  /**
+   * Uploads a Blob / File directly to Post for Me S3 bucket using signed URL
+   */
+  async uploadMedia(file: Blob | File, contentType = "image/png"): Promise<string> {
+    const { upload_url, media_url } = await this.createUploadUrl();
+
+    const uploadRes = await fetch(upload_url, {
+      method: "PUT",
+      headers: {
+        "Content-Type": contentType,
+      },
+      body: file,
+    });
+
+    if (!uploadRes.ok) {
+      throw new Error(`Media Upload fehlgeschlagen (${uploadRes.status}): ${uploadRes.statusText}`);
+    }
+
+    return media_url;
+  }
+
   // --- SOCIAL ACCOUNTS ---
 
   /**
-   * Retrieves all connected social accounts
+   * Retrieves all connected social accounts with optional filters
+   * GET /v1/social-accounts
    */
-  async getSocialAccounts(): Promise<PostForMeSocialAccount[]> {
-    const res = await this.request<any>("/social-accounts");
+  async getSocialAccounts(filters?: {
+    platform?: string;
+    username?: string;
+    status?: "connected" | "disconnected";
+    limit?: number;
+    offset?: number;
+  }): Promise<PostForMeSocialAccount[]> {
+    const params = new URLSearchParams();
+    if (filters?.platform) params.set("platform", filters.platform);
+    if (filters?.username) params.set("username", filters.username);
+    if (filters?.status) params.set("status", filters.status);
+    if (filters?.limit) params.set("limit", String(filters.limit));
+    if (filters?.offset) params.set("offset", String(filters.offset));
+
+    const qs = params.toString() ? `?${params.toString()}` : "";
+    const res = await this.request<any>(`/social-accounts${qs}`);
     if (Array.isArray(res)) return res;
     if (Array.isArray(res?.data)) return res.data;
     return [];
   }
 
   /**
+   * Retrieves a single social account by ID
+   * GET /v1/social-accounts/{id}
+   */
+  async getSocialAccount(id: string): Promise<PostForMeSocialAccount> {
+    const res = await this.request<any>(`/social-accounts/${id}`);
+    return res?.data || res;
+  }
+
+  /**
    * Generates an OAuth authorization URL to connect a platform
-   * @param platform TikTok, Instagram, LinkedIn, Facebook, X, etc.
-   * @param redirectUrl Optional redirect URL back to the application
+   * POST /v1/social-accounts/auth-url
    */
   async createAuthUrl(
     platform: PostForMePlatform | string,
@@ -83,7 +144,6 @@ export class PostForMeApiClient {
       body: JSON.stringify(payload),
     });
 
-    // The API might return { url: "..." } or { data: { url: "..." } }
     const authUrl = res?.data?.url || res?.url;
     if (!authUrl) {
       throw new Error("Konnte keine Authentifizierungs-URL von Post for Me abrufen.");
@@ -92,9 +152,21 @@ export class PostForMeApiClient {
   }
 
   /**
-   * Disconnects / deletes a connected social account
+   * Disconnects an account (clears tokens, preserves post history)
+   * POST /v1/social-accounts/{id}/disconnect
    */
   async disconnectSocialAccount(accountId: string): Promise<boolean> {
+    await this.request(`/social-accounts/${accountId}/disconnect`, {
+      method: "POST",
+    });
+    return true;
+  }
+
+  /**
+   * Permanently deletes a social account and its history
+   * DELETE /v1/social-accounts/{id}
+   */
+  async deleteSocialAccount(accountId: string): Promise<boolean> {
     await this.request(`/social-accounts/${accountId}`, {
       method: "DELETE",
     });
@@ -105,6 +177,7 @@ export class PostForMeApiClient {
 
   /**
    * Creates and schedules or immediately publishes a post
+   * POST /v1/social-posts
    */
   async createPost(payload: PostForMeCreatePostDto): Promise<PostForMeSocialPost> {
     const res = await this.request<any>("/social-posts", {
@@ -115,17 +188,36 @@ export class PostForMeApiClient {
   }
 
   /**
-   * Lists scheduled and published social posts
+   * Lists scheduled and published social posts with filtering
+   * GET /v1/social-posts
    */
-  async getPosts(limit = 50, offset = 0): Promise<PostForMePaginatedResponse<PostForMeSocialPost>> {
-    const res = await this.request<any>(`/social-posts?limit=${limit}&offset=${offset}`);
+  async getPosts(params?: {
+    platform?: string[];
+    status?: string[];
+    social_account_id?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<PostForMePaginatedResponse<PostForMeSocialPost>> {
+    const qs = new URLSearchParams();
+    if (params?.limit) qs.set("limit", String(params.limit));
+    if (params?.offset) qs.set("offset", String(params.offset));
+    if (params?.social_account_id) qs.set("social_account_id", params.social_account_id);
+    if (params?.platform) {
+      params.platform.forEach((p) => qs.append("platform", p));
+    }
+    if (params?.status) {
+      params.status.forEach((s) => qs.append("status", s));
+    }
+
+    const qString = qs.toString() ? `?${qs.toString()}` : "";
+    const res = await this.request<any>(`/social-posts${qString}`);
     if (res?.data && res?.meta) return res;
     return {
       data: Array.isArray(res) ? res : res?.data || [],
       meta: {
         total: res?.meta?.total || 0,
-        offset,
-        limit,
+        offset: params?.offset || 0,
+        limit: params?.limit || 50,
         next: res?.meta?.next || null,
       },
     };
@@ -133,6 +225,7 @@ export class PostForMeApiClient {
 
   /**
    * Retrieves single post details
+   * GET /v1/social-posts/{id}
    */
   async getPost(postId: string): Promise<PostForMeSocialPost> {
     const res = await this.request<any>(`/social-posts/${postId}`);
@@ -141,6 +234,7 @@ export class PostForMeApiClient {
 
   /**
    * Updates a scheduled post
+   * PUT /v1/social-posts/{id}
    */
   async updatePost(postId: string, payload: Partial<PostForMeCreatePostDto>): Promise<PostForMeSocialPost> {
     const res = await this.request<any>(`/social-posts/${postId}`, {
@@ -152,6 +246,7 @@ export class PostForMeApiClient {
 
   /**
    * Deletes / cancels a post
+   * DELETE /v1/social-posts/{id}
    */
   async deletePost(postId: string): Promise<boolean> {
     await this.request(`/social-posts/${postId}`, {
@@ -160,14 +255,91 @@ export class PostForMeApiClient {
     return true;
   }
 
+  // --- POST RESULTS & PREVIEWS ---
+
   /**
-   * Gets execution results and status for each platform for a post
+   * Gets execution results and status for a post or account
+   * GET /v1/social-post-results
    */
-  async getPostResults(postId: string): Promise<PostForMePostResult[]> {
-    const res = await this.request<any>(`/social-posts/${postId}/results`);
+  async getPostResults(postId?: string): Promise<PostForMePostResult[]> {
+    const qs = postId ? `?post_id=${encodeURIComponent(postId)}` : "";
+    const res = await this.request<any>(`/social-post-results${qs}`);
     if (Array.isArray(res)) return res;
     if (Array.isArray(res?.data)) return res.data;
     return [];
+  }
+
+  /**
+   * Creates previews for how a post will look on each platform
+   * POST /v1/social-post-previews
+   */
+  async createPreviews(payload: PostForMeCreatePostDto): Promise<PostForMeSocialPostPreview[]> {
+    const res = await this.request<any>("/social-post-previews", {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    return Array.isArray(res) ? res : res?.data || [];
+  }
+
+  // --- SOCIAL ACCOUNT FEEDS & ANALYTICS ---
+
+  /**
+   * Retrieves an account's live feed and performance metrics
+   * GET /v1/social-account-feeds/{social_account_id}?expand=metrics
+   */
+  async getAccountFeed(
+    socialAccountId: string,
+    options?: {
+      limit?: number;
+      cursor?: string;
+      expandMetrics?: boolean;
+    }
+  ): Promise<PostForMeFeedResponse> {
+    const qs = new URLSearchParams();
+    if (options?.limit) qs.set("limit", String(options.limit));
+    if (options?.cursor) qs.set("cursor", options.cursor);
+    if (options?.expandMetrics !== false) qs.set("expand", "metrics");
+
+    const res = await this.request<any>(
+      `/social-account-feeds/${socialAccountId}?${qs.toString()}`
+    );
+    return res;
+  }
+
+  // --- WEBHOOKS ---
+
+  /**
+   * Lists active webhooks
+   * GET /v1/webhooks
+   */
+  async getWebhooks(): Promise<PostForMeWebhookDto[]> {
+    const res = await this.request<any>("/webhooks");
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res?.data)) return res.data;
+    return [];
+  }
+
+  /**
+   * Creates a webhook subscription
+   * POST /v1/webhooks
+   */
+  async createWebhook(url: string, eventType: string): Promise<PostForMeWebhookDto> {
+    const res = await this.request<any>("/webhooks", {
+      method: "POST",
+      body: JSON.stringify({ url, event_type: eventType }),
+    });
+    return res?.data || res;
+  }
+
+  /**
+   * Deletes a webhook subscription
+   * DELETE /v1/webhooks/{id}
+   */
+  async deleteWebhook(webhookId: string): Promise<boolean> {
+    await this.request(`/webhooks/${webhookId}`, {
+      method: "DELETE",
+    });
+    return true;
   }
 }
 
