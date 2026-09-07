@@ -54,6 +54,7 @@ import {
 import type { SocialChannel, ScheduledPost, SocialPlatform, SlideContent, HistoryEntry, ApiSettings } from "../types";
 import type { PostForMePlatform } from "../postforme/types";
 import { DEFAULT_SOCIAL_CHANNELS, ANCHORED_POSTFORME_API_KEY } from "../defaults";
+import { getStoredCurrentUser, type User } from "../auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { PostForMeApiClient, createPostForMeClient } from "../postforme/client";
@@ -73,6 +74,7 @@ interface PostSchedulerViewProps {
   initialScheduledItem?: { title: string; imageUrls: string[]; prompt?: string } | null;
   onNavigateToCarousel?: () => void;
   settings?: ApiSettings;
+  currentUser?: User | null;
   onOpenPostForMeSetup?: () => void;
   onOpenZernioSetup?: () => void;
   onOpen30DayBatch?: () => void;
@@ -292,11 +294,14 @@ export function PostSchedulerView({
   initialScheduledItem = null,
   onNavigateToCarousel,
   settings,
+  currentUser,
   onOpenPostForMeSetup,
   onOpenZernioSetup,
   onOpen30DayBatch,
 }: PostSchedulerViewProps) {
-  const openDirectSetup = onOpenPostForMeSetup || onOpenZernioSetup;
+  const currentUserResolved = currentUser || getStoredCurrentUser();
+  const isAdmin = currentUserResolved?.role === "admin";
+  const openDirectSetup = isAdmin ? (onOpenPostForMeSetup || onOpenZernioSetup) : undefined;
   const activePostForMeKey = settings?.postForMeApiKey || ANCHORED_POSTFORME_API_KEY;
   const hasPublisherKey = !!activePostForMeKey;
 
@@ -648,9 +653,13 @@ export function PostSchedulerView({
 
     if (!postForMeKey) {
       if (!silent) {
-        toast.info("Bitte hinterlege zuerst deinen Post for Me API Key.", {
-          action: openDirectSetup ? { label: "Setup öffnen", onClick: openDirectSetup } : undefined,
-        });
+        if (isAdmin) {
+          toast.info("Bitte als Admin den Publishing-Key hinterlegen.", {
+            action: openDirectSetup ? { label: "Setup öffnen", onClick: openDirectSetup } : undefined,
+          });
+        } else {
+          toast.info("Publishing-Dienst wird initialisiert. Bitte versuche es gleich erneut.");
+        }
       }
       return;
     }
@@ -662,7 +671,7 @@ export function PostSchedulerView({
 
       if (!accounts || accounts.length === 0) {
         if (!silent) {
-          toast.info("Keine verknüpften Accounts bei Post for Me gefunden. Klicke auf ein Netzwerk, um ein Profil zu verbinden.");
+          toast.info("Keine aktiven Profile gefunden. Klicke oben auf ein soziales Netzwerk, um dein Profil zu verknüpfen.");
         }
         return;
       }
@@ -867,9 +876,13 @@ export function PostSchedulerView({
     const pfmKey = activePostForMeKey;
 
     if (!pfmKey) {
-      toast.error("Kein Post for Me API Key hinterlegt. Öffne das Setup!", {
-        action: openDirectSetup ? { label: "Setup", onClick: openDirectSetup } : undefined,
-      });
+      if (isAdmin) {
+        toast.error("Kein Publishing API Key hinterlegt. Öffne das Admin-Setup!", {
+          action: openDirectSetup ? { label: "Setup", onClick: openDirectSetup } : undefined,
+        });
+      } else {
+        toast.error("Publishing-Dienst ist momentan nicht bereit. Bitte versuche es in Kürze erneut.");
+      }
       return;
     }
 
@@ -914,12 +927,12 @@ export function PostSchedulerView({
         }
 
         if (publishNow) {
-          toast.success("🚀 Erfolgreich via Post for Me übertragen!", {
-            description: `Status: ${postResult.status || "Live"} (ID: ${postResult.id})`,
+          toast.success("🚀 Beitrag erfolgreich veröffentlicht!", {
+            description: `Live auf ${channel.name} (${channel.handle || channel.platform})`,
           });
         } else {
-          toast.success("📅 Erfolgreich mit Post for Me terminiert!", {
-            description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")}`,
+          toast.success("📅 Beitrag erfolgreich terminiert!", {
+            description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")} auf ${channel.name}`,
           });
         }
 
@@ -1226,19 +1239,15 @@ export function PostSchedulerView({
               </button>
             )}
 
-            {openDirectSetup && (
+            {isAdmin && openDirectSetup && (
               <button
                 type="button"
                 onClick={openDirectSetup}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border",
-                  hasPublisherKey
-                    ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20"
-                    : "bg-white/[0.04] text-zinc-300 border-white/10 hover:bg-white/[0.08] hover:text-white"
-                )}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border bg-white/[0.04] text-zinc-300 border-white/10 hover:bg-white/[0.08] hover:text-white"
+                title="Admin Publishing-Engine Setup"
               >
-                <Share2 className="h-3.5 w-3.5" />
-                <span>{hasPublisherKey ? "Post for Me aktiv" : "Post for Me Hub"}</span>
+                <Key className="h-3.5 w-3.5 text-orange-400" />
+                <span>Admin Setup</span>
               </button>
             )}
           </div>
@@ -2719,7 +2728,7 @@ export function PostSchedulerView({
             <div className="flex flex-wrap items-center gap-2">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Post for Me Live-Engine aktiv</span>
+                <span>Multi-Publishing Engine: Aktiv</span>
               </span>
 
               {hasPublisherKey && (
@@ -2728,22 +2737,22 @@ export function PostSchedulerView({
                   disabled={isSyncingChannels}
                   onClick={() => handleSyncAccounts(false)}
                   className="px-3.5 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
-                  title="Profile von Post for Me abrufen & aktualisieren"
+                  title="Profile abrufen & synchronisieren"
                 >
                   <RefreshCw className={cn("h-3.5 w-3.5", isSyncingChannels && "animate-spin text-orange-400")} />
                   <span>{isSyncingChannels ? "Synchronisiere..." : "Kanäle abgleichen"}</span>
                 </button>
               )}
 
-              {openDirectSetup && (
+              {isAdmin && openDirectSetup && (
                 <button
                   type="button"
                   onClick={openDirectSetup}
                   className="px-3.5 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
-                  title="API-Schlüssel & Webhooks einsehen"
+                  title="Admin-Konfiguration: API-Schlüssel & Webhooks einsehen"
                 >
                   <Key className="h-3.5 w-3.5 text-orange-400" />
-                  <span>Setup / Webhooks</span>
+                  <span>Admin Webhooks</span>
                 </button>
               )}
 
@@ -2961,7 +2970,7 @@ export function PostSchedulerView({
                         {/* Account ID / Business Details */}
                         <div className="bg-black/40 p-3 rounded-xl border border-white/[0.06] space-y-1.5 text-xs font-mono">
                           <div className="flex items-center justify-between">
-                            <span className="text-zinc-400 font-sans">Kanal- / Post for Me ID:</span>
+                            <span className="text-zinc-400 font-sans">Kanal-ID:</span>
                             <span className="text-orange-300 font-bold truncate max-w-[170px]" title={chan.channelId}>
                               {chan.channelId}
                             </span>

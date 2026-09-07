@@ -138,7 +138,7 @@ function PostForMeCallbackPage() {
           </div>
           <span className="font-extrabold text-xl tracking-tight text-white">socialcraft</span>
           <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#FF4D1C]/20 text-[#FF8038] border border-[#FF4D1C]/30">
-            Post for Me
+            Cloud Connect
           </span>
         </div>
 
@@ -171,7 +171,7 @@ function PostForMeCallbackPage() {
                 </p>
               )}
               <p className="text-xs text-zinc-400 pt-1">
-                Dein Social-Media-Profil ist jetzt über die Post for Me API startklar für automatische Veröffentlichungen.
+                Dein Social-Media-Profil ist jetzt in Socialcraft startklar für automatische Veröffentlichungen und Terminierungen.
               </p>
             </div>
 

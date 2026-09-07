@@ -350,13 +350,13 @@ export function CryptoxNavbar({
                 <span>Profile verknüpfen & Planer</span>
               </DropdownMenuItem>
 
-              {(onOpenPostForMeSetup || onOpenZernioSetup) && (
+              {isAdmin && (onOpenPostForMeSetup || onOpenZernioSetup) && (
                 <DropdownMenuItem
                   onClick={onOpenPostForMeSetup || onOpenZernioSetup}
                   className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-orange-400 hover:bg-orange-500/10 hover:text-orange-300 cursor-pointer transition-colors"
                 >
                   <Share2 className="h-4 w-4 text-[#FF4D1C]" />
-                  <span>Post for Me Publishing Hub</span>
+                  <span>Admin: Publishing & Webhooks</span>
                 </DropdownMenuItem>
               )}
 

@@ -1218,8 +1218,9 @@ function OnyxStudio() {
               initialScheduledItem={schedulerInitialItem}
               onNavigateToCarousel={() => setActiveTab("carousel")}
               settings={settings}
-              onOpenPostForMeSetup={() => setShowPostForMeSetup(true)}
-              onOpenZernioSetup={() => setShowPostForMeSetup(true)}
+              currentUser={currentUser}
+              onOpenPostForMeSetup={currentUser?.role === "admin" ? () => setShowPostForMeSetup(true) : undefined}
+              onOpenZernioSetup={currentUser?.role === "admin" ? () => setShowPostForMeSetup(true) : undefined}
               onOpen30DayBatch={() => setShow30DayBatch(true)}
             />
           )}
@@ -1330,7 +1331,7 @@ function OnyxStudio() {
         />
       )}
       <PostForMeSetupModal
-        isOpen={showPostForMeSetup}
+        isOpen={showPostForMeSetup && currentUser?.role === "admin"}
         onClose={() => setShowPostForMeSetup(false)}
         settings={settings}
         onChangeSettings={patchSettings}

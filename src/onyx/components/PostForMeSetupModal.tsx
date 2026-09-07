@@ -275,14 +275,14 @@ export function PostForMeSetupModal({
               socialcraft
             </span>
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#FF4D1C]/20 text-[#FF8038] border border-[#FF4D1C]/30">
-              Post for Me Engine
+              Admin Hub
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-1">
-            Multi-Channel Publishing Hub
+            Plattform-Publishing & Webhooks
           </h2>
           <p className="text-xs text-white/60">
-            Direktes Planen & Veröffentlichen auf TikTok, Instagram, Facebook, LinkedIn, X & YouTube via Post for Me API.
+            Zentrale Backend-Infrastruktur für automatisches Multi-Channel Publishing & Webhook-Events aller Endnutzer.
           </p>
         </div>
 
