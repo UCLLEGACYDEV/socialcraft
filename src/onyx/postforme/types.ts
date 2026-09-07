@@ -33,8 +33,8 @@ export interface PostForMeMediaItem {
 }
 
 export interface PostForMePinterestConfiguration {
-  /** Board the pin is published to. Pinterest rejects pins without a board. */
-  board_id?: string;
+  /** Boards the pin is published to. Pinterest rejects pins without a board. */
+  board_ids?: string[];
   /** Destination link opened when the pin is tapped. */
   link?: string;
   /** Pin title (falls back to the post caption's first line). */

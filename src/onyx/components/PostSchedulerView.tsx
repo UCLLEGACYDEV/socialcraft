@@ -1085,25 +1085,31 @@ export function PostSchedulerView({
       scheduledIso = when.toISOString();
     }
 
-    // Pinterest specifics: a pin needs a board, and Pinterest has no multi-image carousel.
-    let pinterestConfig: { board_id?: string; link?: string } | undefined;
+    // Pinterest specifics: a pin must be published to at least one board.
+    // Post for Me's field is `board_ids` (array); we store one or more comma-separated IDs on the channel.
+    let pinterestConfig: { board_ids: string[]; link?: string } | undefined;
     if (channel.platform === "pinterest") {
-      if (!channel.pinterestBoardId?.trim()) {
+      const boardIds = (channel.pinterestBoardId || "")
+        .split(/[\s,]+/)
+        .map((s) => s.trim())
+        .filter(Boolean);
+      if (boardIds.length === 0) {
         toast.error("Für Pinterest fehlt die Board-ID.", {
-          description: "Trage unter „Pinterest-Optionen“ die Ziel-Pinnwand ein – ohne Board kann Pinterest keinen Pin anlegen.",
+          description: "Trage unter „Plattform-Einstellungen für PINTEREST“ die Ziel-Pinnwand ein – ohne Board kann Pinterest keinen Pin anlegen.",
         });
         return;
       }
       pinterestConfig = {
-        board_id: channel.pinterestBoardId.trim(),
+        board_ids: boardIds,
         link: channel.pinterestDefaultLink?.trim() || undefined,
       };
-      if (mediaList.length > 1) {
-        toast.warning("Pinterest unterstützt keine Karussells.", {
-          description: "Es wird nur das erste Bild als Pin veröffentlicht. Für mehrere Bilder lege bitte einzelne Pins an.",
-          duration: 8000,
+      // Pinterest carousel pins accept at most 5 images.
+      if (mediaList.length > 5) {
+        toast.warning("Pinterest erlaubt max. 5 Bilder pro Pin.", {
+          description: `Es werden die ersten 5 von ${mediaList.length} Bildern verwendet.`,
+          duration: 7000,
         });
-        mediaList = mediaList.slice(0, 1);
+        mediaList = mediaList.slice(0, 5);
       }
     }
 
@@ -1136,8 +1142,9 @@ export function PostSchedulerView({
             ? {
                 platform_configurations: {
                   pinterest: {
-                    ...pinterestConfig,
-                    title: postTitle.trim() || undefined,
+                    board_ids: pinterestConfig.board_ids,
+                    ...(pinterestConfig.link ? { link: pinterestConfig.link } : {}),
+                    ...(postTitle.trim() ? { title: postTitle.trim() } : {}),
                   },
                 },
               }
@@ -2827,7 +2834,7 @@ export function PostSchedulerView({
                     <div className="space-y-2.5 pt-2 border-t border-white/5 text-xs">
                       <div>
                         <label className="text-[11px] text-zinc-400 block mb-1">
-                          Board-ID (Pinnwand) <span className="text-rose-400">*</span>
+                          Board-ID(s) (Pinnwand) <span className="text-rose-400">*</span>
                         </label>
                         <input
                           type="text"
@@ -2839,11 +2846,14 @@ export function PostSchedulerView({
                               )
                             )
                           }
-                          placeholder="z. B. 1068981941647123456"
+                          placeholder="z. B. 1068981941647123456 (mehrere mit Komma trennen)"
                           className="w-full bg-[#120F17] border border-white/10 rounded-lg px-3 py-1.5 text-xs font-mono text-white"
                         />
                         <p className="text-[10px] text-zinc-500 mt-1">
-                          Pflichtfeld – ohne Pinnwand kann Pinterest keinen Pin erstellen. Die ID steht in der Board-URL.
+                          Pflichtfeld – ohne Pinnwand kann Pinterest keinen Pin erstellen. Die numerische ID findest du
+                          in der Board-URL (<span className="font-mono">pinterest.com/&lt;user&gt;/&lt;board&gt;/</span> →
+                          beim Board auf „Bearbeiten“, die Zahl steht in der Adresszeile). Post for Me bietet keine
+                          Board-Liste per API, daher die manuelle Eingabe. Mehrere Boards mit Komma trennen.
                         </p>
                       </div>
                       <div>
@@ -2863,7 +2873,7 @@ export function PostSchedulerView({
                         />
                       </div>
                       <p className="text-[10px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded-lg px-2.5 py-1.5">
-                        Hinweis: Pinterest unterstützt keine Karussells. Bei mehreren Bildern wird nur das erste als Pin veröffentlicht.
+                        Hinweis: Ein Pinterest-Karussell-Pin fasst max. 5 Bilder. Bei mehr werden die ersten 5 verwendet.
                       </p>
                     </div>
                   )}

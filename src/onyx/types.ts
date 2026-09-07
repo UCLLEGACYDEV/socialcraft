@@ -60,7 +60,7 @@ export interface SocialChannel {
   zernioAccountId?: string;
   postForMeAccountId?: string;
   profileId?: string; // Links this channel to a specific BrandProfile (e.g. zitate_tiger)
-  pinterestBoardId?: string; // Required by Pinterest — a pin can only be created on a board
+  pinterestBoardId?: string; // Required by Pinterest — target board id(s); comma-separated for multiple
   pinterestDefaultLink?: string; // Optional destination URL attached to every pin
 }
 
