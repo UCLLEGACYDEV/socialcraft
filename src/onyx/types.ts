@@ -16,9 +16,45 @@ export type TabKey =
   | "carousel"
   | "bulk"
   | "direct-prompt"
+  | "scheduler"
   | "ai-clone"
   | "prompt-gallery"
   | "history";
+
+export type SocialPlatform = "facebook" | "instagram" | "tiktok" | "youtube" | "linkedin";
+
+export interface SocialChannel {
+  id: string;
+  platform: SocialPlatform;
+  name: string;
+  channelId: string; // e.g. Facebook Page ID "337570872768998"
+  handle?: string;
+  avatarUrl?: string;
+  businessId?: string;
+  accessToken?: string;
+  webhookUrl?: string;
+  isDefault?: boolean;
+}
+
+export type ScheduledPostStatus = "scheduled" | "queued" | "published" | "draft" | "failed";
+
+export interface ScheduledPost {
+  id: string;
+  title: string;
+  caption: string;
+  hashtags: string[];
+  mediaUrls: string[];
+  mediaType: "carousel" | "image" | "video";
+  channelId: string; // matches SocialChannel.id or channelId
+  platform: SocialPlatform;
+  scheduledFor: string; // ISO Date string
+  status: ScheduledPostStatus;
+  createdAt: string;
+  publishedAt?: string;
+  externalPostUrl?: string;
+  errorMessage?: string;
+}
+
 
 export interface SlideContent {
   id: string;

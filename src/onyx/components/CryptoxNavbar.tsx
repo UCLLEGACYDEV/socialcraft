@@ -51,6 +51,7 @@ const CREATION_TABS: { key: TabKey; label: string }[] = [
   { key: "carousel", label: "Karussell" },
   { key: "bulk", label: "Serie" },
   { key: "direct-prompt", label: "Einzelbild" },
+  { key: "scheduler", label: "Planer" },
 ];
 
 // Group 2: Library & Workspaces
@@ -74,6 +75,7 @@ export function CryptoxNavbar({
   onOpenCreditsUpgrade,
   onOpenBrandKit,
   onOpenSettings,
+  onOpenDatenschutz,
 }: CryptoxNavbarProps) {
   const isAdmin = currentUser?.role === "admin";
 

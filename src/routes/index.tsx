@@ -18,6 +18,7 @@ import {
   PromptGallery,
 } from "@/onyx/components/SimpleViews";
 import { CloudGalleryView } from "@/onyx/components/CloudGalleryView";
+import { PostSchedulerView } from "@/onyx/components/PostSchedulerView";
 import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder, saveHistoryToS4, loadHistoryFromS4, makeProjectFolderName, syncCloudIdentityCookie } from "@/onyx/s4-storage";
 import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
 import { AdminDashboard } from "@/onyx/components/AdminDashboard";
@@ -32,6 +33,7 @@ import {
   DEFAULT_BRAND_KIT,
   DEFAULT_BRIEF,
   DEFAULT_CLONE_PROFILES,
+  DEFAULT_SOCIAL_CHANNELS,
   assembleClonePrompt,
 } from "@/onyx/defaults";
 import { LS, usePersistentState } from "@/onyx/storage";
@@ -51,8 +53,10 @@ import type {
   CreditStatus,
   HistoryEntry,
   ParsedCarousel,
+  ScheduledPost,
   SeriesJob,
   SlideContent,
+  SocialChannel,
   TabKey,
 } from "@/onyx/types";
 
@@ -199,6 +203,15 @@ function OnyxStudio() {
   const [activeCloneId] = usePersistentState<string>(
     LS.activeCloneId,
     DEFAULT_CLONE_PROFILES[0]?.id ?? "",
+  );
+  const [socialChannels, setSocialChannels] = usePersistentState<SocialChannel[]>(
+    LS.socialChannels,
+    DEFAULT_SOCIAL_CHANNELS,
+    true,
+  );
+  const [scheduledPosts, setScheduledPosts] = usePersistentState<ScheduledPost[]>(
+    LS.scheduledPosts,
+    [],
   );
 
   // Restore history from the user's private cloud folder when local history is empty
@@ -1056,6 +1069,7 @@ function OnyxStudio() {
                   }}
                   onExportZip={(withOverlay) => void exportZip(withOverlay)}
                   onSaveToCloud={() => void saveCarouselToCloud()}
+                  onSchedulePost={() => setActiveTab("scheduler")}
                   onReset={resetCarousel}
                   settings={settings}
                   brandKit={brandKit}
@@ -1104,6 +1118,17 @@ function OnyxStudio() {
                 }
                 void refreshCredits();
               }}
+            />
+          )}
+          {activeTab === "scheduler" && (
+            <PostSchedulerView
+              channels={socialChannels}
+              onUpdateChannels={setSocialChannels}
+              posts={scheduledPosts}
+              onUpdatePosts={setScheduledPosts}
+              currentSlides={slides}
+              historyEntries={history}
+              onNavigateToCarousel={() => setActiveTab("carousel")}
             />
           )}
           {activeTab === "ai-clone" && (

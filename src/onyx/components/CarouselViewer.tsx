@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  Calendar,
   CloudUpload,
   Download,
   Grid3X3,
@@ -26,6 +27,7 @@ interface CarouselViewerProps {
   onDownloadSingle: (slideId: string, withOverlay?: boolean) => void;
   onExportZip: (withOverlay?: boolean) => void;
   onSaveToCloud?: (() => void) | undefined;
+  onSchedulePost?: (() => void) | undefined;
   onReset: () => void;
   settings: ApiSettings;
   brandKit: BrandKit;
@@ -44,6 +46,7 @@ export function CarouselViewer({
   onDownloadSingle,
   onExportZip,
   onSaveToCloud,
+  onSchedulePost,
   onReset,
   settings,
   brandKit,
@@ -141,6 +144,16 @@ export function CarouselViewer({
               className="flex items-center gap-1.5 rounded-full border border-orange-500/40 bg-orange-500/15 px-4 py-2 text-xs font-semibold text-orange-400 hover:bg-orange-500/25 transition-colors cursor-pointer"
             >
               <Sparkles className="h-3.5 w-3.5 text-orange-400" /> Alle {slides.length} Visuals laden
+            </button>
+          )}
+          {onSchedulePost && (
+            <button
+              type="button"
+              onClick={onSchedulePost}
+              className="flex items-center gap-1.5 rounded-lg border border-orange-500/40 bg-orange-500/15 hover:bg-orange-500/25 px-3.5 py-2 text-xs font-semibold text-orange-400 transition-all cursor-pointer"
+              title="Dieses Karussell für Facebook/Socials planen"
+            >
+              <Calendar className="h-3.5 w-3.5 text-orange-400" /> Planen
             </button>
           )}
           {onSaveToCloud && (

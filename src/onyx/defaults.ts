@@ -1,4 +1,44 @@
-import type { AiCloneProfile, ApiSettings, BrandKit, BriefValues } from "./types";
+import type { AiCloneProfile, ApiSettings, BrandKit, BriefValues, SocialChannel } from "./types";
+
+export const DEFAULT_SOCIAL_CHANNELS: SocialChannel[] = [
+  {
+    id: "fb-main-page",
+    platform: "facebook",
+    name: "Facebook Unternehmensseite",
+    channelId: "337570872768998",
+    businessId: "25861095310170488",
+    handle: "@facebook.page",
+    avatarUrl: "/images/socialcraft-logo.png",
+    isDefault: true,
+  },
+  {
+    id: "ig-main-account",
+    platform: "instagram",
+    name: "Instagram Business Profil",
+    channelId: "ig-socialcraft-pro",
+    handle: "@socialcraft.ai",
+    avatarUrl: "/images/socialcraft-logo.png",
+    isDefault: false,
+  },
+  {
+    id: "tiktok-main",
+    platform: "tiktok",
+    name: "TikTok Creator",
+    channelId: "tt-socialcraft",
+    handle: "@socialcraft",
+    avatarUrl: "/images/socialcraft-logo.png",
+    isDefault: false,
+  },
+  {
+    id: "yt-main-channel",
+    platform: "youtube",
+    name: "YouTube Channel",
+    channelId: "UC_socialcraft_official",
+    handle: "@socialcraft",
+    avatarUrl: "/images/socialcraft-logo.png",
+    isDefault: false,
+  },
+];
 
 export const DEFAULT_BRAND_KIT: BrandKit = {
   handle: "@dein.name",
