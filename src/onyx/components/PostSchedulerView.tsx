@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -263,6 +263,51 @@ export function PostSchedulerView({
   const [selectedSound, setSelectedSound] = useState<TikTokSoundItem | null>(null);
   const [showMusicLibraryModal, setShowMusicLibraryModal] = useState(false);
 
+  // Composer inline audio player
+  const [isComposerAudioPlaying, setIsComposerAudioPlaying] = useState(false);
+  const composerAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const stopComposerAudio = () => {
+    if (composerAudioRef.current) {
+      composerAudioRef.current.pause();
+      composerAudioRef.current.currentTime = 0;
+      composerAudioRef.current = null;
+    }
+    setIsComposerAudioPlaying(false);
+  };
+
+  const handleToggleComposerAudio = () => {
+    if (isComposerAudioPlaying) {
+      stopComposerAudio();
+      return;
+    }
+
+    if (!selectedSound) return;
+
+    if (selectedSound.previewUrl) {
+      try {
+        const audio = new Audio(selectedSound.previewUrl);
+        audio.volume = 0.85;
+        audio.onended = () => setIsComposerAudioPlaying(false);
+        audio.onerror = () => setIsComposerAudioPlaying(false);
+        audio.play().then(() => {
+          composerAudioRef.current = audio;
+          setIsComposerAudioPlaying(true);
+        }).catch(() => {
+          setIsComposerAudioPlaying(false);
+        });
+      } catch {
+        setIsComposerAudioPlaying(false);
+      }
+    } else {
+      toast.info(`Sound „${selectedSound.title}“ ist aktiv.`);
+    }
+  };
+
+  useEffect(() => {
+    stopComposerAudio();
+  }, [selectedSound]);
+
   const [instagramShareToFeed, setInstagramShareToFeed] = useState(true);
   const [instagramAiDisclosure, setInstagramAiDisclosure] = useState(false);
   const [instagramFirstComment, setInstagramFirstComment] = useState("");
@@ -328,24 +373,20 @@ export function PostSchedulerView({
     if (post.zernioPostId && settings?.zernioApiKey) {
       try {
         const client = new ZernioApiClient(settings.zernioApiKey);
-        await client.deletePost(post.zernioPostId).catch(() => {});
-      } catch (e) {
-        console.warn("Konnte Remote-Post nicht löschen", e);
+        await client.deletePost(post.zernioPostId);
+      } catch (err: any) {
+        console.warn("Could not delete from remote publisher:", err.message);
       }
     }
+
     const updated = posts.map((p) =>
       p.id === post.id ? { ...p, status: "cancelled" as const } : p
     );
     onUpdatePosts(updated);
-    toast.info(`Planung für „${post.title}“ abgebrochen. ❌`, {
-      action: {
-        label: "Neu planen",
-        onClick: () => handleReschedulePost(post),
-      },
-    });
+    toast.info(`Beitrag „${post.title}“ wurde abgebrochen. 🚫`);
   };
 
-  const handleReschedulePost = (post: ScheduledPost) => {
+  const handleEditPost = (post: ScheduledPost) => {
     setEditingPostId(post.id);
     setPostTitle(post.title);
     setPostCaption(post.caption);
@@ -356,7 +397,33 @@ export function PostSchedulerView({
 
     if (post.musicTitle) {
       const match = TIKTOK_MUSIC_LIBRARY.find((s) => s.title === post.musicTitle);
-      if (match) setSelectedSound(match);
+      if (match) {
+        setSelectedSound(match);
+      } else {
+        try {
+          const stored = localStorage.getItem("socialcraft_custom_mp3_library");
+          if (stored) {
+            const customList = JSON.parse(stored);
+            const customMatch = customList.find((s: any) => s.title === post.musicTitle);
+            if (customMatch) {
+              setSelectedSound(customMatch);
+            } else {
+              setSelectedSound({
+                id: `custom-fallback-${Date.now()}`,
+                title: post.musicTitle,
+                artist: post.musicArtist || "Eigener Track",
+                duration: "0:30",
+                category: "trending",
+                categoryLabel: "Audio Track",
+                previewUrl: "",
+                plays: "Lokal",
+                commercialApproved: true,
+                tag: "🎵 Track",
+              });
+            }
+          }
+        } catch {}
+      }
     } else {
       setSelectedSound(null);
     }
@@ -373,6 +440,10 @@ export function PostSchedulerView({
 
     setActiveTab("composer");
     toast.success(`Beitrag „${post.title}“ zur Neuplanung in den Editor geladen! 📅`);
+  };
+
+  const handleReschedulePost = (post: ScheduledPost) => {
+    handleEditPost(post);
   };
 
   const handleQuickRescheduleOpen = (post: ScheduledPost) => {
@@ -1269,7 +1340,128 @@ export function PostSchedulerView({
                   />
                 </div>
 
-                {/* 4. PLATFORM-SPECIFIC SETTINGS ACCORDION */}
+                {/* ── 4. AUDIO-TRACK / EIGENE MP3S / TIKTOK SOUNDS ────────── */}
+                <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-950/30 via-black/40 to-teal-950/20 p-4 space-y-3 shadow-lg shadow-cyan-950/20">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-teal-400 flex items-center justify-center text-black font-bold shadow-md shadow-cyan-500/20">
+                        <Music className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-xs font-bold text-white flex items-center gap-2">
+                          <span>Audio & Hintergrund-Musik</span>
+                          {selectedSound && (
+                            <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                              Aktiv
+                            </span>
+                          )}
+                        </h4>
+                        <p className="text-[11px] text-zinc-400">
+                          Für TikTok, Instagram Reels, Shorts & Social-Posts
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowMusicLibraryModal(true)}
+                      className="px-3 py-1.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-bold flex items-center gap-1.5 transition cursor-pointer shadow-sm active:scale-95"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>{selectedSound ? "Sound wechseln" : "MP3s & Library öffnen"}</span>
+                    </button>
+                  </div>
+
+                  {selectedSound ? (
+                    <div className="bg-black/60 p-3 rounded-xl border border-cyan-500/40 space-y-2.5">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {/* Composer Inline Audio Play Button */}
+                          <button
+                            type="button"
+                            onClick={handleToggleComposerAudio}
+                            className={cn(
+                              "w-9 h-9 rounded-xl flex items-center justify-center shrink-0 transition shadow-md cursor-pointer",
+                              isComposerAudioPlaying
+                                ? "bg-cyan-400 text-black shadow-cyan-400/50 animate-pulse"
+                                : "bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40"
+                            )}
+                            title={isComposerAudioPlaying ? "Pause" : "Im Editor anhören"}
+                          >
+                            {isComposerAudioPlaying ? (
+                              <Pause className="w-4 h-4 fill-current" />
+                            ) : (
+                              <Play className="w-4 h-4 fill-current ml-0.5" />
+                            )}
+                          </button>
+
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-bold text-white text-xs truncate">{selectedSound.title}</p>
+                              {selectedSound.tag && (
+                                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shrink-0">
+                                  {selectedSound.tag}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-zinc-400 mt-0.5 truncate">
+                              {selectedSound.artist} • <span className="font-mono">{selectedSound.duration}</span> • {selectedSound.plays}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Remove Sound */}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              stopComposerAudio();
+                              setSelectedSound(null);
+                              toast.info("Audio-Track entfernt.");
+                            }}
+                            className="text-zinc-400 hover:text-red-400 p-1.5 rounded-lg hover:bg-white/5 transition cursor-pointer"
+                            title="Sound entfernen"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Channel recommendation prompt */}
+                      {selectedChannel.platform !== "tiktok" && (
+                        <div className="pt-2 border-t border-white/5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-400">
+                          <span>💡 Aktueller Ziel-Kanal ist <strong>{selectedChannel.name}</strong>.</span>
+                          {channels.some((c) => c.platform === "tiktok") && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const tk = channels.find((c) => c.platform === "tiktok");
+                                if (tk) setSelectedChannelId(tk.id);
+                              }}
+                              className="text-cyan-400 font-semibold hover:underline cursor-pointer flex items-center gap-1"
+                            >
+                              <span>Zu TikTok-Kanal wechseln</span>
+                              <ArrowRight className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-black/30 p-2.5 rounded-xl border border-white/[0.04] text-[11px] text-zinc-400">
+                      <span>Kein Audio gewählt. Lade eigene MP3s hoch oder wähle lizenzfreie Commercial Sounds.</span>
+                      <button
+                        type="button"
+                        onClick={() => setShowMusicLibraryModal(true)}
+                        className="text-xs font-semibold text-cyan-400 hover:underline shrink-0 text-left cursor-pointer"
+                      >
+                        + Sound hinzufügen
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* 5. PLATFORM-SPECIFIC SETTINGS ACCORDION */}
                 <div className="bg-black/30 border border-white/10 rounded-xl p-3.5 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold text-white flex items-center gap-1.5">
@@ -1282,53 +1474,6 @@ export function PostSchedulerView({
                   {/* TIKTOK SPECIFIC SETTINGS */}
                   {selectedChannel.platform === "tiktok" && (
                     <div className="space-y-3 pt-2 border-t border-white/5 text-xs">
-                      {/* TIKTOK MUSIC SELECTION CARD */}
-                      <div className="p-3 rounded-xl border border-cyan-500/30 bg-cyan-950/20 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Music className="w-4 h-4 text-cyan-400" />
-                            <span className="text-xs font-bold text-white">TikTok Music & Eigene MP3s</span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setShowMusicLibraryModal(true)}
-                            className="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
-                          >
-                            <Sparkles className="w-3 h-3 text-cyan-400" />
-                            <span>{selectedSound ? "Sound wechseln" : "MP3s & Library öffnen"}</span>
-                          </button>
-                        </div>
-
-                        {selectedSound ? (
-                          <div className="flex items-center justify-between bg-black/50 p-2.5 rounded-lg border border-cyan-500/30 text-xs">
-                            <div className="flex items-center gap-2.5 min-w-0">
-                              <div className="w-7 h-7 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 font-bold text-xs shrink-0">
-                                🎵
-                              </div>
-                              <div className="min-w-0">
-                                <p className="font-bold text-white text-xs leading-tight truncate">{selectedSound.title}</p>
-                                <p className="text-[10px] text-zinc-400 mt-0.5 truncate">{selectedSound.artist} • {selectedSound.duration}</p>
-                              </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSelectedSound(null);
-                                toast.info("Sound entfernt.");
-                              }}
-                              className="text-zinc-400 hover:text-red-400 p-1 cursor-pointer transition"
-                              title="Sound entfernen"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ) : (
-                          <p className="text-[11px] text-zinc-400">
-                            Lade eigene MP3s hoch, wähle lizenzierte Sounds aus der Bibliothek oder aktiviere die automatische TikTok Trend-Musik.
-                          </p>
-                        )}
-                      </div>
-
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div>
                           <label className="text-[11px] text-zinc-400 block mb-1">Sichtbarkeit (Privacy):</label>
@@ -1637,6 +1782,22 @@ export function PostSchedulerView({
 
                   {postHashtags && (
                     <p className="text-[11px] text-orange-400/80 font-mono">{postHashtags}</p>
+                  )}
+
+                  {/* Active Audio Overlay Pill */}
+                  {selectedSound && (
+                    <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2 text-xs">
+                      <div className="flex items-center gap-2 text-cyan-300 min-w-0">
+                        <div className="w-5 h-5 rounded-md bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center shrink-0">
+                          <Music className="w-3 h-3 text-cyan-400" />
+                        </div>
+                        <span className="font-bold text-[11px] truncate">{selectedSound.title}</span>
+                        <span className="text-[10px] text-zinc-400 truncate">• {selectedSound.artist}</span>
+                      </div>
+                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shrink-0">
+                        🎵 Audio aktiv
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
