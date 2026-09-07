@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Shield,
   Layers,
@@ -13,6 +13,8 @@ import {
   ExternalLink,
   Tag,
   Palette,
+  Upload,
+  Link2,
   Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -60,7 +62,76 @@ export const BrandProfileManagerModal: React.FC<BrandProfileManagerModalProps> =
   const [formAvatarUrl, setFormAvatarUrl] = useState("");
   const [formColor, setFormColor] = useState(PRESET_COLORS[0].hex);
 
+  const [isDraggingAvatar, setIsDraggingAvatar] = useState(false);
+  const [isProcessingAvatar, setIsProcessingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+
   if (!isOpen) return null;
+
+  /**
+   * Skaliert das Bild vor dem Speichern auf max. 256x256 (Center-Crop) herunter,
+   * damit die Data-URL im localStorage nicht das Quota sprengt.
+   */
+  const compressImageFile = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error("Datei konnte nicht gelesen werden."));
+      reader.onload = () => {
+        const raw = reader.result as string;
+        const img = new Image();
+        img.onerror = () => reject(new Error("Bild konnte nicht dekodiert werden."));
+        img.onload = () => {
+          const SIZE = 256;
+          const canvas = document.createElement("canvas");
+          canvas.width = SIZE;
+          canvas.height = SIZE;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            resolve(raw);
+            return;
+          }
+          const side = Math.min(img.width, img.height);
+          ctx.drawImage(
+            img,
+            (img.width - side) / 2,
+            (img.height - side) / 2,
+            side,
+            side,
+            0,
+            0,
+            SIZE,
+            SIZE
+          );
+          resolve(canvas.toDataURL("image/jpeg", 0.86));
+        };
+        img.src = raw;
+      };
+      reader.readAsDataURL(file);
+    });
+
+  const handleAvatarFile = async (file: File | undefined | null) => {
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast.error("Bitte eine gültige Bilddatei ablegen (JPG, PNG, WebP, GIF).");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Das Bild ist zu groß (max. 10 MB).");
+      return;
+    }
+
+    setIsProcessingAvatar(true);
+    try {
+      const dataUrl = await compressImageFile(file);
+      setFormAvatarUrl(dataUrl);
+      toast.success("Avatar hochgeladen & optimiert.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload fehlgeschlagen.");
+    } finally {
+      setIsProcessingAvatar(false);
+    }
+  };
 
   const resetForm = () => {
     setFormName("");
@@ -68,6 +139,8 @@ export const BrandProfileManagerModal: React.FC<BrandProfileManagerModalProps> =
     setFormDescription("");
     setFormAvatarUrl("");
     setFormColor(PRESET_COLORS[0].hex);
+    setIsDraggingAvatar(false);
+    setIsProcessingAvatar(false);
     setIsCreating(false);
     setEditingId(null);
   };
@@ -276,18 +349,127 @@ export const BrandProfileManagerModal: React.FC<BrandProfileManagerModalProps> =
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
                     <ImageIcon className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>Avatar URL (optional)</span>
+                    <span>Avatar / Logo (optional)</span>
                   </label>
-                  <input
-                    type="url"
-                    value={formAvatarUrl}
-                    onChange={(e) => setFormAvatarUrl(e.target.value)}
-                    placeholder="https://... Bild-URL"
-                    className="w-full bg-black/50 border border-white/15 rounded-xl px-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500"
-                  />
+
+                  {/* Drag & Drop Upload Zone */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => avatarInputRef.current?.click()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        avatarInputRef.current?.click();
+                      }
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (!isDraggingAvatar) setIsDraggingAvatar(true);
+                    }}
+                    onDragLeave={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsDraggingAvatar(false);
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsDraggingAvatar(false);
+                      const dropped = e.dataTransfer.files?.[0];
+                      if (dropped) {
+                        void handleAvatarFile(dropped);
+                        return;
+                      }
+                      // Bild direkt aus einem anderen Tab gezogen → URL übernehmen
+                      const droppedUrl = e.dataTransfer.getData("text/uri-list") || e.dataTransfer.getData("text/plain");
+                      if (droppedUrl?.startsWith("http")) {
+                        setFormAvatarUrl(droppedUrl.trim());
+                        toast.success("Bild-URL übernommen.");
+                      }
+                    }}
+                    onPaste={(e) => {
+                      const pasted = Array.from(e.clipboardData.files)[0];
+                      if (pasted) {
+                        e.preventDefault();
+                        void handleAvatarFile(pasted);
+                      }
+                    }}
+                    className={cn(
+                      "group relative flex items-center gap-3 p-2.5 rounded-xl border border-dashed cursor-pointer transition-all",
+                      isDraggingAvatar
+                        ? "border-orange-500 bg-orange-500/10 ring-2 ring-orange-500/30"
+                        : "border-white/20 bg-black/40 hover:border-orange-500/50 hover:bg-white/[0.04]"
+                    )}
+                  >
+                    <div
+                      className="w-11 h-11 rounded-xl shrink-0 overflow-hidden border border-white/20 flex items-center justify-center bg-white/5"
+                      style={{ borderColor: formAvatarUrl ? formColor : undefined }}
+                    >
+                      {isProcessingAvatar ? (
+                        <div className="w-4 h-4 border-2 border-orange-400 border-t-transparent rounded-full animate-spin" />
+                      ) : formAvatarUrl ? (
+                        <img src={formAvatarUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <Upload className="w-4 h-4 text-zinc-500 group-hover:text-orange-400 transition" />
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[11px] font-semibold text-white leading-tight">
+                        {isDraggingAvatar
+                          ? "Jetzt loslassen zum Hochladen"
+                          : formAvatarUrl
+                            ? "Bild ersetzen"
+                            : "Bild hierher ziehen"}
+                      </p>
+                      <p className="text-[10px] text-zinc-500 leading-tight mt-0.5 truncate">
+                        {formAvatarUrl && !formAvatarUrl.startsWith("data:")
+                          ? formAvatarUrl
+                          : "oder klicken · JPG, PNG, WebP · max. 10 MB"}
+                      </p>
+                    </div>
+
+                    {formAvatarUrl && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setFormAvatarUrl("");
+                        }}
+                        className="p-1.5 rounded-lg text-zinc-500 hover:text-red-300 hover:bg-red-500/10 transition shrink-0"
+                        title="Avatar entfernen"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+
+                    <input
+                      ref={avatarInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        void handleAvatarFile(e.target.files?.[0]);
+                        e.target.value = "";
+                      }}
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <Link2 className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={formAvatarUrl.startsWith("data:") ? "" : formAvatarUrl}
+                      onChange={(e) => setFormAvatarUrl(e.target.value)}
+                      placeholder={formAvatarUrl.startsWith("data:") ? "Bild hochgeladen" : "…oder Bild-URL einfügen"}
+                      className="w-full bg-black/50 border border-white/15 rounded-xl pl-8 pr-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500"
+                    />
+                  </div>
                 </div>
 
                 <div className="space-y-1">
