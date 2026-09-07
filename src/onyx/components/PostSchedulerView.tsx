@@ -1332,10 +1332,23 @@ export function PostSchedulerView({
       setSelectedSound(null);
       setActiveTab("queue");
     } catch (err: any) {
+      const msg = (err?.message || "").toLowerCase();
+
+      // TikTok caps how many users an *unaudited* app may publish for.
+      // This is a TikTok-side app-approval issue, not something a retry fixes.
+      if (msg.includes("reached_active_user_cap") || msg.includes("active_user_cap") || msg.includes("active user cap")) {
+        toast.error("TikTok: Nutzer-Limit der App erreicht (reached_active_user_cap).", {
+          description:
+            "Die mit Post for Me verbundene TikTok-App ist noch nicht für die Content-Posting-API freigegeben und darf nur für wenige Test-Konten posten. Nötig: die TikTok-App im TikTok Developer Portal für die Content-Posting-API auditieren lassen bzw. das Konto als Sandbox-Tester hinzufügen. Nutzt du Post-for-Me-System-Credentials, wende dich an deren Support.",
+          duration: 14000,
+        });
+        return;
+      }
+
       const isCapacityError =
-        err.message?.toLowerCase().includes("capacity") ||
-        err.message?.toLowerCase().includes("limit") ||
-        err.message?.toLowerCase().includes("direct posting");
+        msg.includes("capacity") ||
+        msg.includes("limit") ||
+        msg.includes("direct posting");
 
       if (isCapacityError && channel.platform === "tiktok" && !tiktokDraft) {
         toast.error("TikTok Direct-Posting Tageslimit erreicht!", {
