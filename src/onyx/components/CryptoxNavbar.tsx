@@ -355,7 +355,7 @@ export function CryptoxNavbar({
                     className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-orange-400 hover:bg-orange-500/10 hover:text-orange-300 cursor-pointer transition-colors"
                   >
                     <Share2 className="h-4 w-4 text-[#FF4D1C]" />
-                    <span>Zernio Social Setup (TikTok, IG, FB)</span>
+                    <span>Socialcraft Direct Hub (TikTok, IG, FB...)</span>
                   </DropdownMenuItem>
                 )}
 

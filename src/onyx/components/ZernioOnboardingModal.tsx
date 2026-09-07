@@ -70,7 +70,7 @@ export function ZernioOnboardingModal({
 
   const handleVerifyStep1 = async () => {
     if (!apiKeyInput || apiKeyInput.trim().length < 10) {
-      toast.error("Bitte gib einen gültigen Zernio API Key ein (beginnt mit sk_).");
+      toast.error("Bitte gib einen gültigen Engine Key ein (beginnt mit sk_).");
       return;
     }
 
@@ -99,7 +99,7 @@ export function ZernioOnboardingModal({
         // ignore
       }
 
-      toast.success("Zernio Verbindung erfolgreich hergestellt! 🎉");
+      toast.success("Auto-Publishing Engine erfolgreich verbunden! 🎉");
       setCurrentStep(2);
     } catch (err: any) {
       toast.error(`Verbindung fehlgeschlagen: ${err.message}`);
@@ -110,7 +110,7 @@ export function ZernioOnboardingModal({
 
   const handleConnectPlatform = async (platformId: string) => {
     if (!settings.zernioApiKey && !apiKeyInput) {
-      toast.error("Bitte zuerst im Schritt 1 deinen API Key verifizieren.");
+      toast.error("Bitte zuerst im Schritt 1 deinen Engine Key verifizieren.");
       setCurrentStep(1);
       return;
     }
@@ -148,18 +148,21 @@ export function ZernioOnboardingModal({
         {/* Brand Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center gap-2 mb-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#FF4D1C] to-[#FF8038] flex items-center justify-center shadow-lg shadow-[#FF4D1C]/20">
-              <Share2 className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#FF4D1C] to-[#FF8038] flex items-center justify-center shadow-lg shadow-[#FF4D1C]/25">
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
             <span className="font-extrabold text-2xl tracking-tight bg-gradient-to-r from-white via-white to-white/70 bg-clip-text text-transparent">
-              zernio
+              socialcraft
+            </span>
+            <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#FF4D1C]/20 text-[#FF8038] border border-[#FF4D1C]/30">
+              Direct Hub
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
             Welcome, let's get you set up
           </h2>
           <p className="text-sm text-white/60">
-            Three quick steps and you're ready to go.
+            Three quick steps to connect your channels and start direct publishing.
           </p>
         </div>
 
@@ -190,15 +193,15 @@ export function ZernioOnboardingModal({
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-white text-base">Copy your API key</h3>
+                  <h3 className="font-semibold text-white text-base">Engine Key einbinden</h3>
                   {settings.zernioApiKey && currentStep !== 1 && (
                     <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 font-mono">
-                      Verbunden
+                      Aktiviert
                     </span>
                   )}
                 </div>
                 <p className="text-xs text-white/50 mt-1 mb-3">
-                  This is a one-time display. You can always create more in API Keys.
+                  Verbindet deine Multi-Channel Veröffentlichungs-Pipeline (TikTok, IG, FB, X, etc.).
                 </p>
 
                 {currentStep === 1 ? (
@@ -273,9 +276,9 @@ export function ZernioOnboardingModal({
               </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-white text-base">Connect your first platform</h3>
+                <h3 className="font-semibold text-white text-base">Social-Media Kanäle verknüpfen</h3>
                 <p className="text-xs text-white/50 mt-1 mb-3">
-                  Connect TikTok, Instagram, Facebook or other channels via OAuth.
+                  Wähle deine Zielplattformen und autorisiere den Direktzugriff mit 1 Klick.
                 </p>
 
                 {currentStep === 2 ? (
@@ -349,16 +352,16 @@ export function ZernioOnboardingModal({
               </div>
 
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-white text-base">Start building your integration</h3>
+                <h3 className="font-semibold text-white text-base">Direktveröffentlichung starten</h3>
                 <p className="text-xs text-white/50 mt-1 mb-2">
-                  Explore the scheduler and publish your first AI carousel directly.
+                  Erstelle KI-Karussells und veröffentliche sie direkt auf all deinen Kanälen.
                 </p>
 
                 {currentStep === 3 && (
                   <div className="pt-2 space-y-3">
                     <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-xs text-emerald-300 flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
-                      <span>Dein Socialcraft Studio ist jetzt vollständig mit Zernio verbunden!</span>
+                      <span>Socialcraft Direct Hub ist voll einsatzbereit!</span>
                     </div>
 
                     <button
@@ -366,7 +369,7 @@ export function ZernioOnboardingModal({
                       onClick={() => {
                         onComplete?.();
                         onClose();
-                        toast.success("Zernio Setup abgeschlossen! Viel Erfolg beim Veröffentlichen.");
+                        toast.success("Direct Hub bereit! Viel Erfolg beim Veröffentlichen.");
                       }}
                       className="w-full py-2.5 px-4 bg-[#FF4D1C] hover:bg-[#E03E0E] text-white font-medium text-sm rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-[#FF4D1C]/25 transition"
                     >

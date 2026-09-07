@@ -264,7 +264,7 @@ export function PostSchedulerView({
 
   const handleSyncZernioAccounts = async () => {
     if (!settings?.zernioApiKey) {
-      toast.info("Bitte hinterlege zuerst deinen Zernio API Key.", {
+      toast.info("Bitte hinterlege zuerst deinen Publisher Engine Key.", {
         action: onOpenZernioSetup ? { label: "Setup öffnen", onClick: onOpenZernioSetup } : undefined,
       });
       return;
@@ -276,12 +276,12 @@ export function PostSchedulerView({
       const res = await client.listAccounts(settings.zernioProfileId);
 
       if (!res.accounts || res.accounts.length === 0) {
-        toast.info("Keine verbundenen Zernio-Accounts gefunden. Verbinde Kanäle im Setup.");
+        toast.info("Keine verbundenen Social-Media-Accounts gefunden. Verbinde Kanäle im Setup.");
         return;
       }
 
       const imported: SocialChannel[] = res.accounts.map((acc) => ({
-        id: `zernio-${acc._id}`,
+        id: `direct-${acc._id}`,
         platform: (acc.platform as SocialPlatform) || "facebook",
         name: acc.displayName || acc.username || `${acc.platform} Account`,
         channelId: acc._id,
@@ -297,9 +297,9 @@ export function PostSchedulerView({
 
       if (newChannels.length > 0) {
         onUpdateChannels([...channels, ...newChannels]);
-        toast.success(`${newChannels.length} Zernio-Kanäle erfolgreich synchronisiert! 🎉`);
+        toast.success(`${newChannels.length} Social-Media-Kanäle erfolgreich synchronisiert! 🎉`);
       } else {
-        toast.info("Alle verknüpften Zernio-Accounts sind bereits in deiner Kanalliste.");
+        toast.info("Alle verknüpften Accounts sind bereits in deiner Kanalliste.");
       }
     } catch (err: any) {
       toast.error(`Sync-Fehler: ${err.message}`);
@@ -323,7 +323,7 @@ export function PostSchedulerView({
     const mediaList = selectedMediaUrls.length > 0 ? selectedMediaUrls : customMediaUrl ? [customMediaUrl] : [];
 
     if (!settings?.zernioApiKey) {
-      toast.error("Kein Zernio API-Key hinterlegt. Öffne das Zernio Setup!", {
+      toast.error("Kein Publisher Engine Key hinterlegt. Öffne das Direct Hub Setup!", {
         action: onOpenZernioSetup ? { label: "Setup", onClick: onOpenZernioSetup } : undefined,
       });
       return;
@@ -382,11 +382,11 @@ export function PostSchedulerView({
       onUpdatePosts([newPost, ...posts]);
       
       if (publishNow) {
-        toast.success("🚀 Erfolgreich über Zernio live veröffentlicht!", {
+        toast.success("🚀 Erfolgreich live veröffentlicht!", {
           description: `Status: ${postResult.status} (ID: ${postResult._id})`,
         });
       } else {
-        toast.success("📅 Erfolgreich über Zernio API terminiert!", {
+        toast.success("📅 Erfolgreich im Direct Hub terminiert!", {
           description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")}`,
         });
       }
@@ -395,7 +395,7 @@ export function PostSchedulerView({
       setPostCaption("");
       setActiveTab("queue");
     } catch (err: any) {
-      toast.error(`Zernio Publishing fehlgeschlagen: ${err.message}`);
+      toast.error(`Veröffentlichung fehlgeschlagen: ${err.message}`);
     } finally {
       setIsPublishingZernio(false);
     }
@@ -547,7 +547,7 @@ export function PostSchedulerView({
               >
                 <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
                 <Share2 className="h-3.5 w-3.5" />
-                <span>{settings?.zernioApiKey ? "Zernio API aktiv" : "Zernio verbinden"}</span>
+                <span>{settings?.zernioApiKey ? "Direct Hub aktiv" : "Direct Hub verbinden"}</span>
               </button>
             )}
 
@@ -1257,7 +1257,7 @@ export function PostSchedulerView({
                     className="px-4 py-2.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-xs font-bold text-purple-300 transition-all flex items-center gap-1.5 disabled:opacity-50"
                   >
                     <Clock className="h-3.5 w-3.5" />
-                    <span>Über Zernio terminieren</span>
+                    <span>📅 Automatisch terminieren</span>
                   </button>
 
                   <button
@@ -1423,7 +1423,7 @@ export function PostSchedulerView({
             <div>
               <h3 className="text-lg font-bold text-white">Verknüpfte Kanäle & Seiten-IDs</h3>
               <p className="text-xs text-zinc-400">
-                Verwalte deine Social-Media-Kanäle oder verbinde Live-Accounts per Zernio OAuth
+                Verwalte deine Social-Media-Kanäle oder verbinde Live-Accounts per 1-Klick OAuth
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -1431,10 +1431,10 @@ export function PostSchedulerView({
                 <button
                   type="button"
                   onClick={onOpenZernioSetup}
-                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#FF4D1C] to-[#FF8038] text-white text-xs font-bold shadow-lg shadow-[#FF4D1C]/25 hover:brightness-110 flex items-center gap-1.5 transition"
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#FF4D1C] to-[#FF8038] text-white text-xs font-bold shadow-lg shadow-[#FF4D1C]/25 hover:brightness-110 flex items-center gap-1.5 transition cursor-pointer"
                 >
                   <Key className="h-3.5 w-3.5" />
-                  <span>Zernio Setup Wizard</span>
+                  <span>Direct Hub Wizard</span>
                 </button>
               )}
 
@@ -1443,10 +1443,10 @@ export function PostSchedulerView({
                   type="button"
                   disabled={isSyncingChannels}
                   onClick={handleSyncZernioAccounts}
-                  className="px-3 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition disabled:opacity-50"
+                  className="px-3 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
                 >
                   <RefreshCw className={cn("h-3.5 w-3.5", isSyncingChannels && "animate-spin text-orange-400")} />
-                  <span>Accounts laden</span>
+                  <span>Kanäle abgleichen</span>
                 </button>
               )}
 
