@@ -340,6 +340,16 @@ export function PostForMeSetupModal({
                   .
                 </p>
 
+                {(!settings.postForMeApiKey || settings.postForMeApiKey === ANCHORED_POSTFORME_API_KEY) && (
+                  <div className="mb-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-200 leading-relaxed">
+                    <strong>Geteilte Test-Credentials aktiv.</strong> Aktuell läuft das Publishing über
+                    das gemeinsame Post-for-Me-Projekt. TikTok Direct-Post ist damit gesperrt
+                    (<span className="font-mono">reached_active_user_cap</span>). Für den White-Label-Betrieb:
+                    eigenes Post-for-Me-Projekt anlegen, dort eigene Plattform-Apps (v. a. TikTok)
+                    hinterlegen und den <span className="font-mono">pfm_live_…</span>-Key dieses Projekts hier eintragen.
+                  </div>
+                )}
+
                 {currentStep === 1 ? (
                   <div className="space-y-3">
                     <div className="relative flex items-center">

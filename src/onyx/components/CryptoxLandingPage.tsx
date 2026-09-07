@@ -874,6 +874,15 @@ export function CryptoxLandingPage({
                 <span>Datenschutz (DSGVO)</span>
               </button>
             )}
+            <a href="/privacy" className="hover:text-white transition-colors">
+              Privacy Policy
+            </a>
+            <a href="/terms" className="hover:text-white transition-colors">
+              Terms
+            </a>
+            <a href="https://ucllegacy.com/imprint" target="_blank" rel="noreferrer" className="hover:text-white transition-colors">
+              Impressum
+            </a>
             <button type="button" onClick={onNavigateStudio} className="hover:text-primary-bright transition-colors font-semibold cursor-pointer">
               Studio
             </button>
