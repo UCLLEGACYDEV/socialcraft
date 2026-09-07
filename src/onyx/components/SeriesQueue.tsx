@@ -74,6 +74,7 @@ export function SeriesQueue({
   const [selectedSlideIds, setSelectedSlideIds] = useState<Record<string, string[]>>({});
   const [naming, setNaming] = useState(false);
   const [inspecting, setInspecting] = useState<{ jobId: string; slideId: string } | null>(null);
+  const currentInspectingJob = inspecting ? queue.find((j) => j.id === inspecting.jobId) : undefined;
 
   // Neue Jobs: alle Slides standardmäßig auswählen (manuell geänderte Auswahl bleibt erhalten)
   useEffect(() => {

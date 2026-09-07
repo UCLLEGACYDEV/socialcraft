@@ -128,11 +128,11 @@ export function parseUniversalPromptFile(fileContent: string, fileName = ""): Pa
             titleFromBlock: true,
             raw: JSON.stringify(c),
             slides: (c.slides as Array<Record<string, unknown>>).map((s, si) => ({
-              slideNumber: Number(s.slideNumber || si + 1),
-              title: String(s.title || `Slide ${si + 1}`),
-              headline: String(s.headline || s.title || `Slide ${si + 1}`),
-              subtext: String(s.subtext || ""),
-              prompt: cleanPrompt(String(s.visualPrompt || s.prompt || "")),
+              slideNumber: Number(s['slideNumber'] || si + 1),
+              title: String(s['title'] || `Slide ${si + 1}`),
+              headline: String(s['headline'] || s['title'] || `Slide ${si + 1}`),
+              subtext: String(s['subtext'] || ""),
+              prompt: cleanPrompt(String(s['visualPrompt'] || s['prompt'] || "")),
             })),
             caption: c.caption ? sanitizeNoGedankenstriche(String(c.caption)) : undefined,
           }));

@@ -80,6 +80,7 @@ export function CryptoxNavbar({
   onOpenBrandKit,
   onOpenSettings,
   onOpenDatenschutz,
+  onOpenPostForMeSetup,
   onOpenZernioSetup,
   onOpen30DayBatch,
 }: CryptoxNavbarProps) {
