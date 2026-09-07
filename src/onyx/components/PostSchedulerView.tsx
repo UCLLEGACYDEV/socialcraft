@@ -51,6 +51,8 @@ import {
   Flame,
   Link2,
   Unlink,
+  UploadCloud,
+  Upload,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -489,6 +491,108 @@ export function PostSchedulerView({
   });
   const [customMediaUrl, setCustomMediaUrl] = useState("");
   const [isGeneratingCaption, setIsGeneratingCaption] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
+
+  const handleProcessFiles = async (files: FileList | File[]) => {
+    const validFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    if (validFiles.length === 0) {
+      toast.error("Bitte nur Bilddateien (PNG, JPG, WEBP, etc.) hochladen.");
+      return;
+    }
+
+    setIsUploadingMedia(true);
+    const newUrls: string[] = [];
+
+    for (const file of validFiles) {
+      try {
+        if (activePostForMeKey) {
+          try {
+            const client = new PostForMeApiClient(activePostForMeKey);
+            const s3Url = await client.uploadMedia(file, file.type || "image/png");
+            if (s3Url) {
+              newUrls.push(s3Url);
+              continue;
+            }
+          } catch (pfmErr) {
+            console.warn("Post for Me S3 upload fallback to Data URL:", pfmErr);
+          }
+        }
+
+        const dataUrl = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+        newUrls.push(dataUrl);
+      } catch (err: any) {
+        console.error("Failed to load file:", file.name, err);
+        toast.error(`Konnte „${file.name}“ nicht laden.`);
+      }
+    }
+
+    if (newUrls.length > 0) {
+      setSelectedMediaUrls((prev) => [...prev, ...newUrls]);
+      toast.success(`${newUrls.length} Bild${newUrls.length > 1 ? "er" : ""} per Drag & Drop hinzugefügt! 📸`);
+    }
+    setIsUploadingMedia(false);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+    if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+      await handleProcessFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleMoveMedia = (index: number, direction: -1 | 1) => {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= selectedMediaUrls.length) return;
+    const updated = [...selectedMediaUrls];
+    const temp = updated[index];
+    updated[index] = updated[newIndex];
+    updated[newIndex] = temp;
+    setSelectedMediaUrls(updated);
+  };
+
+  // Clipboard Paste support (Ctrl+V) when composer is active
+  useEffect(() => {
+    const handlePaste = async (e: ClipboardEvent) => {
+      if (activeTab !== "composer") return;
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      const imageFiles: File[] = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.startsWith("image/")) {
+          const file = items[i].getAsFile();
+          if (file) imageFiles.push(file);
+        }
+      }
+      if (imageFiles.length > 0) {
+        e.preventDefault();
+        await handleProcessFiles(imageFiles);
+      }
+    };
+
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, [activeTab, activePostForMeKey]);
 
   const handleGenerateAiCaption = async () => {
     const currentTopic = postTitle.trim() || "Virale Social Media Strategie & Mehrwert";
@@ -2698,9 +2802,45 @@ export function PostSchedulerView({
                   )}
                 </div>
 
-                {/* ── TAB A: LIVE FEED MOCKUP PREVIEW ── */}
+                {/* Hidden File Input for Drag & Drop / File Picker */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      handleProcessFiles(e.target.files);
+                      e.target.value = "";
+                    }
+                  }}
+                />
+
+                {/* ── TAB A: LIVE FEED MOCKUP PREVIEW (Droppable) ── */}
                 {composerTab === "preview" && (
-                  <div className="rounded-2xl border border-white/10 bg-black/60 p-4 space-y-3 shadow-xl">
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    className={cn(
+                      "relative rounded-2xl border bg-black/60 p-4 space-y-3 shadow-xl transition-all",
+                      isDraggingOver
+                        ? "border-[#FF4D17] ring-4 ring-[#FF4D17]/30 bg-[#FF4D17]/[0.06]"
+                        : "border-white/10"
+                    )}
+                  >
+                    {/* Drag & drop glowing overlay */}
+                    {isDraggingOver && (
+                      <div className="absolute inset-0 z-30 bg-black/85 backdrop-blur-md rounded-2xl border-2 border-dashed border-[#FF4D17] flex flex-col items-center justify-center p-6 text-center animate-in fade-in zoom-in-95 duration-150 pointer-events-none">
+                        <div className="w-14 h-14 rounded-2xl bg-[#FF4D17]/20 border border-[#FF4D17]/40 flex items-center justify-center text-orange-400 mb-3 animate-bounce shadow-lg shadow-orange-500/20">
+                          <UploadCloud className="w-7 h-7" />
+                        </div>
+                        <p className="text-white font-bold text-sm">Bild hier loslassen!</p>
+                        <p className="text-zinc-400 text-xs mt-1">Wird direkt als Karussell-Folie hinzugefügt</p>
+                      </div>
+                    )}
+
                     {/* Phone Mockup Header */}
                     <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
                       <div className="flex items-center gap-2">
@@ -2775,10 +2915,20 @@ export function PostSchedulerView({
                         )}
                       </div>
                     ) : (
-                      <div className="aspect-[4/5] rounded-xl border border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-6 text-center text-zinc-500">
-                        <Images className="w-8 h-8 mb-2 opacity-50" />
-                        <span className="text-xs">Keine Bilder im Karussell</span>
-                        <span className="text-[10px] mt-1">Wechsle zu „Medien“, um Visuals hinzuzufügen</span>
+                      <div
+                        onClick={() => fileInputRef.current?.click()}
+                        className="aspect-[4/5] rounded-xl border border-dashed border-white/20 hover:border-orange-500/60 bg-white/[0.02] hover:bg-orange-500/[0.04] flex flex-col items-center justify-center p-6 text-center text-zinc-400 hover:text-white transition-all cursor-pointer group"
+                      >
+                        <div className="w-12 h-12 rounded-xl bg-white/5 group-hover:bg-[#FF4D17]/20 border border-white/10 group-hover:border-[#FF4D17]/40 flex items-center justify-center text-zinc-400 group-hover:text-orange-400 mb-3 transition">
+                          <UploadCloud className="w-6 h-6" />
+                        </div>
+                        <span className="text-xs font-semibold">Keine Bilder im Karussell</span>
+                        <span className="text-[11px] text-zinc-500 group-hover:text-zinc-300 mt-1">
+                          Hier klicken oder Bilder per <strong className="text-orange-400">Drag & Drop</strong> hineinziehen
+                        </span>
+                        <span className="text-[10px] text-zinc-500 mt-2 font-mono">
+                          PNG, JPG, WEBP • Auch Strg + V
+                        </span>
                       </div>
                     )}
 
@@ -2810,49 +2960,144 @@ export function PostSchedulerView({
                 {/* ── TAB B: MEDIA SELECTOR & UPLOAD ── */}
                 {composerTab === "media" && (
                   <div className="space-y-4">
+                    {/* Drag & Drop Upload Zone */}
+                    <div
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      onClick={() => fileInputRef.current?.click()}
+                      className={cn(
+                        "relative p-5 rounded-2xl border-2 border-dashed transition-all cursor-pointer text-center group",
+                        isDraggingOver
+                          ? "border-[#FF4D17] bg-[#FF4D17]/15 ring-4 ring-[#FF4D17]/25 scale-[1.01]"
+                          : "border-white/15 hover:border-[#FF4D17]/60 bg-white/[0.02] hover:bg-[#FF4D17]/[0.03]"
+                      )}
+                    >
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <div
+                          className={cn(
+                            "w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110",
+                            isDraggingOver
+                              ? "bg-[#FF4D17] text-white shadow-lg shadow-[#FF4D17]/40 animate-bounce"
+                              : "bg-white/5 border border-white/10 text-orange-400 group-hover:bg-[#FF4D17]/20 group-hover:border-[#FF4D17]/40"
+                          )}
+                        >
+                          {isUploadingMedia ? (
+                            <RefreshCw className="w-6 h-6 animate-spin text-orange-400" />
+                          ) : (
+                            <UploadCloud className="w-6 h-6" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-xs sm:text-sm font-bold text-white group-hover:text-orange-300 transition">
+                            {isUploadingMedia
+                              ? "Lade Bilder hoch..."
+                              : isDraggingOver
+                              ? "Bilder jetzt loslassen!"
+                              : "Bilder per Drag & Drop hier hineinziehen"}
+                          </p>
+                          <p className="text-[11px] text-zinc-400 mt-0.5">
+                            oder <span className="text-orange-400 font-semibold underline">Dateien durchsuchen</span> • Screenshots direkt mit <span className="font-mono bg-white/10 px-1.5 py-0.5 rounded text-zinc-200">Strg + V</span> einfügen
+                          </p>
+                        </div>
+                        <span className="text-[10px] text-zinc-500 font-mono">
+                          PNG, JPG, WEBP, GIF • Beliebig viele Folien
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Selected Media Cards */}
                     {selectedMediaUrls.length > 0 ? (
                       <div className="space-y-3">
-                        <div className="grid grid-cols-3 gap-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-semibold text-zinc-300">
+                            {selectedMediaUrls.length} Folie{selectedMediaUrls.length > 1 ? "n" : ""} im Karussell:
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedMediaUrls([])}
+                            className="text-zinc-400 hover:text-red-400 text-[11px] font-semibold transition cursor-pointer"
+                          >
+                            Alle entfernen
+                          </button>
+                        </div>
+
+                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
                           {selectedMediaUrls.map((url, i) => (
                             <div
                               key={i}
-                              className="relative group rounded-xl overflow-hidden border border-white/10 aspect-[4/5] bg-black/40"
+                              className="relative group rounded-xl overflow-hidden border border-white/10 aspect-[4/5] bg-black/40 shadow-md"
                             >
                               <img
                                 src={url}
                                 alt={`Slide ${i + 1}`}
                                 className="w-full h-full object-cover"
                               />
+
+                              {/* Slide number badge */}
+                              <span className="absolute top-1.5 left-1.5 text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-black/75 text-white backdrop-blur-sm border border-white/10">
+                                #{i + 1}
+                              </span>
+
+                              {/* Delete button */}
                               <button
                                 type="button"
-                                onClick={() =>
-                                  setSelectedMediaUrls(
-                                    selectedMediaUrls.filter((_, idx) => idx !== i)
-                                  )
-                                }
-                                className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 cursor-pointer"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedMediaUrls(selectedMediaUrls.filter((_, idx) => idx !== i));
+                                }}
+                                className="absolute top-1.5 right-1.5 h-6 w-6 rounded-full bg-black/75 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 cursor-pointer border border-white/10"
+                                title="Folie entfernen"
                               >
                                 <Trash2 className="h-3 w-3" />
                               </button>
-                              <span className="absolute bottom-1 left-1 text-[9px] font-mono px-1 rounded bg-black/70 text-white">
-                                #{i + 1}
-                              </span>
+
+                              {/* Reorder arrows */}
+                              <div className="absolute bottom-1.5 inset-x-1.5 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  type="button"
+                                  disabled={i === 0}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMoveMedia(i, -1);
+                                  }}
+                                  className="h-5 w-5 rounded bg-black/80 hover:bg-white/20 disabled:opacity-30 disabled:pointer-events-none text-white flex items-center justify-center cursor-pointer"
+                                  title="Nach links schieben"
+                                >
+                                  <ChevronLeft className="h-3 w-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={i === selectedMediaUrls.length - 1}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleMoveMedia(i, 1);
+                                  }}
+                                  className="h-5 w-5 rounded bg-black/80 hover:bg-white/20 disabled:opacity-30 disabled:pointer-events-none text-white flex items-center justify-center cursor-pointer"
+                                  title="Nach rechts schieben"
+                                >
+                                  <ChevronRight className="h-3 w-3" />
+                                </button>
+                              </div>
                             </div>
                           ))}
+
+                          {/* Quick Add More Tile */}
+                          <div
+                            onClick={() => fileInputRef.current?.click()}
+                            className="rounded-xl border border-dashed border-white/20 hover:border-orange-500/60 bg-white/[0.02] hover:bg-orange-500/[0.05] aspect-[4/5] flex flex-col items-center justify-center p-2 text-center text-zinc-400 hover:text-orange-400 transition-all cursor-pointer group"
+                            title="Weiteres Bild hinzufügen"
+                          >
+                            <Plus className="w-6 h-6 mb-1 transition-transform group-hover:scale-125" />
+                            <span className="text-[10px] font-semibold leading-tight">+ Folie</span>
+                          </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedMediaUrls([])}
-                          className="text-xs text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
-                        >
-                          Alle Medien entfernen
-                        </button>
                       </div>
                     ) : (
-                      <div className="p-6 border border-dashed border-white/10 rounded-2xl text-center space-y-2 bg-white/[0.01]">
-                        <p className="text-xs text-zinc-400">Keine Visuals ausgewählt.</p>
+                      <div className="p-4 border border-white/5 rounded-xl text-center space-y-1 bg-white/[0.01]">
+                        <p className="text-xs text-zinc-400">Noch keine Bilder hinzugefügt.</p>
                         <p className="text-[11px] text-zinc-500">
-                          Du kannst Visuals aus dem Karussell-Generator, der Historie oder per Bild-URL verwenden.
+                          Ziehe Dateien in das Feld oben, wähle sie per Klick aus oder übernimm fertige Visuals:
                         </p>
                         {onNavigateToCarousel && (
                           <button
@@ -2876,7 +3121,7 @@ export function PostSchedulerView({
                           type="text"
                           value={customMediaUrl}
                           onChange={(e) => setCustomMediaUrl(e.target.value)}
-                          placeholder="https://..."
+                          placeholder="https://images.unsplash.com/..."
                           className="flex-1 bg-[#120F17] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-orange-500"
                         />
                         <button
