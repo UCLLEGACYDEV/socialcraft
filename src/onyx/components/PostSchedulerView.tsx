@@ -302,6 +302,25 @@ export const SCHEDULER_CONNECT_PLATFORMS: SchedulerConnectPlatformConfig[] = [
   },
 ];
 
+/**
+ * Formats a Date for a native `<input type="datetime-local">` value.
+ * MUST use the local calendar fields — `Date.toISOString()` returns UTC, so
+ * slicing that string feeds the picker a time shifted by the timezone offset
+ * and every save drifts the schedule earlier, eventually into the past (which
+ * makes the publishing API post immediately instead of scheduling).
+ */
+function toLocalDatetimeValue(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+/** Parses an `<input type="datetime-local">` value as local time. Returns null when empty/invalid. */
+function parseLocalDatetimeValue(value: string): Date | null {
+  if (!value) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
 export function PostSchedulerView({
   channels = DEFAULT_SOCIAL_CHANNELS,
   onUpdateChannels,
@@ -422,9 +441,14 @@ export function PostSchedulerView({
     const d = new Date();
     d.setDate(d.getDate() + offsetDays);
     d.setHours(hour, minute, 0, 0);
-    setScheduledDate(d.toISOString().slice(0, 16));
+    // If the chosen "peak time" has already passed today, roll it to the same time tomorrow
+    // so the scheduler never receives a timestamp in the past (which publishes immediately).
+    if (d.getTime() <= Date.now() + 5 * 60 * 1000) {
+      d.setDate(d.getDate() + 1);
+    }
+    setScheduledDate(toLocalDatetimeValue(d));
     toast.success(
-      `Termin gesetzt: ${label} (${d.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" })} um ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")} Uhr) ✨`
+      `Termin gesetzt: ${label} (${d.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" })} um ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")} Uhr) ✨`
     );
   };
 
@@ -480,7 +504,7 @@ export function PostSchedulerView({
     const d = new Date();
     d.setDate(d.getDate() + 1);
     d.setHours(18, 0, 0, 0);
-    return d.toISOString().slice(0, 16);
+    return toLocalDatetimeValue(d);
   });
   const [selectedMediaUrls, setSelectedMediaUrls] = useState<string[]>(() => {
     if (initialScheduledItem?.imageUrls && initialScheduledItem.imageUrls.length > 0) {
@@ -991,9 +1015,9 @@ export function PostSchedulerView({
       const d = new Date();
       d.setDate(d.getDate() + 1);
       d.setHours(18, 0, 0, 0);
-      setScheduledDate(d.toISOString().slice(0, 16));
+      setScheduledDate(toLocalDatetimeValue(d));
     } else {
-      setScheduledDate(new Date(post.scheduledFor).toISOString().slice(0, 16));
+      setScheduledDate(toLocalDatetimeValue(postDate));
     }
 
     setActiveTab("composer");
@@ -1006,7 +1030,7 @@ export function PostSchedulerView({
 
   const handleQuickRescheduleOpen = (post: ScheduledPost) => {
     setQuickReschedulePost(post);
-    setQuickRescheduleDate(new Date(post.scheduledFor).toISOString().slice(0, 16));
+    setQuickRescheduleDate(toLocalDatetimeValue(new Date(post.scheduledFor)));
   };
 
   const handleQuickRescheduleSubmit = (e: React.FormEvent) => {
@@ -1026,7 +1050,7 @@ export function PostSchedulerView({
     setQuickReschedulePost(null);
   };
 
-  const handlePublishViaPublisher = async (publishNow = true) => {
+  const handlePublishViaPublisher = async (publishNow = true, scheduleOverride?: Date) => {
     if (!postCaption.trim() && !postTitle.trim()) {
       toast.error("Bitte gib einen Titel oder einen Beitragstext ein.");
       return;
@@ -1038,7 +1062,50 @@ export function PostSchedulerView({
       .filter((t) => t.startsWith("#") || t.length > 1)
       .map((t) => (t.startsWith("#") ? t : `#${t}`));
 
-    const mediaList = selectedMediaUrls.length > 0 ? selectedMediaUrls : customMediaUrl ? [customMediaUrl] : [];
+    let mediaList = selectedMediaUrls.length > 0 ? selectedMediaUrls : customMediaUrl ? [customMediaUrl] : [];
+
+    // Resolve & validate the scheduled time up front. A datetime-local value is
+    // local time; without this guard a stale/past value is sent to the publisher
+    // as `scheduled_at`, which then posts immediately instead of scheduling.
+    let scheduledIso: string;
+    if (publishNow) {
+      scheduledIso = new Date().toISOString();
+    } else {
+      const when = scheduleOverride ?? parseLocalDatetimeValue(scheduledDate);
+      if (!when) {
+        toast.error("Bitte wähle ein gültiges Datum und eine Uhrzeit für die Terminierung.");
+        return;
+      }
+      if (when.getTime() < Date.now() + 2 * 60 * 1000) {
+        toast.error("Der gewählte Zeitpunkt liegt in der Vergangenheit.", {
+          description: "Wähle eine Zeit mindestens einige Minuten in der Zukunft – sonst wird der Beitrag sofort veröffentlicht.",
+        });
+        return;
+      }
+      scheduledIso = when.toISOString();
+    }
+
+    // Pinterest specifics: a pin needs a board, and Pinterest has no multi-image carousel.
+    let pinterestConfig: { board_id?: string; link?: string } | undefined;
+    if (channel.platform === "pinterest") {
+      if (!channel.pinterestBoardId?.trim()) {
+        toast.error("Für Pinterest fehlt die Board-ID.", {
+          description: "Trage unter „Pinterest-Optionen“ die Ziel-Pinnwand ein – ohne Board kann Pinterest keinen Pin anlegen.",
+        });
+        return;
+      }
+      pinterestConfig = {
+        board_id: channel.pinterestBoardId.trim(),
+        link: channel.pinterestDefaultLink?.trim() || undefined,
+      };
+      if (mediaList.length > 1) {
+        toast.warning("Pinterest unterstützt keine Karussells.", {
+          description: "Es wird nur das erste Bild als Pin veröffentlicht. Für mehrere Bilder lege bitte einzelne Pins an.",
+          duration: 8000,
+        });
+        mediaList = mediaList.slice(0, 1);
+      }
+    }
 
     const pfmKey = activePostForMeKey;
 
@@ -1062,9 +1129,19 @@ export function PostSchedulerView({
         const fullCaption = postCaption.trim() + (allHashtags.length > 0 ? "\n\n" + allHashtags.join(" ") : "");
         const postResult = await client.createPost({
           caption: fullCaption,
-          scheduled_at: publishNow ? null : new Date(scheduledDate).toISOString(),
+          scheduled_at: publishNow ? null : scheduledIso,
           social_accounts: [targetAccountId],
           media: mediaList.map((url) => ({ url })),
+          ...(pinterestConfig
+            ? {
+                platform_configurations: {
+                  pinterest: {
+                    ...pinterestConfig,
+                    title: postTitle.trim() || undefined,
+                  },
+                },
+              }
+            : {}),
         });
 
         const newPost: ScheduledPost = {
@@ -1076,7 +1153,7 @@ export function PostSchedulerView({
           mediaType: mediaList.length > 1 ? "carousel" : "image",
           channelId: channel.channelId,
           platform: channel.platform,
-          scheduledFor: new Date(scheduledDate).toISOString(),
+          scheduledFor: scheduledIso,
           status: publishNow ? "published" : "scheduled",
           createdAt: new Date().toISOString(),
           publishedAt: publishNow ? new Date().toISOString() : undefined,
@@ -1100,7 +1177,7 @@ export function PostSchedulerView({
           });
         } else {
           toast.success("📅 Beitrag erfolgreich terminiert!", {
-            description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")} auf ${channel.name}`,
+            description: `Geplant für ${new Date(scheduledIso).toLocaleString("de-DE")} Uhr auf ${channel.name}`,
           });
         }
 
@@ -1122,7 +1199,7 @@ export function PostSchedulerView({
         platform: channel.platform as any,
         accountId: channel.zernioAccountId || channel.channelId,
         publishNow,
-        scheduledFor: !publishNow ? new Date(scheduledDate).toISOString() : undefined,
+        scheduledFor: !publishNow ? scheduledIso : undefined,
         tiktokOptions: {
           privacyLevel: tiktokPrivacy,
           allowComments: tiktokAllowComments,
@@ -1152,7 +1229,7 @@ export function PostSchedulerView({
         mediaType: mediaList.length > 1 ? "carousel" : "image",
         channelId: channel.channelId,
         platform: channel.platform,
-        scheduledFor: new Date(scheduledDate).toISOString(),
+        scheduledFor: scheduledIso,
         status: publishNow ? "published" : "scheduled",
         createdAt: new Date().toISOString(),
         publishedAt: publishNow ? new Date().toISOString() : undefined,
@@ -1182,7 +1259,7 @@ export function PostSchedulerView({
         );
       } else {
         toast.success("📅 Erfolgreich terminiert!", {
-          description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")}`,
+          description: `Geplant für ${new Date(scheduledIso).toLocaleString("de-DE")} Uhr`,
         });
       }
 
@@ -1220,6 +1297,45 @@ export function PostSchedulerView({
 
   const handlePublishViaZernio = handlePublishViaPublisher;
 
+  /**
+   * "Automatisch terminieren" — picks the next open slot for the selected channel
+   * instead of reusing whatever is in the date picker, then schedules the post.
+   * Cadence: one post per day at the picker's time-of-day (default 18:00),
+   * placed the day after the channel's last still-pending post, always in the future.
+   */
+  const handleAutoSchedulePost = () => {
+    const channel = channels.find((c) => c.id === selectedChannelId) || defaultChannel;
+
+    const preferred = parseLocalDatetimeValue(scheduledDate);
+    const hour = preferred ? preferred.getHours() : 18;
+    const minute = preferred ? preferred.getMinutes() : 0;
+
+    const pendingForChannel = posts
+      .filter(
+        (p) =>
+          (p.channelId === channel.channelId || p.channelId === channel.id) &&
+          (p.status === "scheduled" || p.status === "queued" || p.status === "draft")
+      )
+      .map((p) => new Date(p.scheduledFor).getTime())
+      .filter((t) => !Number.isNaN(t));
+
+    const anchor = pendingForChannel.length > 0 ? new Date(Math.max(...pendingForChannel)) : new Date();
+
+    const slot = new Date(anchor);
+    if (pendingForChannel.length > 0) {
+      slot.setDate(slot.getDate() + 1);
+    }
+    slot.setHours(hour, minute, 0, 0);
+
+    // Never land in the past / too close to now — roll forward a day at a time.
+    while (slot.getTime() < Date.now() + 10 * 60 * 1000) {
+      slot.setDate(slot.getDate() + 1);
+    }
+
+    setScheduledDate(toLocalDatetimeValue(slot));
+    void handlePublishViaPublisher(false, slot);
+  };
+
   const handleSchedulePost = () => {
     if (!postCaption.trim() && !postTitle.trim()) {
       toast.error("Bitte gib einen Titel oder einen Beitragstext ein.");
@@ -1232,16 +1348,24 @@ export function PostSchedulerView({
       .filter((t) => t.startsWith("#") || t.length > 1)
       .map((t) => (t.startsWith("#") ? t : `#${t}`));
 
+    const when = parseLocalDatetimeValue(scheduledDate);
+    if (!when) {
+      toast.error("Bitte wähle ein gültiges Datum und eine Uhrzeit.");
+      return;
+    }
+    const scheduledIso = when.toISOString();
+    const mediaUrls = selectedMediaUrls.length > 0 ? selectedMediaUrls : customMediaUrl ? [customMediaUrl] : [];
+
     const newPost: ScheduledPost = {
       id: editingPostId || `post-${Date.now()}`,
       title: postTitle.trim() || "Socialcraft Beitrag",
       caption: postCaption.trim(),
       hashtags: allHashtags,
-      mediaUrls: selectedMediaUrls.length > 0 ? selectedMediaUrls : customMediaUrl ? [customMediaUrl] : [],
-      mediaType: selectedMediaUrls.length > 1 ? "carousel" : "image",
+      mediaUrls,
+      mediaType: mediaUrls.length > 1 ? "carousel" : "image",
       channelId: channel.channelId,
       platform: channel.platform,
-      scheduledFor: new Date(scheduledDate).toISOString(),
+      scheduledFor: scheduledIso,
       status: "scheduled",
       createdAt: new Date().toISOString(),
       musicTitle: selectedSound?.title,
@@ -1253,12 +1377,12 @@ export function PostSchedulerView({
       onUpdatePosts(posts.map((p) => (p.id === editingPostId ? newPost : p)));
       setEditingPostId(null);
       toast.success("Beitrag erfolgreich aktualisiert & neu geplant! 🚀", {
-        description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")} auf ${channel.name}`,
+        description: `Geplant für ${when.toLocaleString("de-DE")} Uhr auf ${channel.name}`,
       });
     } else {
       onUpdatePosts([newPost, ...posts]);
       toast.success("Beitrag erfolgreich lokal geplant! 🚀", {
-        description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")} auf ${channel.name} (ID: ${channel.channelId})`,
+        description: `Geplant für ${when.toLocaleString("de-DE")} Uhr auf ${channel.name}`,
       });
     }
 
@@ -1738,7 +1862,7 @@ export function PostSchedulerView({
                           onClick={() => {
                             const newD = new Date(cell.date);
                             newD.setHours(18, 0, 0, 0);
-                            setScheduledDate(newD.toISOString().slice(0, 16));
+                            setScheduledDate(toLocalDatetimeValue(newD));
                             setActiveTab("composer");
                           }}
                           className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded bg-white/10 hover:bg-[#FF4D17] text-white flex items-center justify-center cursor-pointer"
@@ -2697,6 +2821,52 @@ export function PostSchedulerView({
                       </div>
                     </div>
                   )}
+
+                  {/* PINTEREST SPECIFIC SETTINGS */}
+                  {selectedChannel.platform === "pinterest" && (
+                    <div className="space-y-2.5 pt-2 border-t border-white/5 text-xs">
+                      <div>
+                        <label className="text-[11px] text-zinc-400 block mb-1">
+                          Board-ID (Pinnwand) <span className="text-rose-400">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={selectedChannel.pinterestBoardId || ""}
+                          onChange={(e) =>
+                            onUpdateChannels(
+                              channels.map((c) =>
+                                c.id === selectedChannel.id ? { ...c, pinterestBoardId: e.target.value } : c
+                              )
+                            )
+                          }
+                          placeholder="z. B. 1068981941647123456"
+                          className="w-full bg-[#120F17] border border-white/10 rounded-lg px-3 py-1.5 text-xs font-mono text-white"
+                        />
+                        <p className="text-[10px] text-zinc-500 mt-1">
+                          Pflichtfeld – ohne Pinnwand kann Pinterest keinen Pin erstellen. Die ID steht in der Board-URL.
+                        </p>
+                      </div>
+                      <div>
+                        <label className="text-[11px] text-zinc-400 block mb-1">Ziel-Link des Pins (optional):</label>
+                        <input
+                          type="url"
+                          value={selectedChannel.pinterestDefaultLink || ""}
+                          onChange={(e) =>
+                            onUpdateChannels(
+                              channels.map((c) =>
+                                c.id === selectedChannel.id ? { ...c, pinterestDefaultLink: e.target.value } : c
+                              )
+                            )
+                          }
+                          placeholder="https://deine-website.de/artikel"
+                          className="w-full bg-[#120F17] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white"
+                        />
+                      </div>
+                      <p className="text-[10px] text-amber-400/90 bg-amber-500/10 border border-amber-500/20 rounded-lg px-2.5 py-1.5">
+                        Hinweis: Pinterest unterstützt keine Karussells. Bei mehreren Bildern wird nur das erste als Pin veröffentlicht.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -2723,8 +2893,9 @@ export function PostSchedulerView({
                   <button
                     type="button"
                     disabled={isPublishingZernio}
-                    onClick={() => handlePublishViaZernio(false)}
+                    onClick={handleAutoSchedulePost}
                     className="px-4 py-2.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-xs font-bold text-purple-300 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                    title="Plant den Beitrag automatisch in den nächsten freien Slot dieses Kanals (nicht sofort)"
                   >
                     <Clock className="h-3.5 w-3.5" />
                     <span>📅 Automatisch terminieren</span>
