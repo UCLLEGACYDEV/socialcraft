@@ -396,6 +396,7 @@ export function AiCloneFlowStudio({
           user: currentUser || null,
           projectName: activeClone.name,
           subfolder: `clones/${cleanName}/styles`,
+          onError: (msg) => toast.error(`Cloud-Speicherung fehlgeschlagen: ${msg}`),
         });
       } catch (s4Err) {
         console.warn("[CloneStudio] S4 upload:", s4Err);

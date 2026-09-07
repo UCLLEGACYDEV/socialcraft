@@ -18,7 +18,7 @@ import {
   PromptGallery,
 } from "@/onyx/components/SimpleViews";
 import { CloudGalleryView } from "@/onyx/components/CloudGalleryView";
-import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder } from "@/onyx/s4-storage";
+import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder, saveHistoryToS4, loadHistoryFromS4, makeProjectFolderName, syncCloudIdentityCookie } from "@/onyx/s4-storage";
 import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
 import { AdminDashboard } from "@/onyx/components/AdminDashboard";
 import { AuthModal } from "@/onyx/components/AuthModal";
@@ -161,24 +161,28 @@ function OnyxStudio() {
     }
   }, [currentView]);
 
-  // Ensure user's cloud storage folder exists in the background (especially when admin is active!)
+  // Ensure the cloud storage folder exists in the background (also for guests!)
   useEffect(() => {
-    if (currentUser) {
-      void ensureUserS4Folder(currentUser).then((res) => {
-        if (res.success) {
-          console.log(`[CloudStorage] User folder verified/created: ${res.folder}`);
-        }
-      });
-    }
+    syncCloudIdentityCookie(currentUser);
+    void ensureUserS4Folder(currentUser).then((res) => {
+
+      if (res.success) {
+        console.log(`[CloudStorage] User folder verified/created: ${res.folder}`);
+      } else {
+        console.warn(`[CloudStorage] Folder could not be created: ${res.error}`);
+      }
+    });
   }, [currentUser]);
 
   const [activeTab, setActiveTab] = usePersistentState<TabKey>(LS.activeTab, "carousel");
   const [collapsed, setCollapsed] = usePersistentState<boolean>(LS.sidebarCollapsed, false);
-  const [brandKit, setBrandKit] = usePersistentState<BrandKit>(LS.brandKit, DEFAULT_BRAND_KIT);
+  const [brandKit, setBrandKit] = usePersistentState<BrandKit>(LS.brandKit, DEFAULT_BRAND_KIT, true);
   const [settings, setSettings] = usePersistentState<ApiSettings>(
     LS.apiSettings,
     DEFAULT_API_SETTINGS,
+    true,
   );
+
   const [slides, setSlides] = usePersistentState<SlideContent[]>(LS.activeSlides, []);
   const [topic, setTopic] = usePersistentState<string>(LS.currentTopic, "");
   const [queue, setQueue] = usePersistentState<SeriesJob[]>(LS.seriesQueue, []);
@@ -194,6 +198,31 @@ function OnyxStudio() {
     LS.activeCloneId,
     DEFAULT_CLONE_PROFILES[0]?.id ?? "",
   );
+
+  // Restore history from the user's private cloud folder when local history is empty
+  useEffect(() => {
+    if (history.length > 0) return;
+    let cancelled = false;
+    void loadHistoryFromS4<HistoryEntry>(currentUser).then((cloudHistory) => {
+      if (!cancelled && cloudHistory && cloudHistory.length > 0) {
+        setHistory(cloudHistory);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser]);
+
+  // Sync history into the user's private cloud folder (debounced)
+  useEffect(() => {
+    if (!settings.s4AutoSave || history.length === 0) return;
+    const timer = setTimeout(() => {
+      void saveHistoryToS4(history, currentUser);
+    }, 2000);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [history, currentUser, settings.s4AutoSave]);
 
   const activeClone = useMemo(() => {
     return cloneProfiles.find((p) => p.id === activeCloneId) ?? cloneProfiles[0];
@@ -265,6 +294,9 @@ function OnyxStudio() {
     abortRef.current = controller;
     setIsGeneratingImages(true);
     let realNanoCount = 0;
+    const carouselFolder = makeProjectFolderName(brief.topic || "karussell");
+    // Keep an up-to-date copy of the slides including the freshly rendered images
+    const renderedSlides: SlideContent[] = slides.map((s) => ({ ...s }));
     try {
       for (const slide of slides) {
         if (controller.signal.aborted) break;
@@ -286,11 +318,10 @@ function OnyxStudio() {
             },
           });
           setSlideFlag(slide.id, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
+          const idx = renderedSlides.findIndex((s) => s.id === slide.id);
+          if (idx !== -1 && renderedSlides[idx]) renderedSlides[idx].imageUrl = res.imageUrl;
           if (settings.s4AutoSave) {
             const effectiveUser = currentUser || getStoredCurrentUser();
-            const cleanTopic = (brief.topic || "karussell").replace(/[^a-zA-Z0-9-_\s]/g, "").trim().replace(/\s+/g, "_") || "karussell";
-            const dateStr = new Date().toISOString().slice(0, 10);
-            const carouselFolder = `${dateStr}_${cleanTopic}`;
 
             void saveImageToS4({
               imageUrl: res.imageUrl,
@@ -301,6 +332,7 @@ function OnyxStudio() {
               customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
               subfolder: `carousels/${carouselFolder}`,
               projectName: carouselFolder,
+              onError: (msg) => toast.error(`Slide ${slide.slideNumber} nicht in Cloud gesichert: ${msg}`),
             }).then((cloudImg) => {
               if (cloudImg) {
                 toast.success(`Slide ${slide.slideNumber} in Cloud gesichert ☁️`, { duration: 2500 });
@@ -326,7 +358,9 @@ function OnyxStudio() {
             user: effectiveUser,
             carouselId: `car_${Date.now()}`,
             topic: brief.topic || "Instagram Karussell",
-            slides: slides.map((s) => ({
+            folderName: carouselFolder,
+            skipImages: true,
+            slides: renderedSlides.map((s) => ({
               id: s.id,
               slideNumber: s.slideNumber,
               headline: s.headline,
@@ -336,6 +370,7 @@ function OnyxStudio() {
             })),
           });
         }
+
         if (realNanoCount > 0) {
           toast.success(`${realNanoCount} Visuals via Nano-Banana 2 gerendert! 🍌`);
           void refreshCredits();
@@ -371,9 +406,7 @@ function OnyxStudio() {
       setSlideFlag(slideId, { imageUrl: res.imageUrl, isGeneratingImage: false, renderProgress: 100, renderStatus: "done" });
       if (settings.s4AutoSave) {
         const effectiveUser = currentUser || getStoredCurrentUser();
-        const cleanTopic = (brief.topic || "karussell").replace(/[^a-zA-Z0-9-_\s]/g, "").trim().replace(/\s+/g, "_") || "karussell";
-        const dateStr = new Date().toISOString().slice(0, 10);
-        const carouselFolder = `${dateStr}_${cleanTopic}`;
+        const carouselFolder = makeProjectFolderName(brief.topic || "karussell");
         void saveImageToS4({
           imageUrl: res.imageUrl,
           prompt: slide.visualPrompt,
@@ -383,6 +416,7 @@ function OnyxStudio() {
           customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
           subfolder: `carousels/${carouselFolder}`,
           projectName: carouselFolder,
+          onError: (msg) => toast.error(`Slide ${slide.slideNumber} nicht in Cloud gesichert: ${msg}`),
         }).then((cloudImg) => {
           if (cloudImg) {
             toast.success(`Slide ${slide.slideNumber} in Cloud aktualisiert ☁️`, { duration: 2500 });
@@ -547,6 +581,79 @@ function OnyxStudio() {
     toast.info("Queue und alle aktiven Slides abgebrochen");
   };
 
+  /** Lädt alle fertigen Karussell-Slides in den privaten Cloud-Ordner */
+  const saveCarouselToCloud = async () => {
+    const rendered = slides.filter((s) => Boolean(s.imageUrl));
+    if (rendered.length === 0) {
+      toast.error("Keine fertigen Slides zum Speichern gefunden");
+      return;
+    }
+    const folder = makeProjectFolderName(brief.topic || "karussell");
+    const effectiveUser = currentUser || getStoredCurrentUser();
+    toast.info(`Speichere ${rendered.length} Slides in die Cloud ...`);
+    let ok = 0;
+    for (const slide of rendered) {
+      const saved = await saveImageToS4({
+        imageUrl: slide.imageUrl as string,
+        prompt: slide.visualPrompt,
+        category: "carousel",
+        aspectRatio: brandKit.aspectRatio,
+        user: effectiveUser,
+        customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
+        subfolder: `carousels/${folder}`,
+        projectName: folder,
+        onError: (msg) => toast.error(`Slide ${slide.slideNumber}: ${msg}`),
+      });
+      if (saved) ok++;
+    }
+    await saveCarouselToS4({
+      user: effectiveUser,
+      carouselId: `car_${Date.now()}`,
+      topic: brief.topic || "Instagram Karussell",
+      folderName: folder,
+      skipImages: true,
+      slides: rendered.map((s) => ({
+        id: s.id,
+        slideNumber: s.slideNumber,
+        headline: s.headline,
+        subtext: s.subtext,
+        imageUrl: s.imageUrl,
+        visualPrompt: s.visualPrompt,
+      })),
+    });
+    if (ok > 0) toast.success(`${ok} von ${rendered.length} Slides gespeichert: carousels/${folder}`);
+  };
+
+  /** Lädt alle bereits gerenderten Slides einer Serie in den privaten Cloud-Ordner */
+  const saveJobToCloud = async (jobId: string) => {
+    const job = queue.find((j) => j.id === jobId);
+    const rendered = (job?.slides ?? []).filter((s) => Boolean(s.imageUrl));
+    if (!job || rendered.length === 0) {
+      toast.error("Keine gerenderten Slides zum Speichern gefunden");
+      return;
+    }
+    const folder = makeProjectFolderName(job.topic ?? "series", job.id);
+    const effectiveUser = currentUser || getStoredCurrentUser();
+    toast.info(`Speichere ${rendered.length} Slides in die Cloud ...`);
+    let ok = 0;
+    for (const slide of rendered) {
+      const saved = await saveImageToS4({
+        imageUrl: slide.imageUrl as string,
+        prompt: slide.visualPrompt,
+        category: "series",
+        user: effectiveUser,
+        customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
+        subfolder: `series/${folder}`,
+        projectName: folder,
+        onError: (msg) => toast.error(`Slide ${slide.slideNumber}: ${msg}`),
+      });
+      if (saved) ok++;
+    }
+    if (ok > 0) {
+      toast.success(`${ok} von ${rendered.length} Slides gespeichert: series/${folder}`);
+    }
+  };
+
   const runSingleJobSlide = async (jobId: string, slideId: string) => {
     const job = queue.find((j) => j.id === jobId);
     const slide = job?.slides?.find((s) => s.id === slideId);
@@ -583,12 +690,7 @@ function OnyxStudio() {
       });
 
       if (settings.s4AutoSave) {
-        const _seriesTopic = (job?.topic ?? "series")
-          .replace(/[^a-zA-Z0-9-_\s]/g, "")
-          .trim()
-          .replace(/\s+/g, "_")
-          .slice(0, 40);
-        const _seriesFolder = `${new Date().toISOString().slice(0, 10)}_${_seriesTopic}_${jobId.slice(0, 6)}`;
+        const _seriesFolder = makeProjectFolderName(job?.topic ?? "series", jobId);
               void saveImageToS4({
                 imageUrl: res.imageUrl,
                 prompt: slide.visualPrompt,
@@ -597,6 +699,7 @@ function OnyxStudio() {
                 customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
                 subfolder: `series/${_seriesFolder}`,
                 projectName: _seriesFolder,
+                onError: (msg) => toast.error(`Slide ${slide.slideNumber} nicht in Cloud gesichert: ${msg}`),
               });
       }
 
@@ -695,12 +798,7 @@ function OnyxStudio() {
             });
 
             if (settings.s4AutoSave) {
-              const _qSeriesTopic = (job.topic || "series")
-                .replace(/[^a-zA-Z0-9-_\s]/g, "")
-                .trim()
-                .replace(/\s+/g, "_")
-                .slice(0, 40);
-              const _qSeriesFolder = `${new Date().toISOString().slice(0, 10)}_${_qSeriesTopic}_${id.slice(0, 6)}`;
+              const _qSeriesFolder = makeProjectFolderName(job?.topic ?? "series", id);
               void saveImageToS4({
                 imageUrl: res.imageUrl,
                 prompt: slide.visualPrompt,
@@ -709,6 +807,7 @@ function OnyxStudio() {
                 customFilename: `slide_${String(slide.slideNumber).padStart(2, "0")}.jpg`,
                 subfolder: `series/${_qSeriesFolder}`,
                 projectName: _qSeriesFolder,
+                onError: (msg) => toast.error(`Slide ${slide.slideNumber} nicht in Cloud gesichert: ${msg}`),
               });
             }
 
@@ -936,6 +1035,7 @@ function OnyxStudio() {
                     if (slide) void downloadSlide(slide, brandKit, withOverlay);
                   }}
                   onExportZip={(withOverlay) => void exportZip(withOverlay)}
+                  onSaveToCloud={() => void saveCarouselToCloud()}
                   onReset={resetCarousel}
                   settings={settings}
                   brandKit={brandKit}
@@ -961,6 +1061,7 @@ function OnyxStudio() {
               onCancelSlide={(jobId, slideId) => cancelJobSlide(jobId, slideId)}
               onRunSelectedSlides={(jobId, slideIds) => void runSelectedJobSlides(jobId, slideIds)}
               onCancelJobSlides={(jobId) => cancelJobSlides(jobId)}
+              onSaveJobToCloud={(jobId) => void saveJobToCloud(jobId)}
               settings={settings}
               onChangeSettings={patchSettings}
             />

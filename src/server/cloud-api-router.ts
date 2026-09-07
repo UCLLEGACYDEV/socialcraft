@@ -7,12 +7,20 @@ import {
   testCloudConnection,
   getCloudFileObject,
 } from "./cloud-storage";
+import {
+  resolveCloudIdentity,
+  normalizeKey,
+  isInOwnScope,
+  isTrustedAdmin,
+  resolveListPrefix,
+} from "./cloud-identity";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   "Access-Control-Allow-Headers":
-    "Content-Type, x-cloud-access-key, x-cloud-secret-key, x-cloud-endpoint, x-cloud-bucket, x-cloud-region",
+    "Content-Type, Authorization, x-cloud-access-key, x-cloud-secret-key, x-cloud-endpoint, x-cloud-bucket, x-cloud-region, x-onyx-user-id, x-onyx-user-role",
+  "Access-Control-Allow-Credentials": "true",
 };
 
 function jsonResponse(data: unknown, status = 200) {
@@ -40,6 +48,8 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
 
   const endpoint = pathname.replace("/api/cloud/", "").replace(/\/+$/, "");
 
+  const identity = await resolveCloudIdentity(request);
+
   // 1. Ensure Folder
   if (endpoint === "ensure-folder" && request.method === "POST") {
     try {
@@ -57,7 +67,14 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
         );
       }
 
-      const folderPath = body.folderPath || (body.user?.role === "admin" ? `USERCONTENT/admins/${body.user.id}` : `USERCONTENT/users/${body.user?.id || "guest"}`);
+      // The folder is derived from the caller identity; a client-supplied path
+      // is only accepted when it lies inside the caller's own folder.
+      const requested = body.folderPath ? normalizeKey(body.folderPath) : "";
+      const folderPath =
+        requested && (isInOwnScope(identity, requested) || isTrustedAdmin(identity))
+          ? requested
+          : identity.root;
+
       const res = await ensureCloudFolder(cfg, folderPath, body.user);
       return jsonResponse({ folder: folderPath, ...res });
     } catch (err: unknown) {
@@ -89,9 +106,14 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
         );
       }
 
+      const key = normalizeKey(body.key);
+      if (!isInOwnScope(identity, key)) {
+        return jsonResponse({ error: "Kein Zugriff auf diesen Ordner." }, 403);
+      }
+
       const res = await uploadCloudImage(cfg, {
         imageUrl: body.imageUrl,
-        key: body.key,
+        key,
         ...(body.contentType ? { contentType: body.contentType } : {}),
       });
 
@@ -106,7 +128,6 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
   // 3. List Objects
   if (endpoint === "list" && request.method === "GET") {
     try {
-      const prefix = url.searchParams.get("prefix") || "USERCONTENT/";
       const cfg = extractConfigFromRequest(request);
       if (!cfg) {
         return jsonResponse(
@@ -115,14 +136,26 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
         );
       }
 
+      const requested = url.searchParams.get("prefix");
+      const scope = url.searchParams.get("scope");
+      const sub = url.searchParams.get("sub");
+
+      let prefix: string;
+      if (requested && (isInOwnScope(identity, requested) || isTrustedAdmin(identity))) {
+        prefix = normalizeKey(requested);
+      } else {
+        prefix = resolveListPrefix(identity, scope, sub);
+      }
+
       const objects = await listCloudObjects(cfg, prefix);
-      return jsonResponse({ success: true, objects });
+      return jsonResponse({ success: true, objects, prefix });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Auflistung fehlgeschlagen";
       console.error("[CloudAPI] list error:", err);
       return jsonResponse({ error: msg }, 500);
     }
   }
+
 
   // 4. Delete Objects
   if (endpoint === "delete" && request.method === "POST") {
@@ -141,7 +174,13 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
         return jsonResponse({ error: "Cloud-Zugangsdaten fehlen" }, 401);
       }
 
-      const res = await deleteCloudObjects(cfg, body.keys);
+      const keys = body.keys.map((k) => normalizeKey(String(k)));
+      const forbidden = keys.filter((k) => !isInOwnScope(identity, k) && !isTrustedAdmin(identity));
+      if (forbidden.length > 0) {
+        return jsonResponse({ error: "Kein Zugriff auf diese Dateien." }, 403);
+      }
+
+      const res = await deleteCloudObjects(cfg, keys);
       return jsonResponse(res);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Löschen fehlgeschlagen";
@@ -183,7 +222,12 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
         return new Response("Cloud credentials missing", { status: 401 });
       }
 
-      const fileObj = await getCloudFileObject(cfg, key);
+      const cleanKey = normalizeKey(key);
+      if (!isInOwnScope(identity, cleanKey) && !isTrustedAdmin(identity)) {
+        return new Response("Forbidden", { status: 403, headers: corsHeaders });
+      }
+
+      const fileObj = await getCloudFileObject(cfg, cleanKey);
       if (!fileObj) {
         return new Response("Object not found", { status: 404 });
       }

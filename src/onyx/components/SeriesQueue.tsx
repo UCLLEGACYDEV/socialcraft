@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, Cpu, Loader2, Play, Sparkles, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronDown, ChevronRight, CloudUpload, Cpu, Loader2, Play, Sparkles, X } from "lucide-react";
 import { parseBlock } from "../parse-prompt-block";
 import { mockNameTopic } from "../mock-api";
 import type { ApiSettings, ParsedCarousel, SeriesJob, JobStatus } from "../types";
@@ -39,6 +39,7 @@ interface SeriesQueueProps {
   onCancelSlide?: ((jobId: string, slideId: string) => void) | undefined;
   onRunSelectedSlides?: ((jobId: string, slideIds: string[]) => void) | undefined;
   onCancelJobSlides?: ((jobId: string) => void) | undefined;
+  onSaveJobToCloud?: ((jobId: string) => void) | undefined;
   settings: ApiSettings;
   onChangeSettings: (patch: Partial<ApiSettings>) => void;
 }
@@ -58,6 +59,7 @@ export function SeriesQueue({
   onCancelSlide,
   onRunSelectedSlides,
   onCancelJobSlides,
+  onSaveJobToCloud,
   settings,
   onChangeSettings,
 }: SeriesQueueProps) {
@@ -66,6 +68,21 @@ export function SeriesQueue({
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [selectedSlideIds, setSelectedSlideIds] = useState<Record<string, string[]>>({});
   const [naming, setNaming] = useState(false);
+
+  // Neue Jobs: alle Slides standardmäßig auswählen (manuell geänderte Auswahl bleibt erhalten)
+  useEffect(() => {
+    setSelectedSlideIds((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const job of queue) {
+        if (next[job.id] === undefined && job.slides && job.slides.length > 0) {
+          next[job.id] = job.slides.map((s: { id: string }) => s.id);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [queue]);
 
   const parsed = useMemo(() => parseBlock(text), [text]);
 
@@ -307,7 +324,7 @@ export function SeriesQueue({
         )}
       </div>
 
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
         {queue.length === 0 && (
           <p className="cryptox-card p-6 text-center text-xs text-zinc-400">
             Noch keine Jobs in der Warteschlange.
@@ -403,6 +420,17 @@ export function SeriesQueue({
                         >
                           <Play className="h-3 w-3 fill-current" />
                           Auswahl starten ({selectedCount})
+                        </button>
+                      )}
+
+                      {onSaveJobToCloud && (job.slides ?? []).some((s) => Boolean(s.imageUrl)) && (
+                        <button
+                          type="button"
+                          onClick={() => onSaveJobToCloud(job.id)}
+                          className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-zinc-200 transition-all hover:bg-white/10 hover:text-white"
+                        >
+                          <CloudUpload className="h-3.5 w-3.5" />
+                          In Cloud speichern
                         </button>
                       )}
 
