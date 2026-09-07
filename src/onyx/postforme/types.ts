@@ -41,8 +41,27 @@ export interface PostForMePinterestConfiguration {
   title?: string;
 }
 
+export interface PostForMeTiktokConfiguration {
+  /** "public" or "private" (Post for Me maps this to TikTok's privacy_level). */
+  privacy_status?: "public" | "private";
+  allow_comment?: boolean;
+  allow_duet?: boolean;
+  allow_stitch?: boolean;
+  /** Auto-adds music to photo posts. */
+  auto_add_music?: boolean;
+  /** Flags the content as AI generated. */
+  is_ai_generated?: boolean;
+  disclose_your_brand?: boolean;
+  disclose_branded_content?: boolean;
+  /** Creates a draft upload; posting is completed inside the TikTok app. */
+  is_draft?: boolean;
+  title?: string;
+}
+
 export interface PostForMePlatformConfiguration {
   pinterest?: PostForMePinterestConfiguration;
+  tiktok?: PostForMeTiktokConfiguration;
+  tiktok_business?: PostForMeTiktokConfiguration;
   [key: string]: any;
 }
 

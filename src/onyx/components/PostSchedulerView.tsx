@@ -1189,22 +1189,36 @@ export function PostSchedulerView({
           }
         }
 
+        // Map the composer's per-platform options onto Post for Me's platform_configurations.
+        const platformConfigurations: Record<string, any> = {};
+        if (pinterestConfig) {
+          platformConfigurations["pinterest"] = {
+            board_ids: pinterestConfig.board_ids,
+            ...(pinterestConfig.link ? { link: pinterestConfig.link } : {}),
+            ...(postTitle.trim() ? { title: postTitle.trim() } : {}),
+          };
+        }
+        if (channel.platform === "tiktok") {
+          platformConfigurations["tiktok"] = {
+            privacy_status: tiktokPrivacy === "PUBLIC_TO_EVERYONE" ? "public" : "private",
+            allow_comment: tiktokAllowComments,
+            allow_duet: tiktokAllowDuet,
+            allow_stitch: tiktokAllowStitch,
+            auto_add_music: tiktokAutoMusic,
+            is_ai_generated: tiktokAiDisclosure,
+            is_draft: tiktokDraft,
+            ...(postTitle.trim() ? { title: postTitle.trim() } : {}),
+          };
+        }
+
         const fullCaption = postCaption.trim() + (allHashtags.length > 0 ? "\n\n" + allHashtags.join(" ") : "");
         const postResult = await client.createPost({
           caption: fullCaption,
           scheduled_at: publishNow ? null : scheduledIso,
           social_accounts: [targetAccountId],
           media: publishMedia.map((url) => ({ url })),
-          ...(pinterestConfig
-            ? {
-                platform_configurations: {
-                  pinterest: {
-                    board_ids: pinterestConfig.board_ids,
-                    ...(pinterestConfig.link ? { link: pinterestConfig.link } : {}),
-                    ...(postTitle.trim() ? { title: postTitle.trim() } : {}),
-                  },
-                },
-              }
+          ...(Object.keys(platformConfigurations).length > 0
+            ? { platform_configurations: platformConfigurations }
             : {}),
         });
 
