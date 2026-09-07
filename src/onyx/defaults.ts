@@ -84,6 +84,10 @@ export const ANCHORED_SUPABASE_KEY =
   (typeof import.meta !== "undefined" && import.meta.env?.['VITE_SUPABASE_PUBLISHABLE_KEY']) ||
   "";
 
+export const ANCHORED_POSTFORME_API_KEY =
+  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_POSTFORME_API_KEY']) ||
+  "pfm_live_X6AHnibZB1BjEu4j2ef1f4";
+
 export const ANCHORED_ZERNIO_WEBHOOK_SECRET =
   (typeof import.meta !== "undefined" && import.meta.env?.['VITE_ZERNIO_WEBHOOK_SECRET']) ||
   "PGYSvZxkcOH0XH9I8xhbzrB0/vrxa9GIdEr0QwwhKM9wjcW4uN8Cp8PMZKVAE1wECSKSye7svSmIqCLWjQ==";
@@ -108,6 +112,7 @@ export const DEFAULT_API_SETTINGS: ApiSettings = {
   s4SecretKey: ANCHORED_S4_SECRET_KEY,
   s4Region: ANCHORED_S4_REGION,
   s4AutoSave: true,
+  postForMeApiKey: ANCHORED_POSTFORME_API_KEY,
   zernioWebhookSecret: ANCHORED_ZERNIO_WEBHOOK_SECRET,
 };
 

@@ -36,6 +36,7 @@ import {
   DEFAULT_BRIEF,
   DEFAULT_CLONE_PROFILES,
   DEFAULT_SOCIAL_CHANNELS,
+  ANCHORED_POSTFORME_API_KEY,
   assembleClonePrompt,
 } from "@/onyx/defaults";
 import { LS, usePersistentState } from "@/onyx/storage";
@@ -220,6 +221,13 @@ function OnyxStudio() {
     imageUrls: string[];
     prompt?: string;
   } | null>(null);
+
+  // Ensure Post for Me is active as the dedicated publishing service
+  useEffect(() => {
+    if (!settings.postForMeApiKey) {
+      setSettings((prev) => ({ ...prev, postForMeApiKey: ANCHORED_POSTFORME_API_KEY }));
+    }
+  }, [settings.postForMeApiKey, setSettings]);
 
   // Restore history from the user's private cloud folder when local history is empty
   useEffect(() => {

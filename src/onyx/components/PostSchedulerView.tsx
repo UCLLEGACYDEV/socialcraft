@@ -50,7 +50,7 @@ import {
   Flame,
 } from "lucide-react";
 import type { SocialChannel, ScheduledPost, SocialPlatform, SlideContent, HistoryEntry, ApiSettings } from "../types";
-import { DEFAULT_SOCIAL_CHANNELS } from "../defaults";
+import { DEFAULT_SOCIAL_CHANNELS, ANCHORED_POSTFORME_API_KEY } from "../defaults";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { PostForMeApiClient, createPostForMeClient } from "../postforme/client";
@@ -180,7 +180,8 @@ export function PostSchedulerView({
   onOpen30DayBatch,
 }: PostSchedulerViewProps) {
   const openDirectSetup = onOpenPostForMeSetup || onOpenZernioSetup;
-  const hasPublisherKey = !!(settings?.postForMeApiKey || settings?.zernioApiKey);
+  const activePostForMeKey = settings?.postForMeApiKey || ANCHORED_POSTFORME_API_KEY;
+  const hasPublisherKey = !!activePostForMeKey;
 
   const [activeTab, setActiveTab] = useState<"queue" | "composer" | "channels">(
     initialScheduledItem ? "composer" : "queue"
@@ -478,10 +479,9 @@ export function PostSchedulerView({
   const [quickRescheduleDate, setQuickRescheduleDate] = useState<string>("");
 
   const handleSyncAccounts = async () => {
-    const postForMeKey = settings?.postForMeApiKey;
-    const zernioKey = settings?.zernioApiKey;
+    const postForMeKey = activePostForMeKey;
 
-    if (!postForMeKey && !zernioKey) {
+    if (!postForMeKey) {
       toast.info("Bitte hinterlege zuerst deinen Post for Me API Key.", {
         action: openDirectSetup ? { label: "Setup öffnen", onClick: openDirectSetup } : undefined,
       });
@@ -490,77 +490,46 @@ export function PostSchedulerView({
 
     setIsSyncingChannels(true);
     try {
-      if (postForMeKey) {
-        const client = new PostForMeApiClient(postForMeKey);
-        const accounts = await client.getSocialAccounts();
+      const client = new PostForMeApiClient(postForMeKey);
+      const accounts = await client.getSocialAccounts();
 
-        if (!accounts || accounts.length === 0) {
-          toast.info("Keine verknüpften Accounts bei Post for Me gefunden. Verbinde Kanäle im Setup.");
-          return;
-        }
+      if (!accounts || accounts.length === 0) {
+        toast.info("Keine verknüpften Accounts bei Post for Me gefunden. Verbinde Kanäle im Setup.");
+        return;
+      }
 
-        const platformMapping: Record<string, SocialPlatform> = {
-          tiktok: "tiktok",
-          instagram: "instagram",
-          facebook: "facebook",
-          linkedin: "linkedin",
-          x: "twitter",
-          twitter: "twitter",
-          youtube: "youtube",
-          threads: "threads",
-          pinterest: "pinterest",
-          bluesky: "bluesky",
-        };
+      const platformMapping: Record<string, SocialPlatform> = {
+        tiktok: "tiktok",
+        instagram: "instagram",
+        facebook: "facebook",
+        linkedin: "linkedin",
+        x: "twitter",
+        twitter: "twitter",
+        youtube: "youtube",
+        threads: "threads",
+        pinterest: "pinterest",
+        bluesky: "bluesky",
+      };
 
-        const imported: SocialChannel[] = accounts.map((acc) => ({
-          id: `pfm-${acc.id}`,
-          platform: platformMapping[acc.platform.toLowerCase()] || "facebook",
-          name: acc.display_name || acc.username || `${acc.platform} Account`,
-          channelId: acc.id,
-          postForMeAccountId: acc.id,
-          handle: acc.username ? (acc.username.startsWith("@") ? acc.username : `@${acc.username}`) : undefined,
-          avatarUrl: acc.profile_picture_url || "/images/socialcraft-logo.png",
-          isDefault: false,
-        }));
+      const imported: SocialChannel[] = accounts.map((acc) => ({
+        id: `pfm-${acc.id}`,
+        platform: platformMapping[acc.platform.toLowerCase()] || "facebook",
+        name: acc.display_name || acc.username || `${acc.platform} Account`,
+        channelId: acc.id,
+        postForMeAccountId: acc.id,
+        handle: acc.username ? (acc.username.startsWith("@") ? acc.username : `@${acc.username}`) : undefined,
+        avatarUrl: acc.profile_picture_url || "/images/socialcraft-logo.png",
+        isDefault: false,
+      }));
 
-        const existingIds = new Set(channels.map((c) => c.channelId));
-        const newChannels = imported.filter((c) => !existingIds.has(c.channelId));
+      const existingIds = new Set(channels.map((c) => c.channelId));
+      const newChannels = imported.filter((c) => !existingIds.has(c.channelId));
 
-        if (newChannels.length > 0) {
-          onUpdateChannels([...channels, ...newChannels]);
-          toast.success(`${newChannels.length} Kanäle von Post for Me synchronisiert! 🎉`);
-        } else {
-          toast.info("Alle Post for Me Accounts sind bereits in deiner Kanalliste.");
-        }
-      } else if (zernioKey) {
-        const client = new ZernioApiClient(zernioKey);
-        const res = await client.listAccounts(settings?.zernioProfileId);
-
-        if (!res.accounts || res.accounts.length === 0) {
-          toast.info("Keine verbundenen Social-Media-Accounts gefunden. Verbinde Kanäle im Setup.");
-          return;
-        }
-
-        const imported: SocialChannel[] = res.accounts.map((acc) => ({
-          id: `direct-${acc._id}`,
-          platform: (acc.platform as SocialPlatform) || "facebook",
-          name: acc.displayName || acc.username || `${acc.platform} Account`,
-          channelId: acc._id,
-          zernioAccountId: acc._id,
-          handle: acc.username ? (acc.username.startsWith("@") ? acc.username : `@${acc.username}`) : undefined,
-          avatarUrl: acc.avatarUrl || "/images/socialcraft-logo.png",
-          isDefault: false,
-        }));
-
-        const existingIds = new Set(channels.map((c) => c.channelId));
-        const newChannels = imported.filter((c) => !existingIds.has(c.channelId));
-
-        if (newChannels.length > 0) {
-          onUpdateChannels([...channels, ...newChannels]);
-          toast.success(`${newChannels.length} Social-Media-Kanäle erfolgreich synchronisiert! 🎉`);
-        } else {
-          toast.info("Alle verknüpften Accounts sind bereits in deiner Kanalliste.");
-        }
+      if (newChannels.length > 0) {
+        onUpdateChannels([...channels, ...newChannels]);
+        toast.success(`${newChannels.length} Kanäle von Post for Me synchronisiert! 🎉`);
+      } else {
+        toast.info("Alle Post for Me Accounts sind bereits in deiner Kanalliste.");
       }
     } catch (err: any) {
       toast.error(`Sync-Fehler: ${err.message}`);
@@ -691,10 +660,9 @@ export function PostSchedulerView({
 
     const mediaList = selectedMediaUrls.length > 0 ? selectedMediaUrls : customMediaUrl ? [customMediaUrl] : [];
 
-    const pfmKey = settings?.postForMeApiKey;
-    const zernioKey = settings?.zernioApiKey;
+    const pfmKey = activePostForMeKey;
 
-    if (!pfmKey && !zernioKey) {
+    if (!pfmKey) {
       toast.error("Kein Post for Me API Key hinterlegt. Öffne das Setup!", {
         action: openDirectSetup ? { label: "Setup", onClick: openDirectSetup } : undefined,
       });

@@ -26,6 +26,7 @@ import { toast } from "sonner";
 import { PostForMeApiClient } from "../postforme/client";
 import type { PostForMeSocialAccount, PostForMePlatform } from "../postforme/types";
 import type { ApiSettings, SocialChannel, SocialPlatform } from "../types";
+import { ANCHORED_POSTFORME_API_KEY } from "../defaults";
 import { cn } from "@/lib/utils";
 
 interface PostForMeSetupModalProps {
@@ -67,7 +68,7 @@ export function PostForMeSetupModal({
   onUpdateChannels,
   onComplete,
 }: PostForMeSetupModalProps) {
-  const activeKey = settings.postForMeApiKey || settings.zernioApiKey || "";
+  const activeKey = settings.postForMeApiKey || ANCHORED_POSTFORME_API_KEY;
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(activeKey ? 2 : 1);
   const [apiKeyInput, setApiKeyInput] = useState(activeKey);
   const [webhookSecretInput, setWebhookSecretInput] = useState(
