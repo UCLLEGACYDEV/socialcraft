@@ -16,6 +16,7 @@ import {
   Cloud,
   Lock,
   Share2,
+  Link2,
 } from "lucide-react";
 import type { CreditStatus, TabKey } from "../types";
 import type { User } from "../auth";
@@ -340,6 +341,14 @@ export function CryptoxNavbar({
                   <span>30-Tage Content Batch Generator</span>
                 </DropdownMenuItem>
               )}
+
+              <DropdownMenuItem
+                onClick={() => onNavigate("scheduler")}
+                className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-semibold text-white hover:bg-white/[0.06] cursor-pointer transition-colors"
+              >
+                <Link2 className="h-4 w-4 text-[#FF4D17]" />
+                <span>Profile verknüpfen & Planer</span>
+              </DropdownMenuItem>
 
               {(onOpenPostForMeSetup || onOpenZernioSetup) && (
                 <DropdownMenuItem

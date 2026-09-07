@@ -130,25 +130,57 @@ export class PostForMeApiClient {
    */
   async createAuthUrl(
     platform: PostForMePlatform | string,
-    redirectUrl?: string
+    redirectUrlOverride?: string
   ): Promise<string> {
-    const payload: { platform: string; redirect_url?: string } = {
-      platform: platform.toLowerCase(),
+    const normPlatform = platform.toLowerCase();
+    const payload: Record<string, any> = {
+      platform: normPlatform === "twitter" ? "x" : normPlatform,
+      permissions: ["posts", "feeds"],
     };
-    if (redirectUrl) {
-      payload.redirect_url = redirectUrl;
+
+    if (normPlatform === "instagram") {
+      payload.platform_data = {
+        instagram: { connection_type: "instagram" },
+      };
+    } else if (normPlatform === "x" || normPlatform === "twitter") {
+      payload.platform = "x";
+      payload.platform_data = {
+        x: { connection_type: "oauth2" },
+      };
     }
 
-    const res = await this.request<any>("/social-accounts/auth-url", {
-      method: "POST",
-      body: JSON.stringify(payload),
-    });
-
-    const authUrl = res?.data?.url || res?.url;
-    if (!authUrl) {
-      throw new Error("Konnte keine Authentifizierungs-URL von Post for Me abrufen.");
+    if (redirectUrlOverride) {
+      payload.redirect_url_override = redirectUrlOverride;
     }
-    return authUrl;
+
+    try {
+      const res = await this.request<any>("/social-accounts/auth-url", {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+
+      const authUrl = res?.data?.url || res?.url;
+      if (!authUrl) {
+        throw new Error("Konnte keine Authentifizierungs-URL von Post for Me abrufen.");
+      }
+      return authUrl;
+    } catch (err: any) {
+      // If redirect_url_override is rejected because of quickstart system credentials, retry without override
+      if (
+        payload.redirect_url_override &&
+        (err.message?.includes("Redirect URL Override is not allowed") ||
+          err.message?.includes("Quickstart"))
+      ) {
+        delete payload.redirect_url_override;
+        const resRetry = await this.request<any>("/social-accounts/auth-url", {
+          method: "POST",
+          body: JSON.stringify(payload),
+        });
+        const retryUrl = resRetry?.data?.url || resRetry?.url;
+        if (retryUrl) return retryUrl;
+      }
+      throw err;
+    }
   }
 
   /**

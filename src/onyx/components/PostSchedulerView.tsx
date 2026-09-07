@@ -48,8 +48,11 @@ import {
   MoreHorizontal,
   Zap,
   Flame,
+  Link2,
+  Unlink,
 } from "lucide-react";
 import type { SocialChannel, ScheduledPost, SocialPlatform, SlideContent, HistoryEntry, ApiSettings } from "../types";
+import type { PostForMePlatform } from "../postforme/types";
 import { DEFAULT_SOCIAL_CHANNELS, ANCHORED_POSTFORME_API_KEY } from "../defaults";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -164,6 +167,120 @@ const PLATFORM_COLORS: Record<SocialPlatform, { bg: string; border: string; text
     badge: "bg-sky-500/20 text-sky-200 border-sky-400/30",
   },
 };
+
+export interface SchedulerConnectPlatformConfig {
+  id: PostForMePlatform;
+  name: string;
+  icon: React.ElementType;
+  gradient: string;
+  borderHover: string;
+  badge: string;
+  badgeStyle: string;
+  btnClass: string;
+  description: string;
+}
+
+export const SCHEDULER_CONNECT_PLATFORMS: SchedulerConnectPlatformConfig[] = [
+  {
+    id: "tiktok",
+    name: "TikTok",
+    icon: Video,
+    gradient: "from-cyan-500/15 via-teal-500/5 to-transparent",
+    borderHover: "border-cyan-500/30 hover:border-cyan-400 hover:shadow-[0_0_20px_rgba(6,182,212,0.2)]",
+    badge: "Direct Post & Entwürfe",
+    badgeStyle: "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
+    btnClass: "bg-cyan-500 hover:bg-cyan-400 text-black shadow-cyan-500/20",
+    description: "Direktes Veröffentlichen von Videos, Slides & Creator Inbox Entwürfen",
+  },
+  {
+    id: "instagram",
+    name: "Instagram",
+    icon: Instagram,
+    gradient: "from-pink-500/15 via-rose-500/5 to-transparent",
+    borderHover: "border-pink-500/30 hover:border-pink-400 hover:shadow-[0_0_20px_rgba(244,63,94,0.2)]",
+    badge: "Feed, Karussell & Reels",
+    badgeStyle: "bg-pink-500/15 text-pink-300 border-pink-500/30",
+    btnClass: "bg-gradient-to-r from-pink-500 to-rose-500 hover:brightness-110 text-white shadow-pink-500/20",
+    description: "Automatisches Veröffentlichen von Multi-Slide Karussells und Reels",
+  },
+  {
+    id: "facebook",
+    name: "Facebook",
+    icon: Facebook,
+    gradient: "from-blue-600/15 via-indigo-500/5 to-transparent",
+    borderHover: "border-blue-500/30 hover:border-blue-400 hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]",
+    badge: "Seiten & Gruppen",
+    badgeStyle: "bg-blue-600/15 text-blue-300 border-blue-500/30",
+    btnClass: "bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20",
+    description: "Beiträge mit Bildern & formatierter Caption auf Facebook-Seiten",
+  },
+  {
+    id: "linkedin",
+    name: "LinkedIn",
+    icon: Linkedin,
+    gradient: "from-sky-600/15 via-blue-500/5 to-transparent",
+    borderHover: "border-sky-500/30 hover:border-sky-400 hover:shadow-[0_0_20px_rgba(14,165,233,0.2)]",
+    badge: "Profil & Unternehmensseite",
+    badgeStyle: "bg-sky-600/15 text-sky-300 border-sky-500/30",
+    btnClass: "bg-sky-600 hover:bg-sky-500 text-white shadow-sky-600/20",
+    description: "B2B Karussell-Dokumente & Fachbeiträge auf deinem Profil",
+  },
+  {
+    id: "x",
+    name: "X (Twitter)",
+    icon: Twitter,
+    gradient: "from-zinc-500/15 via-zinc-700/5 to-transparent",
+    borderHover: "border-zinc-500/30 hover:border-zinc-300 hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]",
+    badge: "Posts & Threads",
+    badgeStyle: "bg-zinc-700/30 text-zinc-200 border-zinc-500/30",
+    btnClass: "bg-zinc-700 hover:bg-zinc-600 text-white shadow-zinc-700/20",
+    description: "Bilder-Tweets, Captions & automatische Hashtag-Distribution",
+  },
+  {
+    id: "youtube",
+    name: "YouTube",
+    icon: Youtube,
+    gradient: "from-red-600/15 via-orange-500/5 to-transparent",
+    borderHover: "border-red-500/30 hover:border-red-400 hover:shadow-[0_0_20px_rgba(239,68,68,0.2)]",
+    badge: "Community & Shorts",
+    badgeStyle: "bg-red-600/15 text-red-300 border-red-500/30",
+    btnClass: "bg-red-600 hover:bg-red-500 text-white shadow-red-600/20",
+    description: "Community-Posts mit Bildern & Text auf deinem YouTube Kanal",
+  },
+  {
+    id: "threads",
+    name: "Threads",
+    icon: MessageSquare,
+    gradient: "from-emerald-600/15 via-teal-500/5 to-transparent",
+    borderHover: "border-emerald-500/30 hover:border-emerald-400 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]",
+    badge: "Meta Threads",
+    badgeStyle: "bg-emerald-600/15 text-emerald-300 border-emerald-500/30",
+    btnClass: "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/20",
+    description: "Direktes Veröffentlichen auf Metas Text- & Bilder-Plattform",
+  },
+  {
+    id: "pinterest",
+    name: "Pinterest",
+    icon: Images,
+    gradient: "from-rose-600/15 via-pink-500/5 to-transparent",
+    borderHover: "border-rose-500/30 hover:border-rose-400 hover:shadow-[0_0_20px_rgba(244,63,94,0.2)]",
+    badge: "Pins & Pinnwände",
+    badgeStyle: "bg-rose-600/15 text-rose-300 border-rose-500/30",
+    btnClass: "bg-rose-600 hover:bg-rose-500 text-white shadow-rose-600/20",
+    description: "Pins auf deinen Pinnwänden mit Link & formatierter Beschreibung",
+  },
+  {
+    id: "bluesky",
+    name: "Bluesky",
+    icon: Globe,
+    gradient: "from-indigo-600/15 via-blue-500/5 to-transparent",
+    borderHover: "border-indigo-500/30 hover:border-indigo-400 hover:shadow-[0_0_20px_rgba(99,102,241,0.2)]",
+    badge: "AT Protocol",
+    badgeStyle: "bg-indigo-600/15 text-indigo-300 border-indigo-500/30",
+    btnClass: "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/20",
+    description: "Dezentrales Social Media Netzwerk über das offizielle AT-Protokoll",
+  },
+];
 
 export function PostSchedulerView({
   channels = DEFAULT_SOCIAL_CHANNELS,
@@ -472,19 +589,69 @@ export function PostSchedulerView({
 
   const [isPublishingZernio, setIsPublishingZernio] = useState(false);
   const [isSyncingChannels, setIsSyncingChannels] = useState(false);
+  const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
+  const [disconnectingChannelId, setDisconnectingChannelId] = useState<string | null>(null);
+  const [showComposerConnectQuick, setShowComposerConnectQuick] = useState(false);
 
   // Edit / Reschedule state
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const [quickReschedulePost, setQuickReschedulePost] = useState<ScheduledPost | null>(null);
   const [quickRescheduleDate, setQuickRescheduleDate] = useState<string>("");
 
-  const handleSyncAccounts = async () => {
+  const handleDirectConnectPlatform = async (platformId: string) => {
+    const key = activePostForMeKey;
+    if (!key) {
+      toast.error("Kein Post for Me API Key hinterlegt.");
+      if (openDirectSetup) openDirectSetup();
+      return;
+    }
+
+    setConnectingPlatform(platformId);
+    try {
+      const client = new PostForMeApiClient(key);
+      const redirectUrl = `${window.location.origin}/callback?platform=${platformId}`;
+      const authUrl = await client.createAuthUrl(platformId as any, redirectUrl);
+
+      if (authUrl) {
+        window.open(authUrl, "_blank", "width=650,height=750");
+        toast.info(`Autorisierungsfenster für ${platformId.toUpperCase()} geöffnet... 🔗`, {
+          description: "Schließe die Anmeldung im Popup ab. Dein Profil wird automatisch hier verknüpft.",
+        });
+      }
+    } catch (err: any) {
+      toast.error(`Verbindungsfehler (${platformId}): ${err.message}`);
+    } finally {
+      setConnectingPlatform(null);
+    }
+  };
+
+  const handleDisconnectChannel = async (chan: SocialChannel) => {
+    const accId = chan.postForMeAccountId || chan.channelId;
+    setDisconnectingChannelId(chan.id);
+    try {
+      if (chan.postForMeAccountId && activePostForMeKey) {
+        const client = new PostForMeApiClient(activePostForMeKey);
+        await client.disconnectSocialAccount(accId);
+      }
+      toast.success(`Account „${chan.name}“ erfolgreich getrennt.`);
+    } catch (err: any) {
+      console.warn("Could not disconnect remote account:", err.message);
+    } finally {
+      setDisconnectingChannelId(null);
+    }
+
+    onUpdateChannels(channels.filter((c) => c.id !== chan.id));
+  };
+
+  const handleSyncAccounts = async (silent = false) => {
     const postForMeKey = activePostForMeKey;
 
     if (!postForMeKey) {
-      toast.info("Bitte hinterlege zuerst deinen Post for Me API Key.", {
-        action: openDirectSetup ? { label: "Setup öffnen", onClick: openDirectSetup } : undefined,
-      });
+      if (!silent) {
+        toast.info("Bitte hinterlege zuerst deinen Post for Me API Key.", {
+          action: openDirectSetup ? { label: "Setup öffnen", onClick: openDirectSetup } : undefined,
+        });
+      }
       return;
     }
 
@@ -494,7 +661,9 @@ export function PostSchedulerView({
       const accounts = await client.getSocialAccounts();
 
       if (!accounts || accounts.length === 0) {
-        toast.info("Keine verknüpften Accounts bei Post for Me gefunden. Verbinde Kanäle im Setup.");
+        if (!silent) {
+          toast.info("Keine verknüpften Accounts bei Post for Me gefunden. Klicke auf ein Netzwerk, um ein Profil zu verbinden.");
+        }
         return;
       }
 
@@ -525,20 +694,55 @@ export function PostSchedulerView({
       const existingIds = new Set(channels.map((c) => c.channelId));
       const newChannels = imported.filter((c) => !existingIds.has(c.channelId));
 
+      const updatedChannels = channels.map((existing) => {
+        const fresh = imported.find((i) => i.channelId === existing.channelId);
+        return fresh ? { ...existing, ...fresh } : existing;
+      });
+
       if (newChannels.length > 0) {
-        onUpdateChannels([...channels, ...newChannels]);
-        toast.success(`${newChannels.length} Kanäle von Post for Me synchronisiert! 🎉`);
+        onUpdateChannels([...updatedChannels, ...newChannels]);
+        if (newChannels[0]) {
+          setSelectedChannelId(newChannels[0].id);
+        }
+        toast.success(`${newChannels.length} Social-Media-Profil(e) erfolgreich synchronisiert! 🎉`);
       } else {
-        toast.info("Alle Post for Me Accounts sind bereits in deiner Kanalliste.");
+        onUpdateChannels(updatedChannels);
+        if (!silent) {
+          toast.info("Alle Profile sind aktuell synchronisiert.");
+        }
       }
     } catch (err: any) {
-      toast.error(`Sync-Fehler: ${err.message}`);
+      if (!silent) {
+        toast.error(`Sync-Fehler: ${err.message}`);
+      }
     } finally {
       setIsSyncingChannels(false);
     }
   };
 
   const handleSyncZernioAccounts = handleSyncAccounts;
+
+  // Auto-sync listener when returning from OAuth popup or when window regains focus
+  useEffect(() => {
+    const handleAuthMessage = async (event: MessageEvent) => {
+      if (event.data?.type === "POSTFORME_AUTH_SUCCESS") {
+        await handleSyncAccounts(true);
+      }
+    };
+
+    const handleWindowFocus = () => {
+      if (activePostForMeKey) {
+        handleSyncAccounts(true);
+      }
+    };
+
+    window.addEventListener("message", handleAuthMessage);
+    window.addEventListener("focus", handleWindowFocus);
+    return () => {
+      window.removeEventListener("message", handleAuthMessage);
+      window.removeEventListener("focus", handleWindowFocus);
+    };
+  }, [activePostForMeKey, channels]);
 
   const handleCancelPost = async (post: ScheduledPost) => {
     if (post.postForMePostId && settings?.postForMeApiKey) {
@@ -1677,10 +1881,61 @@ export function PostSchedulerView({
               </div>
 
               {/* 1. Target Channel Selection */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                  <span>1. Ziel-Kanal & Seiten-ID wählen:</span>
-                </label>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                    <span>1. Ziel-Kanal & Profil wählen:</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setShowComposerConnectQuick((prev) => !prev)}
+                    className="text-xs font-semibold text-[#FF6A1F] hover:text-[#FF8038] flex items-center gap-1.5 cursor-pointer transition"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>{showComposerConnectQuick ? "Verbinden schließen" : "+ Profil verknüpfen (1-Klick)"}</span>
+                  </button>
+                </div>
+
+                {/* Quick 1-Click Platform OAuth Connect Drawer in Composer */}
+                {showComposerConnectQuick && (
+                  <div className="p-3.5 rounded-2xl bg-black/60 border border-[#FF4D17]/30 space-y-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-white flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+                        <span>Neues Profil direkt per 1-Klick verbinden:</span>
+                      </span>
+                      <span className="text-[10px] text-zinc-400 font-mono">Öffnet sicheres Login-Popup</span>
+                    </div>
+
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                      {SCHEDULER_CONNECT_PLATFORMS.map((platform) => {
+                        const Icon = platform.icon;
+                        const isConnecting = connectingPlatform === platform.id;
+                        return (
+                          <button
+                            key={platform.id}
+                            type="button"
+                            disabled={isConnecting}
+                            onClick={() => handleDirectConnectPlatform(platform.id)}
+                            className={cn(
+                              "flex flex-col items-center justify-center p-2 rounded-xl border text-center transition-all cursor-pointer group hover:scale-[1.03]",
+                              platform.gradient,
+                              platform.borderHover,
+                              isConnecting && "opacity-60 pointer-events-none"
+                            )}
+                            title={`${platform.name} autorisieren & verknüpfen`}
+                          >
+                            <Icon className={cn("h-4 w-4 mb-1 transition-transform group-hover:scale-110", isConnecting && "animate-spin text-orange-400")} />
+                            <span className="text-[10px] font-bold text-white truncate max-w-full">
+                              {isConnecting ? "Verbinde..." : platform.name}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   {channels.map((chan) => {
                     const Icon = PLATFORM_ICONS[chan.platform] || Share2;
@@ -1698,19 +1953,39 @@ export function PostSchedulerView({
                             : "bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.05]"
                         )}
                       >
-                        <div className="flex items-center gap-2.5">
-                          <div className={cn("p-1.5 rounded-lg border", style.bg, style.border)}>
-                            <Icon className={cn("h-4 w-4", style.text)} />
-                          </div>
-                          <div>
-                            <span className="text-xs font-bold text-white block">{chan.name}</span>
-                            <span className="text-[10px] font-mono text-zinc-400">ID: {chan.channelId}</span>
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          {chan.avatarUrl && chan.avatarUrl !== "/images/socialcraft-logo.png" ? (
+                            <img
+                              src={chan.avatarUrl}
+                              alt={chan.name}
+                              className="h-8 w-8 rounded-lg object-cover border border-white/10 shrink-0"
+                            />
+                          ) : (
+                            <div className={cn("p-1.5 rounded-lg border shrink-0", style.bg, style.border)}>
+                              <Icon className={cn("h-4 w-4", style.text)} />
+                            </div>
+                          )}
+                          <div className="min-w-0">
+                            <span className="text-xs font-bold text-white block truncate">{chan.name}</span>
+                            <span className="text-[10px] font-mono text-zinc-400 truncate block">
+                              {chan.handle || `ID: ${chan.channelId}`}
+                            </span>
                           </div>
                         </div>
-                        {isSelected && <Check className="h-4 w-4 text-orange-400" />}
+                        {isSelected && <Check className="h-4 w-4 text-orange-400 shrink-0" />}
                       </button>
                     );
                   })}
+
+                  {/* Add Platform trigger card right in the grid */}
+                  <button
+                    type="button"
+                    onClick={() => setShowComposerConnectQuick(true)}
+                    className="flex items-center justify-center gap-2 p-3 rounded-xl border border-dashed border-white/15 bg-white/[0.01] hover:bg-white/[0.04] hover:border-orange-500/40 text-zinc-400 hover:text-white transition-all cursor-pointer text-xs font-semibold"
+                  >
+                    <Plus className="h-4 w-4 text-orange-400" />
+                    <span>Weiteres Profil verknüpfen</span>
+                  </button>
                 </div>
               </div>
 
@@ -2422,115 +2697,314 @@ export function PostSchedulerView({
         </div>
       )}
 
-      {/* ── TAB 3: KANÄLE & ID-MANAGER ──────────────────────────────── */}
+      {/* ── TAB 3: PROFILE & KANÄLE VERLINKEN ──────────────────────── */}
       {activeTab === "channels" && (
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-bold text-white">Verknüpfte Kanäle & Seiten-IDs</h3>
-              <p className="text-xs text-zinc-400">
-                Verwalte deine Social-Media-Kanäle oder verbinde Live-Accounts per 1-Klick OAuth
-              </p>
+        <div className="space-y-8">
+          {/* Header & Status Bar */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-transparent border border-white/[0.08]">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="p-2 rounded-xl bg-[#FF4D17]/15 border border-[#FF4D17]/30 text-orange-400">
+                  <Link2 className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white tracking-tight">Social Media Profile verknüpfen</h3>
+                  <p className="text-xs text-zinc-400">
+                    Verbinde deine Social-Media-Accounts per 1-Klick OAuth direkt im Browser. Deine Posts & Karussells werden vollautomatisch übertragen.
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              {openDirectSetup && (
-                <button
-                  type="button"
-                  onClick={openDirectSetup}
-                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#FF4D1C] to-[#FF8038] text-white text-xs font-bold shadow-lg shadow-[#FF4D1C]/25 hover:brightness-110 flex items-center gap-1.5 transition cursor-pointer"
-                >
-                  <Key className="h-3.5 w-3.5" />
-                  <span>Post for Me Setup</span>
-                </button>
-              )}
+
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Post for Me Live-Engine aktiv</span>
+              </span>
 
               {hasPublisherKey && (
                 <button
                   type="button"
                   disabled={isSyncingChannels}
-                  onClick={handleSyncAccounts}
-                  className="px-3 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
+                  onClick={() => handleSyncAccounts(false)}
+                  className="px-3.5 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
+                  title="Profile von Post for Me abrufen & aktualisieren"
                 >
                   <RefreshCw className={cn("h-3.5 w-3.5", isSyncingChannels && "animate-spin text-orange-400")} />
-                  <span>Kanäle abgleichen</span>
+                  <span>{isSyncingChannels ? "Synchronisiere..." : "Kanäle abgleichen"}</span>
+                </button>
+              )}
+
+              {openDirectSetup && (
+                <button
+                  type="button"
+                  onClick={openDirectSetup}
+                  className="px-3.5 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                  title="API-Schlüssel & Webhooks einsehen"
+                >
+                  <Key className="h-3.5 w-3.5 text-orange-400" />
+                  <span>Setup / Webhooks</span>
                 </button>
               )}
 
               <button
                 type="button"
-                onClick={() => setShowAddChannel(true)}
-                className="cryptox-orange-btn !py-2 !px-4 text-xs font-bold"
+                onClick={() => setShowAddChannel((prev) => !prev)}
+                className="px-3 py-2 rounded-xl border border-dashed border-white/20 hover:border-orange-500/40 text-xs font-medium text-zinc-400 hover:text-white transition cursor-pointer"
               >
-                <Plus className="h-4 w-4 mr-1.5" />
-                Kanal manuell
+                + Kanal manuell
               </button>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {channels.map((chan) => {
-              const Icon = PLATFORM_ICONS[chan.platform] || Share2;
-              const style = PLATFORM_COLORS[chan.platform] || PLATFORM_COLORS.facebook;
-              return (
-                <div
-                  key={chan.id}
-                  className="cryptox-card p-6 border border-white/[0.08] flex flex-col justify-between space-y-4 hover:border-white/20 transition-all"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <div className={cn("p-2 rounded-xl border", style.bg, style.border)}>
-                        <Icon className={cn("h-5 w-5", style.text)} />
-                      </div>
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                        Bereit / Aktiv
-                      </span>
-                    </div>
+          {/* ── SECTION 1: 1-KLICK PROFIL VERLINKUNG (OAUTH) ──────────── */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-orange-400" />
+                  <span>Profile direkt verknüpfen (1-Klick OAuth)</span>
+                </h4>
+                <p className="text-xs text-zinc-400">
+                  Wähle ein soziales Netzwerk – es öffnet sich das offizielle Login-Fenster zur direkten Freigabe.
+                </p>
+              </div>
+              <span className="text-[11px] text-zinc-500 font-mono hidden sm:inline-block">
+                Offizielle API-Anbindung
+              </span>
+            </div>
 
-                    <div>
-                      <h4 className="text-base font-bold text-white">{chan.name}</h4>
-                      {chan.handle && <p className="text-xs text-zinc-400 font-mono">{chan.handle}</p>}
-                    </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {SCHEDULER_CONNECT_PLATFORMS.map((platform) => {
+                const Icon = platform.icon;
+                const isConnecting = connectingPlatform === platform.id;
+                const matchedChannels = channels.filter(
+                  (c) =>
+                    c.platform.toLowerCase() === platform.id.toLowerCase() ||
+                    (platform.id === "x" && c.platform.toLowerCase() === "twitter")
+                );
+                const isConnected = matchedChannels.length > 0;
 
-                    <div className="bg-black/40 p-3 rounded-xl border border-white/[0.06] space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-zinc-400">Seiten- / Kanal-ID:</span>
-                        <span className="font-mono font-bold text-orange-300">{chan.channelId}</span>
+                return (
+                  <div
+                    key={platform.id}
+                    className={cn(
+                      "group relative p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between space-y-4 bg-gradient-to-b",
+                      platform.gradient,
+                      platform.borderHover,
+                      isConnected ? "border-white/15 bg-white/[0.02]" : "border-white/[0.08]"
+                    )}
+                  >
+                    <div className="space-y-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-3">
+                          <div className={cn("p-2.5 rounded-xl border", platform.badgeStyle)}>
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <div>
+                            <h5 className="text-sm font-bold text-white group-hover:text-white transition-colors">
+                              {platform.name}
+                            </h5>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border inline-block mt-0.5" style={{ borderColor: "rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.4)", color: "#a1a1aa" }}>
+                              {platform.badge}
+                            </span>
+                          </div>
+                        </div>
+
+                        {isConnected ? (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shrink-0">
+                            <Check className="w-3 h-3" />
+                            <span>Verbunden</span>
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-zinc-500 font-mono px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/10 shrink-0">
+                            Bereit
+                          </span>
+                        )}
                       </div>
-                      {chan.businessId && (
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="text-zinc-400">Business-ID:</span>
-                          <span className="font-mono text-zinc-300">{chan.businessId}</span>
+
+                      <p className="text-xs text-zinc-400 leading-relaxed min-h-[36px]">
+                        {platform.description}
+                      </p>
+
+                      {/* Display connected account handles if available */}
+                      {isConnected && (
+                        <div className="p-2 rounded-xl bg-black/40 border border-white/10 space-y-1">
+                          <span className="text-[10px] text-zinc-400 font-semibold block">Verknüpfte Accounts:</span>
+                          <div className="flex flex-wrap gap-1">
+                            {matchedChannels.map((c) => (
+                              <span
+                                key={c.id}
+                                className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-white/10 text-white border border-white/15 truncate max-w-full"
+                              >
+                                {c.handle || c.name}
+                              </span>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
-                  </div>
 
-                  <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between">
-                    {chan.platform === "facebook" ? (
-                      <a
-                        href={`https://business.facebook.com/latest/settings/pages?business_id=${chan.businessId || "25861095310170488"}&selected_asset_id=${chan.channelId}&selected_asset_type=page#`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-xs text-orange-400 hover:underline flex items-center gap-1 font-semibold"
+                    <div className="pt-2 border-t border-white/[0.06]">
+                      <button
+                        type="button"
+                        disabled={isConnecting}
+                        onClick={() => handleDirectConnectPlatform(platform.id)}
+                        className={cn(
+                          "w-full py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md",
+                          isConnected
+                            ? "bg-white/10 hover:bg-white/20 text-white border border-white/15"
+                            : platform.btnClass
+                        )}
                       >
-                        In Meta Business öffnen <ExternalLink className="h-3 w-3" />
-                      </a>
-                    ) : (
-                      <span className="text-xs text-zinc-500 font-mono">ID verknüpft</span>
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteChannel(chan.id)}
-                      className="text-zinc-500 hover:text-red-400 transition-colors p-1 cursor-pointer"
-                      title="Kanal entfernen"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                        {isConnecting ? (
+                          <>
+                            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                            <span>Öffne Autorisierung...</span>
+                          </>
+                        ) : isConnected ? (
+                          <>
+                            <Plus className="h-3.5 w-3.5" />
+                            <span>Weiteren {platform.name}-Account verbinden</span>
+                          </>
+                        ) : (
+                          <>
+                            <Link2 className="h-3.5 w-3.5" />
+                            <span>{platform.name} jetzt verknüpfen</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ── SECTION 2: AKTIVE PROFILE & KANÄLE ────────────────────── */}
+          <div className="space-y-4 pt-4 border-t border-white/[0.08]">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Share2 className="h-4 w-4 text-orange-400" />
+                  <span>Deine aktiven Kanäle & Profile ({channels.length})</span>
+                </h4>
+                <p className="text-xs text-zinc-400">
+                  Diese Accounts stehen dir im Beitrags-Planer und beim automatischen Veröffentlichen zur Verfügung.
+                </p>
+              </div>
+
+              {channels.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("composer")}
+                  className="cryptox-orange-btn !py-1.5 !px-3.5 text-xs font-bold hidden sm:flex items-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Beitrag planen</span>
+                </button>
+              )}
+            </div>
+
+            {channels.length === 0 ? (
+              <div className="p-8 rounded-2xl border border-dashed border-white/15 bg-white/[0.01] text-center space-y-3">
+                <div className="w-12 h-12 mx-auto rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400">
+                  <Link2 className="w-6 h-6" />
                 </div>
-              );
-            })}
+                <h5 className="text-sm font-bold text-white">Noch keine Social-Media-Profile verknüpft</h5>
+                <p className="text-xs text-zinc-400 max-w-md mx-auto">
+                  Klicke oben auf deine bevorzugte Plattform (z. B. TikTok, Instagram oder LinkedIn), um deinen Account in Sekunden per 1-Klick zu verbinden.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {channels.map((chan) => {
+                  const Icon = PLATFORM_ICONS[chan.platform] || Share2;
+                  const style = PLATFORM_COLORS[chan.platform] || PLATFORM_COLORS.facebook;
+                  const isDisconnecting = disconnectingChannelId === chan.id;
+
+                  return (
+                    <div
+                      key={chan.id}
+                      className="cryptox-card p-5 border border-white/[0.08] flex flex-col justify-between space-y-4 hover:border-white/20 transition-all group"
+                    >
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2.5">
+                            {chan.avatarUrl && chan.avatarUrl !== "/images/socialcraft-logo.png" ? (
+                              <img
+                                src={chan.avatarUrl}
+                                alt={chan.name}
+                                className="w-10 h-10 rounded-xl object-cover border border-white/15 shadow-sm"
+                              />
+                            ) : (
+                              <div className={cn("p-2 rounded-xl border", style.bg, style.border)}>
+                                <Icon className={cn("h-5 w-5", style.text)} />
+                              </div>
+                            )}
+
+                            <div>
+                              <h5 className="text-sm font-bold text-white leading-tight">{chan.name}</h5>
+                              {chan.handle ? (
+                                <p className="text-xs text-orange-300 font-mono font-medium">{chan.handle}</p>
+                              ) : (
+                                <p className="text-[11px] text-zinc-400 font-mono capitalize">{chan.platform}</p>
+                              )}
+                            </div>
+                          </div>
+
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                            Aktiv
+                          </span>
+                        </div>
+
+                        {/* Account ID / Business Details */}
+                        <div className="bg-black/40 p-3 rounded-xl border border-white/[0.06] space-y-1.5 text-xs font-mono">
+                          <div className="flex items-center justify-between">
+                            <span className="text-zinc-400 font-sans">Kanal- / Post for Me ID:</span>
+                            <span className="text-orange-300 font-bold truncate max-w-[170px]" title={chan.channelId}>
+                              {chan.channelId}
+                            </span>
+                          </div>
+                          {chan.businessId && (
+                            <div className="flex items-center justify-between">
+                              <span className="text-zinc-400 font-sans">Business ID:</span>
+                              <span className="text-zinc-300">{chan.businessId}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedChannelId(chan.id);
+                            setActiveTab("composer");
+                            toast.info(`Kanal „${chan.name}“ im Planer ausgewählt.`);
+                          }}
+                          className="text-xs font-semibold text-orange-400 hover:text-orange-300 hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <span>Im Planer wählen</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={isDisconnecting}
+                          onClick={() => handleDisconnectChannel(chan)}
+                          className="px-2.5 py-1 rounded-lg text-xs text-zinc-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                          title="Profil trennen"
+                        >
+                          <Trash2 className={cn("h-3.5 w-3.5", isDisconnecting && "animate-spin")} />
+                          <span>{isDisconnecting ? "Trennt..." : "Trennen"}</span>
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Add Channel Modal / Inline Form */}

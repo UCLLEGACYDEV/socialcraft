@@ -262,11 +262,15 @@ function OnyxStudio() {
               isDefault: false,
             }));
 
-            const existingIds = new Set(socialChannels.map((c) => c.channelId));
-            const newOnes = imported.filter((c) => !existingIds.has(c.channelId));
-            if (newOnes.length > 0) {
-              setSocialChannels([...socialChannels, ...newOnes]);
-            }
+            setSocialChannels((prev) => {
+              const existingIds = new Set(prev.map((c) => c.channelId));
+              const newOnes = imported.filter((c) => !existingIds.has(c.channelId));
+              const updatedExisting = prev.map((old) => {
+                const fresh = imported.find((i) => i.channelId === old.channelId);
+                return fresh ? { ...old, ...fresh } : old;
+              });
+              return [...updatedExisting, ...newOnes];
+            });
           }
         } catch {}
 
