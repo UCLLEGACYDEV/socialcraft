@@ -196,6 +196,7 @@ export function AiCloneView({
         referenceImages: [],
         placement: "all_slides",
         analysisSummary: result.analysisSummary,
+        updatedAt: new Date().toISOString(),
       };
 
       setProfiles((prev) => [
@@ -255,6 +256,7 @@ export function AiCloneView({
         customPrefix: result.customPrefix,
         placement: "all_slides",
         analysisSummary: result.analysisSummary,
+        updatedAt: new Date().toISOString(),
       };
 
       // Set active & update profiles
