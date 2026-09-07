@@ -316,7 +316,11 @@ export function PostSchedulerView({
     try {
       const res = await generateViralCaption({
         topic: currentTopic,
-        platform: selectedChannel?.platform || "instagram",
+        platform: (["facebook", "general", "instagram", "linkedin", "tiktok", "youtube"] as const).includes(
+          selectedChannel?.platform as never,
+        )
+          ? (selectedChannel?.platform as "facebook" | "general" | "instagram" | "linkedin" | "tiktok" | "youtube")
+          : "general",
         apiKey: settings?.geminiApiKey,
       });
 
