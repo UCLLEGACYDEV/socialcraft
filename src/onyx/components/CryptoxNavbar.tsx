@@ -9,10 +9,12 @@ import {
   RefreshCw,
   Settings,
   Shield,
+  ShieldCheck,
   Sparkles,
   User as UserIcon,
   Image as ImageIcon,
   Cloud,
+  Lock,
 } from "lucide-react";
 import type { CreditStatus, TabKey } from "../types";
 import type { User } from "../auth";
@@ -41,6 +43,7 @@ interface CryptoxNavbarProps {
   onOpenBrandKit: () => void;
   onOpenSettings: () => void;
   onOpenMcp: () => void;
+  onOpenDatenschutz?: () => void;
 }
 
 // Group 1: Creation Tools
@@ -211,7 +214,7 @@ export function CryptoxNavbar({
             )}
           </div>
 
-          {/* Tools Cluster: Brand Kit & Settings */}
+          {/* Tools Cluster: Brand Kit, Settings & Privacy/Datenschutz */}
           <div className="flex items-center rounded-xl border border-white/10 bg-white/[0.03] p-0.5 backdrop-blur-xl">
             <button
               type="button"
@@ -223,6 +226,20 @@ export function CryptoxNavbar({
               <span className="hidden xl:inline">Brand Kit</span>
             </button>
             <div className="h-3.5 w-[1px] bg-white/10 my-auto" />
+            {onOpenDatenschutz && (
+              <>
+                <button
+                  type="button"
+                  onClick={onOpenDatenschutz}
+                  className="flex items-center gap-1.5 rounded-lg px-2 py-1.5 text-xs font-medium text-zinc-300 hover:text-emerald-400 hover:bg-white/[0.06] transition-colors cursor-pointer"
+                  title="Datenschutz & Sicherheit (DSGVO)"
+                >
+                  <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
+                  <span className="hidden 2xl:inline text-emerald-400/90 font-medium">Sicherheit</span>
+                </button>
+                <div className="h-3.5 w-[1px] bg-white/10 my-auto" />
+              </>
+            )}
             <button
               type="button"
               onClick={onOpenSettings}
@@ -342,6 +359,16 @@ export function CryptoxNavbar({
                   <Settings className="h-4 w-4 text-zinc-400" />
                   <span>Studio & API Einstellungen</span>
                 </DropdownMenuItem>
+
+                {onOpenDatenschutz && (
+                  <DropdownMenuItem
+                    onClick={onOpenDatenschutz}
+                    className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 cursor-pointer transition-colors"
+                  >
+                    <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                    <span>Datenschutz & Sicherheit (DSGVO)</span>
+                  </DropdownMenuItem>
+                )}
 
                 <DropdownMenuSeparator className="bg-white/[0.08]" />
 

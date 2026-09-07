@@ -45,6 +45,7 @@ interface CryptoxLandingPageProps {
   onNavigateAdmin: () => void;
   onOpenCreditsUpgrade?: () => void;
   onLogout: () => void;
+  onOpenDatenschutz?: () => void;
 }
 
 export function CryptoxLandingPage({
@@ -54,6 +55,7 @@ export function CryptoxLandingPage({
   onNavigateAdmin,
   onOpenCreditsUpgrade,
   onLogout,
+  onOpenDatenschutz,
 }: CryptoxLandingPageProps) {
   const [activeSlideFilter, setActiveSlideFilter] = useState<string>("Gesamt");
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
@@ -862,6 +864,16 @@ export function CryptoxLandingPage({
             <button type="button" onClick={() => scrollToSection("faq")} className="hover:text-white transition-colors cursor-pointer">
               FAQ
             </button>
+            {onOpenDatenschutz && (
+              <button
+                type="button"
+                onClick={onOpenDatenschutz}
+                className="hover:text-emerald-400 transition-colors font-medium flex items-center gap-1 cursor-pointer"
+              >
+                <ShieldCheck className="h-3 w-3 text-emerald-400" />
+                <span>Datenschutz (DSGVO)</span>
+              </button>
+            )}
             <button type="button" onClick={onNavigateStudio} className="hover:text-primary-bright transition-colors font-semibold cursor-pointer">
               Studio
             </button>
@@ -872,6 +884,10 @@ export function CryptoxLandingPage({
           </div>
 
           <div className="flex items-center gap-3">
+            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] text-emerald-300 flex items-center gap-1">
+              <ShieldCheck className="h-3 w-3" />
+              TLS 256-Bit geschützt
+            </span>
             <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[11px] text-white/60">
               Made with ❤️ in Germany
             </span>

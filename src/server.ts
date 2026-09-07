@@ -46,22 +46,56 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 import { handleCloudApiRequest } from "./server/cloud-api-router";
 
+const SECURITY_HEADERS: Record<string, string> = {
+  // Anti-Clickjacking: prevent framing on third-party sites
+  "X-Frame-Options": "SAMEORIGIN",
+  // Anti-MIME-Sniffing
+  "X-Content-Type-Options": "nosniff",
+  // XSS protection filter
+  "X-XSS-Protection": "1; mode=block",
+  // Referrer privacy
+  "Referrer-Policy": "strict-origin-when-cross-origin",
+  // Restrict sensitive browser APIs
+  "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()",
+  // Enforce HTTPS
+  "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
+  // Cross-Origin-Opener-Policy
+  "Cross-Origin-Opener-Policy": "same-origin-allow-popups",
+};
+
+function applySecurityHeaders(response: Response): Response {
+  const newHeaders = new Headers(response.headers);
+  for (const [key, value] of Object.entries(SECURITY_HEADERS)) {
+    if (!newHeaders.has(key)) {
+      newHeaders.set(key, value);
+    }
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: newHeaders,
+  });
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     const cloudResponse = await handleCloudApiRequest(request);
     if (cloudResponse) {
-      return cloudResponse;
+      return applySecurityHeaders(cloudResponse);
     }
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const normalized = await normalizeCatastrophicSsrResponse(response);
+      return applySecurityHeaders(normalized);
     } catch (error) {
-      console.error(error);
-      return new Response(renderErrorPage(), {
-        status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
-      });
+      console.error("[SSR] Uncaught server error:", error);
+      return applySecurityHeaders(
+        new Response(renderErrorPage(), {
+          status: 500,
+          headers: { "content-type": "text/html; charset=utf-8" },
+        })
+      );
     }
   },
 };

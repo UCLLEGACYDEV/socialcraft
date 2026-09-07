@@ -116,9 +116,24 @@ export async function resolveCloudIdentity(request: Request): Promise<CloudIdent
   return { id: "guest", role: "guest", verified: false, root: GUEST_ROOT };
 }
 
-/** Normalizes a key/prefix and rejects traversal attempts. */
+/** Normalizes a key/prefix and rejects directory traversal & injection attempts. */
 export function normalizeKey(key: string): string {
-  return key.replace(/^\/+/, "").replace(/\.\.+\//g, "");
+  if (!key || typeof key !== "string") return "";
+  let clean = key.replace(/\0/g, "").replace(/\\/g, "/");
+  try {
+    clean = decodeURIComponent(clean);
+  } catch {
+    // ignore malformed URI components
+  }
+  // Strip null bytes and ASCII control characters
+  clean = clean.replace(/[\x00-\x1f\x7f]/g, "");
+  // Collapse duplicate slashes
+  clean = clean.replace(/\/+/g, "/");
+  // Remove leading slashes
+  clean = clean.replace(/^\/+/, "");
+  // Strictly filter out any path traversal segments: ../, ./, .., .
+  const parts = clean.split("/").filter((part) => part && part !== "." && part !== "..");
+  return parts.join("/");
 }
 
 /** True when the given key/prefix is inside the caller's own folder. */

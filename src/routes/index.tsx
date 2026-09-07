@@ -24,6 +24,7 @@ import { AdminDashboard } from "@/onyx/components/AdminDashboard";
 import { AuthModal } from "@/onyx/components/AuthModal";
 import { UserProfileModal } from "@/onyx/components/UserProfileModal";
 import { CreditUpgradeModal } from "@/onyx/components/CreditUpgradeModal";
+import { DatenschutzModal } from "@/onyx/components/DatenschutzModal";
 import { type User, getStoredCurrentUser, getStoredUsers, saveStoredCurrentUser } from "@/onyx/auth";
 
 import {
@@ -93,6 +94,7 @@ function OnyxStudio() {
   );
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showDatenschutz, setShowDatenschutz] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<"login" | "register">("login");
 
   // SaaS rule: Authenticated users stay in the Studio workspace; never bounced to marketing landing page
@@ -916,6 +918,7 @@ function OnyxStudio() {
           onNavigateAdmin={handleOpenAdmin}
           onOpenCreditsUpgrade={() => setShowCreditUpgrade(true)}
           onLogout={handleLogout}
+          onOpenDatenschutz={() => setShowDatenschutz(true)}
         />
         {showAuthModal && (
           <AuthModal
@@ -941,6 +944,16 @@ function OnyxStudio() {
             onRefreshCredits={() => void refreshCredits()}
           />
         )}
+        {showDatenschutz && (
+          <DatenschutzModal
+            onClose={() => setShowDatenschutz(false)}
+            onClearAllData={() => {
+              setCurrentUser(null);
+              setSlides([]);
+              setHistory([]);
+            }}
+          />
+        )}
         <Toaster />
       </div>
     );
@@ -960,6 +973,16 @@ function OnyxStudio() {
             initialMode={authModalMode}
             onClose={() => setShowAuthModal(false)}
             onSuccess={handleAuthSuccess}
+          />
+        )}
+        {showDatenschutz && (
+          <DatenschutzModal
+            onClose={() => setShowDatenschutz(false)}
+            onClearAllData={() => {
+              setCurrentUser(null);
+              setSlides([]);
+              setHistory([]);
+            }}
           />
         )}
         <Toaster />
@@ -995,6 +1018,7 @@ function OnyxStudio() {
           onOpenBrandKit={() => setShowBrandKit(true)}
           onOpenSettings={() => setShowSettings(true)}
           onOpenMcp={() => setShowMcp(true)}
+          onOpenDatenschutz={() => setShowDatenschutz(true)}
         />
 
         <main className="mx-auto w-full flex-1 p-4 sm:p-6 max-w-[1600px]">
@@ -1141,6 +1165,27 @@ function OnyxStudio() {
             />
           )}
         </main>
+
+        {/* Studio Security & Privacy Footer */}
+        <footer className="mt-auto border-t border-white/[0.06] bg-black/40 backdrop-blur-md px-6 py-4">
+          <div className="mx-auto flex max-w-[1550px] flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-500">
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
+              <span className="text-zinc-400">Socialcraft Security Shield v2.4 • TLS 256-Bit verschlüsselt</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setShowDatenschutz(true)}
+                className="text-zinc-400 hover:text-white transition-colors cursor-pointer underline-offset-4 hover:underline"
+              >
+                Datenschutz & Sicherheit (DSGVO)
+              </button>
+              <span>•</span>
+              <span className="text-zinc-500">Zero-Tracking & Anti-Hacking Hardening</span>
+            </div>
+          </div>
+        </footer>
       </div>
 
       {showSettings && (
@@ -1206,6 +1251,17 @@ function OnyxStudio() {
           onClose={() => setShowProfileModal(false)}
           onUserUpdated={(u) => setCurrentUser(u)}
           onLogout={handleLogout}
+        />
+      )}
+
+      {showDatenschutz && (
+        <DatenschutzModal
+          onClose={() => setShowDatenschutz(false)}
+          onClearAllData={() => {
+            setCurrentUser(null);
+            setSlides([]);
+            setHistory([]);
+          }}
         />
       )}
 
