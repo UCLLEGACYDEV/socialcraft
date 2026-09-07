@@ -37,6 +37,17 @@ import {
   RotateCcw,
   Edit3,
   X,
+  ChevronLeft,
+  ChevronRight,
+  CalendarDays,
+  LayoutGrid,
+  List,
+  Smartphone,
+  Heart,
+  Bookmark,
+  MoreHorizontal,
+  Zap,
+  Flame,
 } from "lucide-react";
 import type { SocialChannel, ScheduledPost, SocialPlatform, SlideContent, HistoryEntry, ApiSettings } from "../types";
 import { DEFAULT_SOCIAL_CHANNELS } from "../defaults";
@@ -171,6 +182,102 @@ export function PostSchedulerView({
   const [filterPlatform, setFilterPlatform] = useState<string>("all");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showHistoryPicker, setShowHistoryPicker] = useState(false);
+
+  // Calendar & Preview State
+  const [viewMode, setViewMode] = useState<"calendar" | "list">("calendar");
+  const [calendarDate, setCalendarDate] = useState<Date>(() => new Date());
+  const [composerTab, setComposerTab] = useState<"preview" | "media">("preview");
+  const [previewSlideIdx, setPreviewSlideIdx] = useState<number>(0);
+  const [inspectPost, setInspectPost] = useState<ScheduledPost | null>(null);
+
+  const handlePrevMonth = () => {
+    setCalendarDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+  const handleNextMonth = () => {
+    setCalendarDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+  const handleTodayMonth = () => {
+    setCalendarDate(new Date());
+  };
+
+  const getCalendarDays = (year: number, month: number) => {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    let startDayOfWeek = firstDay.getDay() - 1;
+    if (startDayOfWeek === -1) startDayOfWeek = 6;
+
+    const days: { date: Date; isCurrentMonth: boolean }[] = [];
+
+    const prevMonthLastDay = new Date(year, month, 0).getDate();
+    for (let i = startDayOfWeek - 1; i >= 0; i--) {
+      days.push({
+        date: new Date(year, month - 1, prevMonthLastDay - i),
+        isCurrentMonth: false,
+      });
+    }
+
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+      days.push({
+        date: new Date(year, month, i),
+        isCurrentMonth: true,
+      });
+    }
+
+    const totalCells = days.length > 35 ? 42 : 35;
+    const remaining = totalCells - days.length;
+    for (let i = 1; i <= remaining; i++) {
+      days.push({
+        date: new Date(year, month + 1, i),
+        isCurrentMonth: false,
+      });
+    }
+
+    return days;
+  };
+
+  const setBestTime = (offsetDays: number, hour: number, minute: number, label: string) => {
+    const d = new Date();
+    d.setDate(d.getDate() + offsetDays);
+    d.setHours(hour, minute, 0, 0);
+    setScheduledDate(d.toISOString().slice(0, 16));
+    toast.success(
+      `Termin gesetzt: ${label} (${d.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit" })} um ${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")} Uhr) ✨`
+    );
+  };
+
+  const handleAutoDistributePosts = () => {
+    const scheduledOnly = posts.filter((p) => p.status === "scheduled" || p.status === "draft");
+    if (scheduledOnly.length === 0) {
+      toast.info("Keine offenen geplanten Beiträge zum automatischen Verteilen vorhanden.");
+      return;
+    }
+
+    const sorted = [...scheduledOnly].sort(
+      (a, b) => new Date(a.scheduledFor).getTime() - new Date(b.scheduledFor).getTime()
+    );
+
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() + 1);
+    startDate.setHours(18, 0, 0, 0);
+
+    const updatedMap = new Map<string, string>();
+    sorted.forEach((post, idx) => {
+      const d = new Date(startDate);
+      d.setDate(d.getDate() + idx);
+      updatedMap.set(post.id, d.toISOString());
+    });
+
+    const newPosts = posts.map((p) => {
+      if (updatedMap.has(p.id)) {
+        return { ...p, scheduledFor: updatedMap.get(p.id)! };
+      }
+      return p;
+    });
+
+    onUpdatePosts(newPosts);
+    toast.success(`🎉 ${sorted.length} Beiträge gleichmäßig verteilt (jeden Tag 18:00 Uhr ab morgen)!`);
+  };
 
   // Composer Form State
   const defaultChannel = channels.find((c) => c.isDefault) || channels[0] || DEFAULT_SOCIAL_CHANNELS[0];
@@ -901,7 +1008,49 @@ export function PostSchedulerView({
               ))}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              {/* View Switcher: Kalender vs. Liste */}
+              <div className="flex items-center rounded-lg border border-white/10 bg-white/[0.03] p-0.5">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("calendar")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer",
+                    viewMode === "calendar"
+                      ? "bg-[#FF4D17] text-white shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  )}
+                >
+                  <CalendarDays className="h-3.5 w-3.5" />
+                  <span>Kalender</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer",
+                    viewMode === "list"
+                      ? "bg-[#FF4D17] text-white shadow-sm"
+                      : "text-zinc-400 hover:text-white"
+                  )}
+                >
+                  <List className="h-3.5 w-3.5" />
+                  <span>Liste</span>
+                </button>
+              </div>
+
+              {posts.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handleAutoDistributePosts}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20 text-orange-300 text-xs font-semibold transition-all cursor-pointer"
+                  title="Verteilt alle offenen Beiträge automatisch: 1 Beitrag pro Tag um 18:00 Uhr ab morgen"
+                >
+                  <Zap className="h-3.5 w-3.5 text-orange-400" />
+                  <span>Auto-Verteilen</span>
+                </button>
+              )}
+
               {historyEntries.length > 0 && (
                 <button
                   type="button"
@@ -909,56 +1058,202 @@ export function PostSchedulerView({
                     setShowHistoryPicker(true);
                     setActiveTab("composer");
                   }}
-                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-200 transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-200 transition-all cursor-pointer"
                 >
                   <BookOpen className="h-3.5 w-3.5 text-orange-400" />
-                  <span>Aus Historie wählen ({historyEntries.length})</span>
+                  <span>Aus Historie ({historyEntries.length})</span>
                 </button>
               )}
 
               <button
                 type="button"
                 onClick={() => setActiveTab("composer")}
-                className="cryptox-orange-btn !py-2 !px-4 text-xs font-bold"
+                className="cryptox-orange-btn !py-1.5 !px-3.5 text-xs font-bold"
               >
-                <Plus className="h-4 w-4 mr-1.5" />
-                Beitrag hinzufügen
+                <Plus className="h-4 w-4 mr-1" />
+                Beitrag planen
               </button>
             </div>
           </div>
 
-          {filteredPosts.length === 0 ? (
-            <div className="cryptox-card p-12 text-center border border-white/[0.08] space-y-4">
-              <div className="h-16 w-16 mx-auto rounded-2xl bg-[#FF4D17]/10 border border-[#FF4D17]/30 flex items-center justify-center text-orange-400">
-                <CalendarIcon className="h-8 w-8" />
-              </div>
-              <h3 className="text-lg font-bold text-white">Noch keine Beiträge in der Warteschlange</h3>
-              <p className="text-xs text-zinc-400 max-w-md mx-auto">
-                Plane jetzt deinen ersten Beitrag für deine Facebook-Seite (ID: 337570872768998) oder wähle ein fertiges Projekt aus der Galerie.
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("composer")}
-                  className="cryptox-orange-btn !py-2.5 !px-6 text-xs font-bold"
-                >
-                  Jetzt Beitrag planen
-                </button>
-                {historyEntries.length > 0 && (
+          {/* ── CALENDAR VIEW ───────────────────────────────────────── */}
+          {viewMode === "calendar" && (
+            <div className="cryptox-card p-5 border border-white/[0.08] space-y-4">
+              {/* Calendar Month Navigation Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                    <CalendarDays className="h-4 w-4 text-[#FF6A1F]" />
+                    <span className="capitalize">
+                      {calendarDate.toLocaleDateString("de-DE", { month: "long", year: "numeric" })}
+                    </span>
+                  </h2>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-zinc-400">
+                    {filteredPosts.length} Beiträge terminiert
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
                   <button
                     type="button"
-                    onClick={() => {
-                      setShowHistoryPicker(true);
-                      setActiveTab("composer");
-                    }}
-                    className="px-5 py-2.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-200 transition-all"
+                    onClick={handlePrevMonth}
+                    className="p-1.5 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/10 text-zinc-300 hover:text-white transition cursor-pointer"
+                    title="Vorheriger Monat"
                   >
-                    Aus Historie / Galerie laden ({historyEntries.length})
+                    <ChevronLeft className="h-4 w-4" />
                   </button>
-                )}
+                  <button
+                    type="button"
+                    onClick={handleTodayMonth}
+                    className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/10 text-zinc-300 hover:text-white transition cursor-pointer"
+                  >
+                    Heute
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleNextMonth}
+                    className="p-1.5 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/10 text-zinc-300 hover:text-white transition cursor-pointer"
+                    title="Nächster Monat"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Weekday Names Header */}
+              <div className="grid grid-cols-7 gap-1.5 text-center text-xs font-bold text-zinc-400 uppercase tracking-wider py-1 border-b border-white/[0.04]">
+                <span>Mo</span>
+                <span>Di</span>
+                <span>Mi</span>
+                <span>Do</span>
+                <span>Fr</span>
+                <span>Sa</span>
+                <span>So</span>
+              </div>
+
+              {/* Month Grid Cells */}
+              <div className="grid grid-cols-7 gap-1.5">
+                {getCalendarDays(calendarDate.getFullYear(), calendarDate.getMonth()).map((cell, idx) => {
+                  const isToday = cell.date.toDateString() === new Date().toDateString();
+                  const y = cell.date.getFullYear();
+                  const m = cell.date.getMonth();
+                  const d = cell.date.getDate();
+                  const dayPosts = filteredPosts.filter((p) => {
+                    const postD = new Date(p.scheduledFor);
+                    return (
+                      postD.getFullYear() === y &&
+                      postD.getMonth() === m &&
+                      postD.getDate() === d
+                    );
+                  });
+
+                  return (
+                    <div
+                      key={idx}
+                      className={cn(
+                        "min-h-[110px] rounded-xl border p-1.5 flex flex-col justify-between transition-all group relative",
+                        cell.isCurrentMonth
+                          ? "bg-white/[0.02] border-white/[0.07] hover:border-white/20"
+                          : "bg-black/40 border-white/[0.03] opacity-35",
+                        isToday &&
+                          "border-[#FF4D17]/60 bg-[#FF4D17]/[0.06] shadow-[0_0_15px_-4px_rgba(255,77,23,0.3)] ring-1 ring-[#FF4D17]/40"
+                      )}
+                    >
+                      {/* Cell Header: Day Number + Add Button */}
+                      <div className="flex items-center justify-between">
+                        <span
+                          className={cn(
+                            "text-xs font-mono font-bold px-1.5 py-0.5 rounded",
+                            isToday ? "bg-[#FF4D17] text-white" : "text-zinc-400"
+                          )}
+                        >
+                          {cell.date.getDate()}
+                        </span>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newD = new Date(cell.date);
+                            newD.setHours(18, 0, 0, 0);
+                            setScheduledDate(newD.toISOString().slice(0, 16));
+                            setActiveTab("composer");
+                          }}
+                          className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded bg-white/10 hover:bg-[#FF4D17] text-white flex items-center justify-center cursor-pointer"
+                          title={`Beitrag für den ${cell.date.toLocaleDateString("de-DE")} planen`}
+                        >
+                          <Plus className="h-3 w-3" />
+                        </button>
+                      </div>
+
+                      {/* Day Posts List */}
+                      <div className="space-y-1 mt-1 flex-1 overflow-hidden">
+                        {dayPosts.map((p) => {
+                          const Icon = PLATFORM_ICONS[p.platform] || Share2;
+                          const style = PLATFORM_COLORS[p.platform] || PLATFORM_COLORS.facebook;
+                          const postTime = new Date(p.scheduledFor).toLocaleTimeString("de-DE", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          });
+                          const isPublished = p.status === "published";
+                          const isCancelled = p.status === "cancelled";
+
+                          return (
+                            <button
+                              key={p.id}
+                              type="button"
+                              onClick={() => setInspectPost(p)}
+                              className={cn(
+                                "w-full text-left p-1 rounded-md border text-[10px] transition-all flex items-center gap-1 truncate cursor-pointer",
+                                isPublished
+                                  ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
+                                  : isCancelled
+                                  ? "bg-red-500/10 border-red-500/30 text-red-300 opacity-60"
+                                  : "bg-white/[0.05] border-white/10 hover:border-orange-500/40 text-white"
+                              )}
+                              title={`${p.title} (${postTime} Uhr)`}
+                            >
+                              <Icon className={cn("h-3 w-3 shrink-0", style.text)} />
+                              <span className="font-mono text-[9px] text-zinc-400 shrink-0">{postTime}</span>
+                              <span className="truncate font-medium">{p.title || p.caption.slice(0, 20)}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {dayPosts.length === 0 && (
+                        <div className="text-[10px] text-zinc-600 font-mono text-center pb-1 select-none">
+                          —
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
-          ) : (
+          )}
+
+          {/* ── LIST VIEW ───────────────────────────────────────────── */}
+          {viewMode === "list" && (
+            filteredPosts.length === 0 ? (
+              <div className="cryptox-card p-12 text-center border border-white/[0.08] space-y-4">
+                <div className="h-16 w-16 mx-auto rounded-2xl bg-[#FF4D17]/10 border border-[#FF4D17]/30 flex items-center justify-center text-orange-400">
+                  <CalendarIcon className="h-8 w-8" />
+                </div>
+                <h3 className="text-lg font-bold text-white">Noch keine Beiträge in der Warteschlange</h3>
+                <p className="text-xs text-zinc-400 max-w-md mx-auto">
+                  Plane jetzt deinen ersten Beitrag oder wechsle in die Kalender-Ansicht für eine Monatsübersicht.
+                </p>
+                <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("composer")}
+                    className="cryptox-orange-btn !py-2.5 !px-6 text-xs font-bold"
+                  >
+                    Jetzt Beitrag planen
+                  </button>
+                </div>
+              </div>
+            ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {filteredPosts.map((post) => {
                 const Icon = PLATFORM_ICONS[post.platform] || Share2;
@@ -1169,7 +1464,7 @@ export function PostSchedulerView({
                 );
               })}
             </div>
-          )}
+          ))}
         </div>
       )}
 
@@ -1327,16 +1622,63 @@ export function PostSchedulerView({
 
               {/* 2. Date & Time Selection */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                  <Clock className="h-3.5 w-3.5 text-orange-400" />
-                  <span>2. Datum & Uhrzeit der Veröffentlichung:</span>
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-orange-400" />
+                    <span>2. Datum & Uhrzeit der Veröffentlichung:</span>
+                  </label>
+                  <span className="text-[10px] text-zinc-500 font-mono">Beste Zeiten für Algorithmus</span>
+                </div>
+
                 <input
                   type="datetime-local"
                   value={scheduledDate}
                   onChange={(e) => setScheduledDate(e.target.value)}
-                  className="w-full bg-[#120F17] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                  className="w-full bg-[#120F17] border border-white/10 rounded-xl px-4 py-2.5 text-xs font-mono text-white focus:outline-none focus:border-orange-500"
                 />
+
+                {/* Smart Peak Engagement Timing Pills */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                  <span className="text-[10px] text-zinc-400 font-medium flex items-center gap-1 mr-0.5">
+                    <Flame className="w-3 h-3 text-orange-400" />
+                    <span>Peak-Zeiten:</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setBestTime(0, 18, 0, "Heute 18:00")}
+                    className="rounded-md border border-white/10 bg-white/[0.03] hover:border-orange-500/40 hover:bg-orange-500/10 px-2 py-0.5 text-[10px] font-medium text-zinc-300 hover:text-white transition-all cursor-pointer"
+                  >
+                    ⚡ Heute 18:00 (Prime)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBestTime(1, 12, 0, "Morgen 12:00")}
+                    className="rounded-md border border-white/10 bg-white/[0.03] hover:border-orange-500/40 hover:bg-orange-500/10 px-2 py-0.5 text-[10px] font-medium text-zinc-300 hover:text-white transition-all cursor-pointer"
+                  >
+                    ⚡ Morgen 12:00 (Mittag)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBestTime(1, 18, 30, "Morgen 18:30")}
+                    className="rounded-md border border-white/10 bg-white/[0.03] hover:border-orange-500/40 hover:bg-orange-500/10 px-2 py-0.5 text-[10px] font-medium text-zinc-300 hover:text-white transition-all cursor-pointer"
+                  >
+                    ⚡ Morgen 18:30 (Abend)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBestTime(2, 18, 0, "In 2 Tagen")}
+                    className="rounded-md border border-white/10 bg-white/[0.03] hover:border-orange-500/40 hover:bg-orange-500/10 px-2 py-0.5 text-[10px] font-medium text-zinc-300 hover:text-white transition-all cursor-pointer"
+                  >
+                    +2 Tage 18:00
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBestTime(3, 19, 0, "In 3 Tagen")}
+                    className="rounded-md border border-white/10 bg-white/[0.03] hover:border-orange-500/40 hover:bg-orange-500/10 px-2 py-0.5 text-[10px] font-medium text-zinc-300 hover:text-white transition-all cursor-pointer"
+                  >
+                    +3 Tage 19:00
+                  </button>
+                </div>
               </div>
 
               {/* 3. Title & Caption */}
@@ -1732,15 +2074,41 @@ export function PostSchedulerView({
               </div>
             </div>
 
-            {/* Right Column: Media Preview & Karussell-Übernahme */}
+            {/* Right Column: Live Feed Mockup Preview & Media Management */}
             <div className="space-y-5 lg:col-span-5">
-              {/* Media Selector Card */}
+              {/* Media & Preview Card */}
               <div className="cryptox-card p-6 border border-white/[0.08] space-y-4">
+                {/* Header Switcher */}
                 <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                  <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
-                    <Layers className="h-4 w-4 text-orange-400" />
-                    <span>Visuals / Medien ({selectedMediaUrls.length})</span>
-                  </h4>
+                  <div className="flex items-center rounded-lg border border-white/10 bg-white/[0.03] p-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setComposerTab("preview")}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer",
+                        composerTab === "preview"
+                          ? "bg-[#FF4D17] text-white shadow-sm"
+                          : "text-zinc-400 hover:text-white"
+                      )}
+                    >
+                      <Smartphone className="h-3.5 w-3.5" />
+                      <span>Live Vorschau</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setComposerTab("media")}
+                      className={cn(
+                        "flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer",
+                        composerTab === "media"
+                          ? "bg-[#FF4D17] text-white shadow-sm"
+                          : "text-zinc-400 hover:text-white"
+                      )}
+                    >
+                      <Layers className="h-3.5 w-3.5" />
+                      <span>Medien ({selectedMediaUrls.length})</span>
+                    </button>
+                  </div>
+
                   {currentSlides.length > 0 && (
                     <button
                       type="button"
@@ -1756,126 +2124,204 @@ export function PostSchedulerView({
                   )}
                 </div>
 
-                {/* Selected Thumbnails */}
-                {selectedMediaUrls.length > 0 ? (
-                  <div className="space-y-3">
-                    <div className="grid grid-cols-3 gap-2">
-                      {selectedMediaUrls.map((url, i) => (
-                        <div key={i} className="relative group rounded-xl overflow-hidden border border-white/10 aspect-[4/5] bg-black/40">
-                          <img src={url} alt={`Slide ${i + 1}`} className="w-full h-full object-cover" />
-                          <button
-                            type="button"
-                            onClick={() => setSelectedMediaUrls(selectedMediaUrls.filter((_, idx) => idx !== i))}
-                            className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 cursor-pointer"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                          <span className="absolute bottom-1 left-1 text-[9px] font-mono px-1 rounded bg-black/70 text-white">
-                            #{i + 1}
+                {/* ── TAB A: LIVE FEED MOCKUP PREVIEW ── */}
+                {composerTab === "preview" && (
+                  <div className="rounded-2xl border border-white/10 bg-black/60 p-4 space-y-3 shadow-xl">
+                    {/* Phone Mockup Header */}
+                    <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <img
+                          src={selectedChannel?.avatarUrl || "/images/socialcraft-logo.png"}
+                          alt={selectedChannel?.name || "Kanal"}
+                          className="w-7 h-7 rounded-full object-cover border border-white/20"
+                        />
+                        <div>
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs font-bold text-white">{selectedChannel?.name || "Kanal"}</span>
+                            <span className="text-[9px] px-1 py-0.2 rounded bg-white/10 text-zinc-300 font-mono capitalize">
+                              {selectedChannel?.platform || "social"}
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-zinc-400 font-mono block">
+                            {selectedChannel?.handle || `@${selectedChannel?.platform || "user"}`}
                           </span>
                         </div>
-                      ))}
+                      </div>
+                      <MoreHorizontal className="w-4 h-4 text-zinc-400" />
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedMediaUrls([])}
-                      className="text-xs text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
-                    >
-                      Alle Medien entfernen
-                    </button>
-                  </div>
-                ) : (
-                  <div className="p-6 border border-dashed border-white/10 rounded-2xl text-center space-y-2 bg-white/[0.01]">
-                    <p className="text-xs text-zinc-400">Keine Visuals ausgewählt.</p>
-                    <p className="text-[11px] text-zinc-500">
-                      Du kannst Visuals aus dem Karussell-Generator, der Historie oder per Bild-URL verwenden.
-                    </p>
-                    {onNavigateToCarousel && (
-                      <button
-                        type="button"
-                        onClick={onNavigateToCarousel}
-                        className="text-xs font-semibold text-orange-400 hover:underline pt-1 inline-block cursor-pointer"
-                      >
-                        Zum Karussell-Generator $\rightarrow$
-                      </button>
+
+                    {/* Media Carousel Preview */}
+                    {selectedMediaUrls.length > 0 ? (
+                      <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-black/80 border border-white/10 group">
+                        <img
+                          src={selectedMediaUrls[previewSlideIdx % selectedMediaUrls.length]}
+                          alt={`Slide ${previewSlideIdx + 1}`}
+                          className="w-full h-full object-cover transition-transform duration-300"
+                        />
+                        {selectedMediaUrls.length > 1 && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setPreviewSlideIdx((prev) =>
+                                  prev > 0 ? prev - 1 : selectedMediaUrls.length - 1
+                                )
+                              }
+                              className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition cursor-pointer"
+                              title="Vorherige Folie"
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setPreviewSlideIdx((prev) =>
+                                  prev < selectedMediaUrls.length - 1 ? prev + 1 : 0
+                                )
+                              }
+                              className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/60 hover:bg-black/80 text-white flex items-center justify-center transition cursor-pointer"
+                              title="Nächste Folie"
+                            >
+                              <ChevronRight className="w-4 h-4" />
+                            </button>
+                            <div className="absolute top-2 right-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-mono text-white font-bold backdrop-blur-sm">
+                              {previewSlideIdx + 1} / {selectedMediaUrls.length}
+                            </div>
+                          </>
+                        )}
+
+                        {/* Audio Pill */}
+                        {selectedSound && (
+                          <div className="absolute bottom-2 left-2 right-2 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-lg border border-white/15 flex items-center gap-1.5 text-[11px] text-cyan-300 truncate">
+                            <Music className="w-3 h-3 text-cyan-400 shrink-0 animate-spin" />
+                            <span className="truncate">
+                              {selectedSound.title} — {selectedSound.artist}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="aspect-[4/5] rounded-xl border border-dashed border-white/10 bg-white/[0.02] flex flex-col items-center justify-center p-6 text-center text-zinc-500">
+                        <Images className="w-8 h-8 mb-2 opacity-50" />
+                        <span className="text-xs">Keine Bilder im Karussell</span>
+                        <span className="text-[10px] mt-1">Wechsle zu „Medien“, um Visuals hinzuzufügen</span>
+                      </div>
                     )}
+
+                    {/* Actions bar */}
+                    <div className="flex items-center justify-between text-zinc-400 pt-1">
+                      <div className="flex items-center gap-3">
+                        <Heart className="w-4 h-4 text-red-400 hover:scale-110 transition cursor-pointer" />
+                        <MessageSquare className="w-4 h-4 text-zinc-300 hover:scale-110 transition cursor-pointer" />
+                        <Send className="w-4 h-4 text-zinc-300 hover:scale-110 transition cursor-pointer" />
+                      </div>
+                      <Bookmark className="w-4 h-4 text-zinc-300 hover:scale-110 transition cursor-pointer" />
+                    </div>
+
+                    {/* Post Caption Preview */}
+                    <div className="space-y-1 text-xs text-zinc-300">
+                      <p className="line-clamp-3 leading-relaxed">
+                        <strong className="text-white mr-1.5">{selectedChannel?.name}</strong>
+                        {postCaption || "Hier erscheint deine generierte Caption..."}
+                      </p>
+                      {postHashtags && (
+                        <p className="text-[#FF6A1F] text-[11px] font-medium leading-normal break-words">
+                          {postHashtags}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
 
-                {/* Custom Image URL fallback */}
-                <div className="pt-3 border-t border-white/[0.08] space-y-2">
-                  <label className="text-[11px] font-semibold text-zinc-400 block">
-                    Oder Bild-URL manuell hinzufügen:
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={customMediaUrl}
-                      onChange={(e) => setCustomMediaUrl(e.target.value)}
-                      placeholder="https://..."
-                      className="flex-1 bg-[#120F17] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-orange-500"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (customMediaUrl.trim()) {
-                          setSelectedMediaUrls([...selectedMediaUrls, customMediaUrl.trim()]);
-                          setCustomMediaUrl("");
-                          toast.success("Bild hinzugefügt!");
-                        }
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-all cursor-pointer"
-                    >
-                      +
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Live Preview Card */}
-              <div className="cryptox-card p-5 border border-white/[0.08] space-y-3">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 block">
-                  Live Post-Vorschau
-                </span>
-                <div className="rounded-2xl border border-white/10 bg-[#0d0a13] p-4 space-y-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-full bg-orange-500/20 border border-orange-500/40 flex items-center justify-center font-bold text-orange-400 text-xs">
-                      SC
-                    </div>
-                    <div>
-                      <span className="text-xs font-bold text-white block">
-                        {channels.find((c) => c.id === selectedChannelId)?.name || "Socialcraft"}
-                      </span>
-                      <span className="text-[10px] text-zinc-500">
-                        Geplant für {new Date(scheduledDate).toLocaleDateString("de-DE")}
-                      </span>
-                    </div>
-                  </div>
-
-                  <p className="text-xs text-zinc-200 whitespace-pre-line leading-relaxed">
-                    {postCaption || "Deine Caption wird hier in der Vorschau angezeigt..."}
-                  </p>
-
-                  {postHashtags && (
-                    <p className="text-[11px] text-orange-400/80 font-mono">{postHashtags}</p>
-                  )}
-
-                  {/* Active Audio Overlay Pill */}
-                  {selectedSound && (
-                    <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2 text-xs">
-                      <div className="flex items-center gap-2 text-cyan-300 min-w-0">
-                        <div className="w-5 h-5 rounded-md bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center shrink-0">
-                          <Music className="w-3 h-3 text-cyan-400" />
+                {/* ── TAB B: MEDIA SELECTOR & UPLOAD ── */}
+                {composerTab === "media" && (
+                  <div className="space-y-4">
+                    {selectedMediaUrls.length > 0 ? (
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-3 gap-2">
+                          {selectedMediaUrls.map((url, i) => (
+                            <div
+                              key={i}
+                              className="relative group rounded-xl overflow-hidden border border-white/10 aspect-[4/5] bg-black/40"
+                            >
+                              <img
+                                src={url}
+                                alt={`Slide ${i + 1}`}
+                                className="w-full h-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setSelectedMediaUrls(
+                                    selectedMediaUrls.filter((_, idx) => idx !== i)
+                                  )
+                                }
+                                className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 cursor-pointer"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
+                              <span className="absolute bottom-1 left-1 text-[9px] font-mono px-1 rounded bg-black/70 text-white">
+                                #{i + 1}
+                              </span>
+                            </div>
+                          ))}
                         </div>
-                        <span className="font-bold text-[11px] truncate">{selectedSound.title}</span>
-                        <span className="text-[10px] text-zinc-400 truncate">• {selectedSound.artist}</span>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedMediaUrls([])}
+                          className="text-xs text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
+                        >
+                          Alle Medien entfernen
+                        </button>
                       </div>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 shrink-0">
-                        🎵 Audio aktiv
-                      </span>
+                    ) : (
+                      <div className="p-6 border border-dashed border-white/10 rounded-2xl text-center space-y-2 bg-white/[0.01]">
+                        <p className="text-xs text-zinc-400">Keine Visuals ausgewählt.</p>
+                        <p className="text-[11px] text-zinc-500">
+                          Du kannst Visuals aus dem Karussell-Generator, der Historie oder per Bild-URL verwenden.
+                        </p>
+                        {onNavigateToCarousel && (
+                          <button
+                            type="button"
+                            onClick={onNavigateToCarousel}
+                            className="text-xs font-semibold text-orange-400 hover:underline pt-1 inline-block cursor-pointer"
+                          >
+                            Zum Karussell-Generator $\rightarrow$
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Custom Image URL fallback */}
+                    <div className="pt-3 border-t border-white/[0.08] space-y-2">
+                      <label className="text-[11px] font-semibold text-zinc-400 block">
+                        Oder Bild-URL manuell hinzufügen:
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={customMediaUrl}
+                          onChange={(e) => setCustomMediaUrl(e.target.value)}
+                          placeholder="https://..."
+                          className="flex-1 bg-[#120F17] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (customMediaUrl.trim()) {
+                              setSelectedMediaUrls([...selectedMediaUrls, customMediaUrl.trim()]);
+                              setCustomMediaUrl("");
+                              toast.success("Bild hinzugefügt!");
+                            }
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-all cursor-pointer"
+                        >
+                          + Hinzufügen
+                        </button>
+                      </div>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -2133,6 +2579,123 @@ export function PostSchedulerView({
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* ── INSPECT POST DETAILS MODAL ─────────────────────────────── */}
+      {inspectPost && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-xl bg-[#0F0D15] border border-white/15 rounded-2xl shadow-2xl p-6 text-white space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2.5">
+                {(() => {
+                  const Icon = PLATFORM_ICONS[inspectPost.platform] || Share2;
+                  const style = PLATFORM_COLORS[inspectPost.platform] || PLATFORM_COLORS.facebook;
+                  return (
+                    <div className={cn("p-1.5 rounded-lg border", style.bg, style.border)}>
+                      <Icon className={cn("h-4 w-4", style.text)} />
+                    </div>
+                  );
+                })()}
+                <div>
+                  <h3 className="text-sm font-bold text-white">{inspectPost.title || "Beitrags-Details"}</h3>
+                  <p className="text-[11px] text-zinc-400 font-mono">
+                    Geplant für: {new Date(inspectPost.scheduledFor).toLocaleString("de-DE")} Uhr
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setInspectPost(null)}
+                className="text-zinc-500 hover:text-white p-1 cursor-pointer transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Media Gallery in Modal */}
+            {inspectPost.mediaUrls && inspectPost.mediaUrls.length > 0 && (
+              <div className="space-y-1.5">
+                <span className="text-xs font-semibold text-zinc-400">
+                  Karussell-Bilder ({inspectPost.mediaUrls.length}):
+                </span>
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {inspectPost.mediaUrls.map((url, i) => (
+                    <img
+                      key={i}
+                      src={url}
+                      alt={`Slide ${i + 1}`}
+                      className="h-28 w-20 object-cover rounded-lg border border-white/10 shrink-0"
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Caption in Modal */}
+            <div className="space-y-1.5">
+              <span className="text-xs font-semibold text-zinc-400">Caption & Text:</span>
+              <div className="p-3 rounded-xl bg-black/50 border border-white/10 text-xs leading-relaxed max-h-44 overflow-y-auto whitespace-pre-wrap font-sans text-zinc-200">
+                {inspectPost.caption}
+              </div>
+            </div>
+
+            {/* Hashtags */}
+            {inspectPost.hashtags && inspectPost.hashtags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {inspectPost.hashtags.map((tag, i) => (
+                  <span
+                    key={i}
+                    className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-orange-300"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-white/10">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleQuickRescheduleOpen(inspectPost);
+                    setInspectPost(null);
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-xs font-semibold transition cursor-pointer"
+                >
+                  <Clock className="w-3.5 h-3.5 text-orange-400" />
+                  <span>Datum anpassen</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleEditPost(inspectPost);
+                    setInspectPost(null);
+                    setActiveTab("composer");
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-xs font-semibold transition cursor-pointer"
+                >
+                  <Edit3 className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Vollständig bearbeiten</span>
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    handleDeletePost(inspectPost.id);
+                    setInspectPost(null);
+                  }}
+                  className="p-2 text-zinc-400 hover:text-red-400 transition cursor-pointer"
+                  title="Beitrag löschen"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
