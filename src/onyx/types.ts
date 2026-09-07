@@ -161,5 +161,6 @@ export interface AiCloneProfile {
   negativePrompt: string;
   customPrefix: string;
   placement: ClonePlacement;
+  analysisSummary?: string[];
   updatedAt: string;
 }
