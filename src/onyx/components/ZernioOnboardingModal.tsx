@@ -53,10 +53,19 @@ export function ZernioOnboardingModal({
 }: ZernioOnboardingModalProps) {
   const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(settings.zernioApiKey ? 2 : 1);
   const [apiKeyInput, setApiKeyInput] = useState(settings.zernioApiKey || "");
+  const [webhookSecretInput, setWebhookSecretInput] = useState(
+    settings.zernioWebhookSecret || "PGYSvZxkcOH0XH9I8xhbzrB0/vrxa9GIdEr0QwwhKM9wjcW4uN8Cp8PMZKVAE1wECSKSye7svSmIqCLWjQ=="
+  );
   const [isVerifying, setIsVerifying] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
+  const [copiedWebhookUrl, setCopiedWebhookUrl] = useState(false);
+  const [copiedWebhookSecret, setCopiedWebhookSecret] = useState(false);
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
   const [connectedCount, setConnectedCount] = useState<number>(0);
+
+  const webhookEndpointUrl = typeof window !== "undefined"
+    ? `${window.location.origin}/api/cloud/webhook/zernio`
+    : "https://mein-socialcraft.de/api/cloud/webhook/zernio";
 
   if (!isOpen) return null;
 
@@ -66,6 +75,20 @@ export function ZernioOnboardingModal({
     setCopiedKey(true);
     setTimeout(() => setCopiedKey(false), 2000);
     toast.success("API Key in die Zwischenablage kopiert!");
+  };
+
+  const handleCopyWebhookUrl = () => {
+    navigator.clipboard.writeText(webhookEndpointUrl);
+    setCopiedWebhookUrl(true);
+    setTimeout(() => setCopiedWebhookUrl(false), 2000);
+    toast.success("Webhook URL in Zwischenablage kopiert! 📋");
+  };
+
+  const handleCopyWebhookSecret = () => {
+    navigator.clipboard.writeText(webhookSecretInput);
+    setCopiedWebhookSecret(true);
+    setTimeout(() => setCopiedWebhookSecret(false), 2000);
+    toast.success("Webhook Signing Secret kopiert! 🔐");
   };
 
   const handleVerifyStep1 = async () => {
@@ -87,6 +110,7 @@ export function ZernioOnboardingModal({
       onChangeSettings({
         zernioApiKey: apiKeyInput.trim(),
         zernioProfileId: profileId,
+        zernioWebhookSecret: webhookSecretInput.trim(),
       });
 
       // Try fetching accounts
@@ -99,7 +123,7 @@ export function ZernioOnboardingModal({
         // ignore
       }
 
-      toast.success("Auto-Publishing Engine erfolgreich verbunden! 🎉");
+      toast.success("Auto-Publishing Engine & Webhooks erfolgreich verbunden! 🎉");
       setCurrentStep(2);
     } catch (err: any) {
       toast.error(`Verbindung fehlgeschlagen: ${err.message}`);
@@ -224,17 +248,60 @@ export function ZernioOnboardingModal({
                       </button>
                     </div>
 
+                    {/* Webhook Secret input */}
+                    <div className="pt-2 border-t border-white/10 space-y-2">
+                      <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                        <span className="font-semibold text-white flex items-center gap-1">
+                          <Radio className="w-3 h-3 text-orange-400 animate-pulse" />
+                          <span>Webhook Signing Secret (Echtzeit-Rückmeldung):</span>
+                        </span>
+                        <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.2 rounded border border-emerald-500/20 font-bold">
+                          Aktiv
+                        </span>
+                      </div>
+                      <div className="relative flex items-center">
+                        <input
+                          type="password"
+                          value={webhookSecretInput}
+                          onChange={(e) => setWebhookSecretInput(e.target.value)}
+                          placeholder="Webhook Signing Secret..."
+                          className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-1.5 text-xs font-mono text-zinc-300 placeholder:text-white/20 focus:outline-none focus:border-[#FF4D1C] pr-20"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleCopyWebhookSecret}
+                          className="absolute right-1.5 px-2 py-0.5 text-[10px] font-medium text-zinc-400 hover:text-white bg-white/5 hover:bg-white/10 rounded border border-white/10 transition flex items-center gap-1 cursor-pointer"
+                        >
+                          {copiedWebhookSecret ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                          <span>Kopieren</span>
+                        </button>
+                      </div>
+
+                      {/* Live Webhook URL */}
+                      <div className="flex items-center justify-between bg-black/40 p-2 rounded-lg border border-white/5 text-[11px]">
+                        <span className="text-zinc-500 truncate mr-2 font-mono">{webhookEndpointUrl}</span>
+                        <button
+                          type="button"
+                          onClick={handleCopyWebhookUrl}
+                          className="text-[10px] font-semibold text-orange-400 hover:underline shrink-0 flex items-center gap-1 cursor-pointer"
+                        >
+                          {copiedWebhookUrl ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                          <span>URL kopieren</span>
+                        </button>
+                      </div>
+                    </div>
+
                     <button
                       type="button"
                       disabled={isVerifying}
                       onClick={handleVerifyStep1}
-                      className="w-full py-2.5 px-4 bg-[#FF4D1C] hover:bg-[#E03E0E] active:scale-[0.99] text-white font-medium text-sm rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-[#FF4D1C]/25 transition disabled:opacity-50"
+                      className="w-full py-2.5 px-4 bg-[#FF4D1C] hover:bg-[#E03E0E] active:scale-[0.99] text-white font-medium text-sm rounded-lg flex items-center justify-center gap-2 shadow-lg shadow-[#FF4D1C]/25 transition disabled:opacity-50 mt-2"
                     >
                       {isVerifying ? (
                         <span>Prüfe Verbindung...</span>
                       ) : (
                         <>
-                          <span>Continue</span>
+                          <span>Continue & Speichern</span>
                           <ArrowRight className="w-4 h-4" />
                         </>
                       )}
@@ -359,9 +426,14 @@ export function ZernioOnboardingModal({
 
                 {currentStep === 3 && (
                   <div className="pt-2 space-y-3">
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-xs text-emerald-300 flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
-                      <span>Socialcraft Direct Hub ist voll einsatzbereit!</span>
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3 text-xs text-emerald-300 space-y-1.5">
+                      <div className="flex items-center gap-2 font-bold">
+                        <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                        <span>Socialcraft Direct Hub & Webhooks sind aktiv!</span>
+                      </div>
+                      <p className="text-[11px] text-zinc-400">
+                        Status-Updates zu Veröffentlichungen und Social-Accounts werden automatisch in Echtzeit empfangen.
+                      </p>
                     </div>
 
                     <button

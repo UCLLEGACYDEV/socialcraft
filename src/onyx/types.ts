@@ -129,6 +129,7 @@ export interface ApiSettings {
   s4AutoSave: boolean;
   zernioApiKey?: string | undefined;
   zernioProfileId?: string | undefined;
+  zernioWebhookSecret?: string | undefined;
 }
 
 export type JobStatus =

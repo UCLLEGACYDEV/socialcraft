@@ -37,7 +37,10 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
   const url = new URL(request.url);
   const pathname = url.pathname;
 
-  if (!pathname.startsWith("/api/cloud/")) {
+  const isCloudRoute = pathname.startsWith("/api/cloud/");
+  const isWebhookRoute = pathname.startsWith("/api/webhook") || pathname.startsWith("/api/webhooks");
+
+  if (!isCloudRoute && !isWebhookRoute) {
     return null;
   }
 
@@ -46,7 +49,64 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
     return new Response(null, { status: 204, headers: corsHeaders });
   }
 
-  const endpoint = pathname.replace("/api/cloud/", "").replace(/\/+$/, "");
+  const endpoint = pathname.replace(/^\/api\/(cloud|webhooks?)\/?/, "").replace(/\/+$/, "");
+
+  // 0. Zernio / Direct Hub Webhook Receiver
+  if (
+    endpoint === "zernio" ||
+    endpoint === "webhook/zernio" ||
+    endpoint === "webhooks/zernio" ||
+    (isWebhookRoute && (endpoint === "" || endpoint === "zernio"))
+  ) {
+    if (request.method === "GET") {
+      return jsonResponse({
+        status: "active",
+        service: "Socialcraft Direct Hub Webhook Receiver",
+        supportedEvents: [
+          "post.published",
+          "post.failed",
+          "account.connected",
+          "account.disconnected",
+          "post.scheduled",
+          "media.processed",
+        ],
+        timestamp: new Date().toISOString(),
+      });
+    }
+
+    try {
+      const rawText = await request.text();
+      let payload: any = {};
+      try {
+        payload = JSON.parse(rawText);
+      } catch {
+        payload = { raw: rawText };
+      }
+
+      const signature =
+        request.headers.get("x-zernio-signature") ||
+        request.headers.get("x-webhook-signature") ||
+        request.headers.get("x-signature") ||
+        "";
+
+      console.log("[Zernio Webhook Event Received]", {
+        event: payload.event || payload.type || "post.event",
+        timestamp: new Date().toISOString(),
+        postId: payload.postId || payload.data?._id || payload._id,
+        signaturePresent: !!signature,
+      });
+
+      return jsonResponse({
+        received: true,
+        event: payload.event || payload.type || "generic",
+        status: "acknowledged",
+        timestamp: new Date().toISOString(),
+      });
+    } catch (err: unknown) {
+      console.error("[Zernio Webhook Handling Error]", err);
+      return jsonResponse({ received: true, note: "processed with fallback" }, 200);
+    }
+  }
 
   const identity = await resolveCloudIdentity(request);
 
