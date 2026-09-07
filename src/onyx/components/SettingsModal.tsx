@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Lock, Trash2, RefreshCw, ChevronDown, ChevronUp, Cloud, Sparkles, CheckCircle2, Shield } from "lucide-react";
+import { Lock, Trash2, RefreshCw, ChevronDown, ChevronUp, Cloud, Sparkles, CheckCircle2, Shield, Share2, Key } from "lucide-react";
 import { toast } from "sonner";
 import { ModalShell } from "./SlideEditModal";
 import { StudioSelect } from "./StudioSelect";
 import { fetchKieCredits, type KieCreditResult } from "../kie-api";
 import { testCloudConnection, ensureUserS4Folder } from "../s4-storage";
 import { getStoredCurrentUser } from "../auth";
+import { ZernioApiClient } from "../zernio/client";
 import type { ApiSettings, ImageProvider } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +40,9 @@ export function SettingsModal({
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isTestingKie, setIsTestingKie] = useState(false);
   const [kieStatus, setKieStatus] = useState<KieCreditResult | null>(null);
+
+  const [isTestingZernio, setIsTestingZernio] = useState(false);
+  const [zernioStatus, setZernioStatus] = useState<string | null>(null);
 
   const currentUser = getStoredCurrentUser();
   const [cloudStatus, setCloudStatus] = useState<"unknown" | "ok" | "error">("unknown");
@@ -89,6 +93,27 @@ export function SettingsModal({
       }
     } finally {
       setIsTestingKie(false);
+    }
+  };
+
+  const testZernioConnection = async () => {
+    if (!settings.zernioApiKey?.trim()) {
+      toast.error("Bitte gib einen Zernio API Key ein.");
+      return;
+    }
+    setIsTestingZernio(true);
+    try {
+      const client = new ZernioApiClient(settings.zernioApiKey);
+      const res = await client.getProfiles();
+      const accountsRes = await client.listAccounts().catch(() => ({ accounts: [] }));
+      const count = accountsRes.accounts?.length || 0;
+      setZernioStatus(`Aktiv (${res.profiles?.length || 1} Profile, ${count} Kanäle verbunden)`);
+      toast.success(`Zernio API verbunden! (${count} Social-Kanäle aktiv) 🚀`);
+    } catch (err: any) {
+      setZernioStatus(`Fehler: ${err.message}`);
+      toast.error(`Zernio Fehler: ${err.message}`);
+    } finally {
+      setIsTestingZernio(false);
     }
   };
 
@@ -232,7 +257,59 @@ export function SettingsModal({
           </div>
         </Section>
 
-        {/* ── 3. Speicher & Cache ───────────────────────────────────────── */}
+        {/* ── 3. Zernio Social Multi-Channel Engine ────────────────────── */}
+        <Section title="Social Publishing Engine (Zernio API)">
+          <div className="space-y-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-[#FF4D1C] to-[#FF8038] flex items-center justify-center shadow-sm">
+                  <Share2 className="w-3.5 h-3.5 text-white" />
+                </div>
+                <span className="text-xs font-bold text-white">Zernio API Key</span>
+              </div>
+              {zernioStatus && (
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                  {zernioStatus}
+                </span>
+              )}
+            </div>
+
+            <p className="text-[11px] text-zinc-400">
+              Ermöglicht direktes Scheduling und Veröffentlichen auf TikTok, Instagram, Facebook, LinkedIn, Bluesky und Discord.
+            </p>
+
+            <div className="space-y-2 pt-1">
+              <input
+                type="password"
+                className="field-input text-xs font-mono"
+                value={settings.zernioApiKey || ""}
+                onChange={(e) => onChange({ zernioApiKey: e.target.value })}
+                placeholder="sk_c8d8bef5559f3903f5848fa66f87185a..."
+              />
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={testZernioConnection}
+                  disabled={isTestingZernio}
+                  className="text-xs font-semibold text-orange-400 hover:text-orange-300 cursor-pointer disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  <RefreshCw className={cn("w-3 h-3", isTestingZernio && "animate-spin")} />
+                  <span>{isTestingZernio ? "Prüfe..." : "Zernio Verbindung testen"}</span>
+                </button>
+                <a
+                  href="https://zernio.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[11px] text-zinc-500 hover:text-zinc-300 underline"
+                >
+                  Zernio Dashboard
+                </a>
+              </div>
+            </div>
+          </div>
+        </Section>
+
+        {/* ── 4. Speicher & Cache ───────────────────────────────────────── */}
         <Section title="Entwürfe & Cache">
           <div className="flex items-center justify-between gap-3 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3.5">
             <span className="text-xs text-zinc-400">

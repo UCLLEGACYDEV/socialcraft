@@ -21,19 +21,32 @@ export type TabKey =
   | "prompt-gallery"
   | "history";
 
-export type SocialPlatform = "facebook" | "instagram" | "tiktok" | "youtube" | "linkedin";
+export type SocialPlatform =
+  | "facebook"
+  | "instagram"
+  | "tiktok"
+  | "youtube"
+  | "linkedin"
+  | "bluesky"
+  | "discord"
+  | "twitter"
+  | "pinterest"
+  | "threads"
+  | "whatsapp"
+  | "telegram";
 
 export interface SocialChannel {
   id: string;
   platform: SocialPlatform;
   name: string;
-  channelId: string; // e.g. Facebook Page ID "337570872768998"
+  channelId: string; // e.g. Facebook Page ID or Zernio accountId
   handle?: string;
   avatarUrl?: string;
   businessId?: string;
   accessToken?: string;
   webhookUrl?: string;
   isDefault?: boolean;
+  zernioAccountId?: string;
 }
 
 export type ScheduledPostStatus = "scheduled" | "queued" | "published" | "draft" | "failed";
@@ -53,6 +66,8 @@ export interface ScheduledPost {
   publishedAt?: string;
   externalPostUrl?: string;
   errorMessage?: string;
+  zernioPostId?: string;
+  zernioStatus?: string;
 }
 
 
@@ -110,6 +125,8 @@ export interface ApiSettings {
   s4SecretKey?: string | undefined;
   s4Region?: string | undefined;
   s4AutoSave: boolean;
+  zernioApiKey?: string | undefined;
+  zernioProfileId?: string | undefined;
 }
 
 export type JobStatus =

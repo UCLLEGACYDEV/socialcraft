@@ -19,6 +19,7 @@ import {
 } from "@/onyx/components/SimpleViews";
 import { CloudGalleryView } from "@/onyx/components/CloudGalleryView";
 import { PostSchedulerView } from "@/onyx/components/PostSchedulerView";
+import { ZernioOnboardingModal } from "@/onyx/components/ZernioOnboardingModal";
 import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder, saveHistoryToS4, loadHistoryFromS4, makeProjectFolderName, syncCloudIdentityCookie } from "@/onyx/s4-storage";
 import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
 import { AdminDashboard } from "@/onyx/components/AdminDashboard";
@@ -254,6 +255,7 @@ function OnyxStudio() {
   const [creditStatus, setCreditStatus] = useState<CreditStatus | undefined>(undefined);
   const [showSettings, setShowSettings] = useState(false);
   const [showBrandKit, setShowBrandKit] = useState(false);
+  const [showZernioSetup, setShowZernioSetup] = useState(false);
   const [showMcp, setShowMcp] = useState(false);
   const [editing, setEditing] = useState<{ jobId?: string; slideId: string } | null>(null);
 
@@ -1037,6 +1039,7 @@ function OnyxStudio() {
           onOpenSettings={() => setShowSettings(true)}
           onOpenMcp={() => setShowMcp(true)}
           onOpenDatenschutz={() => setShowDatenschutz(true)}
+          onOpenZernioSetup={() => setShowZernioSetup(true)}
         />
 
         <main className="mx-auto w-full flex-1 p-4 sm:p-6 max-w-[1600px]">
@@ -1135,6 +1138,8 @@ function OnyxStudio() {
               historyEntries={history}
               initialScheduledItem={schedulerInitialItem}
               onNavigateToCarousel={() => setActiveTab("carousel")}
+              settings={settings}
+              onOpenZernioSetup={() => setShowZernioSetup(true)}
             />
           )}
           {activeTab === "ai-clone" && (
@@ -1243,6 +1248,15 @@ function OnyxStudio() {
           onClose={() => setShowBrandKit(false)}
         />
       )}
+      <ZernioOnboardingModal
+        isOpen={showZernioSetup}
+        onClose={() => setShowZernioSetup(false)}
+        settings={settings}
+        onChangeSettings={patchSettings}
+        channels={socialChannels}
+        onUpdateChannels={setSocialChannels}
+        onComplete={() => setActiveTab("scheduler")}
+      />
       {showMcp && (
         <ModalShell title="Claude Desktop MCP" onClose={() => setShowMcp(false)} maxHeight="70vh">
           <McpModalContent />

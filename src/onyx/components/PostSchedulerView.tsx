@@ -23,11 +23,20 @@ import {
   BookOpen,
   ArrowRight,
   FolderOpen,
+  Globe,
+  MessageSquare,
+  Twitter,
+  RefreshCw,
+  Key,
+  ShieldCheck,
+  AlertTriangle,
 } from "lucide-react";
-import type { SocialChannel, ScheduledPost, SocialPlatform, SlideContent, HistoryEntry } from "../types";
+import type { SocialChannel, ScheduledPost, SocialPlatform, SlideContent, HistoryEntry, ApiSettings } from "../types";
 import { DEFAULT_SOCIAL_CHANNELS } from "../defaults";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { ZernioApiClient, createZernioClient } from "../zernio/client";
+import { buildZernioPayload } from "../zernio/formatter";
 
 interface PostSchedulerViewProps {
   channels: SocialChannel[];
@@ -38,6 +47,8 @@ interface PostSchedulerViewProps {
   historyEntries?: HistoryEntry[];
   initialScheduledItem?: { title: string; imageUrls: string[]; prompt?: string } | null;
   onNavigateToCarousel?: () => void;
+  settings?: ApiSettings;
+  onOpenZernioSetup?: () => void;
 }
 
 const PLATFORM_ICONS: Record<SocialPlatform, React.ElementType> = {
@@ -46,6 +57,13 @@ const PLATFORM_ICONS: Record<SocialPlatform, React.ElementType> = {
   tiktok: Video,
   youtube: Youtube,
   linkedin: Linkedin,
+  bluesky: Globe,
+  discord: MessageSquare,
+  twitter: Twitter,
+  pinterest: Images,
+  threads: MessageSquare,
+  whatsapp: MessageSquare,
+  telegram: Send,
 };
 
 const PLATFORM_COLORS: Record<SocialPlatform, { bg: string; border: string; text: string; badge: string }> = {
@@ -79,6 +97,48 @@ const PLATFORM_COLORS: Record<SocialPlatform, { bg: string; border: string; text
     text: "text-sky-400",
     badge: "bg-sky-600/20 text-sky-300 border-sky-500/30",
   },
+  bluesky: {
+    bg: "bg-indigo-600/15",
+    border: "border-indigo-500/40",
+    text: "text-indigo-400",
+    badge: "bg-indigo-600/20 text-indigo-300 border-indigo-500/30",
+  },
+  discord: {
+    bg: "bg-purple-600/15",
+    border: "border-purple-500/40",
+    text: "text-purple-400",
+    badge: "bg-purple-600/20 text-purple-300 border-purple-500/30",
+  },
+  twitter: {
+    bg: "bg-zinc-600/15",
+    border: "border-zinc-500/40",
+    text: "text-zinc-300",
+    badge: "bg-zinc-600/20 text-zinc-300 border-zinc-500/30",
+  },
+  pinterest: {
+    bg: "bg-rose-600/15",
+    border: "border-rose-500/40",
+    text: "text-rose-400",
+    badge: "bg-rose-600/20 text-rose-300 border-rose-500/30",
+  },
+  threads: {
+    bg: "bg-zinc-700/15",
+    border: "border-zinc-600/40",
+    text: "text-zinc-200",
+    badge: "bg-zinc-700/20 text-zinc-200 border-zinc-600/30",
+  },
+  whatsapp: {
+    bg: "bg-emerald-600/15",
+    border: "border-emerald-500/40",
+    text: "text-emerald-400",
+    badge: "bg-emerald-600/20 text-emerald-300 border-emerald-500/30",
+  },
+  telegram: {
+    bg: "bg-sky-500/15",
+    border: "border-sky-400/40",
+    text: "text-sky-300",
+    badge: "bg-sky-500/20 text-sky-200 border-sky-400/30",
+  },
 };
 
 export function PostSchedulerView({
@@ -90,6 +150,8 @@ export function PostSchedulerView({
   historyEntries = [],
   initialScheduledItem = null,
   onNavigateToCarousel,
+  settings,
+  onOpenZernioSetup,
 }: PostSchedulerViewProps) {
   const [activeTab, setActiveTab] = useState<"queue" | "composer" | "channels">(
     initialScheduledItem ? "composer" : "queue"
@@ -101,6 +163,7 @@ export function PostSchedulerView({
   // Composer Form State
   const defaultChannel = channels.find((c) => c.isDefault) || channels[0] || DEFAULT_SOCIAL_CHANNELS[0];
   const [selectedChannelId, setSelectedChannelId] = useState<string>(defaultChannel?.id || "fb-main-page");
+  const selectedChannel = channels.find((c) => c.id === selectedChannelId) || defaultChannel;
   const [postTitle, setPostTitle] = useState<string>(initialScheduledItem?.title || "");
   const [postCaption, setPostCaption] = useState<string>(
     initialScheduledItem?.prompt ? `${initialScheduledItem.title}\n\n${initialScheduledItem.prompt}` : ""
@@ -181,6 +244,163 @@ export function PostSchedulerView({
     toast.success(`Beitrag „${entry.topic}“ mit ${imgs.length} Folien geladen! ✨`);
   };
 
+  // Platform-Specific Composer Options
+  const [tiktokPrivacy, setTiktokPrivacy] = useState<"PUBLIC_TO_EVERYONE" | "MUTUAL_FOLLOW_FRIENDS" | "FOLLOWER_OF_CREATOR" | "SELF_ONLY">("PUBLIC_TO_EVERYONE");
+  const [tiktokAllowComments, setTiktokAllowComments] = useState(true);
+  const [tiktokAllowDuet, setTiktokAllowDuet] = useState(true);
+  const [tiktokAllowStitch, setTiktokAllowStitch] = useState(true);
+  const [tiktokAiDisclosure, setTiktokAiDisclosure] = useState(false);
+  const [tiktokAutoMusic, setTiktokAutoMusic] = useState(true);
+
+  const [instagramShareToFeed, setInstagramShareToFeed] = useState(true);
+  const [instagramAiDisclosure, setInstagramAiDisclosure] = useState(false);
+  const [instagramFirstComment, setInstagramFirstComment] = useState("");
+
+  const [facebookDraft, setFacebookDraft] = useState(false);
+  const [facebookFirstComment, setFacebookFirstComment] = useState("");
+
+  const [isPublishingZernio, setIsPublishingZernio] = useState(false);
+  const [isSyncingChannels, setIsSyncingChannels] = useState(false);
+
+  const handleSyncZernioAccounts = async () => {
+    if (!settings?.zernioApiKey) {
+      toast.info("Bitte hinterlege zuerst deinen Zernio API Key.", {
+        action: onOpenZernioSetup ? { label: "Setup öffnen", onClick: onOpenZernioSetup } : undefined,
+      });
+      return;
+    }
+
+    setIsSyncingChannels(true);
+    try {
+      const client = new ZernioApiClient(settings.zernioApiKey);
+      const res = await client.listAccounts(settings.zernioProfileId);
+
+      if (!res.accounts || res.accounts.length === 0) {
+        toast.info("Keine verbundenen Zernio-Accounts gefunden. Verbinde Kanäle im Setup.");
+        return;
+      }
+
+      const imported: SocialChannel[] = res.accounts.map((acc) => ({
+        id: `zernio-${acc._id}`,
+        platform: (acc.platform as SocialPlatform) || "facebook",
+        name: acc.displayName || acc.username || `${acc.platform} Account`,
+        channelId: acc._id,
+        zernioAccountId: acc._id,
+        handle: acc.username ? (acc.username.startsWith("@") ? acc.username : `@${acc.username}`) : undefined,
+        avatarUrl: acc.avatarUrl || "/images/socialcraft-logo.png",
+        isDefault: false,
+      }));
+
+      // Merge with current channels, deduplicating by channelId
+      const existingIds = new Set(channels.map((c) => c.channelId));
+      const newChannels = imported.filter((c) => !existingIds.has(c.channelId));
+
+      if (newChannels.length > 0) {
+        onUpdateChannels([...channels, ...newChannels]);
+        toast.success(`${newChannels.length} Zernio-Kanäle erfolgreich synchronisiert! 🎉`);
+      } else {
+        toast.info("Alle verknüpften Zernio-Accounts sind bereits in deiner Kanalliste.");
+      }
+    } catch (err: any) {
+      toast.error(`Sync-Fehler: ${err.message}`);
+    } finally {
+      setIsSyncingChannels(false);
+    }
+  };
+
+  const handlePublishViaZernio = async (publishNow = true) => {
+    if (!postCaption.trim() && !postTitle.trim()) {
+      toast.error("Bitte gib einen Titel oder einen Beitragstext ein.");
+      return;
+    }
+
+    const channel = channels.find((c) => c.id === selectedChannelId) || defaultChannel;
+    const allHashtags = postHashtags
+      .split(/[\s,]+/)
+      .filter((t) => t.startsWith("#") || t.length > 1)
+      .map((t) => (t.startsWith("#") ? t : `#${t}`));
+
+    const mediaList = selectedMediaUrls.length > 0 ? selectedMediaUrls : customMediaUrl ? [customMediaUrl] : [];
+
+    if (!settings?.zernioApiKey) {
+      toast.error("Kein Zernio API-Key hinterlegt. Öffne das Zernio Setup!", {
+        action: onOpenZernioSetup ? { label: "Setup", onClick: onOpenZernioSetup } : undefined,
+      });
+      return;
+    }
+
+    setIsPublishingZernio(true);
+    try {
+      const client = new ZernioApiClient(settings.zernioApiKey);
+      const postResult = await client.publishOrSchedulePost({
+        title: postTitle.trim() || "Socialcraft Post",
+        caption: postCaption.trim(),
+        hashtags: allHashtags,
+        mediaUrls: mediaList,
+        mediaType: mediaList.length > 1 ? "carousel" : "image",
+        platform: channel.platform as any,
+        accountId: channel.zernioAccountId || channel.channelId,
+        publishNow,
+        scheduledFor: !publishNow ? new Date(scheduledDate).toISOString() : undefined,
+        tiktokOptions: {
+          privacyLevel: tiktokPrivacy,
+          allowComments: tiktokAllowComments,
+          allowDuet: tiktokAllowDuet,
+          allowStitch: tiktokAllowStitch,
+          videoMadeWithAi: tiktokAiDisclosure,
+          autoAddMusic: tiktokAutoMusic,
+        },
+        instagramOptions: {
+          shareToFeed: instagramShareToFeed,
+          isAiGenerated: instagramAiDisclosure,
+          firstComment: instagramFirstComment || undefined,
+        },
+        facebookOptions: {
+          draft: facebookDraft,
+          firstComment: facebookFirstComment || undefined,
+        },
+      });
+
+      const newPost: ScheduledPost = {
+        id: `post-${Date.now()}`,
+        title: postTitle.trim() || "Socialcraft Beitrag",
+        caption: postCaption.trim(),
+        hashtags: allHashtags,
+        mediaUrls: mediaList,
+        mediaType: mediaList.length > 1 ? "carousel" : "image",
+        channelId: channel.channelId,
+        platform: channel.platform,
+        scheduledFor: new Date(scheduledDate).toISOString(),
+        status: publishNow ? "published" : "scheduled",
+        createdAt: new Date().toISOString(),
+        publishedAt: publishNow ? new Date().toISOString() : undefined,
+        zernioPostId: postResult._id,
+        zernioStatus: postResult.status,
+        externalPostUrl: postResult.platforms?.[0]?.platformPostUrl,
+      };
+
+      onUpdatePosts([newPost, ...posts]);
+      
+      if (publishNow) {
+        toast.success("🚀 Erfolgreich über Zernio live veröffentlicht!", {
+          description: `Status: ${postResult.status} (ID: ${postResult._id})`,
+        });
+      } else {
+        toast.success("📅 Erfolgreich über Zernio API terminiert!", {
+          description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")}`,
+        });
+      }
+
+      setPostTitle("");
+      setPostCaption("");
+      setActiveTab("queue");
+    } catch (err: any) {
+      toast.error(`Zernio Publishing fehlgeschlagen: ${err.message}`);
+    } finally {
+      setIsPublishingZernio(false);
+    }
+  };
+
   const handleSchedulePost = () => {
     if (!postCaption.trim() && !postTitle.trim()) {
       toast.error("Bitte gib einen Titel oder einen Beitragstext ein.");
@@ -208,7 +428,7 @@ export function PostSchedulerView({
     };
 
     onUpdatePosts([newPost, ...posts]);
-    toast.success("Beitrag erfolgreich geplant! 🚀", {
+    toast.success("Beitrag erfolgreich lokal geplant! 🚀", {
       description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")} auf ${channel.name} (ID: ${channel.channelId})`,
     });
 
@@ -314,6 +534,23 @@ export function PostSchedulerView({
 
           {/* Quick Action Navigation Buttons */}
           <div className="flex flex-wrap items-center gap-2">
+            {onOpenZernioSetup && (
+              <button
+                type="button"
+                onClick={onOpenZernioSetup}
+                className={cn(
+                  "flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border",
+                  settings?.zernioApiKey
+                    ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20"
+                    : "bg-[#FF4D17]/10 text-orange-400 border-orange-500/40 hover:bg-[#FF4D17]/20"
+                )}
+              >
+                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+                <Share2 className="h-3.5 w-3.5" />
+                <span>{settings?.zernioApiKey ? "Zernio API aktiv" : "Zernio verbinden"}</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => setActiveTab("queue")}
@@ -359,33 +596,47 @@ export function PostSchedulerView({
         </div>
 
         {/* ── Active Channel Ribbon ───────────────────────────────────── */}
-        <div className="mt-6 pt-5 border-t border-white/[0.08] flex flex-wrap items-center gap-3">
-          <span className="text-xs font-semibold text-zinc-400">Aktive Kanäle:</span>
-          {channels.map((chan) => {
-            const Icon = PLATFORM_ICONS[chan.platform] || Share2;
-            const style = PLATFORM_COLORS[chan.platform] || PLATFORM_COLORS.facebook;
-            return (
-              <div
-                key={chan.id}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium backdrop-blur-md transition-all",
-                  style.bg,
-                  style.border
-                )}
-              >
-                <Icon className={cn("h-3.5 w-3.5", style.text)} />
-                <span className="text-white font-semibold">{chan.name}</span>
-                <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-black/40 text-zinc-300">
-                  ID: {chan.channelId}
-                </span>
-                {chan.isDefault && (
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-orange-400 bg-orange-500/20 px-1 rounded">
-                    Standard
+        <div className="mt-6 pt-5 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-xs font-semibold text-zinc-400">Aktive Kanäle:</span>
+            {channels.map((chan) => {
+              const Icon = PLATFORM_ICONS[chan.platform] || Share2;
+              const style = PLATFORM_COLORS[chan.platform] || PLATFORM_COLORS.facebook;
+              return (
+                <div
+                  key={chan.id}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium backdrop-blur-md transition-all",
+                    style.bg,
+                    style.border
+                  )}
+                >
+                  <Icon className={cn("h-3.5 w-3.5", style.text)} />
+                  <span className="text-white font-semibold">{chan.name}</span>
+                  <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-black/40 text-zinc-300">
+                    ID: {chan.channelId}
                   </span>
-                )}
-              </div>
-            );
-          })}
+                  {chan.isDefault && (
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-orange-400 bg-orange-500/20 px-1 rounded">
+                      Standard
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {settings?.zernioApiKey && (
+            <button
+              type="button"
+              disabled={isSyncingChannels}
+              onClick={handleSyncZernioAccounts}
+              className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition bg-white/5 hover:bg-white/10 px-2.5 py-1.5 rounded-lg border border-white/10 disabled:opacity-50"
+            >
+              <RefreshCw className={cn("h-3.5 w-3.5", isSyncingChannels && "animate-spin text-orange-400")} />
+              <span>Accounts syncen</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -799,9 +1050,21 @@ export function PostSchedulerView({
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                    Beitragstext / Caption:
-                  </label>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-zinc-300">
+                      Beitragstext / Caption:
+                    </label>
+                    <span className={cn(
+                      "text-[10px] font-mono px-2 py-0.5 rounded",
+                      selectedChannel.platform === "bluesky" && (postCaption.length + postHashtags.length > 300)
+                        ? "bg-red-500/20 text-red-400 border border-red-500/30 font-bold"
+                        : "text-zinc-400 bg-black/40"
+                    )}>
+                      {postCaption.length + (postHashtags ? postHashtags.length + 2 : 0)} Zeichen
+                      {selectedChannel.platform === "bluesky" && " / max. 300"}
+                      {selectedChannel.platform === "tiktok" && " (TikTok: bis 4.000 Zeichen)"}
+                    </span>
+                  </div>
                   <textarea
                     rows={5}
                     value={postCaption}
@@ -823,10 +1086,152 @@ export function PostSchedulerView({
                     className="w-full bg-[#120F17] border border-white/10 rounded-xl px-4 py-2 text-xs font-mono text-zinc-300 focus:outline-none focus:border-orange-500"
                   />
                 </div>
+
+                {/* 4. PLATFORM-SPECIFIC SETTINGS ACCORDION */}
+                <div className="bg-black/30 border border-white/10 rounded-xl p-3.5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5">
+                      <SlidersHorizontal className="h-3.5 w-3.5 text-orange-400" />
+                      <span>Plattform-Einstellungen für {selectedChannel.platform.toUpperCase()}</span>
+                    </span>
+                    <span className="text-[10px] text-zinc-400 font-mono">Zernio Engine</span>
+                  </div>
+
+                  {/* TIKTOK SPECIFIC SETTINGS */}
+                  {selectedChannel.platform === "tiktok" && (
+                    <div className="space-y-2.5 pt-2 border-t border-white/5 text-xs">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <div>
+                          <label className="text-[11px] text-zinc-400 block mb-1">Sichtbarkeit (Privacy):</label>
+                          <select
+                            value={tiktokPrivacy}
+                            onChange={(e) => setTiktokPrivacy(e.target.value as any)}
+                            className="w-full bg-[#120F17] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                          >
+                            <option value="PUBLIC_TO_EVERYONE">Öffentlich für alle</option>
+                            <option value="MUTUAL_FOLLOW_FRIENDS">Nur Freunde</option>
+                            <option value="FOLLOWER_OF_CREATOR">Nur Follower</option>
+                            <option value="SELF_ONLY">Nur ich (Privat)</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-col justify-center gap-1.5 pt-1">
+                          <label className="flex items-center gap-2 cursor-pointer text-zinc-300">
+                            <input
+                              type="checkbox"
+                              checked={tiktokAiDisclosure}
+                              onChange={(e) => setTiktokAiDisclosure(e.target.checked)}
+                              className="accent-orange-500 rounded"
+                            />
+                            <span>Mit KI erstellt (AI Disclosure)</span>
+                          </label>
+                          <label className="flex items-center gap-2 cursor-pointer text-zinc-300">
+                            <input
+                              type="checkbox"
+                              checked={tiktokAutoMusic}
+                              onChange={(e) => setTiktokAutoMusic(e.target.checked)}
+                              className="accent-orange-500 rounded"
+                            />
+                            <span>Automatische Hintergrundmusik (TikTok)</span>
+                          </label>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 text-[11px] text-zinc-400 pt-1">
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={tiktokAllowComments}
+                            onChange={(e) => setTiktokAllowComments(e.target.checked)}
+                            className="accent-orange-500 rounded"
+                          />
+                          <span>Kommentare erlauben</span>
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={tiktokAllowDuet}
+                            onChange={(e) => setTiktokAllowDuet(e.target.checked)}
+                            className="accent-orange-500 rounded"
+                          />
+                          <span>Duette erlauben</span>
+                        </label>
+                        <label className="flex items-center gap-1.5 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={tiktokAllowStitch}
+                            onChange={(e) => setTiktokAllowStitch(e.target.checked)}
+                            className="accent-orange-500 rounded"
+                          />
+                          <span>Stitch erlauben</span>
+                        </label>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* INSTAGRAM SPECIFIC SETTINGS */}
+                  {selectedChannel.platform === "instagram" && (
+                    <div className="space-y-2.5 pt-2 border-t border-white/5 text-xs">
+                      <div className="flex items-center gap-4">
+                        <label className="flex items-center gap-2 cursor-pointer text-zinc-300">
+                          <input
+                            type="checkbox"
+                            checked={instagramShareToFeed}
+                            onChange={(e) => setInstagramShareToFeed(e.target.checked)}
+                            className="accent-orange-500 rounded"
+                          />
+                          <span>Im Hauptfeed teilen</span>
+                        </label>
+                        <label className="flex items-center gap-2 cursor-pointer text-zinc-300">
+                          <input
+                            type="checkbox"
+                            checked={instagramAiDisclosure}
+                            onChange={(e) => setInstagramAiDisclosure(e.target.checked)}
+                            className="accent-orange-500 rounded"
+                          />
+                          <span>KI-Label anzeigen</span>
+                        </label>
+                      </div>
+                      <div>
+                        <label className="text-[11px] text-zinc-400 block mb-1">Erster Kommentar (First Comment für Links):</label>
+                        <input
+                          type="text"
+                          value={instagramFirstComment}
+                          onChange={(e) => setInstagramFirstComment(e.target.value)}
+                          placeholder="z. B. Link zum Angebot: https://meine-website.de"
+                          className="w-full bg-[#120F17] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {/* FACEBOOK SPECIFIC SETTINGS */}
+                  {selectedChannel.platform === "facebook" && (
+                    <div className="space-y-2.5 pt-2 border-t border-white/5 text-xs">
+                      <label className="flex items-center gap-2 cursor-pointer text-zinc-300">
+                        <input
+                          type="checkbox"
+                          checked={facebookDraft}
+                          onChange={(e) => setFacebookDraft(e.target.checked)}
+                          className="accent-orange-500 rounded"
+                        />
+                        <span>Als Entwurf in den Facebook Publishing Tools anlegen</span>
+                      </label>
+                      <div>
+                        <label className="text-[11px] text-zinc-400 block mb-1">Erster Kommentar:</label>
+                        <input
+                          type="text"
+                          value={facebookFirstComment}
+                          onChange={(e) => setFacebookFirstComment(e.target.value)}
+                          placeholder="z. B. Weitere Infos im Link..."
+                          className="w-full bg-[#120F17] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between gap-4">
+              <div className="pt-4 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={() => setActiveTab("queue")}
@@ -835,14 +1240,45 @@ export function PostSchedulerView({
                   Abbrechen
                 </button>
 
-                <button
-                  type="button"
-                  onClick={handleSchedulePost}
-                  className="cryptox-orange-btn !py-2.5 !px-6 text-xs font-bold"
-                >
-                  <CalendarIcon className="h-4 w-4 mr-2" />
-                  Beitrag jetzt planen
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleSchedulePost}
+                    className="px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-zinc-300 transition-all"
+                    title="Beitrag in lokaler Socialcraft-Queue speichern"
+                  >
+                    Lokal vormerken
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isPublishingZernio}
+                    onClick={() => handlePublishViaZernio(false)}
+                    className="px-4 py-2.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/40 text-xs font-bold text-purple-300 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    <Clock className="h-3.5 w-3.5" />
+                    <span>Über Zernio terminieren</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isPublishingZernio}
+                    onClick={() => handlePublishViaZernio(true)}
+                    className="cryptox-orange-btn !py-2.5 !px-5 text-xs font-bold flex items-center gap-2 disabled:opacity-50"
+                  >
+                    {isPublishingZernio ? (
+                      <>
+                        <RefreshCw className="h-4 w-4 animate-spin" />
+                        <span>Veröffentliche...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-4 w-4" />
+                        <span>Jetzt live veröffentlichen</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -987,17 +1423,42 @@ export function PostSchedulerView({
             <div>
               <h3 className="text-lg font-bold text-white">Verknüpfte Kanäle & Seiten-IDs</h3>
               <p className="text-xs text-zinc-400">
-                Verwalte deine Social-Media-Kanäle über deren eindeutige Seiten- / Channel-IDs
+                Verwalte deine Social-Media-Kanäle oder verbinde Live-Accounts per Zernio OAuth
               </p>
             </div>
-            <button
-              type="button"
-              onClick={() => setShowAddChannel(true)}
-              className="cryptox-orange-btn !py-2 !px-4 text-xs font-bold"
-            >
-              <Plus className="h-4 w-4 mr-1.5" />
-              Kanal hinzufügen
-            </button>
+            <div className="flex items-center gap-2">
+              {onOpenZernioSetup && (
+                <button
+                  type="button"
+                  onClick={onOpenZernioSetup}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#FF4D1C] to-[#FF8038] text-white text-xs font-bold shadow-lg shadow-[#FF4D1C]/25 hover:brightness-110 flex items-center gap-1.5 transition"
+                >
+                  <Key className="h-3.5 w-3.5" />
+                  <span>Zernio Setup Wizard</span>
+                </button>
+              )}
+
+              {settings?.zernioApiKey && (
+                <button
+                  type="button"
+                  disabled={isSyncingChannels}
+                  onClick={handleSyncZernioAccounts}
+                  className="px-3 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition disabled:opacity-50"
+                >
+                  <RefreshCw className={cn("h-3.5 w-3.5", isSyncingChannels && "animate-spin text-orange-400")} />
+                  <span>Accounts laden</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setShowAddChannel(true)}
+                className="cryptox-orange-btn !py-2 !px-4 text-xs font-bold"
+              >
+                <Plus className="h-4 w-4 mr-1.5" />
+                Kanal manuell
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

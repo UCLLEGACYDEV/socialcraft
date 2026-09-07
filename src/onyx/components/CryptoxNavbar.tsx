@@ -15,6 +15,7 @@ import {
   Image as ImageIcon,
   Cloud,
   Lock,
+  Share2,
 } from "lucide-react";
 import type { CreditStatus, TabKey } from "../types";
 import type { User } from "../auth";
@@ -44,6 +45,7 @@ interface CryptoxNavbarProps {
   onOpenSettings: () => void;
   onOpenMcp: () => void;
   onOpenDatenschutz?: () => void;
+  onOpenZernioSetup?: () => void;
 }
 
 // Group 1: Creation Tools
@@ -76,6 +78,7 @@ export function CryptoxNavbar({
   onOpenBrandKit,
   onOpenSettings,
   onOpenDatenschutz,
+  onOpenZernioSetup,
 }: CryptoxNavbarProps) {
   const isAdmin = currentUser?.role === "admin";
 
@@ -345,6 +348,16 @@ export function CryptoxNavbar({
                   <Cloud className="h-4 w-4 text-[#FF6A1F]" />
                   <span>Cloud-Galerie & Ordner</span>
                 </DropdownMenuItem>
+
+                {onOpenZernioSetup && (
+                  <DropdownMenuItem
+                    onClick={onOpenZernioSetup}
+                    className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-orange-400 hover:bg-orange-500/10 hover:text-orange-300 cursor-pointer transition-colors"
+                  >
+                    <Share2 className="h-4 w-4 text-[#FF4D1C]" />
+                    <span>Zernio Social Setup (TikTok, IG, FB)</span>
+                  </DropdownMenuItem>
+                )}
 
                 <DropdownMenuItem
                   onClick={onOpenBrandKit}
