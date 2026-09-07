@@ -49,7 +49,7 @@ export interface SocialChannel {
   zernioAccountId?: string;
 }
 
-export type ScheduledPostStatus = "scheduled" | "queued" | "published" | "draft" | "failed";
+export type ScheduledPostStatus = "scheduled" | "queued" | "published" | "draft" | "failed" | "cancelled";
 
 export interface ScheduledPost {
   id: string;
@@ -68,6 +68,8 @@ export interface ScheduledPost {
   errorMessage?: string;
   zernioPostId?: string;
   zernioStatus?: string;
+  musicTitle?: string;
+  musicArtist?: string;
 }
 
 

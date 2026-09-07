@@ -30,6 +30,13 @@ import {
   Key,
   ShieldCheck,
   AlertTriangle,
+  Music,
+  Play,
+  Pause,
+  XCircle,
+  RotateCcw,
+  Edit3,
+  X,
 } from "lucide-react";
 import type { SocialChannel, ScheduledPost, SocialPlatform, SlideContent, HistoryEntry, ApiSettings } from "../types";
 import { DEFAULT_SOCIAL_CHANNELS } from "../defaults";
@@ -37,6 +44,8 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { ZernioApiClient, createZernioClient } from "../zernio/client";
 import { buildZernioPayload } from "../zernio/formatter";
+import { TikTokMusicLibraryModal } from "./TikTokMusicLibraryModal";
+import { TIKTOK_MUSIC_LIBRARY, type TikTokSoundItem } from "../data/tiktok-sounds";
 
 interface PostSchedulerViewProps {
   channels: SocialChannel[];
@@ -251,6 +260,8 @@ export function PostSchedulerView({
   const [tiktokAllowStitch, setTiktokAllowStitch] = useState(true);
   const [tiktokAiDisclosure, setTiktokAiDisclosure] = useState(false);
   const [tiktokAutoMusic, setTiktokAutoMusic] = useState(true);
+  const [selectedSound, setSelectedSound] = useState<TikTokSoundItem | null>(null);
+  const [showMusicLibraryModal, setShowMusicLibraryModal] = useState(false);
 
   const [instagramShareToFeed, setInstagramShareToFeed] = useState(true);
   const [instagramAiDisclosure, setInstagramAiDisclosure] = useState(false);
@@ -261,6 +272,11 @@ export function PostSchedulerView({
 
   const [isPublishingZernio, setIsPublishingZernio] = useState(false);
   const [isSyncingChannels, setIsSyncingChannels] = useState(false);
+
+  // Edit / Reschedule state
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [quickReschedulePost, setQuickReschedulePost] = useState<ScheduledPost | null>(null);
+  const [quickRescheduleDate, setQuickRescheduleDate] = useState<string>("");
 
   const handleSyncZernioAccounts = async () => {
     if (!settings?.zernioApiKey) {
@@ -306,6 +322,79 @@ export function PostSchedulerView({
     } finally {
       setIsSyncingChannels(false);
     }
+  };
+
+  const handleCancelPost = async (post: ScheduledPost) => {
+    if (post.zernioPostId && settings?.zernioApiKey) {
+      try {
+        const client = new ZernioApiClient(settings.zernioApiKey);
+        await client.deletePost(post.zernioPostId).catch(() => {});
+      } catch (e) {
+        console.warn("Konnte Remote-Post nicht löschen", e);
+      }
+    }
+    const updated = posts.map((p) =>
+      p.id === post.id ? { ...p, status: "cancelled" as const } : p
+    );
+    onUpdatePosts(updated);
+    toast.info(`Planung für „${post.title}“ abgebrochen. ❌`, {
+      action: {
+        label: "Neu planen",
+        onClick: () => handleReschedulePost(post),
+      },
+    });
+  };
+
+  const handleReschedulePost = (post: ScheduledPost) => {
+    setEditingPostId(post.id);
+    setPostTitle(post.title);
+    setPostCaption(post.caption);
+    setPostHashtags(post.hashtags.join(" "));
+    setSelectedMediaUrls(post.mediaUrls);
+    const targetChan = channels.find((c) => c.channelId === post.channelId);
+    if (targetChan) setSelectedChannelId(targetChan.id);
+
+    if (post.musicTitle) {
+      const match = TIKTOK_MUSIC_LIBRARY.find((s) => s.title === post.musicTitle);
+      if (match) setSelectedSound(match);
+    } else {
+      setSelectedSound(null);
+    }
+
+    const postDate = new Date(post.scheduledFor);
+    if (postDate.getTime() < Date.now()) {
+      const d = new Date();
+      d.setDate(d.getDate() + 1);
+      d.setHours(18, 0, 0, 0);
+      setScheduledDate(d.toISOString().slice(0, 16));
+    } else {
+      setScheduledDate(new Date(post.scheduledFor).toISOString().slice(0, 16));
+    }
+
+    setActiveTab("composer");
+    toast.success(`Beitrag „${post.title}“ zur Neuplanung in den Editor geladen! 📅`);
+  };
+
+  const handleQuickRescheduleOpen = (post: ScheduledPost) => {
+    setQuickReschedulePost(post);
+    setQuickRescheduleDate(new Date(post.scheduledFor).toISOString().slice(0, 16));
+  };
+
+  const handleQuickRescheduleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!quickReschedulePost || !quickRescheduleDate) return;
+    const updated = posts.map((p) =>
+      p.id === quickReschedulePost.id
+        ? {
+            ...p,
+            scheduledFor: new Date(quickRescheduleDate).toISOString(),
+            status: p.status === "cancelled" ? ("scheduled" as const) : p.status,
+          }
+        : p
+    );
+    onUpdatePosts(updated);
+    toast.success(`Termin erfolgreich aktualisiert: ${new Date(quickRescheduleDate).toLocaleString("de-DE")} 🕒`);
+    setQuickReschedulePost(null);
   };
 
   const handlePublishViaZernio = async (publishNow = true) => {
@@ -362,7 +451,7 @@ export function PostSchedulerView({
       });
 
       const newPost: ScheduledPost = {
-        id: `post-${Date.now()}`,
+        id: editingPostId || `post-${Date.now()}`,
         title: postTitle.trim() || "Socialcraft Beitrag",
         caption: postCaption.trim(),
         hashtags: allHashtags,
@@ -377,9 +466,16 @@ export function PostSchedulerView({
         zernioPostId: postResult._id,
         zernioStatus: postResult.status,
         externalPostUrl: postResult.platforms?.[0]?.platformPostUrl,
+        musicTitle: selectedSound?.title,
+        musicArtist: selectedSound?.artist,
       };
 
-      onUpdatePosts([newPost, ...posts]);
+      if (editingPostId) {
+        onUpdatePosts(posts.map((p) => (p.id === editingPostId ? newPost : p)));
+        setEditingPostId(null);
+      } else {
+        onUpdatePosts([newPost, ...posts]);
+      }
       
       if (publishNow) {
         toast.success("🚀 Erfolgreich live veröffentlicht!", {
@@ -393,6 +489,7 @@ export function PostSchedulerView({
 
       setPostTitle("");
       setPostCaption("");
+      setSelectedSound(null);
       setActiveTab("queue");
     } catch (err: any) {
       toast.error(`Veröffentlichung fehlgeschlagen: ${err.message}`);
@@ -414,7 +511,7 @@ export function PostSchedulerView({
       .map((t) => (t.startsWith("#") ? t : `#${t}`));
 
     const newPost: ScheduledPost = {
-      id: `post-${Date.now()}`,
+      id: editingPostId || `post-${Date.now()}`,
       title: postTitle.trim() || "Socialcraft Beitrag",
       caption: postCaption.trim(),
       hashtags: allHashtags,
@@ -425,16 +522,27 @@ export function PostSchedulerView({
       scheduledFor: new Date(scheduledDate).toISOString(),
       status: "scheduled",
       createdAt: new Date().toISOString(),
+      musicTitle: selectedSound?.title,
+      musicArtist: selectedSound?.artist,
     };
 
-    onUpdatePosts([newPost, ...posts]);
-    toast.success("Beitrag erfolgreich lokal geplant! 🚀", {
-      description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")} auf ${channel.name} (ID: ${channel.channelId})`,
-    });
+    if (editingPostId) {
+      onUpdatePosts(posts.map((p) => (p.id === editingPostId ? newPost : p)));
+      setEditingPostId(null);
+      toast.success("Beitrag erfolgreich aktualisiert & neu geplant! 🚀", {
+        description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")} auf ${channel.name}`,
+      });
+    } else {
+      onUpdatePosts([newPost, ...posts]);
+      toast.success("Beitrag erfolgreich lokal geplant! 🚀", {
+        description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")} auf ${channel.name} (ID: ${channel.channelId})`,
+      });
+    }
 
     // Reset composer
     setPostTitle("");
     setPostCaption("");
+    setSelectedSound(null);
     setActiveTab("queue");
   };
 
@@ -735,13 +843,18 @@ export function PostSchedulerView({
                 const targetChannel = channels.find((c) => c.channelId === post.channelId);
                 const isCopied = copiedId === post.id;
                 const isPublished = post.status === "published";
+                const isCancelled = post.status === "cancelled";
 
                 return (
                   <div
                     key={post.id}
                     className={cn(
                       "cryptox-card p-5 border flex flex-col justify-between space-y-4 transition-all hover:border-white/20",
-                      isPublished ? "border-emerald-500/30 bg-emerald-950/10" : "border-white/[0.08]"
+                      isPublished
+                        ? "border-emerald-500/30 bg-emerald-950/10"
+                        : isCancelled
+                        ? "border-red-500/20 bg-red-950/5 opacity-80"
+                        : "border-white/[0.08]"
                     )}
                   >
                     <div>
@@ -766,26 +879,50 @@ export function PostSchedulerView({
                             "text-[10px] font-bold px-2 py-0.5 rounded-full border",
                             isPublished
                               ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                              : isCancelled
+                              ? "bg-red-500/20 text-red-300 border-red-500/40"
                               : "bg-orange-500/20 text-orange-300 border-orange-500/40"
                           )}
                         >
-                          {isPublished ? "✅ Veröffentlicht" : "🕒 Geplant"}
+                          {isPublished ? "✅ Veröffentlicht" : isCancelled ? "❌ Abgebrochen" : "🕒 Geplant"}
                         </span>
                       </div>
 
                       {/* Scheduled Time Banner */}
-                      <div className="flex items-center gap-1.5 text-xs text-orange-300 bg-orange-500/10 border border-orange-500/20 rounded-lg px-2.5 py-1.5 mt-3">
-                        <Clock className="h-3.5 w-3.5 text-orange-400 shrink-0" />
-                        <span className="font-semibold">
-                          {new Date(post.scheduledFor).toLocaleString("de-DE", {
-                            weekday: "short",
-                            day: "2-digit",
-                            month: "short",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
+                      <div className="flex items-center justify-between gap-1.5 text-xs text-orange-300 bg-orange-500/10 border border-orange-500/20 rounded-lg px-2.5 py-1.5 mt-3">
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="h-3.5 w-3.5 text-orange-400 shrink-0" />
+                          <span className="font-semibold">
+                            {new Date(post.scheduledFor).toLocaleString("de-DE", {
+                              weekday: "short",
+                              day: "2-digit",
+                              month: "short",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            })}
+                          </span>
+                        </div>
+                        {!isPublished && !isCancelled && (
+                          <button
+                            type="button"
+                            onClick={() => handleQuickRescheduleOpen(post)}
+                            className="text-[10px] font-semibold text-orange-400 hover:text-white underline cursor-pointer"
+                            title="Uhrzeit schnell ändern"
+                          >
+                            Uhrzeit ändern
+                          </button>
+                        )}
                       </div>
+
+                      {/* TikTok Music Indicator */}
+                      {post.musicTitle && (
+                        <div className="flex items-center gap-1.5 text-[10px] text-cyan-300 bg-cyan-500/10 border border-cyan-500/20 rounded-lg px-2.5 py-1 mt-2">
+                          <Music className="h-3 w-3 text-cyan-400 shrink-0" />
+                          <span className="font-semibold truncate">
+                            Sound: {post.musicTitle} {post.musicArtist ? `(${post.musicArtist})` : ""}
+                          </span>
+                        </div>
+                      )}
 
                       {/* Title & Caption */}
                       <h4 className="font-bold text-white text-sm mt-3 line-clamp-1">{post.title}</h4>
@@ -857,27 +994,52 @@ export function PostSchedulerView({
                         </button>
                       </div>
 
-                      <div className="flex items-center justify-between text-[11px] pt-1">
-                        {!isPublished ? (
+                      {/* Secondary Actions: Reschedule / Cancel / Delete */}
+                      <div className="flex items-center justify-between text-[11px] pt-1.5 border-t border-white/5">
+                        <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => handleMarkPublished(post)}
-                            className="text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
+                            onClick={() => handleReschedulePost(post)}
+                            className="text-orange-400 hover:text-orange-300 font-semibold flex items-center gap-1 cursor-pointer transition"
+                            title="Diesen Beitrag bearbeiten & neu planen"
                           >
-                            <CheckCircle2 className="h-3 w-3" /> Als erledigt markieren
+                            <RotateCcw className="h-3 w-3" />
+                            <span>Neu planen</span>
                           </button>
-                        ) : (
-                          <span className="text-zinc-500">Erledigt</span>
-                        )}
 
-                        <button
-                          type="button"
-                          onClick={() => handleDeletePost(post.id)}
-                          className="text-zinc-500 hover:text-red-400 transition-colors flex items-center gap-1 cursor-pointer"
-                          title="Planung löschen"
-                        >
-                          <Trash2 className="h-3 w-3" /> Löschen
-                        </button>
+                          {!isPublished && !isCancelled && (
+                            <button
+                              type="button"
+                              onClick={() => handleCancelPost(post)}
+                              className="text-red-400 hover:text-red-300 flex items-center gap-1 cursor-pointer transition"
+                              title="Geplanten Post abbrechen"
+                            >
+                              <XCircle className="h-3 w-3" />
+                              <span>Abbrechen</span>
+                            </button>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          {!isPublished && !isCancelled && (
+                            <button
+                              type="button"
+                              onClick={() => handleMarkPublished(post)}
+                              className="text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer"
+                            >
+                              <CheckCircle2 className="h-3 w-3" /> Erledigt
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeletePost(post.id)}
+                            className="text-zinc-500 hover:text-red-400 transition-colors flex items-center gap-1 cursor-pointer"
+                            title="Planung endgültig löschen"
+                          >
+                            <Trash2 className="h-3 w-3" /> Löschen
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -964,6 +1126,26 @@ export function PostSchedulerView({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             {/* Left Form: Planungsdetails & Content */}
             <div className="cryptox-card p-6 border border-white/[0.08] lg:col-span-7 space-y-5">
+              {/* Edit Mode Banner */}
+              {editingPostId && (
+                <div className="flex items-center justify-between p-3.5 rounded-xl bg-orange-500/15 border border-orange-500/30 text-xs text-orange-300 animate-in fade-in">
+                  <div className="flex items-center gap-2 font-semibold">
+                    <Edit3 className="w-4 h-4 text-orange-400 shrink-0" />
+                    <span>Neuplanung aktiv: Du bearbeitest gerade den ausgewählten Beitrag.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingPostId(null);
+                      toast.info("Wird als neuer separater Beitrag gespeichert.");
+                    }}
+                    className="text-xs text-zinc-300 hover:text-white underline cursor-pointer"
+                  >
+                    Als neue Kopie anlegen
+                  </button>
+                </div>
+              )}
+
               <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
                 <div>
                   <h3 className="text-lg font-bold text-white">Beitrag konfigurieren</h3>
@@ -1094,12 +1276,59 @@ export function PostSchedulerView({
                       <SlidersHorizontal className="h-3.5 w-3.5 text-orange-400" />
                       <span>Plattform-Einstellungen für {selectedChannel.platform.toUpperCase()}</span>
                     </span>
-                    <span className="text-[10px] text-zinc-400 font-mono">Zernio Engine</span>
+                    <span className="text-[10px] text-zinc-400 font-mono">Socialcraft Direct Engine</span>
                   </div>
 
                   {/* TIKTOK SPECIFIC SETTINGS */}
                   {selectedChannel.platform === "tiktok" && (
-                    <div className="space-y-2.5 pt-2 border-t border-white/5 text-xs">
+                    <div className="space-y-3 pt-2 border-t border-white/5 text-xs">
+                      {/* TIKTOK MUSIC SELECTION CARD */}
+                      <div className="p-3 rounded-xl border border-cyan-500/30 bg-cyan-950/20 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Music className="w-4 h-4 text-cyan-400" />
+                            <span className="text-xs font-bold text-white">TikTok Commercial Music</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setShowMusicLibraryModal(true)}
+                            className="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                          >
+                            <Sparkles className="w-3 h-3 text-cyan-400" />
+                            <span>{selectedSound ? "Sound wechseln" : "Music Library öffnen"}</span>
+                          </button>
+                        </div>
+
+                        {selectedSound ? (
+                          <div className="flex items-center justify-between bg-black/50 p-2.5 rounded-lg border border-cyan-500/30 text-xs">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <div className="w-7 h-7 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-cyan-300 font-bold text-xs shrink-0">
+                                🎵
+                              </div>
+                              <div className="min-w-0">
+                                <p className="font-bold text-white text-xs leading-tight truncate">{selectedSound.title}</p>
+                                <p className="text-[10px] text-zinc-400 mt-0.5 truncate">{selectedSound.artist} • {selectedSound.duration}</p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedSound(null);
+                                toast.info("Sound entfernt.");
+                              }}
+                              className="text-zinc-400 hover:text-red-400 p-1 cursor-pointer transition"
+                              title="Sound entfernen"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ) : (
+                          <p className="text-[11px] text-zinc-400">
+                            Wähle lizenzierte TikTok-Sounds aus der integrierten Bibliothek oder nutze die TikTok Auto-Music Option.
+                          </p>
+                        )}
+                      </div>
+
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div>
                           <label className="text-[11px] text-zinc-400 block mb-1">Sichtbarkeit (Privacy):</label>
@@ -1131,7 +1360,7 @@ export function PostSchedulerView({
                               onChange={(e) => setTiktokAutoMusic(e.target.checked)}
                               className="accent-orange-500 rounded"
                             />
-                            <span>Automatische Hintergrundmusik (TikTok)</span>
+                            <span>Automatische Trend-Musik (TikTok)</span>
                           </label>
                         </div>
                       </div>
@@ -1603,6 +1832,71 @@ export function PostSchedulerView({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── TIKTOK COMMERCIAL MUSIC LIBRARY MODAL ────────────────────── */}
+      <TikTokMusicLibraryModal
+        isOpen={showMusicLibraryModal}
+        onClose={() => setShowMusicLibraryModal(false)}
+        selectedSound={selectedSound}
+        onSelectSound={(sound) => setSelectedSound(sound)}
+      />
+
+      {/* ── QUICK RESCHEDULE MODAL ────────────────────────────────────── */}
+      {quickReschedulePost && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md bg-[#0F0D15] border border-white/15 rounded-2xl shadow-2xl p-6 text-white space-y-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-orange-400" />
+                <h3 className="text-sm font-bold text-white">Termin anpassen & Neu planen</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setQuickReschedulePost(null)}
+                className="text-zinc-500 hover:text-white p-1 cursor-pointer transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleQuickRescheduleSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <span className="text-[11px] text-zinc-400 block">Beitrag:</span>
+                <p className="text-xs text-white font-semibold line-clamp-1 bg-black/40 p-2 rounded-lg border border-white/10">
+                  {quickReschedulePost.title || quickReschedulePost.caption.slice(0, 40)}
+                </p>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] text-zinc-400 block">Neues Datum & Uhrzeit:</label>
+                <input
+                  type="datetime-local"
+                  required
+                  value={quickRescheduleDate}
+                  onChange={(e) => setQuickRescheduleDate(e.target.value)}
+                  className="w-full bg-black/50 border border-white/15 rounded-xl p-2.5 text-xs font-mono text-white focus:outline-none focus:border-orange-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setQuickReschedulePost(null)}
+                  className="px-3 py-1.5 text-xs text-zinc-400 hover:text-white cursor-pointer"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  type="submit"
+                  className="cryptox-orange-btn !py-1.5 !px-4 text-xs font-bold"
+                >
+                  Termin speichern
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
