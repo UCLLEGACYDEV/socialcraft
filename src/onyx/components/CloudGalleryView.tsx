@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Archive,
+  Calendar,
   Check,
   ChevronDown,
   ChevronRight,
@@ -68,6 +69,7 @@ interface CloudGalleryViewProps {
   onDeleteHistory: (id: string) => void;
   onUseInCarousel?: ((imageUrl: string, prompt: string) => void) | undefined;
   onUseInDirectPrompt?: ((prompt: string) => void) | undefined;
+  onScheduleItem?: ((item: { title: string; imageUrls: string[]; prompt?: string }) => void) | undefined;
 }
 
 export function CloudGalleryView({
@@ -77,6 +79,7 @@ export function CloudGalleryView({
   onDeleteHistory,
   onUseInCarousel,
   onUseInDirectPrompt,
+  onScheduleItem,
 }: CloudGalleryViewProps) {
   const [activeSubTab, setActiveSubTab] = useState<"cloud" | "local">("cloud");
   const [folderFilter, setFolderFilter] = useState<"my" | "users" | "admins" | "all">("my");
@@ -729,6 +732,24 @@ export function CloudGalleryView({
                                 <span>Projekt als ZIP</span>
                               </button>
 
+                              {onScheduleItem && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    onScheduleItem({
+                                      title: prettyProjectName(projectName),
+                                      imageUrls: slides.map((s) => s.displayUrl || s.url).filter(Boolean),
+                                      prompt: slides[0]?.prompt,
+                                    });
+                                  }}
+                                  className="flex items-center gap-1.5 rounded-xl border border-orange-500/40 bg-orange-500/15 hover:bg-orange-500/25 px-3 py-1.5 text-xs font-semibold text-orange-400 transition-colors cursor-pointer"
+                                  title="Dieses Projekt im Beitrags-Planer einplanen"
+                                >
+                                  <Calendar className="h-3.5 w-3.5" />
+                                  <span>Planen</span>
+                                </button>
+                              )}
+
                               {onOpenHistory && (
                                 <button
                                   type="button"
@@ -920,16 +941,33 @@ export function CloudGalleryView({
                             <button
                               type="button"
                               onClick={() => setViewerProject(projectName)}
-                              className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-white/5 px-3 py-1.5 text-xs font-medium text-white hover:bg-white/10 transition-colors cursor-pointer"
+                              className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white hover:bg-white/10 transition-colors cursor-pointer"
                             >
                               <Eye className="h-3.5 w-3.5" />
                               <span>Ansehen</span>
                             </button>
+                            {onScheduleItem && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  onScheduleItem({
+                                    title: title,
+                                    imageUrls: slides.map((s) => s.displayUrl || s.url).filter(Boolean),
+                                    prompt: slides[0]?.prompt,
+                                  });
+                                }}
+                                className="flex items-center justify-center gap-1 rounded-lg bg-orange-500/15 border border-orange-500/30 px-2.5 py-1.5 text-xs font-medium text-orange-300 hover:bg-orange-500/25 transition-colors cursor-pointer"
+                                title="Im Planer einplanen"
+                              >
+                                <Calendar className="h-3.5 w-3.5" />
+                                <span>Planen</span>
+                              </button>
+                            )}
                             <button
                               type="button"
                               onClick={() => handleDownloadProjectZip(projectName, slides)}
                               disabled={isZipping}
-                              className="flex-1 flex items-center justify-center gap-1.5 rounded-lg bg-blue-500/15 border border-blue-500/30 px-3 py-1.5 text-xs font-medium text-blue-300 hover:bg-blue-500/25 transition-colors disabled:opacity-50 cursor-pointer"
+                              className="flex items-center justify-center gap-1 rounded-lg bg-blue-500/15 border border-blue-500/30 px-2.5 py-1.5 text-xs font-medium text-blue-300 hover:bg-blue-500/25 transition-colors disabled:opacity-50 cursor-pointer"
                             >
                               {isZipping ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
                               <span>ZIP</span>

@@ -1,4 +1,4 @@
-import { useState, useId } from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -6,7 +6,6 @@ import {
   Share2,
   Trash2,
   CheckCircle2,
-  AlertCircle,
   ExternalLink,
   Copy,
   Check,
@@ -18,11 +17,12 @@ import {
   Layers,
   Sparkles,
   SlidersHorizontal,
-  ChevronRight,
   Send,
   Eye,
-  RefreshCw,
-  Edit3,
+  Images,
+  BookOpen,
+  ArrowRight,
+  FolderOpen,
 } from "lucide-react";
 import type { SocialChannel, ScheduledPost, SocialPlatform, SlideContent, HistoryEntry } from "../types";
 import { DEFAULT_SOCIAL_CHANNELS } from "../defaults";
@@ -36,6 +36,7 @@ interface PostSchedulerViewProps {
   onUpdatePosts: (posts: ScheduledPost[]) => void;
   currentSlides?: SlideContent[];
   historyEntries?: HistoryEntry[];
+  initialScheduledItem?: { title: string; imageUrls: string[]; prompt?: string } | null;
   onNavigateToCarousel?: () => void;
 }
 
@@ -87,17 +88,23 @@ export function PostSchedulerView({
   onUpdatePosts,
   currentSlides = [],
   historyEntries = [],
+  initialScheduledItem = null,
   onNavigateToCarousel,
 }: PostSchedulerViewProps) {
-  const [activeTab, setActiveTab] = useState<"queue" | "composer" | "channels">("queue");
+  const [activeTab, setActiveTab] = useState<"queue" | "composer" | "channels">(
+    initialScheduledItem ? "composer" : "queue"
+  );
   const [filterPlatform, setFilterPlatform] = useState<string>("all");
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [showHistoryPicker, setShowHistoryPicker] = useState(false);
 
   // Composer Form State
   const defaultChannel = channels.find((c) => c.isDefault) || channels[0] || DEFAULT_SOCIAL_CHANNELS[0];
   const [selectedChannelId, setSelectedChannelId] = useState<string>(defaultChannel?.id || "fb-main-page");
-  const [postTitle, setPostTitle] = useState<string>("");
-  const [postCaption, setPostCaption] = useState<string>("");
+  const [postTitle, setPostTitle] = useState<string>(initialScheduledItem?.title || "");
+  const [postCaption, setPostCaption] = useState<string>(
+    initialScheduledItem?.prompt ? `${initialScheduledItem.title}\n\n${initialScheduledItem.prompt}` : ""
+  );
   const [postHashtags, setPostHashtags] = useState<string>("#marketing #business #growth #socialcraft");
   const [scheduledDate, setScheduledDate] = useState<string>(() => {
     const d = new Date();
@@ -106,10 +113,27 @@ export function PostSchedulerView({
     return d.toISOString().slice(0, 16);
   });
   const [selectedMediaUrls, setSelectedMediaUrls] = useState<string[]>(() => {
+    if (initialScheduledItem?.imageUrls && initialScheduledItem.imageUrls.length > 0) {
+      return initialScheduledItem.imageUrls;
+    }
     const validSlideImages = currentSlides.map((s) => s.imageUrl).filter(Boolean) as string[];
     return validSlideImages.length > 0 ? validSlideImages : [];
   });
   const [customMediaUrl, setCustomMediaUrl] = useState("");
+
+  // Update when initialScheduledItem changes
+  useEffect(() => {
+    if (initialScheduledItem) {
+      setPostTitle(initialScheduledItem.title || "");
+      if (initialScheduledItem.imageUrls && initialScheduledItem.imageUrls.length > 0) {
+        setSelectedMediaUrls(initialScheduledItem.imageUrls);
+      }
+      if (initialScheduledItem.prompt) {
+        setPostCaption(`${initialScheduledItem.title}\n\n${initialScheduledItem.prompt}`);
+      }
+      setActiveTab("composer");
+    }
+  }, [initialScheduledItem]);
 
   // New Channel Dialog State
   const [showAddChannel, setShowAddChannel] = useState(false);
@@ -123,6 +147,38 @@ export function PostSchedulerView({
     setCopiedId(id);
     toast.success("In Zwischenablage kopiert! 📋");
     setTimeout(() => setCopiedId(null), 2000);
+  };
+
+  const handleSelectHistoryEntry = (entry: HistoryEntry) => {
+    const imgs = entry.slides.map((s) => s.imageUrl).filter(Boolean) as string[];
+    setSelectedMediaUrls(imgs);
+    setPostTitle(entry.topic);
+
+    // Build intelligent caption from slides
+    const keyPoints = entry.slides
+      .filter((s) => s.headline && s.role !== "hook" && s.role !== "closing")
+      .slice(0, 4)
+      .map((s, i) => `🔹 ${s.headline}${s.subtext ? `: ${s.subtext}` : ""}`)
+      .join("\n");
+
+    const closingSlide = entry.slides.find((s) => s.role === "closing");
+    const cta = closingSlide?.headline || "Speichere dir diesen Post für später ab. 🚀";
+
+    const composedCaption = `${entry.topic}\n\n${keyPoints ? `${keyPoints}\n\n` : ""}${cta}`;
+    setPostCaption(composedCaption);
+
+    // Auto-generate hashtags from title
+    const titleWords = entry.topic
+      .replace(/[^a-zA-ZäöüÄÖÜ0-9\s]/g, "")
+      .split(/\s+/)
+      .filter((w) => w.length > 3)
+      .map((w) => `#${w.toLowerCase()}`);
+    const tags = Array.from(new Set([...titleWords, "#socialcraft", "#growth"])).slice(0, 5);
+    setPostHashtags(tags.join(" "));
+
+    setShowHistoryPicker(false);
+    setActiveTab("composer");
+    toast.success(`Beitrag „${entry.topic}“ mit ${imgs.length} Folien geladen! ✨`);
   };
 
   const handleSchedulePost = () => {
@@ -234,9 +290,6 @@ export function PostSchedulerView({
     return p.platform === filterPlatform;
   });
 
-  const scheduledCount = posts.filter((p) => p.status === "scheduled").length;
-  const publishedCount = posts.filter((p) => p.status === "published").length;
-
   return (
     <div className="space-y-6 max-w-[1550px] mx-auto pb-16">
       {/* ── Top Hero & Channel Banner ───────────────────────────────── */}
@@ -255,7 +308,7 @@ export function PostSchedulerView({
               Beitrags-Planer & Kanal-Zentrale
             </h1>
             <p className="text-sm text-zinc-400 mt-1 max-w-2xl">
-              Plane Beiträge direkt über deine <strong className="text-white">Kanal- & Seiten-IDs</strong> (z. B. Facebook Seite <span className="font-mono text-orange-300">337570872768998</span>) ohne API-Sperren oder Drittanbieter-Zwang.
+              Plane Beiträge direkt über deine <strong className="text-white">Kanal- & Seiten-IDs</strong> (z. B. Facebook Seite <span className="font-mono text-orange-300">337570872768998</span>) oder übernehme bestehende Projekte aus deiner Galerie.
             </p>
           </div>
 
@@ -366,14 +419,30 @@ export function PostSchedulerView({
               ))}
             </div>
 
-            <button
-              type="button"
-              onClick={() => setActiveTab("composer")}
-              className="cryptox-orange-btn !py-2 !px-4 text-xs font-bold self-start sm:self-auto"
-            >
-              <Plus className="h-4 w-4 mr-1.5" />
-              Beitrag hinzufügen
-            </button>
+            <div className="flex items-center gap-2">
+              {historyEntries.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowHistoryPicker(true);
+                    setActiveTab("composer");
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-200 transition-all cursor-pointer"
+                >
+                  <BookOpen className="h-3.5 w-3.5 text-orange-400" />
+                  <span>Aus Historie wählen ({historyEntries.length})</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                onClick={() => setActiveTab("composer")}
+                className="cryptox-orange-btn !py-2 !px-4 text-xs font-bold"
+              >
+                <Plus className="h-4 w-4 mr-1.5" />
+                Beitrag hinzufügen
+              </button>
+            </div>
           </div>
 
           {filteredPosts.length === 0 ? (
@@ -383,15 +452,29 @@ export function PostSchedulerView({
               </div>
               <h3 className="text-lg font-bold text-white">Noch keine Beiträge in der Warteschlange</h3>
               <p className="text-xs text-zinc-400 max-w-md mx-auto">
-                Plane jetzt deinen ersten Beitrag für deine Facebook-Seite (ID: 337570872768998) oder andere Kanäle.
+                Plane jetzt deinen ersten Beitrag für deine Facebook-Seite (ID: 337570872768998) oder wähle ein fertiges Projekt aus der Galerie.
               </p>
-              <button
-                type="button"
-                onClick={() => setActiveTab("composer")}
-                className="cryptox-orange-btn !py-2.5 !px-6 text-xs font-bold"
-              >
-                Jetzt Beitrag planen
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("composer")}
+                  className="cryptox-orange-btn !py-2.5 !px-6 text-xs font-bold"
+                >
+                  Jetzt Beitrag planen
+                </button>
+                {historyEntries.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowHistoryPicker(true);
+                      setActiveTab("composer");
+                    }}
+                    className="px-5 py-2.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-200 transition-all"
+                  >
+                    Aus Historie / Galerie laden ({historyEntries.length})
+                  </button>
+                )}
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -556,269 +639,341 @@ export function PostSchedulerView({
 
       {/* ── TAB 2: COMPOSER / NEUEN BEITRAG PLANEN ───────────────────── */}
       {activeTab === "composer" && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Form: Planungsdetails & Content */}
-          <div className="cryptox-card p-6 border border-white/[0.08] lg:col-span-7 space-y-5">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-white">Neuen Beitrag planen</h3>
-                <p className="text-xs text-zinc-400">Verknüpft mit deiner Kanal-ID für nahtlose Veröffentlichung</p>
+        <div className="space-y-6">
+          {/* ── HISTORIE & GALERIE PICKER (DRAWER / SELECTOR) ─────────── */}
+          {historyEntries.length > 0 && (
+            <div className="cryptox-card p-5 border border-white/[0.08] space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="h-4 w-4 text-orange-400" />
+                  <h3 className="text-sm font-bold text-white">
+                    Bestehendes Projekt aus Galerie / Historie wählen
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-orange-500/20 text-orange-300">
+                    {historyEntries.length} bereit
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowHistoryPicker((prev) => !prev)}
+                  className="text-xs font-semibold text-orange-400 hover:underline cursor-pointer"
+                >
+                  {showHistoryPicker ? "Einklappen" : "Alle Projekte anzeigen"}
+                </button>
               </div>
-              <button
-                type="button"
-                onClick={() => {
-                  setPostTitle("Warum Systeme Motivation schlagen");
-                  setPostCaption("Disziplin ist nicht das, was du fühlst – sondern das System, auf das du dich verlässt, wenn Motivation verschwindet.\n\nSpeichere dir diesen Post für dein nächstes Business-Level ab. 🚀");
-                  setPostHashtags("#business #systeme #disziplin #growth #mindset");
-                }}
-                className="text-xs font-semibold text-orange-400 hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <Sparkles className="h-3.5 w-3.5" /> Beispiel laden
-              </button>
-            </div>
 
-            {/* 1. Target Channel Selection */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                <span>1. Ziel-Kanal & Seiten-ID wählen:</span>
-              </label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {channels.map((chan) => {
-                  const Icon = PLATFORM_ICONS[chan.platform] || Share2;
-                  const isSelected = selectedChannelId === chan.id;
-                  const style = PLATFORM_COLORS[chan.platform] || PLATFORM_COLORS.facebook;
-                  return (
-                    <button
-                      key={chan.id}
-                      type="button"
-                      onClick={() => setSelectedChannelId(chan.id)}
-                      className={cn(
-                        "flex items-center justify-between p-3 rounded-xl border text-left transition-all cursor-pointer",
-                        isSelected
-                          ? "bg-[#FF4D17]/15 border-[#FF4D17] shadow-[0_0_15px_rgba(255,77,23,0.3)] ring-1 ring-[#FF4D17]"
-                          : "bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.05]"
-                      )}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <div className={cn("p-1.5 rounded-lg border", style.bg, style.border)}>
-                          <Icon className={cn("h-4 w-4", style.text)} />
+              {showHistoryPicker && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 pt-2 border-t border-white/[0.06]">
+                  {historyEntries.map((entry) => {
+                    const cover = entry.slides[0]?.imageUrl;
+                    const validCount = entry.slides.filter((s) => s.imageUrl).length;
+                    return (
+                      <div
+                        key={entry.id}
+                        onClick={() => handleSelectHistoryEntry(entry)}
+                        className="group relative flex flex-col p-3 rounded-2xl border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.06] hover:border-orange-500/50 transition-all cursor-pointer shadow-sm"
+                      >
+                        <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden bg-black/50 mb-2.5">
+                          {cover ? (
+                            <img
+                              src={cover}
+                              alt={entry.topic}
+                              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                            />
+                          ) : (
+                            <div className="h-full w-full flex items-center justify-center text-zinc-600">
+                              <Images className="h-6 w-6" />
+                            </div>
+                          )}
+                          <div className="absolute top-2 left-2 rounded bg-black/70 px-1.5 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm">
+                            {validCount} Slides
+                          </div>
                         </div>
-                        <div>
-                          <span className="text-xs font-bold text-white block">{chan.name}</span>
-                          <span className="text-[10px] font-mono text-zinc-400">ID: {chan.channelId}</span>
+
+                        <h4 className="text-xs font-bold text-white line-clamp-1 group-hover:text-orange-400 transition-colors">
+                          {entry.topic}
+                        </h4>
+                        <p className="text-[10px] text-zinc-500 mt-0.5">
+                          {new Date(entry.createdAt).toLocaleDateString("de-DE")}
+                        </p>
+
+                        <div className="mt-2 pt-2 border-t border-white/[0.06] flex items-center justify-between text-[11px] text-orange-400 font-semibold">
+                          <span>In Planer laden</span>
+                          <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
                         </div>
                       </div>
-                      {isSelected && <Check className="h-4 w-4 text-orange-400" />}
-                    </button>
-                  );
-                })}
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Main Composer Grid ────────────────────────────────────── */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Form: Planungsdetails & Content */}
+            <div className="cryptox-card p-6 border border-white/[0.08] lg:col-span-7 space-y-5">
+              <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-white">Beitrag konfigurieren</h3>
+                  <p className="text-xs text-zinc-400">Verknüpft mit deiner Kanal-ID für nahtlose Veröffentlichung</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPostTitle("Warum Systeme Motivation schlagen");
+                    setPostCaption("Disziplin ist nicht das, was du fühlst – sondern das System, auf das du dich verlässt, wenn Motivation verschwindet.\n\nSpeichere dir diesen Post für dein nächstes Business-Level ab. 🚀");
+                    setPostHashtags("#business #systeme #disziplin #growth #mindset");
+                  }}
+                  className="text-xs font-semibold text-orange-400 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <Sparkles className="h-3.5 w-3.5" /> Beispiel laden
+                </button>
               </div>
-            </div>
 
-            {/* 2. Date & Time Selection */}
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                <Clock className="h-3.5 w-3.5 text-orange-400" />
-                <span>2. Datum & Uhrzeit der Veröffentlichung:</span>
-              </label>
-              <input
-                type="datetime-local"
-                value={scheduledDate}
-                onChange={(e) => setScheduledDate(e.target.value)}
-                className="w-full bg-[#120F17] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
-              />
-            </div>
+              {/* 1. Target Channel Selection */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                  <span>1. Ziel-Kanal & Seiten-ID wählen:</span>
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {channels.map((chan) => {
+                    const Icon = PLATFORM_ICONS[chan.platform] || Share2;
+                    const isSelected = selectedChannelId === chan.id;
+                    const style = PLATFORM_COLORS[chan.platform] || PLATFORM_COLORS.facebook;
+                    return (
+                      <button
+                        key={chan.id}
+                        type="button"
+                        onClick={() => setSelectedChannelId(chan.id)}
+                        className={cn(
+                          "flex items-center justify-between p-3 rounded-xl border text-left transition-all cursor-pointer",
+                          isSelected
+                            ? "bg-[#FF4D17]/15 border-[#FF4D17] shadow-[0_0_15px_rgba(255,77,23,0.3)] ring-1 ring-[#FF4D17]"
+                            : "bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.05]"
+                        )}
+                      >
+                        <div className="flex items-center gap-2.5">
+                          <div className={cn("p-1.5 rounded-lg border", style.bg, style.border)}>
+                            <Icon className={cn("h-4 w-4", style.text)} />
+                          </div>
+                          <div>
+                            <span className="text-xs font-bold text-white block">{chan.name}</span>
+                            <span className="text-[10px] font-mono text-zinc-400">ID: {chan.channelId}</span>
+                          </div>
+                        </div>
+                        {isSelected && <Check className="h-4 w-4 text-orange-400" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-            {/* 3. Title & Caption */}
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                  Titel / Thema des Beitrags:
+              {/* 2. Date & Time Selection */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                  <Clock className="h-3.5 w-3.5 text-orange-400" />
+                  <span>2. Datum & Uhrzeit der Veröffentlichung:</span>
                 </label>
                 <input
-                  type="text"
-                  value={postTitle}
-                  onChange={(e) => setPostTitle(e.target.value)}
-                  placeholder="z. B. 5 Schritte zur perfekten Social-Media-Strategie"
+                  type="datetime-local"
+                  value={scheduledDate}
+                  onChange={(e) => setScheduledDate(e.target.value)}
                   className="w-full bg-[#120F17] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
                 />
               </div>
 
-              <div>
-                <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                  Beitragstext / Caption:
-                </label>
-                <textarea
-                  rows={5}
-                  value={postCaption}
-                  onChange={(e) => setPostCaption(e.target.value)}
-                  placeholder="Schreibe hier deinen Beitragstext, Bulletpoints und Call-to-Action..."
-                  className="w-full bg-[#120F17] border border-white/10 rounded-xl p-3.5 text-xs text-white focus:outline-none focus:border-orange-500 resize-none font-sans leading-relaxed"
-                />
-              </div>
-
-              <div>
-                <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                  Hashtags:
-                </label>
-                <input
-                  type="text"
-                  value={postHashtags}
-                  onChange={(e) => setPostHashtags(e.target.value)}
-                  placeholder="#socialcraft #growth #content #marketing"
-                  className="w-full bg-[#120F17] border border-white/10 rounded-xl px-4 py-2 text-xs font-mono text-zinc-300 focus:outline-none focus:border-orange-500"
-                />
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between gap-4">
-              <button
-                type="button"
-                onClick={() => setActiveTab("queue")}
-                className="px-4 py-2.5 rounded-xl border border-white/10 text-xs font-semibold text-zinc-400 hover:text-white"
-              >
-                Abbrechen
-              </button>
-
-              <button
-                type="button"
-                onClick={handleSchedulePost}
-                className="cryptox-orange-btn !py-2.5 !px-6 text-xs font-bold"
-              >
-                <CalendarIcon className="h-4 w-4 mr-2" />
-                Beitrag jetzt planen
-              </button>
-            </div>
-          </div>
-
-          {/* Right Column: Media Preview & Karussell-Übernahme */}
-          <div className="space-y-5 lg:col-span-5">
-            {/* Media Selector Card */}
-            <div className="cryptox-card p-6 border border-white/[0.08] space-y-4">
-              <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
-                  <Layers className="h-4 w-4 text-orange-400" />
-                  <span>Visuals / Medien anfügen</span>
-                </h4>
-                {currentSlides.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const imgs = currentSlides.map((s) => s.imageUrl).filter(Boolean) as string[];
-                      setSelectedMediaUrls(imgs);
-                      toast.success(`${imgs.length} Visuals aus aktuellem Karussell übernommen!`);
-                    }}
-                    className="text-[11px] font-semibold text-orange-400 hover:underline"
-                  >
-                    Aus Karussell laden
-                  </button>
-                )}
-              </div>
-
-              {/* Selected Thumbnails */}
-              {selectedMediaUrls.length > 0 ? (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-3 gap-2">
-                    {selectedMediaUrls.map((url, i) => (
-                      <div key={i} className="relative group rounded-xl overflow-hidden border border-white/10 aspect-[4/5] bg-black/40">
-                        <img src={url} alt={`Slide ${i + 1}`} className="w-full h-full object-cover" />
-                        <button
-                          type="button"
-                          onClick={() => setSelectedMediaUrls(selectedMediaUrls.filter((_, idx) => idx !== i))}
-                          className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </button>
-                        <span className="absolute bottom-1 left-1 text-[9px] font-mono px-1 rounded bg-black/70 text-white">
-                          #{i + 1}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedMediaUrls([])}
-                    className="text-xs text-zinc-400 hover:text-red-400 transition-colors"
-                  >
-                    Alle Medien entfernen
-                  </button>
+              {/* 3. Title & Caption */}
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+                    Titel / Thema des Beitrags:
+                  </label>
+                  <input
+                    type="text"
+                    value={postTitle}
+                    onChange={(e) => setPostTitle(e.target.value)}
+                    placeholder="z. B. 5 Schritte zur perfekten Social-Media-Strategie"
+                    className="w-full bg-[#120F17] border border-white/10 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                  />
                 </div>
-              ) : (
-                <div className="p-6 border border-dashed border-white/10 rounded-2xl text-center space-y-2 bg-white/[0.01]">
-                  <p className="text-xs text-zinc-400">Keine Visuals ausgewählt.</p>
-                  <p className="text-[11px] text-zinc-500">
-                    Du kannst Visuals aus dem Karussell-Generator, der Cloud-Galerie oder per Bild-URL verwenden.
-                  </p>
-                  {onNavigateToCarousel && (
+
+                <div>
+                  <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+                    Beitragstext / Caption:
+                  </label>
+                  <textarea
+                    rows={5}
+                    value={postCaption}
+                    onChange={(e) => setPostCaption(e.target.value)}
+                    placeholder="Schreibe hier deinen Beitragstext, Bulletpoints und Call-to-Action..."
+                    className="w-full bg-[#120F17] border border-white/10 rounded-xl p-3.5 text-xs text-white focus:outline-none focus:border-orange-500 resize-none font-sans leading-relaxed"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+                    Hashtags:
+                  </label>
+                  <input
+                    type="text"
+                    value={postHashtags}
+                    onChange={(e) => setPostHashtags(e.target.value)}
+                    placeholder="#socialcraft #growth #content #marketing"
+                    className="w-full bg-[#120F17] border border-white/10 rounded-xl px-4 py-2 text-xs font-mono text-zinc-300 focus:outline-none focus:border-orange-500"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-4 border-t border-white/[0.08] flex items-center justify-between gap-4">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("queue")}
+                  className="px-4 py-2.5 rounded-xl border border-white/10 text-xs font-semibold text-zinc-400 hover:text-white"
+                >
+                  Abbrechen
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSchedulePost}
+                  className="cryptox-orange-btn !py-2.5 !px-6 text-xs font-bold"
+                >
+                  <CalendarIcon className="h-4 w-4 mr-2" />
+                  Beitrag jetzt planen
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column: Media Preview & Karussell-Übernahme */}
+            <div className="space-y-5 lg:col-span-5">
+              {/* Media Selector Card */}
+              <div className="cryptox-card p-6 border border-white/[0.08] space-y-4">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
+                  <h4 className="text-sm font-bold text-white flex items-center gap-1.5">
+                    <Layers className="h-4 w-4 text-orange-400" />
+                    <span>Visuals / Medien ({selectedMediaUrls.length})</span>
+                  </h4>
+                  {currentSlides.length > 0 && (
                     <button
                       type="button"
-                      onClick={onNavigateToCarousel}
-                      className="text-xs font-semibold text-orange-400 hover:underline pt-1 inline-block"
+                      onClick={() => {
+                        const imgs = currentSlides.map((s) => s.imageUrl).filter(Boolean) as string[];
+                        setSelectedMediaUrls(imgs);
+                        toast.success(`${imgs.length} Visuals aus aktuellem Karussell übernommen!`);
+                      }}
+                      className="text-[11px] font-semibold text-orange-400 hover:underline cursor-pointer"
                     >
-                      Zum Karussell-Generator $\rightarrow$
+                      Aus Karussell laden
                     </button>
                   )}
                 </div>
-              )}
 
-              {/* Custom Image URL fallback */}
-              <div className="pt-3 border-t border-white/[0.08] space-y-2">
-                <label className="text-[11px] font-semibold text-zinc-400 block">
-                  Oder Bild-URL manuell hinzufügen:
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={customMediaUrl}
-                    onChange={(e) => setCustomMediaUrl(e.target.value)}
-                    placeholder="https://..."
-                    className="flex-1 bg-[#120F17] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-orange-500"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (customMediaUrl.trim()) {
-                        setSelectedMediaUrls([...selectedMediaUrls, customMediaUrl.trim()]);
-                        setCustomMediaUrl("");
-                        toast.success("Bild hinzugefügt!");
-                      }
-                    }}
-                    className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-all"
-                  >
-                    +
-                  </button>
+                {/* Selected Thumbnails */}
+                {selectedMediaUrls.length > 0 ? (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-3 gap-2">
+                      {selectedMediaUrls.map((url, i) => (
+                        <div key={i} className="relative group rounded-xl overflow-hidden border border-white/10 aspect-[4/5] bg-black/40">
+                          <img src={url} alt={`Slide ${i + 1}`} className="w-full h-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => setSelectedMediaUrls(selectedMediaUrls.filter((_, idx) => idx !== i))}
+                            className="absolute top-1 right-1 h-5 w-5 rounded-full bg-black/70 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 cursor-pointer"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                          <span className="absolute bottom-1 left-1 text-[9px] font-mono px-1 rounded bg-black/70 text-white">
+                            #{i + 1}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedMediaUrls([])}
+                      className="text-xs text-zinc-400 hover:text-red-400 transition-colors cursor-pointer"
+                    >
+                      Alle Medien entfernen
+                    </button>
+                  </div>
+                ) : (
+                  <div className="p-6 border border-dashed border-white/10 rounded-2xl text-center space-y-2 bg-white/[0.01]">
+                    <p className="text-xs text-zinc-400">Keine Visuals ausgewählt.</p>
+                    <p className="text-[11px] text-zinc-500">
+                      Du kannst Visuals aus dem Karussell-Generator, der Historie oder per Bild-URL verwenden.
+                    </p>
+                    {onNavigateToCarousel && (
+                      <button
+                        type="button"
+                        onClick={onNavigateToCarousel}
+                        className="text-xs font-semibold text-orange-400 hover:underline pt-1 inline-block cursor-pointer"
+                      >
+                        Zum Karussell-Generator $\rightarrow$
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Custom Image URL fallback */}
+                <div className="pt-3 border-t border-white/[0.08] space-y-2">
+                  <label className="text-[11px] font-semibold text-zinc-400 block">
+                    Oder Bild-URL manuell hinzufügen:
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={customMediaUrl}
+                      onChange={(e) => setCustomMediaUrl(e.target.value)}
+                      placeholder="https://..."
+                      className="flex-1 bg-[#120F17] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-orange-500"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (customMediaUrl.trim()) {
+                          setSelectedMediaUrls([...selectedMediaUrls, customMediaUrl.trim()]);
+                          setCustomMediaUrl("");
+                          toast.success("Bild hinzugefügt!");
+                        }
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition-all cursor-pointer"
+                    >
+                      +
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Live Preview Card */}
-            <div className="cryptox-card p-5 border border-white/[0.08] space-y-3">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 block">
-                Live Post-Vorschau
-              </span>
-              <div className="rounded-2xl border border-white/10 bg-[#0d0a13] p-4 space-y-3">
-                <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-full bg-orange-500/20 border border-orange-500/40 flex items-center justify-center font-bold text-orange-400 text-xs">
-                    SC
+              {/* Live Preview Card */}
+              <div className="cryptox-card p-5 border border-white/[0.08] space-y-3">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 block">
+                  Live Post-Vorschau
+                </span>
+                <div className="rounded-2xl border border-white/10 bg-[#0d0a13] p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-full bg-orange-500/20 border border-orange-500/40 flex items-center justify-center font-bold text-orange-400 text-xs">
+                      SC
+                    </div>
+                    <div>
+                      <span className="text-xs font-bold text-white block">
+                        {channels.find((c) => c.id === selectedChannelId)?.name || "Socialcraft"}
+                      </span>
+                      <span className="text-[10px] text-zinc-500">
+                        Geplant für {new Date(scheduledDate).toLocaleDateString("de-DE")}
+                      </span>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-xs font-bold text-white block">
-                      {channels.find((c) => c.id === selectedChannelId)?.name || "Socialcraft"}
-                    </span>
-                    <span className="text-[10px] text-zinc-500">
-                      Geplant für {new Date(scheduledDate).toLocaleDateString("de-DE")}
-                    </span>
-                  </div>
+
+                  <p className="text-xs text-zinc-200 whitespace-pre-line leading-relaxed">
+                    {postCaption || "Deine Caption wird hier in der Vorschau angezeigt..."}
+                  </p>
+
+                  {postHashtags && (
+                    <p className="text-[11px] text-orange-400/80 font-mono">{postHashtags}</p>
+                  )}
                 </div>
-
-                <p className="text-xs text-zinc-200 whitespace-pre-line leading-relaxed">
-                  {postCaption || "Deine Caption wird hier in der Vorschau angezeigt..."}
-                </p>
-
-                {postHashtags && (
-                  <p className="text-[11px] text-orange-400/80 font-mono">{postHashtags}</p>
-                )}
               </div>
             </div>
           </div>
@@ -900,7 +1055,7 @@ export function PostSchedulerView({
                     <button
                       type="button"
                       onClick={() => handleDeleteChannel(chan.id)}
-                      className="text-zinc-500 hover:text-red-400 transition-colors p-1"
+                      className="text-zinc-500 hover:text-red-400 transition-colors p-1 cursor-pointer"
                       title="Kanal entfernen"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -973,7 +1128,7 @@ export function PostSchedulerView({
                 <button
                   type="button"
                   onClick={() => setShowAddChannel(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white cursor-pointer"
                 >
                   Abbrechen
                 </button>

@@ -213,6 +213,11 @@ function OnyxStudio() {
     LS.scheduledPosts,
     [],
   );
+  const [schedulerInitialItem, setSchedulerInitialItem] = useState<{
+    title: string;
+    imageUrls: string[];
+    prompt?: string;
+  } | null>(null);
 
   // Restore history from the user's private cloud folder when local history is empty
   useEffect(() => {
@@ -1128,6 +1133,7 @@ function OnyxStudio() {
               onUpdatePosts={setScheduledPosts}
               currentSlides={slides}
               historyEntries={history}
+              initialScheduledItem={schedulerInitialItem}
               onNavigateToCarousel={() => setActiveTab("carousel")}
             />
           )}
@@ -1186,6 +1192,11 @@ function OnyxStudio() {
                 setDirectPrompt(prompt);
                 setActiveTab("direct-prompt");
                 toast.success("Prompt ins Einzelbild übernommen!");
+              }}
+              onScheduleItem={(item) => {
+                setSchedulerInitialItem(item);
+                setActiveTab("scheduler");
+                toast.success(`Projekt „${item.title}“ im Planer geöffnet! 📅`);
               }}
             />
           )}
