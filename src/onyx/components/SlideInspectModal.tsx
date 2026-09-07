@@ -398,10 +398,10 @@ export function SlideInspectModal({
           </div>
         </div>
 
-        {/* ── Bottom Thumbnail Navigation Strip ───────────────────────── */}
-        <div className="shrink-0 border-t border-white/[0.08] bg-black/60 p-3 sm:px-6">
-          <div className="flex items-center gap-2.5 overflow-x-auto pb-1">
-            {slides.map((s, idx) => {
+        {/* ── Bottom Filmstrip Dock (Ultra-clean Lightroom/Apple Style) ─ */}
+        <div className="shrink-0 border-t border-white/[0.08] bg-[#07060B]/95 px-4 py-3 backdrop-blur-xl">
+          <div className="mx-auto flex max-w-full items-center justify-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar py-1">
+            {slides.map((s) => {
               const isActive = s.id === currentSlide.id;
               const sHasImg = Boolean(s.imageUrl);
               return (
@@ -409,33 +409,56 @@ export function SlideInspectModal({
                   key={s.id}
                   type="button"
                   onClick={() => onSelectSlideId(s.id)}
+                  title={`Slide ${s.slideNumber}: ${s.roleLabel || "Visual"}`}
                   className={cn(
-                    "group relative flex shrink-0 items-center gap-2 rounded-xl border p-1.5 transition-all cursor-pointer",
+                    "group relative flex flex-col items-center justify-between overflow-hidden rounded-xl border transition-all duration-200 cursor-pointer shrink-0",
+                    "w-14 sm:w-16 h-[72px] sm:h-[82px]",
                     isActive
-                      ? "border-[#FF4D17] bg-[#FF4D17]/15 ring-2 ring-[#FF4D17]/50 shadow-[0_0_15px_rgba(255,77,23,0.3)]"
-                      : "border-white/10 bg-white/[0.02] hover:border-white/25 hover:bg-white/[0.05]",
+                      ? "border-[#FF4D17] ring-2 ring-[#FF4D17]/70 shadow-[0_0_20px_rgba(255,77,23,0.5)] -translate-y-1 scale-105 bg-[#171422]"
+                      : "border-white/10 bg-white/[0.02] opacity-60 hover:opacity-100 hover:border-white/30 hover:scale-102",
                   )}
                 >
-                  <div className="relative h-11 w-9 overflow-hidden rounded-lg bg-black/40 border border-white/10">
-                    {sHasImg ? (
-                      <img src={s.imageUrl} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center font-mono text-[10px] font-bold text-white/30">
-                        #{s.slideNumber}
-                      </div>
-                    )}
-                    {s.isGeneratingImage && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/70">
-                        <Loader2 className="h-3.5 w-3.5 animate-spin text-[#FF6A1F]" />
-                      </div>
-                    )}
+                  {/* Background Image / Placeholder */}
+                  {sHasImg ? (
+                    <img
+                      src={s.imageUrl}
+                      alt={`Slide ${s.slideNumber}`}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 font-mono text-xs font-black text-white/20">
+                      {String(s.slideNumber).padStart(2, "0")}
+                    </div>
+                  )}
+
+                  {/* Top Slide Number Pill */}
+                  <div className="relative z-10 w-full flex justify-start p-1">
+                    <span
+                      className={cn(
+                        "flex h-4 min-w-4 items-center justify-center rounded px-1 font-mono text-[9px] font-black shadow-sm",
+                        isActive
+                          ? "bg-[#FF4D17] text-white"
+                          : "bg-black/75 text-zinc-300 border border-white/10",
+                      )}
+                    >
+                      #{s.slideNumber}
+                    </span>
                   </div>
-                  <div className="pr-2 text-left">
-                    <p className={cn("text-xs font-bold", isActive ? "text-white" : "text-zinc-300")}>
-                      Slide {s.slideNumber}
-                    </p>
-                    <p className="text-[10px] text-zinc-500 max-w-[80px] truncate">
-                      {s.roleLabel || "Visual"}
+
+                  {/* Generating Spinner Overlay */}
+                  {s.isGeneratingImage && (
+                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 backdrop-blur-[2px]">
+                      <Loader2 className="h-4 w-4 animate-spin text-[#FF6A1F]" />
+                    </div>
+                  )}
+
+                  {/* Bottom Role Label Banner */}
+                  <div className="relative z-10 w-full bg-black/85 px-1 py-0.5 text-center backdrop-blur-sm border-t border-white/10">
+                    <p className={cn(
+                      "truncate font-semibold leading-tight text-[8px] sm:text-[9px]",
+                      isActive ? "text-[#FFA043]" : "text-zinc-400 group-hover:text-zinc-200"
+                    )}>
+                      {s.roleLabel || `Slide ${s.slideNumber}`}
                     </p>
                   </div>
                 </button>

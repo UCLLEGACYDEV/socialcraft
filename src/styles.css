@@ -501,5 +501,14 @@
   font-weight: 600;
 }
 
+/* Custom sleek hidden scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 
 
