@@ -113,6 +113,69 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
     }
   }
 
+  // 0.1 Post for Me Server Proxy (Prevents browser CORS blocks and protects credentials)
+  if (endpoint === "postforme/proxy" || endpoint === "postforme-proxy") {
+    if (request.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: corsHeaders });
+    }
+
+    try {
+      const reqData = (await request.json().catch(() => ({}))) as {
+        endpoint?: string;
+        method?: string;
+        body?: any;
+        apiKey?: string;
+      };
+
+      const rawEndpoint: string = reqData.endpoint || "/social-accounts";
+      const cleanEndpoint = rawEndpoint.startsWith("/") ? rawEndpoint : `/${rawEndpoint}`;
+      const method = (reqData.method || "GET").toUpperCase();
+
+      const apiKey =
+        (reqData.apiKey && reqData.apiKey.trim()) ||
+        request.headers.get("x-postforme-key") ||
+        (typeof process !== "undefined" && process.env?.POSTFORME_API_KEY) ||
+        (typeof process !== "undefined" && process.env?.VITE_POSTFORME_API_KEY) ||
+        "pfm_live_X6AHnibZB1BjEu4j2ef1f4";
+
+      const targetUrl = `https://api.postforme.dev/v1${cleanEndpoint}`;
+
+      const fetchHeaders: Record<string, string> = {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      };
+
+      const fetchInit: RequestInit = {
+        method,
+        headers: fetchHeaders,
+      };
+
+      if (reqData.body && ["POST", "PUT", "PATCH"].includes(method)) {
+        fetchInit.body = typeof reqData.body === "string" ? reqData.body : JSON.stringify(reqData.body);
+      }
+
+      const upstreamResp = await fetch(targetUrl, fetchInit);
+      const upstreamText = await upstreamResp.text();
+      let responseBody: any;
+      try {
+        responseBody = JSON.parse(upstreamText);
+      } catch {
+        responseBody = { raw: upstreamText };
+      }
+
+      return new Response(JSON.stringify(responseBody), {
+        status: upstreamResp.status,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      });
+    } catch (proxyErr: any) {
+      console.error("[PostForMe Proxy Error]", proxyErr);
+      return jsonResponse({ error: proxyErr.message || "Proxy communication failure" }, 500);
+    }
+  }
+
   const identity = await resolveCloudIdentity(request);
 
   // 1. Ensure Folder

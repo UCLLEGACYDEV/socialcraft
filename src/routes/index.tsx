@@ -222,6 +222,7 @@ function OnyxStudio() {
     imageUrls: string[];
     prompt?: string;
   } | null>(null);
+  const [schedulerSubTab, setSchedulerSubTab] = useState<"queue" | "composer" | "channels">("queue");
 
   // Ensure Post for Me is active as the dedicated publishing service
   useEffect(() => {
@@ -1118,6 +1119,10 @@ function OnyxStudio() {
           onOpenPostForMeSetup={() => setShowPostForMeSetup(true)}
           onOpenZernioSetup={() => setShowPostForMeSetup(true)}
           onOpen30DayBatch={() => setShow30DayBatch(true)}
+          onNavigateScheduler={(subTab) => {
+            setSchedulerSubTab(subTab);
+            setActiveTab("scheduler");
+          }}
         />
 
         <main className="mx-auto w-full flex-1 p-4 sm:p-6 max-w-[1600px]">
@@ -1219,6 +1224,7 @@ function OnyxStudio() {
               onNavigateToCarousel={() => setActiveTab("carousel")}
               settings={settings}
               currentUser={currentUser}
+              initialTab={schedulerSubTab}
               onOpenPostForMeSetup={currentUser?.role === "admin" ? () => setShowPostForMeSetup(true) : undefined}
               onOpenZernioSetup={currentUser?.role === "admin" ? () => setShowPostForMeSetup(true) : undefined}
               onOpen30DayBatch={() => setShow30DayBatch(true)}

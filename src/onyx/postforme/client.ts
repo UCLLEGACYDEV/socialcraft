@@ -23,11 +23,54 @@ export class PostForMeApiClient {
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const isBrowser = typeof window !== "undefined";
+    const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+
+    if (isBrowser) {
+      try {
+        const proxyResp = await fetch("/api/cloud/postforme/proxy", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            endpoint: cleanEndpoint,
+            method: options.method || "GET",
+            body: options.body
+              ? typeof options.body === "string"
+                ? JSON.parse(options.body)
+                : options.body
+              : undefined,
+            apiKey: this.apiKey,
+          }),
+        });
+
+        const proxyData = await proxyResp.json().catch(() => ({}));
+
+        if (!proxyResp.ok) {
+          const errorMessage =
+            proxyData.message ||
+            proxyData.error ||
+            proxyData.detail ||
+            (Array.isArray(proxyData.errors) ? proxyData.errors.map((e: any) => e.message || e).join(", ") : null) ||
+            `Verbindungsfehler (${proxyResp.status}): ${proxyResp.statusText}`;
+          throw new Error(errorMessage);
+        }
+
+        return proxyData as T;
+      } catch (proxyError: any) {
+        if (proxyError.message && !proxyError.message.includes("Failed to fetch")) {
+          throw proxyError;
+        }
+        console.warn("[PostForMeClient] Proxy request issue, attempting direct request fallback...", proxyError.message);
+      }
+    }
+
     if (!this.apiKey) {
       throw new Error("Kein Post for Me API Key hinterlegt. Bitte in den Einstellungen hinterlegen.");
     }
 
-    const url = `${this.baseUrl}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`;
+    const url = `${this.baseUrl}${cleanEndpoint}`;
     const headers: Record<string, string> = {
       Authorization: `Bearer ${this.apiKey}`,
       "Content-Type": "application/json",
@@ -149,7 +192,9 @@ export class PostForMeApiClient {
       };
     }
 
-    if (redirectUrlOverride) {
+    // Quickstart credentials on Post for Me disallow redirect_url_override
+    // and automatically route to the dashboard's Project Redirect URL.
+    if (redirectUrlOverride && !this.apiKey.startsWith("pfm_live_")) {
       payload.redirect_url_override = redirectUrlOverride;
     }
 

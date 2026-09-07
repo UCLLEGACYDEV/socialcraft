@@ -75,6 +75,7 @@ interface PostSchedulerViewProps {
   onNavigateToCarousel?: () => void;
   settings?: ApiSettings;
   currentUser?: User | null;
+  initialTab?: "queue" | "composer" | "channels";
   onOpenPostForMeSetup?: () => void;
   onOpenZernioSetup?: () => void;
   onOpen30DayBatch?: () => void;
@@ -295,6 +296,7 @@ export function PostSchedulerView({
   onNavigateToCarousel,
   settings,
   currentUser,
+  initialTab,
   onOpenPostForMeSetup,
   onOpenZernioSetup,
   onOpen30DayBatch,
@@ -306,8 +308,14 @@ export function PostSchedulerView({
   const hasPublisherKey = !!activePostForMeKey;
 
   const [activeTab, setActiveTab] = useState<"queue" | "composer" | "channels">(
-    initialScheduledItem ? "composer" : "queue"
+    initialTab || (initialScheduledItem ? "composer" : "queue")
   );
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
   const [filterPlatform, setFilterPlatform] = useState<string>("all");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [showHistoryPicker, setShowHistoryPicker] = useState(false);
@@ -1189,42 +1197,51 @@ export function PostSchedulerView({
           {/* Quick Action Navigation */}
           <div className="flex flex-wrap items-center gap-2">
             {/* View Switcher Tabs */}
-            <div className="flex items-center rounded-full border border-white/10 bg-white/[0.03] p-0.5">
+            <div className="flex items-center rounded-2xl border border-white/10 bg-white/[0.04] p-1 shadow-lg backdrop-blur-md">
               <button
                 type="button"
                 onClick={() => setActiveTab("queue")}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer",
+                  "flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
                   activeTab === "queue"
-                    ? "bg-[#FF4D17] text-white shadow-sm"
+                    ? "bg-[#FF4D17] text-white shadow-[0_0_15px_rgba(255,77,23,0.35)]"
                     : "text-zinc-400 hover:text-white"
                 )}
               >
-                Geplant ({posts.length})
+                <CalendarIcon className="w-3.5 h-3.5" />
+                <span>Planer ({posts.length})</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab("composer")}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer",
+                  "flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
                   activeTab === "composer"
-                    ? "bg-[#FF4D17] text-white shadow-sm"
+                    ? "bg-[#FF4D17] text-white shadow-[0_0_15px_rgba(255,77,23,0.35)]"
                     : "text-zinc-400 hover:text-white"
                 )}
               >
-                + Planen
+                <Plus className="w-3.5 h-3.5" />
+                <span>+ Planen</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab("channels")}
                 className={cn(
-                  "px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer",
+                  "flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer relative",
                   activeTab === "channels"
-                    ? "bg-[#FF4D17] text-white shadow-sm"
-                    : "text-zinc-400 hover:text-white"
+                    ? "bg-gradient-to-r from-[#FF4D17] to-[#FF8038] text-white shadow-[0_0_20px_rgba(255,77,23,0.4)]"
+                    : "text-zinc-300 hover:text-white hover:bg-white/5"
                 )}
               >
-                Kanäle ({channels.length})
+                <Link2 className="w-3.5 h-3.5 text-orange-400" />
+                <span>Profile verbinden</span>
+                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold bg-white/20 text-white ml-0.5">
+                  {channels.length}
+                </span>
+                {channels.length > 0 && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
+                )}
               </button>
             </div>
 
@@ -1907,19 +1924,37 @@ export function PostSchedulerView({
 
                 {/* Quick 1-Click Platform OAuth Connect Drawer in Composer */}
                 {showComposerConnectQuick && (
-                  <div className="p-3.5 rounded-2xl bg-black/60 border border-[#FF4D17]/30 space-y-2.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-white flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-orange-400" />
-                        <span>Neues Profil direkt per 1-Klick verbinden:</span>
-                      </span>
-                      <span className="text-[10px] text-zinc-400 font-mono">Öffnet sicheres Login-Popup</span>
+                  <div className="relative overflow-hidden p-4 rounded-2xl bg-gradient-to-br from-[#1C152B]/95 via-[#120E1C]/95 to-[#0A0812] border border-[#FF4D17]/40 shadow-2xl backdrop-blur-2xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-2.5">
+                      <div className="flex items-center gap-2">
+                        <div className="w-6 h-6 rounded-lg bg-[#FF4D17]/20 border border-[#FF4D17]/30 flex items-center justify-center text-orange-400 shrink-0">
+                          <Sparkles className="w-3.5 h-3.5" />
+                        </div>
+                        <div>
+                          <span className="text-xs font-bold text-white block">Social Profile 1-Klick verbinden</span>
+                          <span className="text-[10px] text-zinc-400">Autorisiere dein Profil sicher per Popup – keine API-Keys oder Webhooks nötig</span>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("channels")}
+                        className="text-[11px] font-semibold text-orange-400 hover:text-orange-300 flex items-center gap-1 cursor-pointer transition self-start sm:self-auto bg-orange-500/10 hover:bg-orange-500/20 border border-orange-500/25 px-2.5 py-1 rounded-xl"
+                      >
+                        <span>Großer Accounts-Hub</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </button>
                     </div>
 
-                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5">
                       {SCHEDULER_CONNECT_PLATFORMS.map((platform) => {
                         const Icon = platform.icon;
                         const isConnecting = connectingPlatform === platform.id;
+                        const isAlreadyConnected = channels.some(
+                          (c) =>
+                            c.platform.toLowerCase() === platform.id.toLowerCase() ||
+                            (platform.id === "x" && c.platform.toLowerCase() === "twitter")
+                        );
+
                         return (
                           <button
                             key={platform.id}
@@ -1927,16 +1962,29 @@ export function PostSchedulerView({
                             disabled={isConnecting}
                             onClick={() => handleDirectConnectPlatform(platform.id)}
                             className={cn(
-                              "flex flex-col items-center justify-center p-2 rounded-xl border text-center transition-all cursor-pointer group hover:scale-[1.03]",
+                              "relative flex flex-col items-center justify-center p-3 rounded-xl border text-center transition-all cursor-pointer group bg-gradient-to-b hover:scale-[1.03] active:scale-[0.98]",
                               platform.gradient,
                               platform.borderHover,
-                              isConnecting && "opacity-60 pointer-events-none"
+                              isAlreadyConnected ? "border-emerald-500/30 bg-emerald-500/[0.04]" : "border-white/10",
+                              isConnecting && "opacity-60 pointer-events-none ring-1 ring-orange-500"
                             )}
                             title={`${platform.name} autorisieren & verknüpfen`}
                           >
-                            <Icon className={cn("h-4 w-4 mb-1 transition-transform group-hover:scale-110", isConnecting && "animate-spin text-orange-400")} />
-                            <span className="text-[10px] font-bold text-white truncate max-w-full">
-                              {isConnecting ? "Verbinde..." : platform.name}
+                            {isAlreadyConnected && (
+                              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                            )}
+                            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center mb-1.5 border transition-transform group-hover:scale-110", platform.badgeStyle)}>
+                              {isConnecting ? (
+                                <RefreshCw className="h-4 w-4 animate-spin text-orange-400" />
+                              ) : (
+                                <Icon className="h-4 w-4" />
+                              )}
+                            </div>
+                            <span className="text-[11px] font-bold text-white truncate max-w-full block">
+                              {isConnecting ? "Öffne..." : platform.name}
+                            </span>
+                            <span className="text-[9px] text-zinc-400 font-mono mt-0.5 truncate max-w-full">
+                              {isAlreadyConnected ? "Verbunden ✓" : platform.badge}
                             </span>
                           </button>
                         );
@@ -2708,72 +2756,97 @@ export function PostSchedulerView({
 
       {/* ── TAB 3: PROFILE & KANÄLE VERLINKEN ──────────────────────── */}
       {activeTab === "channels" && (
-        <div className="space-y-8">
-          {/* Header & Status Bar */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-white/[0.04] via-white/[0.02] to-transparent border border-white/[0.08]">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-[#FF4D17]/15 border border-[#FF4D17]/30 text-orange-400">
-                  <Link2 className="h-5 w-5" />
+        <div className="space-y-8 animate-in fade-in duration-300">
+          {/* Luxury SaaS Hero Banner */}
+          <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-white/10 bg-gradient-to-br from-[#1F1533]/90 via-[#110D1D]/95 to-[#08060E] backdrop-blur-2xl shadow-2xl space-y-6">
+            <div className="pointer-events-none absolute -top-24 -right-24 w-80 h-80 rounded-full bg-gradient-to-br from-[#FF4D17]/25 to-purple-600/15 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-gradient-to-tr from-cyan-500/10 to-[#FF8038]/10 blur-3xl" />
+
+            <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div className="space-y-2 max-w-2xl">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF4D17]/15 border border-[#FF4D17]/30 text-orange-300 text-xs font-semibold">
+                  <Sparkles className="w-3.5 h-3.5 text-orange-400" />
+                  <span>Socialcraft Multi-Publishing Hub</span>
                 </div>
-                <div>
-                  <h3 className="text-lg font-bold text-white tracking-tight">Social Media Profile verknüpfen</h3>
-                  <p className="text-xs text-zinc-400">
-                    Verbinde deine Social-Media-Accounts per 1-Klick OAuth direkt im Browser. Deine Posts & Karussells werden vollautomatisch übertragen.
-                  </p>
-                </div>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  Social Media Accounts & Profile
+                </h2>
+                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                  Verbinde deine Social-Media-Accounts per 1-Klick OAuth direkt im Browser. Deine Beiträge und Karussells werden ohne zusätzliche API-Keys vollautomatisch synchronisiert und veröffentlicht.
+                </p>
+              </div>
+
+              {/* Action Buttons & Status */}
+              <div className="relative z-10 flex flex-wrap items-center gap-2.5">
+                <span className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                  <span>Auto-Publishing: Aktiv</span>
+                </span>
+
+                {hasPublisherKey && (
+                  <button
+                    type="button"
+                    disabled={isSyncingChannels}
+                    onClick={() => handleSyncAccounts(false)}
+                    className="px-4 py-2 rounded-xl border border-white/15 bg-white/10 hover:bg-white/15 text-white text-xs font-bold flex items-center gap-2 transition disabled:opacity-50 cursor-pointer shadow-sm"
+                    title="Profile abrufen & synchronisieren"
+                  >
+                    <RefreshCw className={cn("h-3.5 w-3.5 text-orange-400", isSyncingChannels && "animate-spin")} />
+                    <span>{isSyncingChannels ? "Synchronisiere..." : "Kanäle abgleichen"}</span>
+                  </button>
+                )}
+
+                {isAdmin && openDirectSetup && (
+                  <button
+                    type="button"
+                    onClick={openDirectSetup}
+                    className="px-3.5 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                    title="Admin-Konfiguration: API-Schlüssel & Webhooks einsehen"
+                  >
+                    <Key className="h-3.5 w-3.5 text-orange-400" />
+                    <span>Admin Webhooks</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setShowAddChannel((prev) => !prev)}
+                  className="px-3.5 py-2 rounded-xl border border-dashed border-white/20 hover:border-orange-500/40 text-xs font-medium text-zinc-400 hover:text-white transition cursor-pointer"
+                >
+                  + Manuell
+                </button>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Multi-Publishing Engine: Aktiv</span>
-              </span>
-
-              {hasPublisherKey && (
-                <button
-                  type="button"
-                  disabled={isSyncingChannels}
-                  onClick={() => handleSyncAccounts(false)}
-                  className="px-3.5 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
-                  title="Profile abrufen & synchronisieren"
-                >
-                  <RefreshCw className={cn("h-3.5 w-3.5", isSyncingChannels && "animate-spin text-orange-400")} />
-                  <span>{isSyncingChannels ? "Synchronisiere..." : "Kanäle abgleichen"}</span>
-                </button>
-              )}
-
-              {isAdmin && openDirectSetup && (
-                <button
-                  type="button"
-                  onClick={openDirectSetup}
-                  className="px-3.5 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
-                  title="Admin-Konfiguration: API-Schlüssel & Webhooks einsehen"
-                >
-                  <Key className="h-3.5 w-3.5 text-orange-400" />
-                  <span>Admin Webhooks</span>
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={() => setShowAddChannel((prev) => !prev)}
-                className="px-3 py-2 rounded-xl border border-dashed border-white/20 hover:border-orange-500/40 text-xs font-medium text-zinc-400 hover:text-white transition cursor-pointer"
-              >
-                + Kanal manuell
-              </button>
+            {/* Quick Metrics Bar */}
+            <div className="relative z-10 grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/10">
+              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+                <span className="text-[11px] text-zinc-400 block font-medium">Verknüpfte Kanäle</span>
+                <span className="text-xl font-bold text-white mt-0.5 block">{channels.length} Profile</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+                <span className="text-[11px] text-zinc-400 block font-medium">Unterstützte Netzwerke</span>
+                <span className="text-xl font-bold text-orange-400 mt-0.5 block">9 Plattformen</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+                <span className="text-[11px] text-zinc-400 block font-medium">OAuth-Sicherheit</span>
+                <span className="text-xl font-bold text-emerald-400 mt-0.5 block">100% Verifiziert</span>
+              </div>
+              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/5">
+                <span className="text-[11px] text-zinc-400 block font-medium">Setup für Endnutzer</span>
+                <span className="text-xl font-bold text-cyan-300 mt-0.5 block">1-Klick Zero-Config</span>
+              </div>
             </div>
           </div>
 
-          {/* ── SECTION 1: 1-KLICK PROFIL VERLINKUNG (OAUTH) ──────────── */}
+          {/* ── SECTION 1: VERFÜGBARE NETZWERKE (1-KLICK OAUTH) ──────────── */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-orange-400" />
-                  <span>Profile direkt verknüpfen (1-Klick OAuth)</span>
-                </h4>
+                  <span>Verfügbare Social-Media-Netzwerke (1-Klick OAuth)</span>
+                </h3>
                 <p className="text-xs text-zinc-400">
                   Wähle ein soziales Netzwerk – es öffnet sich das offizielle Login-Fenster zur direkten Freigabe.
                 </p>
@@ -2798,55 +2871,57 @@ export function PostSchedulerView({
                   <div
                     key={platform.id}
                     className={cn(
-                      "group relative p-5 rounded-2xl border transition-all duration-200 flex flex-col justify-between space-y-4 bg-gradient-to-b",
+                      "group relative p-6 rounded-3xl border transition-all duration-300 flex flex-col justify-between space-y-5 bg-gradient-to-b shadow-lg hover:shadow-2xl hover:scale-[1.01]",
                       platform.gradient,
                       platform.borderHover,
-                      isConnected ? "border-white/15 bg-white/[0.02]" : "border-white/[0.08]"
+                      isConnected
+                        ? "border-emerald-500/30 bg-emerald-500/[0.02]"
+                        : "border-white/10 hover:border-white/20"
                     )}
                   >
-                    <div className="space-y-3">
+                    <div className="space-y-3.5">
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-center gap-3">
-                          <div className={cn("p-2.5 rounded-xl border", platform.badgeStyle)}>
+                          <div className={cn("p-3 rounded-2xl border shadow-md transition-transform group-hover:scale-105", platform.badgeStyle)}>
                             <Icon className="h-5 w-5" />
                           </div>
                           <div>
-                            <h5 className="text-sm font-bold text-white group-hover:text-white transition-colors">
+                            <h4 className="text-base font-bold text-white group-hover:text-white transition-colors">
                               {platform.name}
-                            </h5>
-                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border inline-block mt-0.5" style={{ borderColor: "rgba(255,255,255,0.1)", background: "rgba(0,0,0,0.4)", color: "#a1a1aa" }}>
+                            </h4>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border inline-block mt-0.5 bg-black/40 text-zinc-300 border-white/10">
                               {platform.badge}
                             </span>
                           </div>
                         </div>
 
                         {isConnected ? (
-                          <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shrink-0">
-                            <Check className="w-3 h-3" />
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-sm shrink-0">
+                            <Check className="w-3.5 h-3.5" />
                             <span>Verbunden</span>
                           </span>
                         ) : (
-                          <span className="text-[10px] text-zinc-500 font-mono px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/10 shrink-0">
+                          <span className="text-[10px] text-zinc-400 font-mono px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/10 shrink-0">
                             Bereit
                           </span>
                         )}
                       </div>
 
-                      <p className="text-xs text-zinc-400 leading-relaxed min-h-[36px]">
+                      <p className="text-xs text-zinc-300/90 leading-relaxed min-h-[38px]">
                         {platform.description}
                       </p>
 
                       {/* Display connected account handles if available */}
                       {isConnected && (
-                        <div className="p-2 rounded-xl bg-black/40 border border-white/10 space-y-1">
-                          <span className="text-[10px] text-zinc-400 font-semibold block">Verknüpfte Accounts:</span>
-                          <div className="flex flex-wrap gap-1">
+                        <div className="p-2.5 rounded-2xl bg-black/40 border border-emerald-500/20 space-y-1.5">
+                          <span className="text-[10px] text-emerald-400 font-semibold block">Verknüpfte Profile:</span>
+                          <div className="flex flex-wrap gap-1.5">
                             {matchedChannels.map((c) => (
                               <span
                                 key={c.id}
-                                className="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-white/10 text-white border border-white/15 truncate max-w-full"
+                                className="text-[11px] font-mono font-medium px-2.5 py-1 rounded-xl bg-white/10 text-white border border-white/15 truncate max-w-full flex items-center gap-1"
                               >
-                                {c.handle || c.name}
+                                <span>{c.handle || c.name}</span>
                               </span>
                             ))}
                           </div>
@@ -2854,22 +2929,22 @@ export function PostSchedulerView({
                       )}
                     </div>
 
-                    <div className="pt-2 border-t border-white/[0.06]">
+                    <div className="pt-3 border-t border-white/[0.08]">
                       <button
                         type="button"
                         disabled={isConnecting}
                         onClick={() => handleDirectConnectPlatform(platform.id)}
                         className={cn(
-                          "w-full py-2 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md",
+                          "w-full py-2.5 px-4 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md hover:brightness-110 active:scale-[0.98]",
                           isConnected
-                            ? "bg-white/10 hover:bg-white/20 text-white border border-white/15"
+                            ? "bg-white/10 hover:bg-white/15 text-white border border-white/15"
                             : platform.btnClass
                         )}
                       >
                         {isConnecting ? (
                           <>
                             <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                            <span>Öffne Autorisierung...</span>
+                            <span>Autorisierung wird geöffnet...</span>
                           </>
                         ) : isConnected ? (
                           <>
@@ -2879,7 +2954,7 @@ export function PostSchedulerView({
                         ) : (
                           <>
                             <Link2 className="h-3.5 w-3.5" />
-                            <span>{platform.name} jetzt verknüpfen</span>
+                            <span>{platform.name} jetzt verbinden →</span>
                           </>
                         )}
                       </button>
@@ -2990,19 +3065,19 @@ export function PostSchedulerView({
                           onClick={() => {
                             setSelectedChannelId(chan.id);
                             setActiveTab("composer");
-                            toast.info(`Kanal „${chan.name}“ im Planer ausgewählt.`);
+                            toast.info(`Kanal „${chan.name}“ im Composer geladen.`);
                           }}
-                          className="text-xs font-semibold text-orange-400 hover:text-orange-300 hover:underline flex items-center gap-1 cursor-pointer"
+                          className="px-3 py-1.5 rounded-xl bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 hover:text-orange-300 border border-orange-500/20 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all shadow-sm"
                         >
-                          <span>Im Planer wählen</span>
-                          <ArrowRight className="w-3 h-3" />
+                          <span>Beitrag planen</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
                         </button>
 
                         <button
                           type="button"
                           disabled={isDisconnecting}
                           onClick={() => handleDisconnectChannel(chan)}
-                          className="px-2.5 py-1 rounded-lg text-xs text-zinc-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
+                          className="px-2.5 py-1.5 rounded-xl text-xs text-zinc-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all flex items-center gap-1 cursor-pointer disabled:opacity-50"
                           title="Profil trennen"
                         >
                           <Trash2 className={cn("h-3.5 w-3.5", isDisconnecting && "animate-spin")} />
