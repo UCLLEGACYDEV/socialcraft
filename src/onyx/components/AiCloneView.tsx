@@ -91,6 +91,8 @@ export function AiCloneView({
     return readLS<ApiSettings>(LS.apiSettings, DEFAULT_API_SETTINGS);
   });
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Create Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createMethod, setCreateMethod] = useState<"photo" | "text">("photo");
