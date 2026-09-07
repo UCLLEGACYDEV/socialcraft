@@ -74,6 +74,7 @@ export function CryptoxNavbar({
   onOpenCreditsUpgrade,
   onOpenBrandKit,
   onOpenSettings,
+  onOpenDatenschutz,
 }: CryptoxNavbarProps) {
   const isAdmin = currentUser?.role === "admin";
 
