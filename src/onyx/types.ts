@@ -35,6 +35,17 @@ export type SocialPlatform =
   | "whatsapp"
   | "telegram";
 
+export interface BrandProfile {
+  id: string; // e.g. "profile-default", "profile-zitate-tiger"
+  slug: string; // e.g. "zitate_tiger"
+  name: string; // e.g. "Zitate Tiger"
+  description?: string;
+  avatarUrl?: string;
+  color?: string; // Theme accent color
+  createdAt: string;
+  isDefault?: boolean;
+}
+
 export interface SocialChannel {
   id: string;
   platform: SocialPlatform;
@@ -48,6 +59,7 @@ export interface SocialChannel {
   isDefault?: boolean;
   zernioAccountId?: string;
   postForMeAccountId?: string;
+  profileId?: string; // Links this channel to a specific BrandProfile (e.g. zitate_tiger)
 }
 
 export type ScheduledPostStatus = "scheduled" | "queued" | "published" | "draft" | "failed" | "cancelled";
@@ -73,6 +85,7 @@ export interface ScheduledPost {
   postForMeStatus?: string;
   musicTitle?: string;
   musicArtist?: string;
+  profileId?: string; // Links this post to a specific BrandProfile
 }
 
 

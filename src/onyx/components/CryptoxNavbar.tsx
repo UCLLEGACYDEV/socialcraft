@@ -50,6 +50,10 @@ interface CryptoxNavbarProps {
   onOpenZernioSetup?: () => void;
   onOpen30DayBatch?: () => void;
   onNavigateScheduler?: (subTab: "queue" | "composer" | "channels") => void;
+  brandProfiles?: import("../types").BrandProfile[];
+  activeProfileId?: string;
+  onSelectProfile?: (profileId: string) => void;
+  onOpenBrandProfileManager?: () => void;
 }
 
 // Group 1: Creation Tools
@@ -86,8 +90,13 @@ export function CryptoxNavbar({
   onOpenZernioSetup,
   onOpen30DayBatch,
   onNavigateScheduler,
+  brandProfiles,
+  activeProfileId,
+  onSelectProfile,
+  onOpenBrandProfileManager,
 }: CryptoxNavbarProps) {
   const isAdmin = currentUser?.role === "admin";
+  const activeBrand = brandProfiles?.find((p) => p.id === activeProfileId) || brandProfiles?.[0];
 
   // Clean credit count without noisy provider text
   const creditDisplay = creditStatus?.kie.success
@@ -194,6 +203,70 @@ export function CryptoxNavbar({
               <span className="hidden sm:inline">30-Tage Batch</span>
               <span className="sm:hidden">30d</span>
             </button>
+          )}
+
+          {/* Brand Profile Selector Pill */}
+          {brandProfiles && brandProfiles.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="hidden md:inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] px-3 py-1 text-xs text-white/90 backdrop-blur-xl transition-all cursor-pointer shadow-sm"
+                  title="Aktives Brand-Profil (Kanäle & Posts getrennt)"
+                >
+                  <span
+                    className="w-2.5 h-2.5 rounded-full shrink-0 shadow-[0_0_8px_currentColor]"
+                    style={{
+                      backgroundColor: activeBrand?.color || "#F04A20",
+                      color: activeBrand?.color || "#F04A20",
+                    }}
+                  />
+                  <span className="font-bold text-xs max-w-[110px] truncate text-white">
+                    {activeBrand?.name || "Profil"}
+                  </span>
+                  <ChevronDown className="h-3 w-3 text-zinc-400" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-60 bg-[#0F0D15] border-white/15 text-white shadow-2xl">
+                <DropdownMenuLabel className="text-[10px] uppercase font-mono text-zinc-400 px-3 py-1.5">
+                  Brand-Profil wechseln
+                </DropdownMenuLabel>
+                {brandProfiles.map((p) => {
+                  const isSel = p.id === activeProfileId;
+                  return (
+                    <DropdownMenuItem
+                      key={p.id}
+                      onClick={() => onSelectProfile?.(p.id)}
+                      className={cn(
+                        "flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs",
+                        isSel ? "bg-orange-500/15 text-orange-300 font-bold" : "hover:bg-white/10"
+                      )}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0"
+                          style={{ backgroundColor: p.color || "#F04A20" }}
+                        />
+                        <span className="truncate">{p.name}</span>
+                      </div>
+                      {isSel && <span className="text-[10px] text-emerald-400 font-bold">Aktiv</span>}
+                    </DropdownMenuItem>
+                  );
+                })}
+                {isAdmin && onOpenBrandProfileManager && (
+                  <>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem
+                      onClick={onOpenBrandProfileManager}
+                      className="flex items-center gap-2 px-3 py-2 text-xs text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 cursor-pointer font-bold"
+                    >
+                      <Layers className="w-3.5 h-3.5" />
+                      <span>Profile verwalten...</span>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
 
           {/* Credits Pill (clean & compact) */}
@@ -323,6 +396,16 @@ export function CryptoxNavbar({
                 >
                   <Shield className="h-4 w-4" />
                   <span>Admin Dashboard</span>
+                </DropdownMenuItem>
+              )}
+
+              {isAdmin && onOpenBrandProfileManager && (
+                <DropdownMenuItem
+                  onClick={onOpenBrandProfileManager}
+                  className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-yellow-400 hover:bg-yellow-500/15 hover:text-white cursor-pointer transition-colors"
+                >
+                  <Layers className="h-4 w-4" />
+                  <span>Brand-Profile (Multi-Kanal)</span>
                 </DropdownMenuItem>
               )}
 

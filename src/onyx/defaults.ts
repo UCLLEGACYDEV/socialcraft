@@ -1,4 +1,27 @@
-import type { AiCloneProfile, ApiSettings, BrandKit, BriefValues, SocialChannel } from "./types";
+import type { AiCloneProfile, ApiSettings, BrandKit, BrandProfile, BriefValues, SocialChannel } from "./types";
+
+export const DEFAULT_BRAND_PROFILES: BrandProfile[] = [
+  {
+    id: "profile-default",
+    slug: "main",
+    name: "Haupt-Brand (Socialcraft)",
+    description: "Standard-Profil für offizielle Unternehmens-Kanäle",
+    avatarUrl: "/images/socialcraft-logo.png",
+    color: "#F04A20", // Socialcraft Orange
+    createdAt: "2025-01-01T00:00:00Z",
+    isDefault: true,
+  },
+  {
+    id: "profile-zitate-tiger",
+    slug: "zitate_tiger",
+    name: "Zitate Tiger",
+    description: "Daily Quotes, Mindset & Motivation Marke",
+    avatarUrl: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=150&h=150&fit=crop&crop=face",
+    color: "#EAB308", // Golden Yellow
+    createdAt: "2026-02-15T00:00:00Z",
+    isDefault: false,
+  },
+];
 
 export const DEFAULT_SOCIAL_CHANNELS: SocialChannel[] = [
   {
@@ -10,6 +33,7 @@ export const DEFAULT_SOCIAL_CHANNELS: SocialChannel[] = [
     handle: "@facebook.page",
     avatarUrl: "/images/socialcraft-logo.png",
     isDefault: true,
+    profileId: "profile-default",
   },
   {
     id: "ig-main-account",
@@ -19,6 +43,7 @@ export const DEFAULT_SOCIAL_CHANNELS: SocialChannel[] = [
     handle: "@socialcraft.ai",
     avatarUrl: "/images/socialcraft-logo.png",
     isDefault: false,
+    profileId: "profile-default",
   },
   {
     id: "tiktok-main",
@@ -28,6 +53,7 @@ export const DEFAULT_SOCIAL_CHANNELS: SocialChannel[] = [
     handle: "@socialcraft",
     avatarUrl: "/images/socialcraft-logo.png",
     isDefault: false,
+    profileId: "profile-default",
   },
   {
     id: "yt-main-channel",
@@ -37,6 +63,7 @@ export const DEFAULT_SOCIAL_CHANNELS: SocialChannel[] = [
     handle: "@socialcraft",
     avatarUrl: "/images/socialcraft-logo.png",
     isDefault: false,
+    profileId: "profile-default",
   },
 ];
 

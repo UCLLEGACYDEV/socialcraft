@@ -29,6 +29,7 @@ import { AuthModal } from "@/onyx/components/AuthModal";
 import { UserProfileModal } from "@/onyx/components/UserProfileModal";
 import { CreditUpgradeModal } from "@/onyx/components/CreditUpgradeModal";
 import { DatenschutzModal } from "@/onyx/components/DatenschutzModal";
+import { BrandProfileManagerModal } from "@/onyx/components/BrandProfileManagerModal";
 import { type User, getStoredCurrentUser, getStoredUsers, saveStoredCurrentUser } from "@/onyx/auth";
 
 import {
@@ -37,9 +38,11 @@ import {
   DEFAULT_BRIEF,
   DEFAULT_CLONE_PROFILES,
   DEFAULT_SOCIAL_CHANNELS,
+  DEFAULT_BRAND_PROFILES,
   ANCHORED_POSTFORME_API_KEY,
   assembleClonePrompt,
 } from "@/onyx/defaults";
+import type { BrandProfile } from "@/onyx/types";
 import { LS, usePersistentState } from "@/onyx/storage";
 import {
   generateImageUnified,
@@ -213,6 +216,17 @@ function OnyxStudio() {
     DEFAULT_SOCIAL_CHANNELS,
     true,
   );
+  const [brandProfiles, setBrandProfiles] = usePersistentState<BrandProfile[]>(
+    LS.brandProfiles,
+    DEFAULT_BRAND_PROFILES,
+    true,
+  );
+  const [activeBrandProfileId, setActiveBrandProfileId] = usePersistentState<string>(
+    LS.activeBrandProfileId,
+    DEFAULT_BRAND_PROFILES[0]?.id ?? "profile-default",
+  );
+  const [showBrandProfileManager, setShowBrandProfileManager] = useState(false);
+
   const [scheduledPosts, setScheduledPosts] = usePersistentState<ScheduledPost[]>(
     LS.scheduledPosts,
     [],
@@ -261,14 +275,17 @@ function OnyxStudio() {
               handle: acc.username ? (acc.username.startsWith("@") ? acc.username : `@${acc.username}`) : undefined,
               avatarUrl: acc.profile_picture_url || "/images/socialcraft-logo.png",
               isDefault: false,
+              profileId: activeBrandProfileId,
             }));
 
             setSocialChannels((prev) => {
               const existingIds = new Set(prev.map((c) => c.channelId));
-              const newOnes = imported.filter((c) => !existingIds.has(c.channelId));
+              const newOnes = imported
+                .filter((c) => !existingIds.has(c.channelId))
+                .map((c) => ({ ...c, profileId: activeBrandProfileId }));
               const updatedExisting = prev.map((old) => {
                 const fresh = imported.find((i) => i.channelId === old.channelId);
-                return fresh ? { ...old, ...fresh } : old;
+                return fresh ? { ...old, ...fresh, profileId: old.profileId || activeBrandProfileId } : old;
               });
               return [...updatedExisting, ...newOnes];
             });
@@ -1123,6 +1140,10 @@ function OnyxStudio() {
             setSchedulerSubTab(subTab);
             setActiveTab("scheduler");
           }}
+          brandProfiles={brandProfiles}
+          activeProfileId={activeBrandProfileId}
+          onSelectProfile={setActiveBrandProfileId}
+          onOpenBrandProfileManager={() => setShowBrandProfileManager(true)}
         />
 
         <main className="mx-auto w-full flex-1 p-4 sm:p-6 max-w-[1600px]">
@@ -1228,6 +1249,11 @@ function OnyxStudio() {
               onOpenPostForMeSetup={currentUser?.role === "admin" ? () => setShowPostForMeSetup(true) : undefined}
               onOpenZernioSetup={currentUser?.role === "admin" ? () => setShowPostForMeSetup(true) : undefined}
               onOpen30DayBatch={() => setShow30DayBatch(true)}
+              brandProfiles={brandProfiles}
+              activeProfileId={activeBrandProfileId}
+              onSelectProfile={setActiveBrandProfileId}
+              onUpdateBrandProfiles={setBrandProfiles}
+              onOpenBrandProfileManager={() => setShowBrandProfileManager(true)}
             />
           )}
           {activeTab === "ai-clone" && (
@@ -1344,6 +1370,16 @@ function OnyxStudio() {
         channels={socialChannels}
         onUpdateChannels={setSocialChannels}
         onComplete={() => setActiveTab("scheduler")}
+      />
+      <BrandProfileManagerModal
+        isOpen={showBrandProfileManager}
+        onClose={() => setShowBrandProfileManager(false)}
+        profiles={brandProfiles}
+        activeProfileId={activeBrandProfileId}
+        onSelectProfile={setActiveBrandProfileId}
+        onUpdateProfiles={setBrandProfiles}
+        channels={socialChannels}
+        isAdmin={currentUser?.role === "admin"}
       />
       <ThirtyDayBatchModal
         isOpen={show30DayBatch}

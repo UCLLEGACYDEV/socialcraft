@@ -39,6 +39,7 @@ import {
   X,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
   CalendarDays,
   LayoutGrid,
   List,
@@ -51,9 +52,17 @@ import {
   Link2,
   Unlink,
 } from "lucide-react";
-import type { SocialChannel, ScheduledPost, SocialPlatform, SlideContent, HistoryEntry, ApiSettings } from "../types";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import type { SocialChannel, ScheduledPost, SocialPlatform, SlideContent, HistoryEntry, ApiSettings, BrandProfile } from "../types";
 import type { PostForMePlatform } from "../postforme/types";
-import { DEFAULT_SOCIAL_CHANNELS, ANCHORED_POSTFORME_API_KEY } from "../defaults";
+import { DEFAULT_SOCIAL_CHANNELS, DEFAULT_BRAND_PROFILES, ANCHORED_POSTFORME_API_KEY } from "../defaults";
 import { getStoredCurrentUser, type User } from "../auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -80,6 +89,11 @@ interface PostSchedulerViewProps {
   onOpenPostForMeSetup?: () => void;
   onOpenZernioSetup?: () => void;
   onOpen30DayBatch?: () => void;
+  brandProfiles?: BrandProfile[];
+  activeProfileId?: string;
+  onSelectProfile?: (id: string) => void;
+  onUpdateBrandProfiles?: (profiles: BrandProfile[]) => void;
+  onOpenBrandProfileManager?: () => void;
 }
 
 const PLATFORM_ICONS: Record<SocialPlatform, React.ElementType> = {
@@ -301,12 +315,40 @@ export function PostSchedulerView({
   onOpenPostForMeSetup,
   onOpenZernioSetup,
   onOpen30DayBatch,
+  brandProfiles = DEFAULT_BRAND_PROFILES,
+  activeProfileId,
+  onSelectProfile,
+  onUpdateBrandProfiles,
+  onOpenBrandProfileManager,
 }: PostSchedulerViewProps) {
   const currentUserResolved = currentUser || getStoredCurrentUser();
   const isAdmin = currentUserResolved?.role === "admin";
   const openDirectSetup = isAdmin ? (onOpenPostForMeSetup || onOpenZernioSetup) : undefined;
   const activePostForMeKey = settings?.postForMeApiKey || ANCHORED_POSTFORME_API_KEY;
   const hasPublisherKey = !!activePostForMeKey;
+
+  const resolvedProfiles = brandProfiles && brandProfiles.length > 0 ? brandProfiles : DEFAULT_BRAND_PROFILES;
+  const [internalProfileId, setInternalProfileId] = useState<string>(activeProfileId || resolvedProfiles[0].id);
+  const effectiveProfileId = activeProfileId || internalProfileId;
+  const activeProfile = resolvedProfiles.find((p) => p.id === effectiveProfileId) || resolvedProfiles[0];
+
+  const handleSwitchProfile = (id: string) => {
+    if (onSelectProfile) {
+      onSelectProfile(id);
+    } else {
+      setInternalProfileId(id);
+    }
+    toast.success(`Brand-Profil gewechselt: ${resolvedProfiles.find((p) => p.id === id)?.name || id}`);
+  };
+
+  // Strictly filter channels & posts belonging to this Brand Profile
+  const profileChannels = channels.filter(
+    (c) => (c.profileId || DEFAULT_BRAND_PROFILES[0].id) === activeProfile?.id
+  );
+
+  const profilePosts = posts.filter(
+    (p) => !p.profileId || p.profileId === activeProfile?.id
+  );
 
   const [activeTab, setActiveTab] = useState<"queue" | "composer" | "channels">(
     initialTab || (initialScheduledItem ? "composer" : "queue")
@@ -417,10 +459,16 @@ export function PostSchedulerView({
     toast.success(`🎉 ${sorted.length} Beiträge gleichmäßig verteilt (jeden Tag 18:00 Uhr ab morgen)!`);
   };
 
-  // Composer Form State
-  const defaultChannel = channels.find((c) => c.isDefault) || channels[0] || DEFAULT_SOCIAL_CHANNELS[0];
+  // Composer Form State (scoped to active brand profile)
+  const defaultChannel = profileChannels.find((c) => c.isDefault) || profileChannels[0] || DEFAULT_SOCIAL_CHANNELS[0];
   const [selectedChannelId, setSelectedChannelId] = useState<string>(defaultChannel?.id || "fb-main-page");
-  const selectedChannel = channels.find((c) => c.id === selectedChannelId) || defaultChannel;
+  const selectedChannel = profileChannels.find((c) => c.id === selectedChannelId) || defaultChannel;
+
+  useEffect(() => {
+    if (profileChannels.length > 0 && !profileChannels.some((c) => c.id === selectedChannelId)) {
+      setSelectedChannelId(profileChannels[0].id);
+    }
+  }, [activeProfile?.id, profileChannels, selectedChannelId]);
   const [postTitle, setPostTitle] = useState<string>(initialScheduledItem?.title || "");
   const [postCaption, setPostCaption] = useState<string>(
     initialScheduledItem?.prompt ? `${initialScheduledItem.title}\n\n${initialScheduledItem.prompt}` : ""
@@ -932,6 +980,7 @@ export function PostSchedulerView({
           postForMeStatus: postResult.status,
           musicTitle: selectedSound?.title,
           musicArtist: selectedSound?.artist,
+          profileId: activeProfile?.id,
         };
 
         if (editingPostId) {
@@ -1008,6 +1057,7 @@ export function PostSchedulerView({
         externalPostUrl: postResult.platforms?.[0]?.platformPostUrl,
         musicTitle: selectedSound?.title,
         musicArtist: selectedSound?.artist,
+        profileId: activeProfile?.id,
       };
 
       if (editingPostId) {
@@ -1092,6 +1142,7 @@ export function PostSchedulerView({
       createdAt: new Date().toISOString(),
       musicTitle: selectedSound?.title,
       musicArtist: selectedSound?.artist,
+      profileId: activeProfile?.id,
     };
 
     if (editingPostId) {
@@ -1162,26 +1213,27 @@ export function PostSchedulerView({
       channelId: newChannelId.trim(),
       handle: newHandle.trim() ? (newHandle.startsWith("@") ? newHandle : `@${newHandle}`) : undefined,
       avatarUrl: "/images/socialcraft-logo.png",
-      isDefault: channels.length === 0,
+      isDefault: profileChannels.length === 0,
+      profileId: activeProfile?.id,
     };
     onUpdateChannels([...channels, channel]);
     setShowAddChannel(false);
     setNewChannelName("");
     setNewChannelId("");
     setNewHandle("");
-    toast.success("Kanal erfolgreich hinzugefügt!");
+    toast.success(`Kanal erfolgreich zu Profil „${activeProfile.name}“ hinzugefügt!`);
   };
 
   const handleDeleteChannel = (id: string) => {
-    if (channels.length <= 1) {
-      toast.error("Du musst mindestens einen Haupt-Kanal behalten.");
+    if (profileChannels.length <= 1) {
+      toast.error("Du musst mindestens einen Haupt-Kanal in diesem Profil behalten.");
       return;
     }
     onUpdateChannels(channels.filter((c) => c.id !== id));
     toast.info("Kanal entfernt.");
   };
 
-  const filteredPosts = posts.filter((p) => {
+  const filteredPosts = profilePosts.filter((p) => {
     if (filterPlatform === "all") return true;
     return p.platform === filterPlatform;
   });
@@ -1192,12 +1244,84 @@ export function PostSchedulerView({
       <div className="cryptox-card p-6 border border-white/[0.08]">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4 text-[#FF6A1F]" />
-              <span>Beitrags-Planer</span>
-            </h1>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              Automatische Veröffentlichung auf TikTok, Instagram, Facebook & LinkedIn.
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                <CalendarIcon className="h-4 w-4 text-[#FF6A1F]" />
+                <span>Beitrags-Planer</span>
+              </h1>
+
+              {/* Brand Profile Selector Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-xs font-semibold text-white transition shadow-sm cursor-pointer"
+                    title="Brand-Profil wechseln (Kanäle & Posts getrennt)"
+                  >
+                    <div
+                      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold overflow-hidden shrink-0 border border-white/20"
+                      style={{
+                        backgroundColor: activeProfile.color ? `${activeProfile.color}30` : "#F04A2030",
+                        color: activeProfile.color || "#F04A20",
+                      }}
+                    >
+                      {activeProfile.avatarUrl ? (
+                        <img src={activeProfile.avatarUrl} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        activeProfile.name.slice(0, 1).toUpperCase()
+                      )}
+                    </div>
+                    <span className="font-bold text-white max-w-[130px] truncate">{activeProfile.name}</span>
+                    <span className="text-[10px] text-zinc-400 font-mono">@{activeProfile.slug}</span>
+                    <ChevronDown className="w-3.5 h-3.5 text-zinc-400 ml-0.5" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-64 bg-[#0F0D15] border-white/15 text-white shadow-2xl">
+                  <DropdownMenuLabel className="text-[10px] uppercase font-mono text-zinc-400 px-3 py-1.5">
+                    Brand-Profil wechseln
+                  </DropdownMenuLabel>
+                  {resolvedProfiles.map((p) => {
+                    const count = channels.filter(
+                      (c) => (c.profileId || DEFAULT_BRAND_PROFILES[0].id) === p.id
+                    ).length;
+                    const isSel = p.id === activeProfile.id;
+                    return (
+                      <DropdownMenuItem
+                        key={p.id}
+                        onClick={() => handleSwitchProfile(p.id)}
+                        className={cn(
+                          "flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs",
+                          isSel ? "bg-orange-500/15 text-orange-300 font-bold" : "hover:bg-white/10"
+                        )}
+                      >
+                        <div className="flex items-center gap-2 truncate">
+                          <span
+                            className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                            style={{ backgroundColor: p.color || "#F04A20" }}
+                          />
+                          <span className="truncate">{p.name}</span>
+                        </div>
+                        <span className="text-[10px] text-zinc-400 font-mono">{count} Kanäle</span>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  {isAdmin && onOpenBrandProfileManager && (
+                    <>
+                      <DropdownMenuSeparator className="bg-white/10" />
+                      <DropdownMenuItem
+                        onClick={onOpenBrandProfileManager}
+                        className="flex items-center gap-2 px-3 py-2 text-xs text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 cursor-pointer font-bold"
+                      >
+                        <Layers className="w-3.5 h-3.5" />
+                        <span>Profile verwalten / Neu anlegen...</span>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <p className="text-xs text-zinc-400 mt-1">
+              Aktives Profil: <strong className="text-white">{activeProfile.name}</strong> • Kanäle & Posts sind isoliert.
             </p>
           </div>
 
@@ -1216,7 +1340,7 @@ export function PostSchedulerView({
                 )}
               >
                 <CalendarIcon className="w-3.5 h-3.5" />
-                <span>Planer ({posts.length})</span>
+                <span>Planer ({profilePosts.length})</span>
               </button>
               <button
                 type="button"
@@ -1244,9 +1368,9 @@ export function PostSchedulerView({
                 <Link2 className="w-3.5 h-3.5 text-orange-400" />
                 <span>Profile verbinden</span>
                 <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold bg-white/20 text-white ml-0.5">
-                  {channels.length}
+                  {profileChannels.length}
                 </span>
-                {channels.length > 0 && (
+                {profileChannels.length > 0 && (
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
                 )}
               </button>
@@ -1280,19 +1404,23 @@ export function PostSchedulerView({
         {/* ── Compact Channel Status ──────────────────────────────────── */}
         <div className="mt-4 pt-3 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] text-zinc-500 font-medium">Aktive Kanäle:</span>
-            {channels.map((chan) => {
-              const Icon = PLATFORM_ICONS[chan.platform] || Share2;
-              return (
-                <div
-                  key={chan.id}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.02] text-[11px] text-zinc-300"
-                >
-                  <Icon className="h-3 w-3 text-orange-400" />
-                  <span className="font-medium text-white">{chan.name}</span>
-                </div>
-              );
-            })}
+            <span className="text-[11px] text-zinc-500 font-medium">Kanäle ({activeProfile.name}):</span>
+            {profileChannels.length === 0 ? (
+              <span className="text-[11px] text-zinc-500 italic">Noch keine Kanäle verknüpft</span>
+            ) : (
+              profileChannels.map((chan) => {
+                const Icon = PLATFORM_ICONS[chan.platform] || Share2;
+                return (
+                  <div
+                    key={chan.id}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.02] text-[11px] text-zinc-300"
+                  >
+                    <Icon className="h-3 w-3 text-orange-400" />
+                    <span className="font-medium text-white">{chan.name}</span>
+                  </div>
+                );
+              })
+            )}
           </div>
 
           {hasPublisherKey && (
@@ -1956,7 +2084,7 @@ export function PostSchedulerView({
                       {SCHEDULER_CONNECT_PLATFORMS.map((platform) => {
                         const Icon = platform.icon;
                         const isConnecting = connectingPlatform === platform.id;
-                        const isAlreadyConnected = channels.some(
+                        const isAlreadyConnected = profileChannels.some(
                           (c) =>
                             c.platform.toLowerCase() === platform.id.toLowerCase() ||
                             (platform.id === "x" && c.platform.toLowerCase() === "twitter")
@@ -1975,7 +2103,7 @@ export function PostSchedulerView({
                               isAlreadyConnected ? "border-emerald-500/30 bg-emerald-500/[0.04]" : "border-white/10",
                               isConnecting && "opacity-60 pointer-events-none ring-1 ring-orange-500"
                             )}
-                            title={`${platform.name} autorisieren & verknüpfen`}
+                            title={`${platform.name} für ${activeProfile.name} verknüpfen`}
                           >
                             {isAlreadyConnected && (
                               <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
@@ -2001,7 +2129,19 @@ export function PostSchedulerView({
                 )}
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {channels.map((chan) => {
+                  {profileChannels.length === 0 ? (
+                    <div className="col-span-full p-4 rounded-xl border border-dashed border-white/15 bg-white/[0.02] text-center text-xs text-zinc-400 space-y-2">
+                      <p>Für <strong className="text-white">{activeProfile.name}</strong> ist noch kein Social-Media-Kanal hinterlegt.</p>
+                      <button
+                        type="button"
+                        onClick={() => setShowComposerConnectQuick(true)}
+                        className="text-xs font-bold text-orange-400 hover:text-orange-300 underline cursor-pointer"
+                      >
+                        + Jetzt Kanal für {activeProfile.name} verbinden
+                      </button>
+                    </div>
+                  ) : (
+                    profileChannels.map((chan) => {
                     const Icon = PLATFORM_ICONS[chan.platform] || Share2;
                     const isSelected = selectedChannelId === chan.id;
                     const style = PLATFORM_COLORS[chan.platform] || PLATFORM_COLORS.facebook;
@@ -2039,7 +2179,8 @@ export function PostSchedulerView({
                         {isSelected && <Check className="h-4 w-4 text-orange-400 shrink-0" />}
                       </button>
                     );
-                  })}
+                  })
+                )}
 
                   {/* Add Platform trigger card right in the grid */}
                   <button
@@ -2847,6 +2988,50 @@ export function PostSchedulerView({
           </div>
 
           {/* ── SECTION 1: VERFÜGBARE NETZWERKE (1-KLICK OAUTH) ──────────── */}
+          {/* Active Brand Profile Banner */}
+          <div className="p-4 rounded-2xl bg-white/[0.03] border border-orange-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm border overflow-hidden shrink-0 shadow-inner"
+                style={{
+                  backgroundColor: activeProfile.color ? `${activeProfile.color}25` : "#F04A2025",
+                  borderColor: activeProfile.color || "#F04A20",
+                  color: activeProfile.color || "#F04A20",
+                }}
+              >
+                {activeProfile.avatarUrl ? (
+                  <img src={activeProfile.avatarUrl} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  activeProfile.name.slice(0, 2).toUpperCase()
+                )}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-bold text-white">
+                    Aktives Brand-Profil: {activeProfile.name}
+                  </h4>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/10 text-zinc-300">
+                    @{activeProfile.slug}
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400 mt-0.5">
+                  Alle hier verknüpften Kanäle & Posts gehören exklusiv zu <strong>{activeProfile.name}</strong>.
+                </p>
+              </div>
+            </div>
+
+            {isAdmin && onOpenBrandProfileManager && (
+              <button
+                type="button"
+                onClick={onOpenBrandProfileManager}
+                className="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/15 text-white border border-white/15 transition cursor-pointer flex items-center gap-1.5 self-start sm:self-center shrink-0"
+              >
+                <Layers className="w-3.5 h-3.5 text-orange-400" />
+                <span>Profile verwalten / Neu anlegen</span>
+              </button>
+            )}
+          </div>
+
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
@@ -2855,7 +3040,7 @@ export function PostSchedulerView({
                   <span>Verfügbare Social-Media-Netzwerke (1-Klick OAuth)</span>
                 </h3>
                 <p className="text-xs text-zinc-400">
-                  Wähle ein soziales Netzwerk – es öffnet sich das offizielle Login-Fenster zur direkten Freigabe.
+                  Wähle ein Netzwerk – es öffnet sich das offizielle Login-Fenster zur Freigabe für <strong>{activeProfile.name}</strong>.
                 </p>
               </div>
               <span className="text-[11px] text-zinc-500 font-mono hidden sm:inline-block">
@@ -2867,7 +3052,7 @@ export function PostSchedulerView({
               {SCHEDULER_CONNECT_PLATFORMS.map((platform) => {
                 const Icon = platform.icon;
                 const isConnecting = connectingPlatform === platform.id;
-                const matchedChannels = channels.filter(
+                const matchedChannels = profileChannels.filter(
                   (c) =>
                     c.platform.toLowerCase() === platform.id.toLowerCase() ||
                     (platform.id === "x" && c.platform.toLowerCase() === "twitter")
@@ -2956,12 +3141,12 @@ export function PostSchedulerView({
                         ) : isConnected ? (
                           <>
                             <Plus className="h-3.5 w-3.5" />
-                            <span>Weiteren {platform.name}-Account verbinden</span>
+                            <span>Weiteren {platform.name}-Account für {activeProfile.name} verbinden</span>
                           </>
                         ) : (
                           <>
                             <Link2 className="h-3.5 w-3.5" />
-                            <span>{platform.name} jetzt verbinden →</span>
+                            <span>{platform.name} für {activeProfile.name} verbinden →</span>
                           </>
                         )}
                       </button>
@@ -2978,14 +3163,14 @@ export function PostSchedulerView({
               <div>
                 <h4 className="text-sm font-bold text-white flex items-center gap-2">
                   <Share2 className="h-4 w-4 text-orange-400" />
-                  <span>Deine aktiven Kanäle & Profile ({channels.length})</span>
+                  <span>Deine aktiven Kanäle für „{activeProfile.name}“ ({profileChannels.length})</span>
                 </h4>
                 <p className="text-xs text-zinc-400">
-                  Diese Accounts stehen dir im Beitrags-Planer und beim automatischen Veröffentlichen zur Verfügung.
+                  Diese Accounts stehen dir exklusiv für <strong>{activeProfile.name}</strong> im Beitrags-Planer zur Verfügung.
                 </p>
               </div>
 
-              {channels.length > 0 && (
+              {profileChannels.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setActiveTab("composer")}
@@ -2997,19 +3182,19 @@ export function PostSchedulerView({
               )}
             </div>
 
-            {channels.length === 0 ? (
+            {profileChannels.length === 0 ? (
               <div className="p-8 rounded-2xl border border-dashed border-white/15 bg-white/[0.01] text-center space-y-3">
                 <div className="w-12 h-12 mx-auto rounded-2xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-400">
                   <Link2 className="w-6 h-6" />
                 </div>
-                <h5 className="text-sm font-bold text-white">Noch keine Social-Media-Profile verknüpft</h5>
+                <h5 className="text-sm font-bold text-white">Noch keine Kanäle für „{activeProfile.name}“ verknüpft</h5>
                 <p className="text-xs text-zinc-400 max-w-md mx-auto">
-                  Klicke oben auf deine bevorzugte Plattform (z. B. TikTok, Instagram oder LinkedIn), um deinen Account in Sekunden per 1-Klick zu verbinden.
+                  Klicke oben auf ein Netzwerk (z. B. TikTok, Instagram oder LinkedIn), um deinen ersten Kanal für <strong>{activeProfile.name}</strong> per 1-Klick zu verbinden.
                 </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {channels.map((chan) => {
+                {profileChannels.map((chan) => {
                   const Icon = PLATFORM_ICONS[chan.platform] || Share2;
                   const style = PLATFORM_COLORS[chan.platform] || PLATFORM_COLORS.facebook;
                   const isDisconnecting = disconnectingChannelId === chan.id;

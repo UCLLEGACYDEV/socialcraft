@@ -51,7 +51,16 @@ function PostForMeCallbackPage() {
         const accounts = await client.getSocialAccounts();
         setConnectedCount(accounts.length);
 
-        // 3. Sync to local channels
+        // 3. Read active brand profile from storage
+        let activeProfileId = "profile-default";
+        try {
+          const rawProfile = localStorage.getItem(LS.activeBrandProfileId);
+          if (rawProfile) {
+            activeProfileId = rawProfile.replace(/^"|"$/g, "");
+          }
+        } catch {}
+
+        // 4. Sync to local channels scoped to active profile
         const platformMapping: Record<string, SocialPlatform> = {
           tiktok: "tiktok",
           instagram: "instagram",
@@ -74,13 +83,16 @@ function PostForMeCallbackPage() {
           handle: acc.username ? (acc.username.startsWith("@") ? acc.username : `@${acc.username}`) : undefined,
           avatarUrl: acc.profile_picture_url || "/images/socialcraft-logo.png",
           isDefault: false,
+          profileId: activeProfileId,
         }));
 
         try {
           const storedChannelsRaw = localStorage.getItem(LS.socialChannels);
           const currentChannels: SocialChannel[] = storedChannelsRaw ? JSON.parse(storedChannelsRaw) : [];
           const existingIds = new Set(currentChannels.map((c) => c.channelId));
-          const newOnes = imported.filter((c) => !existingIds.has(c.channelId));
+          const newOnes = imported
+            .filter((c) => !existingIds.has(c.channelId))
+            .map((c) => ({ ...c, profileId: activeProfileId }));
 
           if (newOnes.length > 0) {
             localStorage.setItem(LS.socialChannels, JSON.stringify([...currentChannels, ...newOnes]));
