@@ -1287,7 +1287,7 @@ export function PostSchedulerView({
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
                             <Music className="w-4 h-4 text-cyan-400" />
-                            <span className="text-xs font-bold text-white">TikTok Commercial Music</span>
+                            <span className="text-xs font-bold text-white">TikTok Music & Eigene MP3s</span>
                           </div>
                           <button
                             type="button"
@@ -1295,7 +1295,7 @@ export function PostSchedulerView({
                             className="px-2.5 py-1 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-500/40 text-cyan-300 text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
                           >
                             <Sparkles className="w-3 h-3 text-cyan-400" />
-                            <span>{selectedSound ? "Sound wechseln" : "Music Library öffnen"}</span>
+                            <span>{selectedSound ? "Sound wechseln" : "MP3s & Library öffnen"}</span>
                           </button>
                         </div>
 
@@ -1324,7 +1324,7 @@ export function PostSchedulerView({
                           </div>
                         ) : (
                           <p className="text-[11px] text-zinc-400">
-                            Wähle lizenzierte TikTok-Sounds aus der integrierten Bibliothek oder nutze die TikTok Auto-Music Option.
+                            Lade eigene MP3s hoch, wähle lizenzierte Sounds aus der Bibliothek oder aktiviere die automatische TikTok Trend-Musik.
                           </p>
                         )}
                       </div>
