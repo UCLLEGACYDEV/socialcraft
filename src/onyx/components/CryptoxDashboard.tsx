@@ -94,7 +94,9 @@ export function CryptoxDashboard({
                         ? "Snack-Content"
                         : brief.slideCount <= 7
                           ? "Instagram-Standard"
-                          : "Deep Dive Guide"}
+                          : brief.slideCount <= 12
+                            ? "Deep Dive Guide"
+                            : "Mega-Karussell (bis zu 35)"}
                     </span>
                   </div>
                 </div>
@@ -113,8 +115,8 @@ export function CryptoxDashboard({
                   </span>
                   <button
                     type="button"
-                    onClick={() => onChangeBrief({ slideCount: Math.min(10, brief.slideCount + 1) })}
-                    disabled={brief.slideCount >= 10}
+                    onClick={() => onChangeBrief({ slideCount: Math.min(35, brief.slideCount + 1) })}
+                    disabled={brief.slideCount >= 35}
                     className="flex h-6 w-6 items-center justify-center rounded-full text-white/70 hover:bg-white/10 hover:text-white disabled:opacity-30"
                   >
                     <Plus className="h-3 w-3" />
@@ -127,7 +129,7 @@ export function CryptoxDashboard({
                 <Slider
                   value={[brief.slideCount]}
                   min={2}
-                  max={10}
+                  max={35}
                   step={1}
                   onValueChange={([v]) => v !== undefined && onChangeBrief({ slideCount: v })}
                 />

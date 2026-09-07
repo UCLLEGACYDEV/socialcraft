@@ -15,9 +15,11 @@ const SUGGESTED_TOPICS = [
 
 const PRESET_SLIDE_COUNTS = [
   { count: 4, label: "4 Slides (Quick Tip)" },
-  { count: 6, label: "6 Slides" },
   { count: 7, label: "7 Slides (Empfohlen)" },
-  { count: 10, label: "10 Slides (Deep Dive)" },
+  { count: 10, label: "10 Slides (Standard)" },
+  { count: 15, label: "15 Slides (Deep Dive)" },
+  { count: 20, label: "20 Slides (Masterclass)" },
+  { count: 30, label: "30 Slides (Mega-Serie)" },
 ];
 
 interface CarouselBriefFormProps {
@@ -47,7 +49,9 @@ export function CarouselBriefForm({
       ? "Kurzer Snack-Content · Ideal für schnelle Tipps"
       : values.slideCount <= 7
         ? "Optimaler Instagram-Standard · Höchste Save- & Share-Rate"
-        : "Ausführlicher Deep-Dive · Ideal für Step-by-Step Guides & Stories";
+        : values.slideCount <= 12
+          ? "Ausführlicher Deep-Dive · Ideal für Step-by-Step Guides & Stories"
+          : "Mega-Karussell (bis zu 35 Slides) · Masterclass für TikTok, LinkedIn & Instagram";
 
   return (
     <div className="cryptox-card-elevated relative overflow-hidden space-y-6 p-5 sm:p-7 border border-white/[0.12]">
@@ -156,8 +160,8 @@ export function CarouselBriefForm({
             </span>
             <button
               type="button"
-              onClick={() => onChange({ slideCount: Math.min(10, values.slideCount + 1) })}
-              disabled={values.slideCount >= 10}
+              onClick={() => onChange({ slideCount: Math.min(35, values.slideCount + 1) })}
+              disabled={values.slideCount >= 35}
               className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-foreground/10 hover:text-foreground disabled:opacity-30"
               aria-label="Eine Slide mehr"
             >
@@ -171,7 +175,7 @@ export function CarouselBriefForm({
           <Slider
             value={[values.slideCount]}
             min={2}
-            max={10}
+            max={35}
             step={1}
             onValueChange={([val]) => val !== undefined && onChange({ slideCount: val })}
             aria-label="Anzahl der Slides"
@@ -180,10 +184,10 @@ export function CarouselBriefForm({
           {/* Slider scale markers */}
           <div className="mt-2 flex justify-between text-[11px] font-medium text-muted-foreground/70">
             <span>2 Slides</span>
-            <span>4</span>
-            <span className="font-semibold text-primary-bright">6 (Standard)</span>
-            <span>8</span>
-            <span>10 Slides</span>
+            <span>7 (Standard)</span>
+            <span>10</span>
+            <span>20</span>
+            <span>35 Slides</span>
           </div>
         </div>
 

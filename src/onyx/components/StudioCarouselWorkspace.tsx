@@ -173,7 +173,7 @@ export function StudioCarouselWorkspace({
         const first = parsedCarousels[0];
         onChangeBrief({
           topic: first.title,
-          slideCount: Math.min(10, Math.max(3, first.slides.length)),
+          slideCount: Math.min(35, Math.max(2, first.slides.length)),
         });
         toast.success(`Karussell „${first.title}“ (${first.slides.length} Slides) erkannt! 🚀`, {
           description: parsedCarousels.length > 1
@@ -403,19 +403,19 @@ export function StudioCarouselWorkspace({
                 <div className="flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] p-0.5">
                   <button
                     type="button"
-                    onClick={() => onChangeBrief({ slideCount: Math.max(3, brief.slideCount - 1) })}
-                    disabled={brief.slideCount <= 3}
+                    onClick={() => onChangeBrief({ slideCount: Math.max(2, brief.slideCount - 1) })}
+                    disabled={brief.slideCount <= 2}
                     className="flex h-6 w-6 items-center justify-center rounded-full text-white/70 hover:bg-white/10 hover:text-white disabled:opacity-30"
                   >
                     <Minus className="h-3 w-3" />
                   </button>
-                  <span className="w-5 text-center text-xs font-bold text-white font-mono">
+                  <span className="w-6 text-center text-xs font-bold text-white font-mono">
                     {brief.slideCount}
                   </span>
                   <button
                     type="button"
-                    onClick={() => onChangeBrief({ slideCount: Math.min(10, brief.slideCount + 1) })}
-                    disabled={brief.slideCount >= 10}
+                    onClick={() => onChangeBrief({ slideCount: Math.min(35, brief.slideCount + 1) })}
+                    disabled={brief.slideCount >= 35}
                     className="flex h-6 w-6 items-center justify-center rounded-full text-white/70 hover:bg-white/10 hover:text-white disabled:opacity-30"
                   >
                     <Plus className="h-3 w-3" />
@@ -425,18 +425,39 @@ export function StudioCarouselWorkspace({
 
               <Slider
                 value={[brief.slideCount]}
-                min={3}
-                max={10}
+                min={2}
+                max={35}
                 step={1}
                 onValueChange={([v]) => v !== undefined && onChangeBrief({ slideCount: v })}
               />
 
-              <p className="text-[10px] text-white/50 pt-1">
+              {/* Quick Slide Selection Buttons */}
+              <div className="flex flex-wrap items-center gap-1 pt-1">
+                {[4, 6, 8, 10, 12, 15, 20, 25, 30].map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    onClick={() => onChangeBrief({ slideCount: num })}
+                    className={cn(
+                      "rounded px-1.5 py-0.5 text-[10px] font-mono font-semibold transition-all",
+                      brief.slideCount === num
+                        ? "border border-[#FF6A1F] bg-[#FF6A1F]/20 text-[#FF6A1F] shadow-[0_0_8px_-2px_#FF6A1F]"
+                        : "border border-white/10 bg-white/[0.02] text-white/50 hover:border-white/20 hover:text-white"
+                    )}
+                  >
+                    {num}
+                  </button>
+                ))}
+              </div>
+
+              <p className="text-[10px] text-white/50 pt-0.5">
                 {brief.slideCount <= 5
                   ? "⚡ Snack-Karussell: Schneller Konsum, hohe Vollendungsquote."
-                  : brief.slideCount <= 7
-                    ? "✨ Empfohlen: Perfekte Balance aus Dwell-Time und Speicher-Rate."
-                    : "📚 Deep-Dive: Maximaler Mehrwert für Experten-Karussells."}
+                  : brief.slideCount <= 10
+                    ? "✨ Standard: Perfekte Balance aus Dwell-Time und Speicher-Rate."
+                    : brief.slideCount <= 20
+                      ? "📚 Deep-Dive: Masterclass & umfangreiche Step-by-Step Guides."
+                      : "🔥 Mega-Karussell: Maximales Format (bis zu 35 Folien für TikTok / LinkedIn)."}
               </p>
             </div>
 
