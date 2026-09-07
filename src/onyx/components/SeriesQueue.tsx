@@ -420,7 +420,7 @@ export function SeriesQueue({
                   </div>
 
                   {/* ── Slide Grid ──────────────────────────────────────── */}
-                  <div className="grid grid-cols-2 gap-2.5 border-t border-border p-3.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                  <div className="grid grid-cols-2 gap-3 border-t border-white/[0.08] p-3.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
                     {job.slides.map((slide) => (
                       <SlideCard
                         key={slide.id}

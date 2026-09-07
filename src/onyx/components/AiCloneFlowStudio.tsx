@@ -31,6 +31,7 @@ import { generateImageUnified, makeId } from "../mock-api";
 import {
   analyzeInspirationAndFuseWithClone,
   analyzePersonaPhoto,
+  autoGeneratePersonaProfile,
   type InspirationFusionResult,
   type PersonaAnalysisProgress,
 } from "../persona-analyzer";
@@ -198,9 +199,13 @@ export function AiCloneFlowStudio({
   const inspirationFileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
-  // Clone Creator from Photo State
+  // Streamlined Clone Creator State (Name, Age, Gender + optional Vibe/Photo)
   const [showCloneCreator, setShowCloneCreator] = useState(false);
   const [newCloneName, setNewCloneName] = useState("");
+  const [newCloneAge, setNewCloneAge] = useState("28");
+  const [newCloneGender, setNewCloneGender] = useState<"male" | "female" | "diverse">("male");
+  const [newCloneVibe, setNewCloneVibe] = useState("Tech Founder / Modern Creator");
+  const [newClonePhoto, setNewClonePhoto] = useState<string>("");
   const [isAnalyzingNewClone, setIsAnalyzingNewClone] = useState(false);
   const [cloneAnalysisProgress, setCloneAnalysisProgress] = useState<PersonaAnalysisProgress | null>(null);
   const clonePhotoInputRef = useRef<HTMLInputElement>(null);
@@ -211,52 +216,67 @@ export function AiCloneFlowStudio({
   const [batchCurrentIndex, setBatchCurrentIndex] = useState<number>(-1);
   const [batchTotal, setBatchTotal] = useState<number>(0);
 
-  // 1. Photo Upload to Create a Brand New Clone
+  // 1. Auto-Generate Brand New Clone from Name, Age, Gender (+ optional Vibe/Photo)
+  const handleAutoGenerateClone = async () => {
+    const name = newCloneName.trim() || (newCloneGender === "female" ? "Sarah" : newCloneGender === "diverse" ? "Alex" : "Michael");
+    setIsAnalyzingNewClone(true);
+    try {
+      const analysis = await autoGeneratePersonaProfile(
+        {
+          name,
+          age: newCloneAge,
+          gender: newCloneGender,
+          vibe: newCloneVibe,
+          referencePhotoUrl: newClonePhoto || undefined,
+        },
+        {
+          apiKey: settings.kieApiKey,
+          onProgress: (p) => setCloneAnalysisProgress(p),
+        },
+      );
+
+      const newProfile: AiCloneProfile = {
+        id: `clone_${makeId()}`,
+        name,
+        isActive: true,
+        avatarUrl: newClonePhoto || "",
+        referenceImages: newClonePhoto ? [newClonePhoto] : [],
+        genderAge: analysis.genderAge,
+        hairFace: analysis.hairFace,
+        tattoosFeatures: analysis.tattoosFeatures,
+        wardrobe: analysis.wardrobe,
+        lightingLook: analysis.lightingLook,
+        framingCamera: analysis.framingCamera,
+        negativePrompt: analysis.negativePrompt,
+        customPrefix: analysis.customPrefix,
+        placement: "hook_closing",
+        updatedAt: new Date().toISOString(),
+      };
+
+      setProfiles((prev) => [newProfile, ...prev]);
+      setActiveId(newProfile.id);
+      setShowCloneCreator(false);
+      setNewCloneName("");
+      setNewClonePhoto("");
+      toast.success(`🎉 KI-Klon „${name}“ erfolgreich generiert & aktiviert!`);
+    } catch (err: unknown) {
+      toast.error("Fehler bei der Profilgenerierung: " + (err instanceof Error ? err.message : "Unbekannter Fehler"));
+    } finally {
+      setIsAnalyzingNewClone(false);
+      setCloneAnalysisProgress(null);
+    }
+  };
+
   const handleNewClonePhotoUpload = (file: File) => {
     if (!file.type.startsWith("image/")) {
-      toast.error("Bitte lade eine gültige Bilddatei (JPG, PNG, WebP) hoch.");
+      toast.error("Bitte lade eine Bilddatei (JPG, PNG, WebP) hoch.");
       return;
     }
     const reader = new FileReader();
-    reader.onload = async (e) => {
+    reader.onload = (e) => {
       const dataUrl = e.target?.result as string;
-      setIsAnalyzingNewClone(true);
-      try {
-        const analysis = await analyzePersonaPhoto(dataUrl, {
-          apiKey: settings.kieApiKey,
-          onProgress: (p) => setCloneAnalysisProgress(p),
-        });
-
-        const name = newCloneName.trim() || `Klon (${analysis.genderAge.split(",")[0] || "Persona"})`;
-        const newProfile: AiCloneProfile = {
-          id: `clone_${makeId()}`,
-          name,
-          isActive: true,
-          avatarUrl: dataUrl,
-          referenceImages: [dataUrl],
-          genderAge: analysis.genderAge,
-          hairFace: analysis.hairFace,
-          tattoosFeatures: analysis.tattoosFeatures,
-          wardrobe: analysis.wardrobe,
-          lightingLook: analysis.lightingLook,
-          framingCamera: analysis.framingCamera,
-          negativePrompt: analysis.negativePrompt,
-          customPrefix: analysis.customPrefix,
-          placement: "hook_closing",
-          updatedAt: new Date().toISOString(),
-        };
-
-        setProfiles((prev) => [newProfile, ...prev]);
-        setActiveId(newProfile.id);
-        setShowCloneCreator(false);
-        setNewCloneName("");
-        toast.success(`🎉 Neuer KI-Klon „${name}“ erfolgreich erstellt und aktiviert!`);
-      } catch (err: unknown) {
-        toast.error("Fehler bei der Fotoanalyse: " + (err instanceof Error ? err.message : "Unbekannter Fehler"));
-      } finally {
-        setIsAnalyzingNewClone(false);
-        setCloneAnalysisProgress(null);
-      }
+      setNewClonePhoto(dataUrl);
+      toast.success("Foto ausgewählt! Klicke auf 'Profil generieren'.");
     };
     reader.readAsDataURL(file);
   };
@@ -491,88 +511,171 @@ export function AiCloneFlowStudio({
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-12">
-      {/* ── MODAL: CREATE NEW CLONE FROM 1 PHOTO ───────────────────── */}
+      {/* ── MODAL: 1-CLICK KI-KLON ERSTELLUNG ───────────────────── */}
       {showCloneCreator && (
-        <div className="p-6 rounded-2xl border border-[#FF4D17]/40 bg-gradient-to-b from-[#FF4D17]/10 via-black/90 to-black space-y-4 shadow-2xl animate-fadeIn">
-          <div className="flex items-center justify-between">
+        <div className="p-6 rounded-2xl border border-[#FF4D17]/40 bg-gradient-to-b from-[#FF4D17]/10 via-[#110F17]/95 to-[#110F17] space-y-5 shadow-2xl animate-in fade-in duration-300">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="h-10 w-10 rounded-xl bg-[#FF4D17] text-white flex items-center justify-center font-bold shadow-md">
-                <Camera className="h-5 w-5" />
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-[#FF4D17] to-amber-500 text-white flex items-center justify-center font-bold shadow-[0_0_20px_rgba(255,77,23,0.4)]">
+                <Sparkles className="h-5 w-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-white">
-                  Eigenen KI-Klon aus 1 Foto erstellen (10 Sekunden)
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span>KI-Klon in 3 Sekunden erstellen</span>
+                  <span className="rounded bg-[#FF4D17]/20 text-[#FF4D17] border border-[#FF4D17]/40 text-[10px] px-2 py-0.5 font-bold uppercase tracking-wider">
+                    Vollautomatisch
+                  </span>
                 </h3>
                 <p className="text-xs text-zinc-400">
-                  Lade ein Porträtfoto hoch. Gesichtszüge, Haare, Bart & Tattoos werden automatisch gespeichert.
+                  Gib nur Name, Alter & Geschlecht ein — die KI generiert Gesicht, Bart, Garderobe, Licht & Master-Prompt eigenständig!
                 </p>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setShowCloneCreator(false)}
-              className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-white/10"
+              className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-white/10 cursor-pointer"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* 1. Name */}
             <div>
               <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                Klon-Name (z. B. dein Vorname):
+                1. Name:
               </label>
               <input
                 type="text"
                 value={newCloneName}
                 onChange={(e) => setNewCloneName(e.target.value)}
-                placeholder="z. B. Michael (Mein KI-Klon)"
+                placeholder="z. B. Michael"
                 className="field-input text-xs w-full"
               />
             </div>
 
+            {/* 2. Alter */}
             <div>
               <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                Porträtfoto hochladen:
+                2. Alter:
               </label>
               <input
-                ref={clonePhotoInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) handleNewClonePhotoUpload(e.target.files[0]);
-                }}
+                type="text"
+                value={newCloneAge}
+                onChange={(e) => setNewCloneAge(e.target.value)}
+                placeholder="z. B. 28 oder Anfang 30"
+                className="field-input text-xs w-full"
               />
-              <button
-                type="button"
-                onClick={() => clonePhotoInputRef.current?.click()}
-                disabled={isAnalyzingNewClone}
-                className="w-full py-2.5 px-4 rounded-xl border border-dashed border-[#FF4D17]/50 bg-[#FF4D17]/[0.05] hover:bg-[#FF4D17]/15 text-xs font-semibold text-white transition-all flex items-center justify-center gap-2"
-              >
-                {isAnalyzingNewClone ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin text-[#FF4D17]" />
-                    <span>Analysiere Gesicht & DNA…</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-4 w-4 text-[#FF4D17]" />
-                    <span>Foto auswählen & Klon speichern</span>
-                  </>
-                )}
-              </button>
+            </div>
+
+            {/* 3. Geschlecht */}
+            <div>
+              <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+                3. Geschlecht:
+              </label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(["male", "female", "diverse"] as const).map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setNewCloneGender(g)}
+                    className={cn(
+                      "py-2 px-1 rounded-xl text-xs font-semibold border transition-all text-center cursor-pointer",
+                      newCloneGender === g
+                        ? "border-[#FF4D17] bg-[#FF4D17]/20 text-white font-bold shadow-[0_0_12px_rgba(255,77,23,0.3)]"
+                        : "border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white hover:bg-white/[0.06]",
+                    )}
+                  >
+                    {g === "male" ? "👨 Mann" : g === "female" ? "👩 Frau" : "✨ Divers"}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
+          {/* Vibe / Stil Presets */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300 block">
+              4. Vibe & Persona-Stil (Optional):
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                "Tech Founder / Modern Creator",
+                "Business Coach & Speaker",
+                "Creative Director & Designer",
+                "High-Fashion & Luxury Editorial",
+                "Athletic & Fitness Leader",
+              ].map((vibe) => (
+                <button
+                  key={vibe}
+                  type="button"
+                  onClick={() => setNewCloneVibe(vibe)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs transition-all border cursor-pointer",
+                    newCloneVibe === vibe
+                      ? "border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF4D17] font-semibold"
+                      : "border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white hover:border-white/20",
+                  )}
+                >
+                  {vibe}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Optional Selfie / Photo Attachment */}
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <Camera className="h-4 w-4 text-orange-400 shrink-0" />
+              <div className="text-xs">
+                <span className="font-semibold text-white">Eigenes Foto / Selfie anhängen</span>
+                <span className="text-zinc-400 ml-1.5">(Rein optional — die KI erstellt ansonsten ein fotorealistisches Gesicht)</span>
+              </div>
+            </div>
+
+            <input
+              ref={clonePhotoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files?.[0]) handleNewClonePhotoUpload(e.target.files[0]);
+              }}
+            />
+
+            {newClonePhoto ? (
+              <div className="flex items-center gap-2 shrink-0">
+                <img src={newClonePhoto} alt="" className="h-7 w-7 rounded-lg object-cover border border-[#FF4D17]" />
+                <span className="text-[11px] text-emerald-400 font-semibold">Foto geladen ✓</span>
+                <button
+                  type="button"
+                  onClick={() => setNewClonePhoto("")}
+                  className="text-zinc-500 hover:text-rose-400 text-xs ml-1"
+                >
+                  Entfernen
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => clonePhotoInputRef.current?.click()}
+                className="shrink-0 px-3 py-1.5 rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 text-xs text-zinc-300 hover:text-white transition-colors cursor-pointer"
+              >
+                Foto wählen
+              </button>
+            )}
+          </div>
+
+          {/* Progress Bar during Analysis */}
           {isAnalyzingNewClone && cloneAnalysisProgress && (
-            <div className="p-3 rounded-xl bg-black/50 border border-white/10 space-y-1.5">
+            <div className="p-3.5 rounded-xl bg-black/60 border border-[#FF4D17]/30 space-y-2">
               <div className="flex justify-between text-xs text-white">
                 <span className="flex items-center gap-1.5 font-medium">
-                  <Sparkles className="h-3 w-3 text-[#FF4D17] animate-pulse" />
+                  <Sparkles className="h-3.5 w-3.5 text-[#FF4D17] animate-pulse" />
                   {cloneAnalysisProgress.label}
                 </span>
-                <span className="font-mono text-[#FF4D17]">{cloneAnalysisProgress.percent}%</span>
+                <span className="font-mono font-bold text-[#FF4D17]">{cloneAnalysisProgress.percent}%</span>
               </div>
               <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
                 <div
@@ -582,6 +685,26 @@ export function AiCloneFlowStudio({
               </div>
             </div>
           )}
+
+          {/* Submit Button */}
+          <button
+            type="button"
+            onClick={handleAutoGenerateClone}
+            disabled={isAnalyzingNewClone}
+            className="w-full cryptox-orange-btn !py-3 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(255,77,23,0.4)] disabled:opacity-50 cursor-pointer"
+          >
+            {isAnalyzingNewClone ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>KI synthetisiert Gesicht, Bart & Stil…</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                <span>✨ KI-Klon-Profil in 3 Sekunden generieren</span>
+              </>
+            )}
+          </button>
         </div>
       )}
 

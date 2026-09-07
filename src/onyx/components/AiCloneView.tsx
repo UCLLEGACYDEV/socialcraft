@@ -40,6 +40,7 @@ import { generateImageUnified, makeId, mockGenerateImage } from "../mock-api";
 import {
   analyzeInspirationAndFuseWithClone,
   analyzePersonaPhoto,
+  autoGeneratePersonaProfile,
   type InspirationFusionResult,
   type PersonaAnalysisProgress,
 } from "../persona-analyzer";
@@ -220,13 +221,18 @@ export function AiCloneView({
   onUseInCarousel,
   onUseInDirectPrompt,
 }: AiCloneViewProps) {
-  // Studio Mode: "flow" (1-Click Style-Transfer Studio) vs. "dna" (Detailed form)
+  // Streamlined 1-Click Creator Modal State
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createName, setCreateName] = useState("");
+  const [createAge, setCreateAge] = useState("28");
+  const [createGender, setCreateGender] = useState<"male" | "female" | "diverse">("male");
+  const [createVibe, setCreateVibe] = useState("Tech Founder / Modern Creator");
+  const [createPhoto, setCreatePhoto] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [createProgress, setCreateProgress] = useState<PersonaAnalysisProgress | null>(null);
+  const createPhotoInputRef = useRef<HTMLInputElement>(null);
+
   const [studioMode, setStudioMode] = useState<"flow" | "dna">("flow");
-
-  // Step-by-step DNA Wizard State (1 to 7)
-  const [dnaStep, setDnaStep] = useState<number>(1);
-  const [justCreatedProfile, setJustCreatedProfile] = useState<boolean>(false);
-
   const [profiles, setProfiles] = usePersistentState<AiCloneProfile[]>(
     LS.cloneProfiles,
     DEFAULT_CLONE_PROFILES,
@@ -236,24 +242,9 @@ export function AiCloneView({
     DEFAULT_CLONE_PROFILES[0]?.id ?? "",
   );
 
-  const fileInputId = useId();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [testImageLoading, setTestImageLoading] = useState(false);
   const [testImages, setTestImages] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
-
-  // KI-Foto-Analysator State
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisProgress, setAnalysisProgress] = useState<PersonaAnalysisProgress | null>(null);
-  const [lastAnalysisSummary, setLastAnalysisSummary] = useState<string[] | null>(null);
-
-  // Inspirations- & Style-Fusion State
-  const inspirationInputRef = useRef<HTMLInputElement>(null);
-  const [inspirationImage, setInspirationImage] = useState<string>("");
-  const [isFusingInspiration, setIsFusingInspiration] = useState(false);
-  const [fusionProgress, setFusionProgress] = useState<PersonaAnalysisProgress | null>(null);
-  const [fusionResult, setFusionResult] = useState<InspirationFusionResult | null>(null);
 
   const DUMMY_PRESET_IDS = useMemo(() => new Set(["editorial-minimalist", "founder-dark-ember", "cyber-visionary", "michael-schmidt"]), []);
 
@@ -266,19 +257,18 @@ export function AiCloneView({
     }
   }, [profiles, setProfiles, setActiveId, DUMMY_PRESET_IDS]);
 
-  // Active profile
   const fallbackProfile: AiCloneProfile = useMemo(() => ({
     id: "new_clone",
     name: "Mein KI-Klon",
     isActive: true,
     avatarUrl: "",
     referenceImages: [],
-    genderAge: "",
-    hairFace: "",
-    tattoosFeatures: "",
-    wardrobe: "",
-    lightingLook: "",
-    framingCamera: "",
+    genderAge: "Mann, Anfang 30",
+    hairFace: "Kurze dunkle Haare, gepflegter 3-Tage-Bart, markante Kieferlinie",
+    tattoosFeatures: "Reine, makellose Hautstruktur ohne temporäre Unreinheiten",
+    wardrobe: "Schwarzer feingestrickter Merinowolle-Rollkragen",
+    lightingLook: "Dunkles High-End Studio, warmes bernsteinfarbenes Ember-Kantenlicht",
+    framingCamera: "85mm Porträt-Festbrennweite, f/1.8, samtiges Bokeh",
     negativePrompt: "Keine Pickel, keine Hautunreinheiten, kein künstliches Grinsen, keine Cartoon-Ästhetik",
     customPrefix: "",
     placement: "hook_closing",
@@ -290,7 +280,6 @@ export function AiCloneView({
     return valid.find((p) => p.id === activeId) ?? valid[0] ?? fallbackProfile;
   }, [profiles, activeId, fallbackProfile, DUMMY_PRESET_IDS]);
 
-  // Patch active profile
   const patchProfile = (patch: Partial<AiCloneProfile>) => {
     setProfiles((prev) =>
       prev.map((p) =>
@@ -299,7 +288,6 @@ export function AiCloneView({
     );
   };
 
-  // Switch or activate profile
   const handleSelectProfile = (id: string) => {
     setActiveId(id);
     setProfiles((prev) =>
@@ -310,7 +298,6 @@ export function AiCloneView({
     );
   };
 
-  // Toggle active status
   const handleToggleActive = () => {
     const nextState = !activeProfile.isActive;
     patchProfile({ isActive: nextState });
@@ -321,133 +308,63 @@ export function AiCloneView({
     );
   };
 
-  // Create new profile & launch Guided Step-by-Step Wizard
+  // 1-Click Auto-Generate Persona from Name, Alter, Geschlecht
+  const handleAutoCreateClone = async () => {
+    const name = createName.trim() || (createGender === "female" ? "Sarah" : createGender === "diverse" ? "Alex" : "Michael");
+    setIsCreating(true);
+    try {
+      const settings = readLS<ApiSettings>(LS.apiSettings, DEFAULT_API_SETTINGS);
+      const analysis = await autoGeneratePersonaProfile(
+        {
+          name,
+          age: createAge,
+          gender: createGender,
+          vibe: createVibe,
+          referencePhotoUrl: createPhoto || undefined,
+        },
+        {
+          apiKey: settings?.kieApiKey,
+          onProgress: (p) => setCreateProgress(p),
+        },
+      );
+
+      const newProfile: AiCloneProfile = {
+        id: `clone_${makeId()}`,
+        name,
+        isActive: true,
+        avatarUrl: createPhoto || "",
+        referenceImages: createPhoto ? [createPhoto] : [],
+        genderAge: analysis.genderAge,
+        hairFace: analysis.hairFace,
+        tattoosFeatures: analysis.tattoosFeatures,
+        wardrobe: analysis.wardrobe,
+        lightingLook: analysis.lightingLook,
+        framingCamera: analysis.framingCamera,
+        negativePrompt: analysis.negativePrompt,
+        customPrefix: analysis.customPrefix,
+        placement: "hook_closing",
+        updatedAt: new Date().toISOString(),
+      };
+
+      setProfiles((prev) => [newProfile, ...prev]);
+      setActiveId(newProfile.id);
+      setShowCreateModal(false);
+      setCreateName("");
+      setCreatePhoto("");
+      toast.success(`🎉 Neuer KI-Klon „${name}“ erfolgreich generiert & aktiviert!`);
+    } catch (err: unknown) {
+      toast.error("Fehler bei der Profilgenerierung: " + (err instanceof Error ? err.message : "Unbekannter Fehler"));
+    } finally {
+      setIsCreating(false);
+      setCreateProgress(null);
+    }
+  };
+
+  // Create new profile button triggers 1-Click modal
   const handleCreateProfile = () => {
-    const newId = makeId();
-    const newProfile: AiCloneProfile = {
-      id: newId,
-      name: `Neuer Klon ${profiles.length + 1}`,
-      isActive: true,
-      avatarUrl: "",
-      referenceImages: [],
-      genderAge: "Mann, Anfang 30, europäisch",
-      hairFace: "Kurze dunkle Haare, gepflegter 3-Tage-Bart, markante Kieferlinie",
-      tattoosFeatures: "Reine, makellose Hautstruktur ohne temporäre Makel",
-      wardrobe: "Schwarzer minimalistischer Merinowolle-Rollkragen",
-      lightingLook: "Dunkles High-End Studio, warmes bernsteinfarbenes Ember-Kantenlicht",
-      framingCamera: "85mm Porträt-Festbrennweite, f/1.8, samtiges Bokeh",
-      negativePrompt: "Keine Pickel, keine Hautunreinheiten, kein künstliches Grinsen, kein Cartoon, keine Verzerrungen",
-      customPrefix: "",
-      placement: "hook_closing",
-      updatedAt: new Date().toISOString(),
-    };
-    setProfiles((prev) => [newProfile, ...prev]);
-    setActiveId(newId);
-    setStudioMode("dna");
-    setDnaStep(1);
-    setJustCreatedProfile(true);
-    toast.success("Neues Profil angelegt! Starte mit Schritt 1 der Anleitung.");
+    setShowCreateModal(true);
   };
 
-  // KI-Foto-Analysator Handler
-  const handleAnalyzePhoto = async (customImg?: string) => {
-    const targetImg = customImg || activeProfile.avatarUrl || activeProfile.referenceImages?.[0];
-    if (!targetImg) {
-      toast.error("Bitte lade zuerst ein Referenzfoto hoch.");
-      fileInputRef.current?.click();
-      return;
-    }
-
-    setIsAnalyzing(true);
-    setAnalysisProgress({ step: 1, totalSteps: 5, label: "Initialisiere Vision-Analyse…", percent: 15 });
-
-    const settings = readLS<ApiSettings>(LS.apiSettings, DEFAULT_API_SETTINGS);
-    try {
-      const res = await analyzePersonaPhoto(targetImg, {
-        apiKey: settings?.kieApiKey,
-        onProgress: (p) => setAnalysisProgress(p),
-      });
-
-      patchProfile({
-        genderAge: res.genderAge,
-        hairFace: res.hairFace,
-        tattoosFeatures: res.tattoosFeatures,
-        wardrobe: res.wardrobe,
-        lightingLook: res.lightingLook,
-        framingCamera: res.framingCamera,
-        negativePrompt: res.negativePrompt,
-        customPrefix: res.customPrefix,
-      });
-
-      setLastAnalysisSummary(res.analysisSummary);
-      toast.success("KI-Foto-Analyse abgeschlossen! Tattoos, Garderobe & Licht synchronisiert (Haut bereinigt).");
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Fehler bei der KI-Foto-Analyse";
-      toast.error(msg);
-    } finally {
-      setIsAnalyzing(false);
-      setAnalysisProgress(null);
-    }
-  };
-
-  // Inspirations-Foto Upload Handler
-  const handleInspirationUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
-        setInspirationImage(event.target.result as string);
-        toast.success("Inspirationsfoto geladen! Klicke jetzt auf 'Stil auf Klon übertragen'.");
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // Inspirations-Stil analysieren & auf Klon fusionieren
-  const handleRunInspirationFusion = async (customUrl?: string) => {
-    const targetUrl = customUrl || inspirationImage;
-    if (!targetUrl) {
-      toast.error("Bitte wähle zuerst ein Inspirationsfoto aus oder lade ein Foto hoch.");
-      inspirationInputRef.current?.click();
-      return;
-    }
-
-    setIsFusingInspiration(true);
-    setFusionProgress({ step: 1, totalSteps: 4, label: "Scanne Inspirationsbild nach Garderobe & Schnitt…", percent: 25 });
-
-    const settings = readLS<ApiSettings>(LS.apiSettings, DEFAULT_API_SETTINGS);
-    try {
-      const result = await analyzeInspirationAndFuseWithClone(targetUrl, activeProfile, {
-        apiKey: settings?.kieApiKey,
-        onProgress: (p) => setFusionProgress(p),
-      });
-
-      setFusionResult(result);
-      toast.success(`Inspirations-Stil erfolgreich auf ${activeProfile.name} übertragen!`);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Fehler bei der Style-Fusion";
-      toast.error(msg);
-    } finally {
-      setIsFusingInspiration(false);
-      setFusionProgress(null);
-    }
-  };
-
-  // Fusion-Ergebnis direkt auf das Klon-Profil anwenden
-  const handleApplyFusionToProfile = () => {
-    if (!fusionResult) return;
-    patchProfile({
-      wardrobe: fusionResult.extractedWardrobe,
-      lightingLook: fusionResult.extractedLighting,
-      framingCamera: fusionResult.extractedPose,
-      negativePrompt: fusionResult.negativePrompt,
-      customPrefix: fusionResult.fusedPrompt,
-    });
-    toast.success(`Garderobe & Licht-Look direkt in Klon „${activeProfile.name}“ gespeichert!`);
-  };
-
-  // Delete profile
   const handleDeleteProfile = (id: string) => {
     if (profiles.length <= 1) {
       toast.error("Mindestens ein Profil muss erhalten bleiben.");
@@ -461,48 +378,10 @@ export function AiCloneView({
     toast.success("Profil gelöscht");
   };
 
-  // Assembled prompt
   const assembledPrompt = useMemo(() => {
     return assembleClonePrompt(activeProfile);
   }, [activeProfile]);
 
-  // Handle file uploads for reference images
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const newImgs: string[] = [];
-    let processed = 0;
-
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          newImgs.push(event.target.result as string);
-        }
-        processed++;
-        if (processed === files.length) {
-          patchProfile({
-            referenceImages: [...(activeProfile.referenceImages || []), ...newImgs],
-            avatarUrl: activeProfile.avatarUrl || newImgs[0] || "",
-          });
-          toast.success(`${newImgs.length} Referenzfoto(s) hinzugefügt`);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handleRemoveImage = (index: number) => {
-    const updated = [...activeProfile.referenceImages];
-    updated.splice(index, 1);
-    patchProfile({
-      referenceImages: updated,
-      avatarUrl: updated[0] || "",
-    });
-  };
-
-  // Copy prompt prefix
   const handleCopyPrompt = () => {
     void navigator.clipboard.writeText(assembledPrompt);
     setCopied(true);
@@ -510,7 +389,6 @@ export function AiCloneView({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Test render
   const handleTestRender = async () => {
     setTestImageLoading(true);
     const settings = readLS<ApiSettings>(LS.apiSettings, DEFAULT_API_SETTINGS);
@@ -522,11 +400,7 @@ export function AiCloneView({
         ...(activeProfile.referenceImages.length > 0 ? { referenceImages: activeProfile.referenceImages } : {}),
       });
       setTestImages((prev) => [res.imageUrl, ...prev]);
-      if (res.fromRealApi) {
-        toast.success("Test-Visual via Nano-Banana 2 & deiner Persona gerendert! 🍌");
-      } else {
-        toast.success("Test-Visual mit Persona berechnet (Demo-Modus)!");
-      }
+      toast.success(res.fromRealApi ? "Test-Visual via Nano-Banana 2 & Persona gerendert! 🍌" : "Test-Visual mit Persona berechnet!");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Fehler beim Rendern";
       toast.error(msg);
@@ -546,7 +420,7 @@ export function AiCloneView({
                 <UserCheck className="h-4 w-4" />
               </span>
               <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
-                KI Clone & Persona Studio
+                KI Clone &amp; Persona Studio
               </h1>
               <span
                 className={cn(
@@ -560,8 +434,8 @@ export function AiCloneView({
               </span>
             </div>
             <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
-              Definiere dein konsistentes Gesicht, Styling und Lichtkonzept. Sobald aktiviert,
-              wird die Persona automatisch in deine Karussell-Prompts eingebaut, sodass dein Look auf allen Slides synchron bleibt.
+              Definiere Name, Alter und Geschlecht — die KI analysiert und generiert Gesicht, Bart, Garderobe und Licht automatisch.
+              Sobald aktiviert, bleibt dein konsistenter Look auf allen Karussell-Slides synchron.
             </p>
           </div>
 
@@ -571,7 +445,7 @@ export function AiCloneView({
               type="button"
               onClick={handleToggleActive}
               className={cn(
-                "inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all",
+                "inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer",
                 activeProfile.isActive
                   ? "cryptox-orange-btn !py-2 !px-4 text-xs font-semibold"
                   : "border border-white/[0.1] bg-white/[0.03] text-zinc-300 hover:bg-white/[0.08] hover:text-white",
@@ -584,10 +458,10 @@ export function AiCloneView({
             <button
               type="button"
               onClick={handleCreateProfile}
-              className="inline-flex items-center gap-1.5 rounded-full border border-white/[0.1] bg-white/[0.04] px-4 py-2 text-xs font-semibold text-zinc-200 transition-colors hover:bg-white/[0.08] hover:text-white"
+              className="inline-flex items-center gap-1.5 rounded-full border border-[#FF4D17]/40 bg-[#FF4D17]/15 px-4 py-2 text-xs font-semibold text-orange-300 transition-colors hover:bg-[#FF4D17]/30 hover:text-white cursor-pointer shadow-sm"
             >
-              <Plus className="h-3.5 w-3.5 text-orange-400" />
-              <span>Neues Profil</span>
+              <Sparkles className="h-3.5 w-3.5 text-orange-400" />
+              <span>Neuen Klon erstellen (3s)</span>
             </button>
           </div>
         </div>
@@ -604,7 +478,7 @@ export function AiCloneView({
                   type="button"
                   onClick={() => handleSelectProfile(p.id)}
                   className={cn(
-                    "flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-medium transition-all shrink-0",
+                    "flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-medium transition-all shrink-0 cursor-pointer",
                     isSelected
                       ? "border-orange-500/80 bg-orange-500/15 text-orange-400 font-semibold shadow-[0_0_15px_-4px_rgba(255,77,23,0.4)]"
                       : "border-white/[0.08] bg-white/[0.02] text-zinc-400 hover:border-white/[0.16] hover:text-zinc-200",
@@ -632,7 +506,7 @@ export function AiCloneView({
             <button
               type="button"
               onClick={() => handleDeleteProfile(activeProfile.id)}
-              className="text-xs text-zinc-400 hover:text-destructive flex items-center gap-1 shrink-0 px-2.5 py-1 rounded-lg hover:bg-destructive/10"
+              className="text-xs text-zinc-400 hover:text-destructive flex items-center gap-1 shrink-0 px-2.5 py-1 rounded-lg hover:bg-destructive/10 cursor-pointer"
               title="Aktives Profil löschen"
             >
               <Trash2 className="h-3 w-3" /> Löschen
@@ -641,7 +515,211 @@ export function AiCloneView({
         </div>
       </div>
 
-      {/* ── Studio Mode Switcher: 1-Click Flow vs. Klon-DNA ── */}
+      {/* ── MODAL: 1-CLICK KI-KLON ERSTELLEN ─────────────────────── */}
+      {showCreateModal && (
+        <div className="p-6 rounded-2xl border border-[#FF4D17]/40 bg-gradient-to-b from-[#FF4D17]/10 via-[#110F17]/95 to-[#110F17] space-y-5 shadow-2xl animate-in fade-in duration-300">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="flex items-center gap-2.5">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-[#FF4D17] to-amber-500 text-white flex items-center justify-center font-bold shadow-[0_0_20px_rgba(255,77,23,0.4)]">
+                <Sparkles className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white flex items-center gap-2">
+                  <span>KI-Klon in 3 Sekunden erstellen</span>
+                  <span className="rounded bg-[#FF4D17]/20 text-[#FF4D17] border border-[#FF4D17]/40 text-[10px] px-2 py-0.5 font-bold uppercase tracking-wider">
+                    Vollautomatisch
+                  </span>
+                </h3>
+                <p className="text-xs text-zinc-400">
+                  Gib nur Name, Alter &amp; Geschlecht ein — Gesicht, Bart, Haarschnitt, Kleidung &amp; Licht generiert die KI selbst!
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowCreateModal(false)}
+              className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-white/10 cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {/* 1. Name */}
+            <div>
+              <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+                1. Name:
+              </label>
+              <input
+                type="text"
+                value={createName}
+                onChange={(e) => setCreateName(e.target.value)}
+                placeholder="z. B. Michael"
+                className="field-input text-xs w-full"
+              />
+            </div>
+
+            {/* 2. Alter */}
+            <div>
+              <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+                2. Alter:
+              </label>
+              <input
+                type="text"
+                value={createAge}
+                onChange={(e) => setCreateAge(e.target.value)}
+                placeholder="z. B. 28 oder Anfang 30"
+                className="field-input text-xs w-full"
+              />
+            </div>
+
+            {/* 3. Geschlecht */}
+            <div>
+              <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
+                3. Geschlecht:
+              </label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(["male", "female", "diverse"] as const).map((g) => (
+                  <button
+                    key={g}
+                    type="button"
+                    onClick={() => setCreateGender(g)}
+                    className={cn(
+                      "py-2 px-1 rounded-xl text-xs font-semibold border transition-all text-center cursor-pointer",
+                      createGender === g
+                        ? "border-[#FF4D17] bg-[#FF4D17]/20 text-white font-bold shadow-[0_0_12px_rgba(255,77,23,0.3)]"
+                        : "border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white hover:bg-white/[0.06]",
+                    )}
+                  >
+                    {g === "male" ? "👨 Mann" : g === "female" ? "👩 Frau" : "✨ Divers"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Vibe Presets */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-zinc-300 block">
+              4. Vibe &amp; Persona-Stil (Optional):
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {[
+                "Tech Founder / Modern Creator",
+                "Business Coach & Speaker",
+                "Creative Director & Designer",
+                "High-Fashion & Luxury Editorial",
+                "Athletic & Fitness Leader",
+              ].map((vibe) => (
+                <button
+                  key={vibe}
+                  type="button"
+                  onClick={() => setCreateVibe(vibe)}
+                  className={cn(
+                    "px-3 py-1.5 rounded-lg text-xs transition-all border cursor-pointer",
+                    createVibe === vibe
+                      ? "border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF4D17] font-semibold"
+                      : "border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white hover:border-white/20",
+                  )}
+                >
+                  {vibe}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Optional Selfie / Photo Attachment */}
+          <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <Camera className="h-4 w-4 text-orange-400 shrink-0" />
+              <div className="text-xs">
+                <span className="font-semibold text-white">Eigenes Foto / Selfie anhängen</span>
+                <span className="text-zinc-400 ml-1.5">(Rein optional — die KI erstellt ansonsten ein fotorealistisches Gesicht)</span>
+              </div>
+            </div>
+
+            <input
+              ref={createPhotoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    if (ev.target?.result) setCreatePhoto(ev.target.result as string);
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+            />
+
+            {createPhoto ? (
+              <div className="flex items-center gap-2 shrink-0">
+                <img src={createPhoto} alt="" className="h-7 w-7 rounded-lg object-cover border border-[#FF4D17]" />
+                <span className="text-[11px] text-emerald-400 font-semibold">Foto geladen ✓</span>
+                <button
+                  type="button"
+                  onClick={() => setCreatePhoto("")}
+                  className="text-zinc-500 hover:text-rose-400 text-xs ml-1 cursor-pointer"
+                >
+                  Entfernen
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => createPhotoInputRef.current?.click()}
+                className="shrink-0 px-3 py-1.5 rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 text-xs text-zinc-300 hover:text-white transition-colors cursor-pointer"
+              >
+                Foto wählen
+              </button>
+            )}
+          </div>
+
+          {/* Progress Bar during Analysis */}
+          {isCreating && createProgress && (
+            <div className="p-3.5 rounded-xl bg-black/60 border border-[#FF4D17]/30 space-y-2">
+              <div className="flex justify-between text-xs text-white">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Sparkles className="h-3.5 w-3.5 text-[#FF4D17] animate-pulse" />
+                  {createProgress.label}
+                </span>
+                <span className="font-mono font-bold text-[#FF4D17]">{createProgress.percent}%</span>
+              </div>
+              <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-gradient-to-r from-[#FF4D17] to-amber-400 transition-all duration-300"
+                  style={{ width: `${createProgress.percent}%` }}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Submit Button */}
+          <button
+            type="button"
+            onClick={handleAutoCreateClone}
+            disabled={isCreating}
+            className="w-full cryptox-orange-btn !py-3 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(255,77,23,0.4)] disabled:opacity-50 cursor-pointer"
+          >
+            {isCreating ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                <span>KI synthetisiert Gesicht, Bart &amp; Stil…</span>
+              </>
+            ) : (
+              <>
+                <Sparkles className="h-4 w-4" />
+                <span>✨ KI-Klon-Profil in 3 Sekunden generieren</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
+
+      {/* ── Studio Mode Switcher: 1-Click Studio vs. Klon-DNA Übersicht ── */}
       <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] shadow-inner mb-6">
         <button
           type="button"
@@ -654,7 +732,7 @@ export function AiCloneView({
           )}
         >
           <Zap className="h-4 w-4 fill-current" />
-          <span>⚡ 1-Click Klon Studio & Style-Transfer</span>
+          <span>⚡ 1-Click Klon Studio &amp; Style-Transfer</span>
           <span className="rounded bg-black/30 px-2 py-0.5 text-[10px] font-mono text-white/90">
             Aktiv
           </span>
@@ -671,10 +749,7 @@ export function AiCloneView({
           )}
         >
           <SlidersHorizontal className="h-4 w-4 text-orange-400" />
-          <span>⚙️ Klon-DNA Schritt-für-Schritt Anleitung (7 Schritte)</span>
-          <span className="rounded bg-orange-500/20 text-orange-300 border border-orange-500/30 px-2 py-0.5 text-[10px] font-mono">
-            Stufe {dnaStep}/7
-          </span>
+          <span>⚙️ Klon-DNA &amp; Merkmale anpassen</span>
         </button>
       </div>
 
@@ -685,834 +760,184 @@ export function AiCloneView({
           onOpenDetailedDna={() => setStudioMode("dna")}
         />
       ) : (
-        /* ── 7-Schritte Klon-DNA Wizard & Live-Studio ────────────── */
+        /* ── Unified Single-Page Klon-DNA Dashboard ───────────────── */
         <div className="space-y-6">
-          {/* Welcome / Onboarding Banner when creating new profile */}
-          {justCreatedProfile && (
-            <div className="relative overflow-hidden rounded-2xl border border-orange-500/40 bg-gradient-to-r from-orange-500/15 via-[#1a1322] to-amber-500/10 p-4 sm:p-5 flex items-start justify-between gap-3 shadow-[0_0_30px_-5px_rgba(255,77,23,0.3)] animate-in fade-in slide-in-from-top-2 duration-300">
-              <div className="flex items-start gap-3">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-orange-500/20 text-orange-400 shrink-0 mt-0.5">
-                  <Sparkles className="h-4 w-4" />
-                </span>
-                <div className="space-y-1">
-                  <h3 className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
-                    <span>Neues Klon-Profil gestartet:</span>
-                    <span className="text-orange-400 font-mono">„{activeProfile.name}“</span>
-                  </h3>
-                  <p className="text-xs text-zinc-300 leading-relaxed">
-                    Folge jetzt dieser geführten <strong>7-Schritte-Anleitung</strong>. Klicke auf die Schnell-Chips, um Züge, Bart, Garderobe und Licht mit 1 Klick einzurichten.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setJustCreatedProfile(false)}
-                className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-white/10 shrink-0"
-                title="Hinweis schließen"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          )}
-
-          {/* ── Wizard Stepper Bar (1 bis 7) ───────────────────────── */}
-          <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/90 backdrop-blur-xl p-4 sm:p-5 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)] space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-orange-500/20 text-orange-400 font-bold text-xs">
-                  {dnaStep}
-                </span>
-                <span className="text-xs font-bold uppercase tracking-wider text-white">
-                  Schritt-für-Schritt Assistent: {WIZARD_STEPS[dnaStep - 1]?.label}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-[11px] text-zinc-400 font-mono">
-                <span>Schritt {dnaStep} von 7</span>
-                <span className="text-orange-400 font-bold">({Math.round((dnaStep / 7) * 100)}% abgeschlossen)</span>
-              </div>
-            </div>
-
-            {/* Visual Progress Bar */}
-            <div className="h-1.5 w-full overflow-hidden rounded-full bg-black/60 border border-white/10">
-              <div
-                className="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-orange-400 transition-all duration-300 rounded-full shadow-[0_0_12px_rgba(255,77,23,0.8)]"
-                style={{ width: `${(dnaStep / 7) * 100}%` }}
-              />
-            </div>
-
-            {/* Stepper Navigation Pills */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-1.5 pt-1">
-              {WIZARD_STEPS.map((step) => {
-                const StepIcon = step.icon;
-                const isActive = dnaStep === step.id;
-                const isPassed = dnaStep > step.id;
-                return (
-                  <button
-                    key={step.id}
-                    type="button"
-                    onClick={() => setDnaStep(step.id)}
-                    className={cn(
-                      "flex items-center gap-2 p-2 rounded-xl text-left transition-all border cursor-pointer",
-                      isActive
-                        ? "border-orange-500 bg-orange-500/15 shadow-[0_0_15px_-3px_rgba(255,77,23,0.4)] text-white font-semibold"
-                        : isPassed
-                          ? "border-emerald-500/30 bg-emerald-500/[0.04] text-zinc-300 hover:border-emerald-500/50"
-                          : "border-white/[0.06] bg-white/[0.01] text-zinc-400 hover:border-white/20 hover:text-zinc-200",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold shrink-0",
-                        isActive
-                          ? "bg-orange-500 text-white"
-                          : isPassed
-                            ? "bg-emerald-500/20 text-emerald-400"
-                            : "bg-white/10 text-zinc-400",
-                      )}
-                    >
-                      {isPassed ? <Check className="h-3 w-3" /> : step.id}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[11px] font-semibold truncate leading-tight">{step.label}</p>
-                      <p className="text-[9px] text-zinc-400 truncate hidden sm:block">{step.desc}</p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* ── Main 2-Column Wizard Grid ───────────────────────────── */}
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-            {/* Left Column: Active Step Card (7 cols) */}
-            <div className="space-y-6 lg:col-span-7">
-              {/* ──────────────── STEP 1: IDENTITÄT ──────────────── */}
-              {dnaStep === 1 && (
-                <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-5 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)] animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-orange-500/20 text-orange-400">
-                        <User className="h-4 w-4" />
-                      </span>
-                      <div>
-                        <h2 className="text-sm font-bold text-white">Schritt 1: Identität & Basisdaten</h2>
-                        <p className="text-[11px] text-zinc-400">Name, Alter, Geschlecht und primäre Persona-Rolle</p>
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 text-[10px] font-bold text-orange-400">
-                      Stufe 1/7
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                        Profil-Name <span className="text-orange-400">*</span>
-                      </label>
-                      <input
-                        value={activeProfile.name}
-                        onChange={(e) => patchProfile({ name: e.target.value })}
-                        placeholder="z. B. Max (Tech Founder)"
-                        className="field-input text-xs"
-                      />
-                      <span className="text-[10px] text-zinc-400 mt-1 block">
-                        Name zur Identifikation in deiner Klon-Bibliothek.
-                      </span>
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                        Geschlecht, Alter & Typ <span className="text-orange-400">*</span>
-                      </label>
-                      <input
-                        value={activeProfile.genderAge}
-                        onChange={(e) => patchProfile({ genderAge: e.target.value })}
-                        placeholder="z. B. Mann, Anfang 30, mitteleuropäisch"
-                        className="field-input text-xs"
-                      />
-                      <span className="text-[10px] text-zinc-400 mt-1 block">
-                        Basis-Definition für KI-Gesichtsstrukturen.
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* One-Click Archetype Quick Selector */}
-                  <div className="space-y-2 pt-1">
-                    <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-orange-400" />
-                      1-Klick Vorlage wählen (Archetyp):
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {IDENTITY_ARCHETYPES.map((arch, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => patchProfile({ genderAge: arch.value })}
-                          className={cn(
-                            "rounded-lg px-3 py-1.5 text-xs font-medium border transition-all cursor-pointer",
-                            activeProfile.genderAge === arch.value
-                              ? "border-orange-500 bg-orange-500/20 text-orange-300 font-semibold shadow-sm"
-                              : "border-white/10 bg-white/[0.03] text-zinc-300 hover:border-white/20 hover:bg-white/[0.06]",
-                          )}
-                        >
-                          {arch.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl border border-white/[0.08] bg-black/40 p-3.5 flex items-start gap-3">
-                    <HelpCircle className="h-4 w-4 text-orange-400 mt-0.5 shrink-0" />
-                    <p className="text-[11px] text-zinc-400 leading-relaxed">
-                      💡 <strong>Tipp für Gesichts-Konsistenz:</strong> Ein präzises Alter (z. B. „Anfang 30“) verhindert, dass der Klon zwischen verschiedenen Generationen jünger oder älter dargestellt wird.
-                    </p>
-                  </div>
+            {/* Left Column: DNA Trait Cards (7 cols) */}
+            <div className="space-y-4 lg:col-span-7">
+              {/* 1. Identität & Basis */}
+              <div className="cryptox-card p-5 rounded-2xl border border-white/[0.08] bg-[#110F17]/90 space-y-3">
+                <div className="flex items-center gap-2 border-b border-white/[0.08] pb-2.5">
+                  <User className="h-4 w-4 text-orange-400" />
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wide">1. Identität &amp; Basis</h3>
                 </div>
-              )}
-
-              {/* ──────────────── STEP 2: GESICHT & BART ────────── */}
-              {dnaStep === 2 && (
-                <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-5 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)] animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-orange-500/20 text-orange-400">
-                        <Sparkles className="h-4 w-4" />
-                      </span>
-                      <div>
-                        <h2 className="text-sm font-bold text-white">Schritt 2: Gesichtszüge, Haare & Bart</h2>
-                        <p className="text-[11px] text-zinc-400">Haarschnitt, Haarfarbe, Bart-Stil und Gesichtsgeometrie</p>
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 text-[10px] font-bold text-orange-400">
-                      Stufe 2/7
-                    </span>
-                  </div>
-
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                      Gesichtsmerkmale, Haare & Bartstil
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={activeProfile.hairFace}
-                      onChange={(e) => patchProfile({ hairFace: e.target.value })}
-                      placeholder="z. B. Kurze dunkle Haare, gepflegter 3-Tage-Bart, markante Kieferlinie, fokussierter Blick"
-                      className="field-input text-xs leading-relaxed"
-                    />
-                  </div>
-
-                  {/* One-Click Hair & Beard Chips */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                      <Plus className="h-3.5 w-3.5 text-orange-400" />
-                      Schnell-Merkmale hinzufügen (Klick ergänzt das Feld):
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {HAIR_BEARD_CHIPS.map((chip, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => {
-                            const current = activeProfile.hairFace?.trim() || "";
-                            if (!current) {
-                              patchProfile({ hairFace: chip.text });
-                            } else if (!current.toLowerCase().includes(chip.text.toLowerCase())) {
-                              patchProfile({ hairFace: `${current}, ${chip.text}` });
-                            }
-                            toast.success(`„${chip.label}“ hinzugefügt`);
-                          }}
-                          className="rounded-lg px-2.5 py-1 text-xs border border-white/10 bg-white/[0.03] text-zinc-300 hover:border-orange-500/50 hover:bg-orange-500/10 hover:text-white transition-all cursor-pointer flex items-center gap-1"
-                        >
-                          <span>+</span> {chip.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="rounded-xl border border-white/[0.08] bg-black/40 p-3.5 flex items-start gap-3">
-                    <HelpCircle className="h-4 w-4 text-orange-400 mt-0.5 shrink-0" />
-                    <p className="text-[11px] text-zinc-400 leading-relaxed">
-                      💡 <strong>Profi-Tipp:</strong> Halte Haarschnitt und Bartlänge über alle Folien hinweg identisch. Wenn du zwischen Glattrasiert und Vollbart wechselst, lege dafür zwei getrennte Klon-Profile an.
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* ──────────────── STEP 3: SIGNATURE & HAUT ───────── */}
-              {dnaStep === 3 && (
-                <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-5 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)] animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-orange-500/20 text-orange-400">
-                        <ShieldCheck className="h-4 w-4" />
-                      </span>
-                      <div>
-                        <h2 className="text-sm font-bold text-white">Schritt 3: Signature-Merkmale & Blemish-Filter</h2>
-                        <p className="text-[11px] text-zinc-400">Permanente Erkennungsmerkmale und automatischer Makellos-Filter</p>
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 text-[10px] font-bold text-orange-400">
-                      Stufe 3/7
-                    </span>
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-300 block mb-1.5 flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-orange-400" />
-                      Tattoos, Schmuck & permanente Signature-Merkmale
-                    </label>
-                    <textarea
-                      rows={2}
-                      value={activeProfile.tattoosFeatures || ""}
-                      onChange={(e) => patchProfile({ tattoosFeatures: e.target.value })}
-                      placeholder="z. B. Geometrisches Unterarm-Tattoo, schlichter Siegelring, reine Hautstruktur"
-                      className="field-input text-xs leading-relaxed"
-                    />
-                  </div>
-
-                  {/* Feature Quick Chips */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                      <Plus className="h-3.5 w-3.5 text-orange-400" />
-                      Schnell-Merkmale hinzufügen:
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {FEATURE_CHIPS.map((chip, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => {
-                            const current = activeProfile.tattoosFeatures?.trim() || "";
-                            if (!current) {
-                              patchProfile({ tattoosFeatures: chip.text });
-                            } else if (!current.toLowerCase().includes(chip.text.toLowerCase())) {
-                              patchProfile({ tattoosFeatures: `${current}, ${chip.text}` });
-                            }
-                            toast.success(`„${chip.label}“ hinzugefügt`);
-                          }}
-                          className="rounded-lg px-2.5 py-1 text-xs border border-white/10 bg-white/[0.03] text-zinc-300 hover:border-orange-500/50 hover:bg-orange-500/10 hover:text-white transition-all cursor-pointer flex items-center gap-1"
-                        >
-                          <span>+</span> {chip.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Negative Prompt / Filter */}
-                  <div>
-                    <label className="text-xs font-semibold text-zinc-300 block mb-1.5 flex items-center gap-1.5">
-                      <EyeOff className="h-3.5 w-3.5 text-orange-400" />
-                      Negativer Prompt (Unerwünschtes automatisch herausfiltern)
-                    </label>
+                    <label className="text-[11px] text-zinc-400 block mb-1">Name:</label>
                     <input
-                      value={activeProfile.negativePrompt}
-                      onChange={(e) => patchProfile({ negativePrompt: e.target.value })}
-                      placeholder="z. B. Keine Pickel, keine Unreinheiten, kein Grinsen, kein Cartoon"
+                      value={activeProfile.name}
+                      onChange={(e) => patchProfile({ name: e.target.value })}
                       className="field-input text-xs"
+                      placeholder="Name"
                     />
                   </div>
-
-                  {/* Automatic Blemish Filter Badge */}
-                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/[0.06] p-3.5 flex items-start gap-3">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-400 mt-0.5 shrink-0" />
-                    <div>
-                      <p className="text-xs font-semibold text-emerald-300">
-                        Automatischer Magazin-Hautfilter aktiviert
-                      </p>
-                      <p className="text-[11px] text-zinc-400 leading-relaxed mt-0.5">
-                        Temporäre Hautunreinheiten wie Pickel oder Rötungen werden bei allen Klon-Generierungen garantiert herausgefiltert. Deine permanenten Merkmale wie Tattoos, Brille und Knochenstruktur bleiben exakt erhalten!
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* ──────────────── STEP 4: GARDEROBE ─────────────── */}
-              {dnaStep === 4 && (
-                <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-5 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)] animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-orange-500/20 text-orange-400">
-                        <Shirt className="h-4 w-4" />
-                      </span>
-                      <div>
-                        <h2 className="text-sm font-bold text-white">Schritt 4: Signatur-Garderobe & Outfit</h2>
-                        <p className="text-[11px] text-zinc-400">Der unverwechselbare Kleidungsstil deines Klons</p>
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 text-[10px] font-bold text-orange-400">
-                      Stufe 4/7
-                    </span>
-                  </div>
-
                   <div>
-                    <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                      Signatur-Kleidung (Textbeschreibung)
-                    </label>
+                    <label className="text-[11px] text-zinc-400 block mb-1">Geschlecht &amp; Alter:</label>
                     <input
-                      value={activeProfile.wardrobe}
-                      onChange={(e) => patchProfile({ wardrobe: e.target.value })}
-                      placeholder="z. B. Schwarzer Merinowolle-Rollkragen"
+                      value={activeProfile.genderAge}
+                      onChange={(e) => patchProfile({ genderAge: e.target.value })}
                       className="field-input text-xs"
+                      placeholder="z. B. Mann, 28 Jahre"
                     />
                   </div>
+                </div>
 
-                  {/* Wardrobe Preset Grid */}
-                  <div className="space-y-2 pt-1">
-                    <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                      <Sparkles className="h-3.5 w-3.5 text-orange-400" />
-                      Wähle eine Signature-Garderobe mit 1 Klick:
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                      {WARDROBE_PRESETS.map((w, idx) => {
-                        const isSelected = activeProfile.wardrobe === w.desc;
-                        return (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => {
-                              patchProfile({ wardrobe: w.desc });
-                              toast.success(`Outfit „${w.title}“ übernommen!`);
-                            }}
-                            className={cn(
-                              "flex items-start gap-3 rounded-xl border p-3 text-left transition-all cursor-pointer",
-                              isSelected
-                                ? "border-orange-500 bg-orange-500/15 shadow-[0_0_15px_-4px_rgba(255,77,23,0.5)] text-white"
-                                : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]",
-                            )}
-                          >
-                            <span className="text-xl p-1.5 rounded-lg bg-black/40 shrink-0">
-                              {w.icon}
-                            </span>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs font-bold text-white truncate">{w.title}</p>
-                              <p className="text-[10px] text-zinc-400 mt-0.5 line-clamp-2">{w.desc}</p>
-                            </div>
-                            {isSelected && <Check className="h-4 w-4 text-orange-400 shrink-0 mt-0.5" />}
-                          </button>
-                        );
-                      })}
-                    </div>
+                {/* Placement Selector */}
+                <div className="space-y-1.5 pt-1">
+                  <label className="text-[11px] text-zinc-400 block">Slide-Platzierung im Karussell:</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                    {PLACEMENT_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => patchProfile({ placement: opt.id })}
+                        className={cn(
+                          "p-2.5 rounded-xl border text-left transition-all cursor-pointer",
+                          activeProfile.placement === opt.id
+                            ? "border-orange-500 bg-orange-500/10 text-white shadow-sm"
+                            : "border-white/10 bg-white/[0.02] text-zinc-400 hover:text-zinc-200",
+                        )}
+                      >
+                        <div className="text-xs font-bold text-white">{opt.label}</div>
+                        <div className="text-[10px] text-zinc-400 mt-0.5 leading-snug">{opt.desc}</div>
+                      </button>
+                    ))}
                   </div>
                 </div>
-              )}
+              </div>
 
-              {/* ──────────────── STEP 5: LICHT & KAMERA ────────── */}
-              {dnaStep === 5 && (
-                <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-5 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)] animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-orange-500/20 text-orange-400">
-                        <SunMedium className="h-4 w-4" />
-                      </span>
-                      <div>
-                        <h2 className="text-sm font-bold text-white">Schritt 5: Beleuchtung & Kamera-Linse</h2>
-                        <p className="text-[11px] text-zinc-400">Studio-Lichtkonzept und 85mm Festbrennweiten-Look</p>
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 text-[10px] font-bold text-orange-400">
-                      Stufe 5/7
-                    </span>
+              {/* 2. Gesicht, Haare & Bart */}
+              <div className="cryptox-card p-5 rounded-2xl border border-white/[0.08] bg-[#110F17]/90 space-y-3">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-orange-400" />
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wide">2. Gesichtszüge, Haare &amp; Bart</h3>
                   </div>
+                  <span className="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                    KI-generiert
+                  </span>
+                </div>
+                <div>
+                  <textarea
+                    rows={2}
+                    value={activeProfile.hairFace}
+                    onChange={(e) => patchProfile({ hairFace: e.target.value })}
+                    className="field-input text-xs leading-relaxed"
+                    placeholder="Haarschnitt, Bart, Jawline…"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {HAIR_BEARD_CHIPS.slice(0, 5).map((chip, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => patchProfile({ hairFace: chip.text })}
+                      className="text-[10px] px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/10 text-zinc-300 hover:text-white hover:border-orange-500/40 transition-colors cursor-pointer"
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-                  {/* Lighting Presets */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                      <SunMedium className="h-3.5 w-3.5 text-orange-400" />
-                      Lichtstimmung & Studio-Atmosphäre
-                    </label>
+              {/* 3. Garderobe & Kleidung */}
+              <div className="cryptox-card p-5 rounded-2xl border border-white/[0.08] bg-[#110F17]/90 space-y-3">
+                <div className="flex items-center gap-2 border-b border-white/[0.08] pb-2.5">
+                  <Shirt className="h-4 w-4 text-orange-400" />
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wide">3. Signatur-Garderobe</h3>
+                </div>
+                <div>
+                  <textarea
+                    rows={2}
+                    value={activeProfile.wardrobe}
+                    onChange={(e) => patchProfile({ wardrobe: e.target.value })}
+                    className="field-input text-xs leading-relaxed"
+                    placeholder="Signatur-Outfit für Karussell-Slides…"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {WARDROBE_PRESETS.slice(0, 4).map((wp, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => patchProfile({ wardrobe: wp.desc })}
+                      className="text-[10px] px-2.5 py-1 rounded-lg bg-white/[0.03] border border-white/10 text-zinc-300 hover:text-white hover:border-orange-500/40 transition-colors cursor-pointer"
+                    >
+                      {wp.icon} {wp.title}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 4. Licht & Kamera */}
+              <div className="cryptox-card p-5 rounded-2xl border border-white/[0.08] bg-[#110F17]/90 space-y-3">
+                <div className="flex items-center gap-2 border-b border-white/[0.08] pb-2.5">
+                  <SunMedium className="h-4 w-4 text-orange-400" />
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wide">4. Licht &amp; Kameraoptik</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] text-zinc-400 block mb-1">Lichtkonzept:</label>
                     <input
                       value={activeProfile.lightingLook}
                       onChange={(e) => patchProfile({ lightingLook: e.target.value })}
-                      placeholder="z. B. Dunkles Studio, warmes Ember-Rimlight"
-                      className="field-input text-xs mb-2"
+                      className="field-input text-xs"
+                      placeholder="Studio-Licht"
                     />
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {LIGHTING_PRESETS.map((l, idx) => {
-                        const isSelected = activeProfile.lightingLook === l.desc;
-                        return (
-                          <button
-                            key={idx}
-                            type="button"
-                            onClick={() => {
-                              patchProfile({ lightingLook: l.desc });
-                              toast.success(`Licht „${l.title}“ gewählt!`);
-                            }}
-                            className={cn(
-                              "flex items-start gap-2.5 rounded-xl border p-2.5 text-left transition-all cursor-pointer",
-                              isSelected
-                                ? "border-orange-500 bg-orange-500/15 text-white"
-                                : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]",
-                            )}
-                          >
-                            <span className="text-lg shrink-0">{l.icon}</span>
-                            <div className="min-w-0 flex-1">
-                              <p className="text-xs font-semibold text-white truncate">{l.title}</p>
-                              <p className="text-[10px] text-zinc-400 truncate">{l.subtitle}</p>
-                            </div>
-                            {isSelected && <Check className="h-3.5 w-3.5 text-orange-400 shrink-0" />}
-                          </button>
-                        );
-                      })}
-                    </div>
                   </div>
-
-                  {/* Camera & Framing */}
-                  <div className="space-y-2 pt-2 border-t border-white/[0.08]">
-                    <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                      <Camera className="h-3.5 w-3.5 text-orange-400" />
-                      Kamera, Brennweite & Bildausschnitt
-                    </label>
+                  <div>
+                    <label className="text-[11px] text-zinc-400 block mb-1">Kamera / Brennweite:</label>
                     <input
                       value={activeProfile.framingCamera}
                       onChange={(e) => patchProfile({ framingCamera: e.target.value })}
-                      placeholder="z. B. 85mm Porträt-Festbrennweite, f/1.8, samtiges Bokeh"
-                      className="field-input text-xs mb-2"
+                      className="field-input text-xs"
+                      placeholder="85mm Porträt f/1.8"
                     />
-
-                    <div className="flex flex-wrap gap-2">
-                      {CAMERA_PRESETS.map((c, idx) => (
-                        <button
-                          key={idx}
-                          type="button"
-                          onClick={() => {
-                            patchProfile({ framingCamera: c.text });
-                            toast.success(`Linse: ${c.label}`);
-                          }}
-                          className={cn(
-                            "rounded-lg px-2.5 py-1 text-xs border transition-all cursor-pointer",
-                            activeProfile.framingCamera === c.text
-                              ? "border-orange-500 bg-orange-500/20 text-orange-300 font-semibold"
-                              : "border-white/10 bg-white/[0.03] text-zinc-300 hover:border-white/20 hover:text-white",
-                          )}
-                        >
-                          {c.label}
-                        </button>
-                      ))}
-                    </div>
                   </div>
                 </div>
-              )}
+              </div>
 
-              {/* ──────────────── STEP 6: FOTO & SCAN ───────────── */}
-              {dnaStep === 6 && (
-                <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-5 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)] animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-orange-500/20 text-orange-400">
-                        <Camera className="h-4 w-4" />
-                      </span>
-                      <div>
-                        <h2 className="text-sm font-bold text-white">Schritt 6: Referenzfoto & KI-Vision-Scan</h2>
-                        <p className="text-[11px] text-zinc-400">Lade Porträts hoch und lasse die KI deine Merkmale automatisch scannen</p>
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-orange-500/10 border border-orange-500/30 px-2.5 py-0.5 text-[10px] font-bold text-orange-400">
-                      Stufe 6/7
-                    </span>
+              {/* 5. Makellos-Haut-Filter & Negative Prompt */}
+              <div className="cryptox-card p-5 rounded-2xl border border-white/[0.08] bg-[#110F17]/90 space-y-3">
+                <div className="flex items-center justify-between border-b border-white/[0.08] pb-2.5">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wide">5. Makellose Haut &amp; Negative Filter</h3>
                   </div>
-
-                  {/* Photo Dropzone & Thumbnails */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-zinc-300">
-                        Deine Porträtfotos ({activeProfile.referenceImages?.length || 0})
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="inline-flex items-center gap-1.5 rounded-full border border-orange-500/40 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-300 hover:bg-orange-500/20 hover:text-white transition-all cursor-pointer"
-                      >
-                        <Upload className="h-3 w-3" /> Foto hochladen
-                      </button>
-                      <input
-                        id={fileInputId}
-                        ref={fileInputRef}
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        className="hidden"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
-                      {activeProfile.referenceImages?.map((img, idx) => (
-                        <div
-                          key={idx}
-                          className="group relative aspect-square overflow-hidden rounded-xl border border-white/[0.1] bg-black/40"
-                        >
-                          <img src={img} alt="" className="h-full w-full object-cover" />
-                          <button
-                            type="button"
-                            onClick={() => handleRemoveImage(idx)}
-                            className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/80 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-destructive"
-                            aria-label="Foto entfernen"
-                          >
-                            <X className="h-3 w-3" />
-                          </button>
-                          {activeProfile.avatarUrl === img && (
-                            <span className="absolute bottom-1 left-1 rounded bg-orange-500 px-1.5 py-0.2 text-[9px] font-bold text-white">
-                              Avatar
-                            </span>
-                          )}
-                        </div>
-                      ))}
-
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="flex aspect-square flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-white/[0.15] bg-white/[0.02] text-zinc-400 transition-colors hover:border-orange-500/50 hover:bg-orange-500/5 hover:text-white cursor-pointer"
-                      >
-                        <Plus className="h-5 w-5 text-orange-400" />
-                        <span className="text-[10px] font-medium">Hinzufügen</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* 1-Click KI-Foto-Analysator Box */}
-                  <div className="rounded-xl border border-orange-500/30 bg-gradient-to-b from-orange-500/10 via-[#16121b] to-[#110F17] p-4 space-y-3 shadow-[0_0_25px_-8px_rgba(255,77,23,0.3)]">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-orange-500/20 text-orange-400">
-                          <Wand2 className="h-3.5 w-3.5" />
-                        </span>
-                        <div>
-                          <h4 className="text-xs font-bold text-white">Automatischer KI-Foto-Scan (Vision AI)</h4>
-                          <p className="text-[10px] text-zinc-400">Scannt dein Foto und füllt alle DNA-Felder automatisch mit 1 Klick aus</p>
-                        </div>
-                      </div>
-                      <span className="rounded-full border border-orange-500/40 bg-orange-500/15 px-2 py-0.5 text-[10px] font-semibold text-orange-400">
-                        1-Klick Scan
-                      </span>
-                    </div>
-
-                    <button
-                      type="button"
-                      disabled={isAnalyzing || (!activeProfile.avatarUrl && (!activeProfile.referenceImages || activeProfile.referenceImages.length === 0))}
-                      onClick={() => handleAnalyzePhoto()}
-                      className={cn(
-                        "w-full flex items-center justify-center gap-2 rounded-xl py-2.5 px-4 text-xs font-semibold transition-all shadow-md cursor-pointer",
-                        isAnalyzing
-                          ? "bg-orange-500/30 text-orange-200 cursor-not-allowed border border-orange-500/40"
-                          : (!activeProfile.avatarUrl && (!activeProfile.referenceImages || activeProfile.referenceImages.length === 0))
-                            ? "border border-white/10 bg-white/5 text-zinc-500 cursor-not-allowed"
-                            : "cryptox-orange-btn hover:shadow-[0_0_20px_-3px_rgba(255,77,23,0.6)]"
-                      )}
-                    >
-                      {isAnalyzing ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin text-orange-300" />
-                          <span>{analysisProgress?.label || "Analysiere Porträt…"}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-4 w-4" />
-                          <span>Foto analysieren & Klon-DNA automatisch befüllen</span>
-                        </>
-                      )}
-                    </button>
-
-                    {/* Progress Bar */}
-                    {isAnalyzing && analysisProgress && (
-                      <div className="space-y-1.5 pt-1">
-                        <div className="flex items-center justify-between text-[11px] text-zinc-300 font-mono">
-                          <span>Schritt {analysisProgress.step}/5: {analysisProgress.label}</span>
-                          <span className="text-orange-400 font-bold">{analysisProgress.percent}%</span>
-                        </div>
-                        <div className="h-2 w-full overflow-hidden rounded-full bg-black/60 border border-white/10">
-                          <div
-                            className="h-full bg-gradient-to-r from-orange-500 via-amber-400 to-orange-400 transition-all duration-300 rounded-full shadow-[0_0_10px_rgba(255,77,23,0.8)]"
-                            style={{ width: `${analysisProgress.percent}%` }}
-                          />
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Analysis Summary */}
-                    {lastAnalysisSummary && !isAnalyzing && (
-                      <div className="rounded-lg border border-emerald-500/30 bg-black/40 p-3 space-y-1.5 text-[11px]">
-                        <div className="text-[10px] font-semibold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                          <Check className="h-3 w-3 text-emerald-400" /> KI-Vision Scan erfolgreich abgeschlossen:
-                        </div>
-                        <ul className="space-y-1 text-zinc-300">
-                          {lastAnalysisSummary.map((item, i) => (
-                            <li key={i} className="flex items-start gap-1.5 leading-tight">
-                              <span className="text-orange-400 mt-0.5">•</span>
-                              <span>{item}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* ──────────────── STEP 7: AKTIVIERUNG & TEST ─────── */}
-              {dnaStep === 7 && (
-                <div className="cryptox-card relative overflow-hidden rounded-2xl border border-orange-500/40 bg-gradient-to-b from-[#181220] via-[#120E19] to-[#0D0914] p-5 sm:p-6 space-y-5 shadow-[0_15px_60px_-10px_rgba(255,77,23,0.3)] animate-in fade-in duration-200">
-                  <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-                    <div className="flex items-center gap-2.5">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-orange-500/20 text-orange-400">
-                        <Zap className="h-4 w-4" />
-                      </span>
-                      <div>
-                        <h2 className="text-sm font-bold text-white">Schritt 7: Platzierung & Klon aktivieren</h2>
-                        <p className="text-[11px] text-zinc-400">Slide-Regel festlegen, Test-Render prüfen und Klon aktivieren</p>
-                      </div>
-                    </div>
-                    <span className="rounded-full bg-emerald-500/15 border border-emerald-500/40 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400">
-                      Finaler Schritt
-                    </span>
-                  </div>
-
-                  {/* Placement Selector */}
-                  <div className="space-y-2.5">
-                    <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                      <Layers className="h-3.5 w-3.5 text-orange-400" />
-                      Slide-Platzierung in deinen Instagram-Karussells
-                    </label>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                      {PLACEMENT_OPTIONS.map((opt) => (
-                        <button
-                          key={opt.id}
-                          type="button"
-                          onClick={() => patchProfile({ placement: opt.id })}
-                          className={cn(
-                            "flex flex-col text-left rounded-xl border p-3 transition-all cursor-pointer",
-                            activeProfile.placement === opt.id
-                              ? "border-orange-500 bg-orange-500/15 shadow-[0_0_15px_-4px_rgba(255,77,23,0.4)] text-white"
-                              : "border-white/10 bg-white/[0.02] hover:border-white/20 hover:bg-white/[0.04]",
-                          )}
-                        >
-                          <span className="text-xs font-bold leading-tight">{opt.label}</span>
-                          <span className="mt-1 text-[10px] text-zinc-400 leading-snug">
-                            {opt.desc}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Clone Profile Summary Badge */}
-                  <div className="rounded-xl border border-white/[0.1] bg-black/50 p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white">Zusammenfassung: {activeProfile.name}</span>
-                      <span className={cn(
-                        "text-[10px] font-bold px-2 py-0.5 rounded-full border",
-                        activeProfile.isActive
-                          ? "border-orange-500/50 bg-orange-500/20 text-orange-300"
-                          : "border-zinc-700 bg-zinc-800 text-zinc-400"
-                      )}>
-                        {activeProfile.isActive ? "Bereits Aktiviert" : "Noch Inaktiv"}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px]">
-                      <div className="rounded-lg bg-white/[0.02] p-2 border border-white/5">
-                        <span className="text-[9px] text-zinc-500 block uppercase font-mono">Alter & Typ</span>
-                        <span className="text-zinc-200 font-medium truncate block">{activeProfile.genderAge}</span>
-                      </div>
-                      <div className="rounded-lg bg-white/[0.02] p-2 border border-white/5">
-                        <span className="text-[9px] text-zinc-500 block uppercase font-mono">Garderobe</span>
-                        <span className="text-zinc-200 font-medium truncate block">{activeProfile.wardrobe}</span>
-                      </div>
-                      <div className="rounded-lg bg-white/[0.02] p-2 border border-white/5">
-                        <span className="text-[9px] text-zinc-500 block uppercase font-mono">Licht & Linse</span>
-                        <span className="text-zinc-200 font-medium truncate block">{activeProfile.lightingLook}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Giant Activate CTA Button */}
-                  <div className="pt-2 space-y-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        patchProfile({ isActive: true });
-                        toast.success(`🚀 Klon „${activeProfile.name}“ gespeichert & für Karussells aktiviert!`);
-                      }}
-                      className="w-full flex items-center justify-center gap-2 rounded-xl py-3.5 px-6 text-sm font-bold bg-gradient-to-r from-[#FF4D17] to-amber-500 text-white shadow-[0_0_30px_rgba(255,77,23,0.6)] hover:shadow-[0_0_40px_rgba(255,77,23,0.8)] transition-all cursor-pointer transform hover:scale-[1.01]"
-                    >
-                      <CheckCircle2 className="h-5 w-5" />
-                      <span>Klon-Profil speichern &amp; für Karussells aktivieren 🚀</span>
-                    </button>
-
-                    <div className="flex items-center justify-center gap-3 text-xs">
-                      <button
-                        type="button"
-                        onClick={() => setStudioMode("flow")}
-                        className="text-orange-400 hover:text-orange-300 font-semibold flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>⚡ Zum 1-Click Klon Studio wechseln</span>
-                        <ArrowRight className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* ── Wizard Step Navigation Footer ─────────────────── */}
-              <div className="flex items-center justify-between p-4 rounded-2xl border border-white/[0.08] bg-[#110F17]/80 backdrop-blur-xl">
-                <button
-                  type="button"
-                  disabled={dnaStep <= 1}
-                  onClick={() => setDnaStep((prev) => Math.max(1, prev - 1))}
-                  className={cn(
-                    "flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all border",
-                    dnaStep <= 1
-                      ? "opacity-30 border-white/5 text-zinc-600 cursor-not-allowed"
-                      : "border-white/10 bg-white/[0.03] text-zinc-300 hover:text-white hover:bg-white/[0.08] cursor-pointer",
-                  )}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  <span>Vorheriger Schritt</span>
-                </button>
-
-                <div className="text-center">
-                  <span className="text-xs font-mono text-zinc-400">
-                    Schritt <strong className="text-white">{dnaStep}</strong> von 7
+                  <span className="text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                    Aktiv (Pickel &amp; Unreinheiten gefiltert)
                   </span>
                 </div>
-
-                {dnaStep < 7 ? (
-                  <button
-                    type="button"
-                    onClick={() => setDnaStep((prev) => Math.min(7, prev + 1))}
-                    className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold cryptox-orange-btn cursor-pointer shadow-md"
-                  >
-                    <span>Weiter: {WIZARD_STEPS[dnaStep]?.label}</span>
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      patchProfile({ isActive: true });
-                      toast.success(`🚀 Klon „${activeProfile.name}“ gespeichert & aktiviert!`);
-                    }}
-                    className="flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-600 text-white cursor-pointer shadow-md"
-                  >
-                    <Check className="h-4 w-4" />
-                    <span>Fertig &amp; Aktiviert!</span>
-                  </button>
-                )}
+                <div>
+                  <input
+                    value={activeProfile.negativePrompt}
+                    onChange={(e) => patchProfile({ negativePrompt: e.target.value })}
+                    className="field-input text-xs"
+                    placeholder="Keine Pickel, keine Unreinheiten…"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Right Column: Live Clone Pass & Test Sandbox (5 cols) */}
-            <div className="space-y-6 lg:col-span-5">
+            {/* Right Column: Live Persona Identity Pass & Test Sandbox (5 cols) */}
+            <div className="space-y-5 lg:col-span-5">
               {/* ── Live Clone Identity Pass ───────────────────────── */}
-              <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-4 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)]">
+              <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/90 p-5 sm:p-6 space-y-4 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)]">
                 <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
                   <div className="flex items-center gap-2">
-                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-orange-500/20 text-orange-400">
-                      <UserCheck className="h-3.5 w-3.5" />
-                    </span>
+                    <UserCheck className="h-4 w-4 text-orange-400" />
                     <span className="text-xs font-bold uppercase tracking-wider text-white">
-                      Live Klon-Identitäts-Pass
+                      Live Persona-Pass
                     </span>
                   </div>
                   <span
@@ -1550,7 +975,7 @@ export function AiCloneView({
                         85mm Bokeh
                       </span>
                       <span className="text-[9px] px-2 py-0.5 rounded-md bg-orange-500/10 text-orange-300 border border-orange-500/20">
-                        Reine Haut
+                        Reine Haut ✓
                       </span>
                       <span className="text-[9px] px-2 py-0.5 rounded-md bg-white/5 text-zinc-300 border border-white/5">
                         {activeProfile.placement === "hook_closing" ? "Hook & CTA" : "Alle Slides"}
@@ -1563,7 +988,7 @@ export function AiCloneView({
                 <div className="space-y-2 pt-2 border-t border-white/[0.08]">
                   <div className="flex items-center justify-between">
                     <span className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
-                      Live Klon-Prompt (automatisch generiert)
+                      Master-Prompt (automatisch generiert)
                     </span>
                     <button
                       type="button"
@@ -1575,7 +1000,7 @@ export function AiCloneView({
                     </button>
                   </div>
 
-                  <div className="rounded-xl border border-white/[0.08] bg-black/60 p-3 text-[11px] leading-relaxed text-zinc-200 select-all font-mono max-h-32 overflow-y-auto">
+                  <div className="rounded-xl border border-white/[0.08] bg-black/60 p-3 text-[11px] leading-relaxed text-zinc-200 select-all font-mono max-h-36 overflow-y-auto">
                     {assembledPrompt}
                   </div>
 
@@ -1607,10 +1032,10 @@ export function AiCloneView({
               </div>
 
               {/* ── Test Render Sandbox ───────────────────────────── */}
-              <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/85 backdrop-blur-xl p-5 sm:p-6 space-y-3.5 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)]">
+              <div className="cryptox-card relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#110F17]/90 p-5 sm:p-6 space-y-3.5 shadow-[0_15px_50px_-10px_rgba(0,0,0,0.7)]">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
-                    Persona Test-Render
+                    Persona Test-Visual
                   </span>
                   <button
                     type="button"
@@ -1623,7 +1048,7 @@ export function AiCloneView({
                     ) : (
                       <Sparkles className="h-3 w-3" />
                     )}
-                    <span>Testbild generieren</span>
+                    <span>Testbild berechnen</span>
                   </button>
                 </div>
 
@@ -1642,7 +1067,7 @@ export function AiCloneView({
                   <div className="flex aspect-video w-full flex-col items-center justify-center rounded-xl border border-dashed border-white/[0.12] bg-white/[0.01] p-4 text-center">
                     <Lightbulb className="h-5 w-5 text-orange-400/70 mb-1.5" />
                     <span className="text-xs text-zinc-400">
-                      Noch kein Testbild berechnet. Klicke auf „Testbild generieren“, um das Klon-Visual vorab zu prüfen.
+                      Klicke auf „Testbild berechnen“, um ein Live-Porträt dieser Persona zu rendern.
                     </span>
                   </div>
                 )}
