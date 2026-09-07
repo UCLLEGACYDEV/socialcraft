@@ -176,9 +176,12 @@ export class PostForMeApiClient {
     redirectUrlOverride?: string
   ): Promise<string> {
     const normPlatform = platform.toLowerCase();
+    // LinkedIn restricts r_member_postAnalytics on personal member accounts and fails OAuth if requested.
+    // Using ['posts'] requests openid, w_member_social, profile, email which works universally.
+    const permissions = normPlatform === "linkedin" ? ["posts"] : ["posts", "feeds"];
     const payload: Record<string, any> = {
       platform: normPlatform === "twitter" ? "x" : normPlatform,
-      permissions: ["posts", "feeds"],
+      permissions,
     };
 
     if (normPlatform === "instagram") {
