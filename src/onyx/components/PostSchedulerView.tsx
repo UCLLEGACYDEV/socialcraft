@@ -1392,12 +1392,24 @@ export function PostSchedulerView({
     } catch (err: any) {
       const msg = (err?.message || "").toLowerCase();
 
-      // TikTok caps how many users an *unaudited* app may publish for.
-      // This is a TikTok-side app-approval issue, not something a retry fixes.
+      // TikTok caps how many users an *unaudited* app may DIRECT-post for. The cap
+      // is on the app (here: Post for Me's shared credentials), not on the account —
+      // it can't be lifted from your own Developer Portal. The draft endpoint
+      // (/publish/inbox/…) is a separate path and usually still works.
       if (msg.includes("reached_active_user_cap") || msg.includes("active_user_cap") || msg.includes("active user cap")) {
-        toast.error("TikTok: Nutzer-Limit der App erreicht (reached_active_user_cap).", {
+        toast.error("TikTok: Direct-Post gesperrt (reached_active_user_cap).", {
           description:
-            "Die mit Post for Me verbundene TikTok-App ist noch nicht für die Content-Posting-API freigegeben und darf nur für wenige Test-Konten posten. Nötig: die TikTok-App im TikTok Developer Portal für die Content-Posting-API auditieren lassen bzw. das Konto als Sandbox-Tester hinzufügen. Nutzt du Post-for-Me-System-Credentials, wende dich an deren Support.",
+            "Die genutzte TikTok-App (geteilte Post-for-Me-Credentials) ist nicht für öffentliches Direct-Posting freigegeben. Poste als Entwurf (landet im TikTok-Postfach zur Freigabe), oder hinterlege im White-Label-Projekt eigene TikTok-Credentials.",
+          action:
+            channel.platform === "tiktok" && !tiktokDraft
+              ? {
+                  label: "Als Entwurf senden",
+                  onClick: () => {
+                    setTiktokDraft(true);
+                    setTimeout(() => handlePublishViaPublisher(publishNow), 100);
+                  },
+                }
+              : undefined,
           duration: 14000,
         });
         return;
