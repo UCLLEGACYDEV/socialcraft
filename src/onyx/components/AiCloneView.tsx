@@ -93,6 +93,11 @@ export function AiCloneView({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState("");
+  const [showUploadZone, setShowUploadZone] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState<PersonaAnalysisProgress | null>(null);
+
   // Create Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createMethod, setCreateMethod] = useState<"photo" | "text">("photo");
