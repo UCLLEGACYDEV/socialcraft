@@ -91,6 +91,13 @@ export function AiCloneView({
     return readLS<ApiSettings>(LS.apiSettings, DEFAULT_API_SETTINGS);
   });
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState("");
+  const [showUploadZone, setShowUploadZone] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [analysisProgress, setAnalysisProgress] = useState<PersonaAnalysisProgress | null>(null);
+
   // Create Modal state
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createMethod, setCreateMethod] = useState<"photo" | "text">("photo");
@@ -189,6 +196,7 @@ export function AiCloneView({
         referenceImages: [],
         placement: "all_slides",
         analysisSummary: result.analysisSummary,
+        updatedAt: new Date().toISOString(),
       };
 
       setProfiles((prev) => [
@@ -248,6 +256,7 @@ export function AiCloneView({
         customPrefix: result.customPrefix,
         placement: "all_slides",
         analysisSummary: result.analysisSummary,
+        updatedAt: new Date().toISOString(),
       };
 
       // Set active & update profiles
