@@ -321,6 +321,47 @@ function parseLocalDatetimeValue(value: string): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+/**
+ * The publishing API fetches every `media[].url` from its own servers, so a URL
+ * that only resolves inside this app — a `data:`/`blob:` URL, a same-origin proxy
+ * path like `/api/cloud/file?key=…`, or a pre-signed S3 URL that expires before a
+ * scheduled post runs — silently breaks the post (carousels worst of all, and
+ * Pinterest is the strictest validator). This re-hosts any such URL onto the
+ * publisher's own storage and returns URLs it can always fetch.
+ */
+async function ensurePublicMedia(client: PostForMeApiClient, urls: string[]): Promise<string[]> {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const resolved: string[] = [];
+
+  for (const url of urls) {
+    const isSameOrigin = url.startsWith("/") || (origin && url.startsWith(origin));
+    const needsRehost =
+      url.startsWith("data:") ||
+      url.startsWith("blob:") ||
+      isSameOrigin ||
+      /[?&]X-Amz-|\.amazonaws\.com/i.test(url); // pre-signed → expires
+
+    if (!needsRehost) {
+      resolved.push(url);
+      continue;
+    }
+
+    try {
+      const resp = await fetch(url, isSameOrigin ? { credentials: "include" } : {});
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const blob = await resp.blob();
+      const hosted = await client.uploadMedia(blob, blob.type || "image/jpeg");
+      resolved.push(hosted);
+    } catch (err) {
+      console.warn("[PostScheduler] Could not re-host media for publishing:", url, err);
+      // Keep the original only if it is at least an absolute https URL; otherwise drop it.
+      if (/^https:\/\//i.test(url)) resolved.push(url);
+    }
+  }
+
+  return resolved;
+}
+
 export function PostSchedulerView({
   channels = DEFAULT_SOCIAL_CHANNELS,
   onUpdateChannels,
@@ -1132,12 +1173,28 @@ export function PostSchedulerView({
         const client = new PostForMeApiClient(pfmKey);
         const targetAccountId = channel.postForMeAccountId || channel.zernioAccountId || channel.channelId;
 
+        // Make sure every image is on a URL the publishing API can actually fetch.
+        let publishMedia = mediaList;
+        if (mediaList.length > 0) {
+          publishMedia = await ensurePublicMedia(client, mediaList);
+          if (publishMedia.length < mediaList.length) {
+            if (publishMedia.length === 0) {
+              toast.error("Die Bilder konnten nicht für die Veröffentlichung vorbereitet werden.", {
+                description: "Bitte lade die Bilder erneut hoch und versuche es noch einmal.",
+              });
+              setIsPublishingZernio(false);
+              return;
+            }
+            toast.warning(`${mediaList.length - publishMedia.length} Bild(er) konnten nicht übernommen werden und wurden ausgelassen.`);
+          }
+        }
+
         const fullCaption = postCaption.trim() + (allHashtags.length > 0 ? "\n\n" + allHashtags.join(" ") : "");
         const postResult = await client.createPost({
           caption: fullCaption,
           scheduled_at: publishNow ? null : scheduledIso,
           social_accounts: [targetAccountId],
-          media: mediaList.map((url) => ({ url })),
+          media: publishMedia.map((url) => ({ url })),
           ...(pinterestConfig
             ? {
                 platform_configurations: {
@@ -1156,8 +1213,8 @@ export function PostSchedulerView({
           title: postTitle.trim() || "Socialcraft Beitrag",
           caption: postCaption.trim(),
           hashtags: allHashtags,
-          mediaUrls: mediaList,
-          mediaType: mediaList.length > 1 ? "carousel" : "image",
+          mediaUrls: publishMedia,
+          mediaType: publishMedia.length > 1 ? "carousel" : "image",
           channelId: channel.channelId,
           platform: channel.platform,
           scheduledFor: scheduledIso,
