@@ -890,15 +890,11 @@ function OnyxStudio() {
     setEditing(null);
 
     if (regenerate) {
-      void (async () => {
-        const number = editingSlide?.slideNumber ?? 1;
-        if (jobId) updateJobSlide(jobId, slideId, { isGeneratingImage: true });
-        else setSlideFlag(slideId, { isGeneratingImage: true });
-        const res = await mockGenerateImage(number);
-        const done = { imageUrl: res.imageUrl, isGeneratingImage: false };
-        if (jobId) updateJobSlide(jobId, slideId, done);
-        else setSlideFlag(slideId, done);
-      })();
+      if (jobId) {
+        void runSingleJobSlide(jobId, slideId);
+      } else {
+        void rerollImage(slideId);
+      }
     }
   };
 

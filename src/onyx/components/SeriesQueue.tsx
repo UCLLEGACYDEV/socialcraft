@@ -4,6 +4,7 @@ import { parseBlock } from "../parse-prompt-block";
 import { mockNameTopic } from "../mock-api";
 import type { ApiSettings, ParsedCarousel, SeriesJob, JobStatus } from "../types";
 import { SlideCard } from "./SlideCard";
+import { SlideInspectModal } from "./SlideInspectModal";
 import { cn } from "@/lib/utils";
 
 const STATUS_LABEL: Record<JobStatus, string> = {
@@ -68,6 +69,7 @@ export function SeriesQueue({
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [selectedSlideIds, setSelectedSlideIds] = useState<Record<string, string[]>>({});
   const [naming, setNaming] = useState(false);
+  const [inspecting, setInspecting] = useState<{ jobId: string; slideId: string } | null>(null);
 
   // Neue Jobs: alle Slides standardmäßig auswählen (manuell geänderte Auswahl bleibt erhalten)
   useEffect(() => {
@@ -127,6 +129,8 @@ export function SeriesQueue({
     setSelectedSlideIds((prev) => ({ ...prev, [jobId]: [] }));
   };
 
+  const currentInspectingJob = inspecting ? queue.find((j) => j.id === inspecting.jobId) : null;
+
   return (
     <div className="space-y-5">
       <div className="cryptox-card relative overflow-hidden space-y-5 p-6 sm:p-7 border border-white/[0.08]">
@@ -141,7 +145,7 @@ export function SeriesQueue({
             <button
               type="button"
               onClick={onStopQueue}
-              className="flex items-center gap-1.5 rounded-full border border-destructive/60 bg-destructive/20 px-4 py-2 text-xs font-bold text-destructive hover:bg-destructive/30 hover:text-white transition-all shadow-[0_0_15px_rgba(239,68,68,0.25)]"
+              className="flex items-center gap-1.5 rounded-full border border-destructive/60 bg-destructive/20 px-4 py-2 text-xs font-bold text-destructive hover:bg-destructive/30 hover:text-white transition-all shadow-[0_0_15px_rgba(239,68,68,0.25)] cursor-pointer"
             >
               <X className="h-3.5 w-3.5" /> Queue & Slides abbrechen
             </button>
@@ -187,7 +191,7 @@ export function SeriesQueue({
                   type="button"
                   onClick={() => onChangeSettings({ kieModel: m.id })}
                   className={cn(
-                    "rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all",
+                    "rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer",
                     settings.kieModel === m.id
                       ? "border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF6A1F] shadow-[0_0_12px_-4px_#FF4D17]"
                       : "border-white/10 bg-white/[0.03] text-white/60 hover:text-white hover:border-white/20",
@@ -210,7 +214,7 @@ export function SeriesQueue({
                     type="button"
                     onClick={() => onChangeSettings({ kieResolution: res })}
                     className={cn(
-                      "flex-1 rounded-xl border py-1.5 text-xs font-bold transition-all",
+                      "flex-1 rounded-xl border py-1.5 text-xs font-bold transition-all cursor-pointer",
                       settings.kieResolution === res
                         ? "border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF6A1F]"
                         : "border-white/10 bg-white/[0.03] text-white/60 hover:text-white",
@@ -252,7 +256,7 @@ export function SeriesQueue({
                 type="button"
                 onClick={nameAll}
                 disabled={naming}
-                className="flex items-center gap-1.5 text-xs text-orange-400 hover:underline"
+                className="flex items-center gap-1.5 text-xs text-orange-400 hover:underline cursor-pointer"
               >
                 {naming ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -280,7 +284,7 @@ export function SeriesQueue({
                       const name = await mockNameTopic(c.title);
                       setTitles((p) => ({ ...p, [i]: name }));
                     }}
-                    className="shrink-0 rounded-lg p-1.5 text-zinc-400 transition-colors hover:text-orange-400 hover:bg-white/[0.05]"
+                    className="shrink-0 rounded-lg p-1.5 text-zinc-400 transition-colors hover:text-orange-400 hover:bg-white/[0.05] cursor-pointer"
                     aria-label="KI-Titel"
                     title="KI-Titel optimieren"
                   >
@@ -324,31 +328,31 @@ export function SeriesQueue({
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 items-start">
         {queue.length === 0 && (
-          <p className="cryptox-card p-6 text-center text-xs text-zinc-400">
+          <p className="cryptox-card p-6 text-center text-xs text-zinc-400 col-span-full">
             Noch keine Jobs in der Warteschlange.
           </p>
         )}
         {queue.map((job) => {
-          const open = expanded[job.id] ?? false;
+          const open = expanded[job.id] ?? true; // Standardmäßig geöffnet für Übersicht
           const selectedIds = selectedSlideIds[job.id] ?? [];
           const selectedCount = selectedIds.length;
           const isJobRendering = Boolean(job.slides?.some((s) => s.isGeneratingImage)) || job.status === "rendering";
 
           return (
-            <div key={job.id} className="cryptox-card overflow-hidden p-0 border border-white/[0.08]">
-              <div className="flex items-center gap-3 p-4">
+            <div key={job.id} className="cryptox-card overflow-hidden p-0 border border-white/[0.08] shadow-lg">
+              <div className="flex items-center gap-3 p-4 bg-white/[0.02]">
                 <button
                   type="button"
                   onClick={() => setExpanded((p) => ({ ...p, [job.id]: !open }))}
-                  className="text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground cursor-pointer"
                   aria-label="Details"
                 >
                   {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
                 </button>
                 <input
-                  className="min-w-0 flex-1 bg-transparent text-sm outline-none font-medium"
+                  className="min-w-0 flex-1 bg-transparent text-sm outline-none font-bold text-white truncate"
                   value={job.topic}
                   onChange={(e) => onRenameJob(job.id, e.target.value)}
                 />
@@ -366,7 +370,7 @@ export function SeriesQueue({
                 <button
                   type="button"
                   onClick={() => onDeleteJob(job.id)}
-                  className="shrink-0 text-muted-foreground hover:text-destructive"
+                  className="shrink-0 text-muted-foreground hover:text-destructive cursor-pointer"
                   aria-label="Job löschen"
                 >
                   <X className="h-4 w-4" />
@@ -396,14 +400,14 @@ export function SeriesQueue({
                         <button
                           type="button"
                           onClick={() => selectAllInJob(job)}
-                          className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-300 transition-colors hover:bg-white/10 hover:text-white"
+                          className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-300 transition-colors hover:bg-white/10 hover:text-white cursor-pointer"
                         >
                           Alle
                         </button>
                         <button
                           type="button"
                           onClick={() => deselectAllInJob(job.id)}
-                          className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+                          className="rounded-md border border-white/10 bg-white/5 px-2 py-0.5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white cursor-pointer"
                         >
                           Keine
                         </button>
@@ -416,7 +420,7 @@ export function SeriesQueue({
                           type="button"
                           onClick={() => onRunSelectedSlides(job.id, selectedIds)}
                           disabled={selectedCount === 0 || isJobRendering}
-                          className="flex items-center gap-1.5 rounded-lg border border-orange-500/40 bg-orange-500/15 px-3 py-1.5 text-xs font-semibold text-orange-400 transition-all hover:bg-orange-500/25 hover:text-white disabled:opacity-40 disabled:pointer-events-none shadow-[0_0_12px_rgba(255,77,23,0.15)]"
+                          className="flex items-center gap-1.5 rounded-lg border border-orange-500/40 bg-orange-500/15 px-3 py-1.5 text-xs font-semibold text-orange-400 transition-all hover:bg-orange-500/25 hover:text-white disabled:opacity-40 disabled:pointer-events-none shadow-[0_0_12px_rgba(255,77,23,0.15)] cursor-pointer"
                         >
                           <Play className="h-3 w-3 fill-current" />
                           Auswahl starten ({selectedCount})
@@ -427,7 +431,7 @@ export function SeriesQueue({
                         <button
                           type="button"
                           onClick={() => onSaveJobToCloud(job.id)}
-                          className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-zinc-200 transition-all hover:bg-white/10 hover:text-white"
+                          className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-xs font-semibold text-zinc-200 transition-all hover:bg-white/10 hover:text-white cursor-pointer"
                         >
                           <CloudUpload className="h-3.5 w-3.5" />
                           In Cloud speichern
@@ -438,7 +442,7 @@ export function SeriesQueue({
                         <button
                           type="button"
                           onClick={() => onCancelJobSlides(job.id)}
-                          className="flex items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs font-semibold text-rose-300 transition-all hover:bg-rose-500/25 hover:text-white shadow-[0_0_12px_rgba(244,63,94,0.15)]"
+                          className="flex items-center gap-1.5 rounded-lg border border-rose-500/40 bg-rose-500/15 px-3 py-1.5 text-xs font-semibold text-rose-300 transition-all hover:bg-rose-500/25 hover:text-white shadow-[0_0_12px_rgba(244,63,94,0.15)] cursor-pointer"
                         >
                           <X className="h-3.5 w-3.5" />
                           Job abbrechen
@@ -447,8 +451,8 @@ export function SeriesQueue({
                     </div>
                   </div>
 
-                  {/* ── Slide Grid ──────────────────────────────────────── */}
-                  <div className="grid grid-cols-2 gap-3 border-t border-white/[0.08] p-3.5 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+                  {/* ── Slide Grid (Guaranteed card widths min 150px) ─────── */}
+                  <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-3.5 border-t border-white/[0.08] p-4">
                     {job.slides.map((slide) => (
                       <SlideCard
                         key={slide.id}
@@ -459,8 +463,9 @@ export function SeriesQueue({
                         onStartSingle={onStartSlide ? () => onStartSlide(job.id, slide.id) : undefined}
                         onCancel={slide.isGeneratingImage && onCancelSlide ? () => onCancelSlide(job.id, slide.id) : undefined}
                         modelName={settings.kieApiKey?.trim() ? settings.kieModel : "Demo"}
+                        onPreview={() => setInspecting({ jobId: job.id, slideId: slide.id })}
                         onReroll={() => onRerollSlide(job.id, slide.id)}
-                        onEdit={() => onEditSlide(job.id, slide.id)}
+                        onEdit={() => setInspecting({ jobId: job.id, slideId: slide.id })}
                         onDownload={() => onDownloadSlide(job.id, slide.id)}
                       />
                     ))}
@@ -471,6 +476,24 @@ export function SeriesQueue({
           );
         })}
       </div>
+
+      {/* ── Full Slide Inspection Lightbox Modal ────────────────────── */}
+      {inspecting && currentInspectingJob?.slides && (
+        <SlideInspectModal
+          slides={currentInspectingJob.slides}
+          activeSlideId={inspecting.slideId}
+          topicTitle={currentInspectingJob.topic}
+          onClose={() => setInspecting(null)}
+          onSelectSlideId={(newSlideId) => setInspecting((prev) => prev ? { ...prev, slideId: newSlideId } : null)}
+          onReroll={(slideId) => onRerollSlide(inspecting.jobId, slideId)}
+          onSaveText={(slideId, patch) => onEditSlide(inspecting.jobId, slideId)}
+          onDownload={(slideId) => onDownloadSlide(inspecting.jobId, slideId)}
+          selectedSlideIds={selectedSlideIds[inspecting.jobId]}
+          onToggleSelect={(slideId) => toggleSlideSelect(inspecting.jobId, slideId)}
+          modelName={settings.kieApiKey?.trim() ? settings.kieModel : "ONYX Ultra"}
+        />
+      )}
     </div>
   );
 }
+

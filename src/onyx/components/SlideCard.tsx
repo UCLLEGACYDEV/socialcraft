@@ -3,6 +3,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Download,
+  Eye,
   Loader2,
   Pencil,
   Play,
@@ -23,6 +24,7 @@ interface SlideCardProps {
   onStartSingle?: (() => void) | undefined;
   onReroll: () => void;
   onEdit: () => void;
+  onPreview?: (() => void) | undefined;
   onDownload: () => void;
   onCancel?: (() => void) | undefined;
   canMoveLeft?: boolean | undefined;
@@ -43,6 +45,7 @@ export function SlideCard({
   onStartSingle,
   onReroll,
   onEdit,
+  onPreview,
   onDownload,
   onCancel,
   canMoveLeft,
@@ -56,10 +59,19 @@ export function SlideCard({
   const progress = Math.min(100, Math.max(0, slide.renderProgress ?? 0));
   const isCancelled = slide.renderStatus === "cancelled";
 
+  const handleCardClick = () => {
+    if (onPreview) {
+      onPreview();
+    } else {
+      onEdit();
+    }
+  };
+
   return (
     <div
+      onClick={handleCardClick}
       className={cn(
-        "group relative overflow-hidden rounded-2xl border bg-[#110F17]/85 backdrop-blur-xl transition-all duration-300",
+        "group relative overflow-hidden rounded-2xl border bg-[#110F17]/90 backdrop-blur-xl transition-all duration-300 cursor-pointer select-none",
         isSelected
           ? "border-[#FF4D17] ring-2 ring-[#FF4D17]/60 shadow-[0_0_25px_rgba(255,77,23,0.35)]"
           : "border-white/[0.08] shadow-[0_12px_35px_rgba(0,0,0,0.5)] hover:border-orange-500/40 hover:shadow-[0_20px_50px_-10px_rgba(255,77,23,0.2)]",
@@ -75,7 +87,7 @@ export function SlideCard({
             onToggleSelect?.();
           }}
           className={cn(
-            "absolute left-2.5 top-2.5 z-20 flex h-6 w-6 items-center justify-center rounded-lg border transition-all duration-200",
+            "absolute left-2.5 top-2.5 z-20 flex h-6 w-6 items-center justify-center rounded-lg border transition-all duration-200 cursor-pointer",
             isSelected
               ? "border-[#FF4D17] bg-[#FF4D17] text-white shadow-[0_0_10px_#FF4D17]"
               : "border-white/30 bg-black/60 text-transparent hover:border-white/60 hover:bg-black/80",
@@ -174,7 +186,7 @@ export function SlideCard({
                 e.stopPropagation();
                 onStartSingle();
               }}
-              className="mt-2 flex items-center gap-1 rounded-full border border-orange-500/40 bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-400 transition-all hover:bg-orange-500/30 hover:text-white"
+              className="mt-2 flex items-center gap-1 rounded-full border border-orange-500/40 bg-orange-500/15 px-3 py-1 text-xs font-semibold text-orange-400 transition-all hover:bg-orange-500/30 hover:text-white cursor-pointer"
             >
               <Play className="h-3 w-3 fill-current" />
               {isCancelled ? "Wiederholen" : "Starten"}
@@ -225,7 +237,7 @@ export function SlideCard({
       {done && (
         <>
           {/* Bottom info bar with slide number, role label, and compact quick actions */}
-          <div className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-between gap-1.5 bg-[#0D0C12]/92 border-t border-white/[0.08] px-2.5 py-1.5 backdrop-blur-md">
+          <div className="absolute inset-x-0 bottom-0 z-10 flex items-center justify-between gap-1.5 bg-[#0D0C12]/95 border-t border-white/[0.08] px-2.5 py-1.5 backdrop-blur-md">
             <span className="min-w-0 truncate text-[11px] font-semibold text-zinc-200">
               <span className="text-orange-400 font-mono mr-1">#{slide.slideNumber}</span>
               <span className="truncate">{slide.roleLabel}</span>
@@ -238,7 +250,7 @@ export function SlideCard({
                   onReroll();
                 }}
                 title="Neu generieren"
-                className="flex h-5.5 w-5.5 items-center justify-center rounded-md text-zinc-400 hover:bg-white/10 hover:text-orange-400 transition-colors cursor-pointer"
+                className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-400 hover:bg-white/10 hover:text-orange-400 transition-colors cursor-pointer"
               >
                 <RefreshCw className="h-3 w-3" />
               </button>
@@ -246,26 +258,37 @@ export function SlideCard({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  onEdit();
+                  if (onPreview) onPreview();
+                  else onEdit();
                 }}
-                title="Slide bearbeiten"
-                className="flex h-5.5 w-5.5 items-center justify-center rounded-md text-zinc-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+                title="Großansicht & Anpassen"
+                className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
               >
-                <Pencil className="h-3 w-3" />
+                <Eye className="h-3 w-3" />
               </button>
             </div>
           </div>
 
           {/* Centered Hover Actions Overlay */}
-          <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center gap-2 bg-black/70 opacity-0 backdrop-blur-[3px] transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100 p-2">
-            <IconAction onClick={onDownload} label="Download" tone="light">
-              <Download className="h-3.5 w-3.5" />
+          <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center gap-1.5 bg-black/75 opacity-0 backdrop-blur-[3px] transition-opacity duration-200 group-hover:pointer-events-auto group-hover:opacity-100 p-2">
+            <IconAction
+              onClick={() => {
+                if (onPreview) onPreview();
+                else onEdit();
+              }}
+              label="Großansicht & Prüfen"
+              tone="glass"
+            >
+              <Eye className="h-4 w-4" />
             </IconAction>
             <IconAction onClick={onReroll} label="Neu generieren" tone="accent">
-              <RefreshCw className="h-3.5 w-3.5" />
+              <RefreshCw className="h-4 w-4" />
             </IconAction>
-            <IconAction onClick={onEdit} label="Bearbeiten" tone="glass">
-              <Pencil className="h-3.5 w-3.5" />
+            <IconAction onClick={onEdit} label="Prompt bearbeiten" tone="glass">
+              <Pencil className="h-4 w-4" />
+            </IconAction>
+            <IconAction onClick={onDownload} label="Download" tone="light">
+              <Download className="h-4 w-4" />
             </IconAction>
           </div>
         </>
@@ -295,13 +318,14 @@ function IconAction({
       aria-label={label}
       title={label}
       className={cn(
-        "flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 active:scale-95 shadow-md cursor-pointer",
+        "flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-200 hover:scale-110 active:scale-95 shadow-md cursor-pointer",
         tone === "light" && "bg-white text-zinc-900 hover:bg-zinc-100 shadow-[0_0_12px_rgba(255,255,255,0.3)]",
         tone === "accent" && "bg-gradient-to-r from-[#FF5722] to-[#F4511E] text-white shadow-[0_0_15px_rgba(255,77,23,0.5)]",
-        tone === "glass" && "border border-white/25 bg-black/60 text-white backdrop-blur-md hover:bg-white/20 hover:border-white/40",
+        tone === "glass" && "border border-white/25 bg-black/70 text-white backdrop-blur-md hover:bg-white/20 hover:border-white/40",
       )}
     >
       {children}
     </button>
   );
 }
+

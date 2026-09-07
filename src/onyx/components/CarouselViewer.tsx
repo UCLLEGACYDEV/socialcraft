@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type { ApiSettings, BrandKit, SlideContent } from "../types";
 import { SlideCard } from "./SlideCard";
+import { SlideInspectModal } from "./SlideInspectModal";
 import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,7 @@ export function CarouselViewer({
 }: CarouselViewerProps) {
   const [withOverlay, setWithOverlay] = useState(true);
   const [showSquareGuide, setShowSquareGuide] = useState(false);
+  const [inspectingSlideId, setInspectingSlideId] = useState<string | null>(null);
   const done = slides.filter((s) => s.imageUrl).length;
   const ratio = brandKit.aspectRatio === "1:1" ? "1 / 1" : "4 / 5";
 
@@ -128,7 +130,7 @@ export function CarouselViewer({
             <button
               type="button"
               onClick={onCancelGeneration}
-              className="flex items-center gap-1.5 rounded-full border border-destructive/50 bg-destructive/15 px-3.5 py-2 text-xs font-semibold text-destructive"
+              className="flex items-center gap-1.5 rounded-full border border-destructive/50 bg-destructive/15 px-3.5 py-2 text-xs font-semibold text-destructive cursor-pointer"
             >
               <X className="h-3.5 w-3.5" /> Generierung abbrechen
             </button>
@@ -136,7 +138,7 @@ export function CarouselViewer({
             <button
               type="button"
               onClick={onGenerateImages}
-              className="flex items-center gap-1.5 rounded-full border border-orange-500/40 bg-orange-500/15 px-4 py-2 text-xs font-semibold text-orange-400 hover:bg-orange-500/25 transition-colors"
+              className="flex items-center gap-1.5 rounded-full border border-orange-500/40 bg-orange-500/15 px-4 py-2 text-xs font-semibold text-orange-400 hover:bg-orange-500/25 transition-colors cursor-pointer"
             >
               <Sparkles className="h-3.5 w-3.5 text-orange-400" /> Alle {slides.length} Visuals laden
             </button>
@@ -146,7 +148,7 @@ export function CarouselViewer({
               type="button"
               onClick={() => onSaveToCloud()}
               disabled={done === 0}
-              className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-zinc-200 transition-all hover:bg-white/10 hover:text-white disabled:opacity-40"
+              className="flex items-center gap-1.5 rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-xs font-semibold text-zinc-200 transition-all hover:bg-white/10 hover:text-white disabled:opacity-40 cursor-pointer"
             >
               <CloudUpload className="h-3.5 w-3.5" /> In Cloud speichern
             </button>
@@ -162,15 +164,16 @@ export function CarouselViewer({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(170px,1fr))] gap-4">
         {slides.map((slide, idx) => (
           <SlideCard
             key={slide.id}
             slide={slide}
             aspectRatio={ratio}
             modelName={settings.provider === "mock" ? "Studio Preset" : settings.kieModel}
+            onPreview={() => setInspectingSlideId(slide.id)}
             onReroll={() => onRerollImage(slide.id)}
-            onEdit={() => onEditSlide(slide.id)}
+            onEdit={() => setInspectingSlideId(slide.id)}
             onDownload={() => onDownloadSingle(slide.id, withOverlay)}
             canMoveLeft={idx > 0}
             canMoveRight={idx < slides.length - 1}
@@ -187,7 +190,7 @@ export function CarouselViewer({
           <button
             type="button"
             onClick={onAddSlide}
-            className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-4 text-zinc-400 hover:text-white hover:border-orange-500/40 hover:bg-white/[0.04] transition-all cursor-pointer group"
+            className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] p-4 text-zinc-400 hover:text-white hover:border-orange-500/40 hover:bg-white/[0.04] transition-all cursor-pointer group min-h-[200px]"
             style={{ aspectRatio: ratio }}
             title="Weitere Slide anfügen"
           >
@@ -198,6 +201,23 @@ export function CarouselViewer({
           </button>
         )}
       </div>
+
+      {/* ── Relaxed Inspection Lightbox Modal ────────────────────── */}
+      {inspectingSlideId && (
+        <SlideInspectModal
+          slides={slides}
+          activeSlideId={inspectingSlideId}
+          topicTitle={topic}
+          onClose={() => setInspectingSlideId(null)}
+          onSelectSlideId={setInspectingSlideId}
+          onReroll={(slideId) => onRerollImage(slideId)}
+          onSaveText={(slideId, patch) => onEditSlide(slideId)}
+          onDownload={(slideId) => onDownloadSingle(slideId, withOverlay)}
+          aspectRatio={ratio}
+          modelName={settings.provider === "mock" ? "Studio Preset" : settings.kieModel}
+        />
+      )}
     </div>
   );
 }
+
