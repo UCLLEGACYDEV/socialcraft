@@ -1242,9 +1242,12 @@ export function PostSchedulerView({
             set_caption_for_each_image: facebookCaptionEachImage,
           };
         }
+        if (channel.platform === "youtube" && postTitle.trim()) {
+          platformConfigurations["youtube"] = { title: postTitle.trim() };
+        }
 
         const fullCaption = postCaption.trim() + (allHashtags.length > 0 ? "\n\n" + allHashtags.join(" ") : "");
-        const postResult = await client.createPost({
+        const createPayload = {
           caption: fullCaption,
           scheduled_at: publishNow ? null : scheduledIso,
           social_accounts: [targetAccountId],
@@ -1252,7 +1255,16 @@ export function PostSchedulerView({
           ...(Object.keys(platformConfigurations).length > 0
             ? { platform_configurations: platformConfigurations }
             : {}),
-        });
+        };
+
+        // Editing a still-pending Post for Me post → update it in place instead of
+        // creating a duplicate and orphaning the original scheduled entry.
+        const editingRemote = editingPostId
+          ? posts.find((p) => p.id === editingPostId && p.postForMePostId && p.status !== "published")
+          : undefined;
+        const postResult = editingRemote?.postForMePostId
+          ? await client.updatePost(editingRemote.postForMePostId, createPayload as any)
+          : await client.createPost(createPayload);
 
         const newPost: ScheduledPost = {
           id: editingPostId || `post-${Date.now()}`,
@@ -1516,7 +1528,16 @@ export function PostSchedulerView({
     setActiveTab("queue");
   };
 
-  const handleDeletePost = (id: string) => {
+  const handleDeletePost = async (id: string) => {
+    const target = posts.find((p) => p.id === id);
+    // Also cancel it on Post for Me if it hasn't gone out yet.
+    if (target?.postForMePostId && target.status !== "published" && activePostForMeKey) {
+      try {
+        await new PostForMeApiClient(activePostForMeKey).deletePost(target.postForMePostId);
+      } catch (err: any) {
+        console.warn("Could not delete from Post for Me:", err?.message || err);
+      }
+    }
     onUpdatePosts(posts.filter((p) => p.id !== id));
     toast.info("Geplanter Beitrag entfernt.");
   };
