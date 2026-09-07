@@ -1014,11 +1014,10 @@ function OnyxStudio() {
 
   return (
     <div className="min-h-screen bg-[#060509] text-foreground relative overflow-x-hidden selection:bg-[#FF4D17] selection:text-white">
-      {/* Background ambient glow matching screenshot */}
+      {/* Subtle modern dark workspace background */}
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[80rem] h-[50rem] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,77,23,0.18)_0%,rgba(255,50,0,0.06)_45%,transparent_70%)] blur-[90px]" />
-        <div className="absolute top-[45%] -right-40 w-[45rem] h-[45rem] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,90,20,0.12)_0%,transparent_65%)] blur-[100px]" />
-        <div className="absolute bottom-0 left-10 w-[40rem] h-[30rem] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,60,0,0.08)_0%,transparent_60%)] blur-[90px]" />
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[70rem] h-[35rem] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,77,23,0.08)_0%,transparent_70%)] blur-[100px]" />
+        <div className="absolute top-[50%] -right-40 w-[35rem] h-[35rem] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,90,20,0.04)_0%,transparent_70%)] blur-[100px]" />
       </div>
 
       <div className="relative z-10 flex min-h-screen flex-col">

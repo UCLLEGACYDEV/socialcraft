@@ -160,89 +160,53 @@ export function StudioCarouselWorkspace({
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in-50 duration-300">
-      {/* ── 1. Top Studio Command Bar ──────────────────────────────── */}
-      <div className="cryptox-card p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div className="space-y-6 animate-in fade-in-50 duration-300">
+      {/* ── 1. Clean Top Studio Header ──────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-1">
         <div>
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-[#FF3B00] to-[#FFA149] text-white shadow-[0_0_15px_#FF4D17]">
-              <Sparkles className="h-4 w-4" />
-            </span>
-            <h1 className="text-lg font-bold text-white tracking-tight">
-              Karussell Studio
-            </h1>
-            <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-emerald-400 flex items-center gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Bereit zur Erstellung
-            </span>
-          </div>
-          <p className="mt-1 text-xs text-white/60">
-            Erstelle psychologisch strukturierte Instagram-Karussells mit konsistenter Bildsprache im Format 4:5.
+          <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+            <Sparkles className="h-4 w-4 text-[#FF6A1F]" />
+            <span>Karussell Studio</span>
+          </h1>
+          <p className="text-xs text-zinc-400 mt-0.5">
+            Thema eingeben, Hook wählen und professionelle Folien im Format 4:5 generieren.
           </p>
         </div>
 
-        {/* Live Engine & Format Badges */}
-        <div className="flex flex-wrap items-center gap-2">
-          {/* Engine indicator */}
-          <button
-            type="button"
-            onClick={onOpenSettings}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-white/80 hover:bg-white/[0.08] hover:border-white/20 transition-all cursor-pointer"
-            title="ONYX Engine Render-Pipeline"
-          >
-            <Cpu className="h-3.5 w-3.5 text-[#FF6A1F]" />
-            <span>ONYX Ultra Pipeline</span>
-            <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              HQ Active
-            </span>
-          </button>
-
-          {/* Aspect Ratio Badge */}
-          <button
-            type="button"
-            onClick={onOpenBrandKit}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3 py-1 text-xs text-white/80 hover:bg-white/[0.08] hover:text-white transition-colors"
-            title="Seitenverhältnis anpassen"
-          >
-            <span className="font-mono font-bold text-primary-bright">4:5</span>
-            <span>Instagram Portrait</span>
-          </button>
-
-          {/* KI Persona Status Pill */}
+        {/* Subtle quick tags */}
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => {
               onChangeBrief({ useClone: !brief.useClone });
-              toast.info(brief.useClone ? "KI-Persona deaktiviert" : "KI-Persona für Karussell aktiviert");
+              toast.info(brief.useClone ? "KI-Persona deaktiviert" : "KI-Persona aktiviert");
             }}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition-all cursor-pointer",
+              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all cursor-pointer",
               brief.useClone
-                ? "border-[#FF4D17]/60 bg-[#FF4D17]/15 text-white shadow-[0_0_20px_-3px_#FF4D17]"
-                : "border-white/10 bg-white/[0.03] text-white/50 hover:text-white",
+                ? "border-[#FF4D17]/60 bg-[#FF4D17]/15 text-orange-300"
+                : "border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white",
             )}
           >
-            <UserCheck className="h-3.5 w-3.5 text-primary-bright" />
-            <span>{brief.useClone ? "KI-Klon: Aktiv" : "KI-Klon: Inaktiv"}</span>
+            <UserCheck className="h-3.5 w-3.5 text-orange-400" />
+            <span>{brief.useClone ? "KI-Klon aktiv" : "KI-Klon"}</span>
           </button>
+
+          <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-xs text-zinc-400 font-mono">
+            4:5 Portrait
+          </span>
         </div>
       </div>
 
-      {/* ── 2. Main Creator Console (Apple-Grade 2-Column Layout) ──── */}
+      {/* ── 2. Main Creator Console ─────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* LEFT/CENTER: Big Prompt & Hook Workspace (8 Cols) */}
-        <div className="cryptox-card-elevated p-6 sm:p-8 space-y-6 lg:col-span-8">
-          {/* Header Row with Reset */}
-          <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-bold text-white tracking-wide">
-                Thema, Hook & Kernaussage
-              </span>
-              <span className="text-xs text-white/40">
-                (Strg + Enter zum Generieren)
-              </span>
-            </div>
+        {/* LEFT/CENTER: Prompt & Hook Workspace (8 Cols) */}
+        <div className="cryptox-card p-6 space-y-5 lg:col-span-8 border border-white/[0.08]">
+          {/* Prompt Header */}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
+              Thema & Kernbotschaft
+            </span>
             {brief.topic && (
               <button
                 type="button"
@@ -250,15 +214,15 @@ export function StudioCarouselWorkspace({
                   onChangeBrief({ topic: "" });
                   setSelectedHookType(null);
                 }}
-                className="text-xs text-white/50 hover:text-white flex items-center gap-1 transition-colors"
+                className="text-xs text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
               >
-                <RotateCcw className="h-3 w-3" /> Feld leeren
+                <RotateCcw className="h-3 w-3" /> Zurücksetzen
               </button>
             )}
           </div>
 
           {/* Big Clean Prompt Textarea */}
-          <div className="space-y-2">
+          <div className="relative">
             <textarea
               rows={4}
               value={brief.topic}
@@ -269,22 +233,17 @@ export function StudioCarouselWorkspace({
                   if (brief.topic.trim() && !isGenerating) onSubmit();
                 }
               }}
-              placeholder="Beschreibe das Thema deines Karussells, z. B. „7 psychologische Prinzipien, die jeden Pitch unwiderstehlich machen“… oder wähle unten einen Hook-Typ."
-              className="w-full resize-none rounded-2xl border border-white/15 bg-black/40 p-4 sm:p-5 text-sm sm:text-base leading-relaxed text-white placeholder:text-white/35 outline-none focus:border-[#FF4D17] focus:ring-1 focus:ring-[#FF4D17]/40 transition-all shadow-inner"
+              placeholder="z. B. 5 fatale Fehler beim B2B-Sales Closing 2026… oder klicke unten auf einen Hook-Vorschlag."
+              className="w-full resize-none rounded-2xl border border-white/10 bg-black/40 p-4 text-sm leading-relaxed text-white placeholder:text-zinc-500 outline-none focus:border-[#FF4D17]/80 focus:ring-1 focus:ring-[#FF4D17]/30 transition-all"
             />
           </div>
 
-          {/* ── Hook Enhancer Engine (Echte Funktion) ──────────────── */}
-          <div className="space-y-2.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-white/80 flex items-center gap-1.5">
-                <Flame className="h-3.5 w-3.5 text-[#FF6A1F]" />
-                Psychologischen Hook anwenden:
-              </span>
-              <span className="text-white/40 text-[11px]">
-                Klicke für 1-Klick Optimierung
-              </span>
-            </div>
+          {/* ── Hook Enhancer (Clean Streamlined Row) ──────────────── */}
+          <div className="space-y-2">
+            <span className="text-[11px] font-semibold text-zinc-400 flex items-center gap-1.5">
+              <Flame className="h-3.5 w-3.5 text-[#FF6A1F]" />
+              Hook-Typ anwenden:
+            </span>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               {HOOK_ARCHETYPES.map((hook) => {
@@ -296,21 +255,16 @@ export function StudioCarouselWorkspace({
                     type="button"
                     onClick={() => applyHookModifier(hook)}
                     className={cn(
-                      "flex flex-col items-start gap-1 p-3 rounded-2xl border text-left transition-all group",
+                      "flex items-center justify-between p-2.5 rounded-xl border text-left transition-all cursor-pointer",
                       isSelected
-                        ? "border-[#FF4D17] bg-[#FF4D17]/20 shadow-[0_0_20px_-3px_#FF4D17]"
-                        : "border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]",
+                        ? "border-[#FF4D17]/80 bg-[#FF4D17]/15 text-white"
+                        : "border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white hover:border-white/20 hover:bg-white/[0.05]",
                     )}
                   >
-                    <div className="flex items-center justify-between w-full">
-                      <span className="text-xs font-bold text-white group-hover:text-[#FFA149] transition-colors">
-                        {hook.label}
-                      </span>
-                      <Icon className="h-3.5 w-3.5 text-white/40 group-hover:text-white" />
-                    </div>
-                    <span className="text-[10px] text-white/50 leading-tight">
-                      {hook.desc}
+                    <span className="text-xs font-semibold truncate">
+                      {hook.label}
                     </span>
+                    <Icon className="h-3.5 w-3.5 shrink-0 text-zinc-500 ml-1" />
                   </button>
                 );
               })}
@@ -318,56 +272,53 @@ export function StudioCarouselWorkspace({
           </div>
 
           {/* ── Audience / Zielgruppe ──────────────────────────────── */}
-          <div className="space-y-2 pt-2 border-t border-white/[0.06]">
+          <div className="space-y-2 pt-3 border-t border-white/[0.06]">
             <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-white/80 flex items-center gap-1.5">
-                <Users className="h-3.5 w-3.5 text-cyan-400" />
-                Zielgruppe & Tonalität:
-              </span>
-              <span className="text-white/40 text-[11px]">
-                Definiert Sprache & Schmerzpunkte
+              <span className="font-semibold text-zinc-400 flex items-center gap-1.5">
+                <Users className="h-3.5 w-3.5 text-orange-400" />
+                Zielgruppe (optional):
               </span>
             </div>
 
-            <input
-              value={brief.audience}
-              onChange={(e) => onChangeBrief({ audience: e.target.value })}
-              placeholder="z. B. B2B Entscheider, Content Creator, Agenturinhaber, Fitness-Interessierte…"
-              className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-xs sm:text-sm text-white placeholder:text-white/35 outline-none focus:border-[#FF4D17] transition-colors"
-            />
-
-            {/* Quick Audience Pills */}
-            <div className="flex flex-wrap gap-1.5 pt-1">
+            <div className="flex flex-wrap gap-1.5">
               {[
-                "B2B Entscheider & Gründer",
+                "B2B & Gründer",
                 "Content Creator & Coaches",
-                "Agenturinhaber & Marketer",
+                "Agenturen & Marketing",
                 "E-Commerce Brands",
-              ].map((aud) => (
-                <button
-                  key={aud}
-                  type="button"
-                  onClick={() => onChangeBrief({ audience: aud })}
-                  className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-[11px] text-white/60 hover:text-white hover:border-[#FF4D17]/40 hover:bg-white/[0.06] transition-colors"
-                >
-                  {aud}
-                </button>
-              ))}
+              ].map((aud) => {
+                const isSelected = brief.audience === aud;
+                return (
+                  <button
+                    key={aud}
+                    type="button"
+                    onClick={() => onChangeBrief({ audience: isSelected ? "" : aud })}
+                    className={cn(
+                      "rounded-full border px-2.5 py-1 text-xs transition-colors cursor-pointer",
+                      isSelected
+                        ? "border-[#FF4D17]/60 bg-[#FF4D17]/20 text-white font-medium"
+                        : "border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white hover:border-white/20",
+                    )}
+                  >
+                    {aud}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* ── Big Primary Apple Generate CTA Button ──────────────── */}
-          <div className="pt-4 border-t border-white/[0.08]">
+          {/* ── Primary Action Button ───────────────────────────────── */}
+          <div className="pt-3 border-t border-white/[0.08]">
             <button
               type="button"
               onClick={onSubmit}
               disabled={isGenerating || !brief.topic.trim()}
-              className="cryptox-orange-btn w-full py-4 text-sm sm:text-base font-bold shadow-[0_0_35px_rgba(255,77,23,0.55)] hover:shadow-[0_0_50px_rgba(255,77,23,0.8)] disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer"
+              className="cryptox-orange-btn w-full py-3.5 text-sm font-bold shadow-[0_0_25px_rgba(255,77,23,0.4)] hover:shadow-[0_0_35px_rgba(255,77,23,0.6)] disabled:opacity-40 disabled:pointer-events-none transition-all cursor-pointer"
             >
               {isGenerating ? (
                 <span className="flex items-center justify-center gap-2">
                   <div className="h-4 w-4 rounded-full border-2 border-white/90 border-t-transparent animate-spin" />
-                  <span>Karussell-Sequenz wird berechnet…</span>
+                  <span>Karussell wird generiert…</span>
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">

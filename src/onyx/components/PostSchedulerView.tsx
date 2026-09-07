@@ -721,36 +721,69 @@ export function PostSchedulerView({
 
   return (
     <div className="space-y-6 max-w-[1550px] mx-auto pb-16">
-      {/* ── Top Hero & Channel Banner ───────────────────────────────── */}
-      <div className="cryptox-card relative overflow-hidden p-6 sm:p-8 border border-white/[0.08] shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-[radial-gradient(ellipse_at_top_right,rgba(255,77,23,0.15),transparent_70%)] pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      {/* ── Top Hero & Clean Control Bar ────────────────────────────── */}
+      <div className="cryptox-card p-6 border border-white/[0.08]">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399]" />
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-orange-400">
-                Socialcraft Direct Hub • Multi-Channel Scheduler
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Beitrags-Planer & Kanal-Zentrale
+            <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4 text-[#FF6A1F]" />
+              <span>Beitrags-Planer</span>
             </h1>
-            <p className="text-sm text-zinc-400 mt-1 max-w-2xl">
-              Plane Beiträge direkt über deine <strong className="text-white">Kanal- & Seiten-IDs</strong> (z. B. Facebook Seite <span className="font-mono text-orange-300">337570872768998</span>) oder übernehme bestehende Projekte aus deiner Galerie.
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Automatische Veröffentlichung auf TikTok, Instagram, Facebook & LinkedIn.
             </p>
           </div>
 
-          {/* Quick Action Navigation Buttons */}
+          {/* Quick Action Navigation */}
           <div className="flex flex-wrap items-center gap-2">
+            {/* View Switcher Tabs */}
+            <div className="flex items-center rounded-full border border-white/10 bg-white/[0.03] p-0.5">
+              <button
+                type="button"
+                onClick={() => setActiveTab("queue")}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer",
+                  activeTab === "queue"
+                    ? "bg-[#FF4D17] text-white shadow-sm"
+                    : "text-zinc-400 hover:text-white"
+                )}
+              >
+                Geplant ({posts.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("composer")}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer",
+                  activeTab === "composer"
+                    ? "bg-[#FF4D17] text-white shadow-sm"
+                    : "text-zinc-400 hover:text-white"
+                )}
+              >
+                + Planen
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("channels")}
+                className={cn(
+                  "px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer",
+                  activeTab === "channels"
+                    ? "bg-[#FF4D17] text-white shadow-sm"
+                    : "text-zinc-400 hover:text-white"
+                )}
+              >
+                Kanäle ({channels.length})
+              </button>
+            </div>
+
             {onOpen30DayBatch && (
               <button
                 type="button"
                 onClick={onOpen30DayBatch}
-                className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border border-[#FF4D17]/50 bg-gradient-to-r from-[#FF4D17]/25 via-red-600/20 to-orange-500/15 hover:from-[#FF4D17]/35 hover:to-orange-500/25 text-orange-300 hover:text-white shadow-[0_0_20px_-3px_rgba(255,77,23,0.35)]"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-[#FF4D17]/40 bg-[#FF4D17]/10 text-orange-300 hover:bg-[#FF4D17]/20 hover:text-white transition-all cursor-pointer"
               >
-                <Sparkles className="h-4 w-4 text-[#FF4D17] animate-pulse" />
-                <span>30-Tage Batch Generator</span>
+                <Sparkles className="h-3.5 w-3.5 text-orange-400" />
+                <span>30-Tage Batch</span>
               </button>
             )}
 
@@ -759,88 +792,32 @@ export function PostSchedulerView({
                 type="button"
                 onClick={onOpenZernioSetup}
                 className={cn(
-                  "flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border",
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border",
                   settings?.zernioApiKey
                     ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20"
-                    : "bg-[#FF4D17]/10 text-orange-400 border-orange-500/40 hover:bg-[#FF4D17]/20"
+                    : "bg-white/[0.04] text-zinc-300 border-white/10 hover:bg-white/[0.08] hover:text-white"
                 )}
               >
-                <div className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
                 <Share2 className="h-3.5 w-3.5" />
-                <span>{settings?.zernioApiKey ? "Direct Hub aktiv" : "Direct Hub verbinden"}</span>
+                <span>{settings?.zernioApiKey ? "Direct Hub aktiv" : "Direct Hub"}</span>
               </button>
             )}
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("queue")}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                activeTab === "queue"
-                  ? "bg-[#FF4D17] text-white shadow-[0_0_20px_rgba(255,77,23,0.4)]"
-                  : "bg-white/[0.04] text-zinc-300 border border-white/10 hover:bg-white/[0.08] hover:text-white"
-              )}
-            >
-              <CalendarIcon className="h-4 w-4" />
-              <span>Geplante Beiträge ({posts.length})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("composer")}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                activeTab === "composer"
-                  ? "bg-[#FF4D17] text-white shadow-[0_0_20px_rgba(255,77,23,0.4)]"
-                  : "bg-white/[0.04] text-zinc-300 border border-white/10 hover:bg-white/[0.08] hover:text-white"
-              )}
-            >
-              <Plus className="h-4 w-4" />
-              <span>Neuen Beitrag planen</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab("channels")}
-              className={cn(
-                "flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                activeTab === "channels"
-                  ? "bg-[#FF4D17] text-white shadow-[0_0_20px_rgba(255,77,23,0.4)]"
-                  : "bg-white/[0.04] text-zinc-300 border border-white/10 hover:bg-white/[0.08] hover:text-white"
-              )}
-            >
-              <SlidersHorizontal className="h-4 w-4" />
-              <span>Kanäle & IDs ({channels.length})</span>
-            </button>
           </div>
         </div>
 
-        {/* ── Active Channel Ribbon ───────────────────────────────────── */}
-        <div className="mt-6 pt-5 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-xs font-semibold text-zinc-400">Aktive Kanäle:</span>
+        {/* ── Compact Channel Status ──────────────────────────────────── */}
+        <div className="mt-4 pt-3 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] text-zinc-500 font-medium">Aktive Kanäle:</span>
             {channels.map((chan) => {
               const Icon = PLATFORM_ICONS[chan.platform] || Share2;
-              const style = PLATFORM_COLORS[chan.platform] || PLATFORM_COLORS.facebook;
               return (
                 <div
                   key={chan.id}
-                  className={cn(
-                    "flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-medium backdrop-blur-md transition-all",
-                    style.bg,
-                    style.border
-                  )}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.02] text-[11px] text-zinc-300"
                 >
-                  <Icon className={cn("h-3.5 w-3.5", style.text)} />
-                  <span className="text-white font-semibold">{chan.name}</span>
-                  <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-black/40 text-zinc-300">
-                    ID: {chan.channelId}
-                  </span>
-                  {chan.isDefault && (
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-orange-400 bg-orange-500/20 px-1 rounded">
-                      Standard
-                    </span>
-                  )}
+                  <Icon className="h-3 w-3 text-orange-400" />
+                  <span className="font-medium text-white">{chan.name}</span>
                 </div>
               );
             })}
@@ -851,9 +828,9 @@ export function PostSchedulerView({
               type="button"
               disabled={isSyncingChannels}
               onClick={handleSyncZernioAccounts}
-              className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition bg-white/5 hover:bg-white/10 px-2.5 py-1.5 rounded-lg border border-white/10 disabled:opacity-50"
+              className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-white/5 disabled:opacity-50"
             >
-              <RefreshCw className={cn("h-3.5 w-3.5", isSyncingChannels && "animate-spin text-orange-400")} />
+              <RefreshCw className={cn("h-3 w-3", isSyncingChannels && "animate-spin text-orange-400")} />
               <span>Accounts syncen</span>
             </button>
           )}
