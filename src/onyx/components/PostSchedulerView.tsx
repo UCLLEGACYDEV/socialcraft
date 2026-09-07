@@ -814,9 +814,13 @@ export function PostSchedulerView({
   const [instagramShareToFeed, setInstagramShareToFeed] = useState(true);
   const [instagramAiDisclosure, setInstagramAiDisclosure] = useState(false);
   const [instagramFirstComment, setInstagramFirstComment] = useState("");
+  const [instagramPlacement, setInstagramPlacement] = useState<"timeline" | "reels" | "stories">("timeline");
+  const [instagramCollaborators, setInstagramCollaborators] = useState("");
 
   const [facebookDraft, setFacebookDraft] = useState(false);
   const [facebookFirstComment, setFacebookFirstComment] = useState("");
+  const [facebookPlacement, setFacebookPlacement] = useState<"timeline" | "reels" | "stories">("timeline");
+  const [facebookCaptionEachImage, setFacebookCaptionEachImage] = useState(true);
 
   const [isPublishingZernio, setIsPublishingZernio] = useState(false);
   const [isSyncingChannels, setIsSyncingChannels] = useState(false);
@@ -1210,6 +1214,23 @@ export function PostSchedulerView({
             ...(postTitle.trim() ? { title: postTitle.trim() } : {}),
           };
         }
+        if (channel.platform === "instagram") {
+          const collaborators = instagramCollaborators
+            .split(/[\s,]+/)
+            .map((s) => s.replace(/^@/, "").trim())
+            .filter(Boolean);
+          platformConfigurations["instagram"] = {
+            placement: instagramPlacement,
+            share_to_feed: instagramShareToFeed,
+            ...(collaborators.length > 0 ? { collaborators } : {}),
+          };
+        }
+        if (channel.platform === "facebook") {
+          platformConfigurations["facebook"] = {
+            placement: facebookPlacement,
+            set_caption_for_each_image: facebookCaptionEachImage,
+          };
+        }
 
         const fullCaption = postCaption.trim() + (allHashtags.length > 0 ? "\n\n" + allHashtags.join(" ") : "");
         const postResult = await client.createPost({
@@ -1498,6 +1519,95 @@ export function PostSchedulerView({
     onUpdatePosts(updated);
     toast.success("Beitrag als veröffentlicht markiert! 🎉");
   };
+
+  const [checkingStatusId, setCheckingStatusId] = useState<string | null>(null);
+  const autoCheckedRef = useRef<Set<string>>(new Set());
+
+  /**
+   * Asks Post for Me for the real per-platform outcome of a post and folds it back
+   * into the queue: any failed account marks the post "failed" with the platform's
+   * error, all-success marks it "published" and stores the live post URL.
+   */
+  const handleCheckPostStatus = async (post: ScheduledPost, silent = false) => {
+    if (!post.postForMePostId || !activePostForMeKey) return;
+    if (!silent) setCheckingStatusId(post.id);
+    try {
+      const client = new PostForMeApiClient(activePostForMeKey);
+      const results = await client.getPostResults(post.postForMePostId);
+
+      if (!results || results.length === 0) {
+        // No results yet — check the post's own processing status.
+        const remote = await client.getPost(post.postForMePostId).catch(() => null);
+        if (!silent) {
+          toast.info(
+            remote?.status === "processing" || remote?.status === "scheduled"
+              ? "Der Beitrag wird noch verarbeitet – bitte gleich erneut prüfen."
+              : "Noch keine Rückmeldung der Plattform verfügbar."
+          );
+        }
+        return;
+      }
+
+      const failed = results.filter((r) => r.success === false);
+      const firstUrl = results.find((r) => r.platform_data?.url)?.platform_data?.url;
+      const errText = failed
+        .map((r) => {
+          const e = r.error || {};
+          return e["message"] || e["error"] || e["detail"] || JSON.stringify(e);
+        })
+        .filter((s) => s && s !== "{}")
+        .join(" · ");
+
+      onUpdatePosts(
+        posts.map((p) => {
+          if (p.id !== post.id) return p;
+          if (failed.length > 0) {
+            return { ...p, status: "failed" as const, errorMessage: errText || "Veröffentlichung fehlgeschlagen." };
+          }
+          return {
+            ...p,
+            status: "published" as const,
+            publishedAt: p.publishedAt || new Date().toISOString(),
+            externalPostUrl: firstUrl || p.externalPostUrl,
+            errorMessage: undefined,
+          };
+        })
+      );
+
+      if (!silent) {
+        if (failed.length > 0) {
+          toast.error(`Veröffentlichung fehlgeschlagen: ${errText || "unbekannter Fehler"}`);
+        } else {
+          toast.success("Beitrag ist live! ✅", { description: firstUrl });
+        }
+      }
+    } catch (err: any) {
+      if (!silent) toast.error(`Status konnte nicht geladen werden: ${err?.message || err}`);
+    } finally {
+      if (!silent) setCheckingStatusId(null);
+    }
+  };
+
+  // When the queue opens, quietly reconcile posts that should have gone out by now.
+  useEffect(() => {
+    if (activeTab !== "queue" || !activePostForMeKey) return;
+    const now = Date.now();
+    posts
+      .filter(
+        (p) =>
+          p.postForMePostId &&
+          p.status !== "failed" &&
+          p.status !== "cancelled" &&
+          !autoCheckedRef.current.has(p.postForMePostId) &&
+          new Date(p.scheduledFor).getTime() < now + 60 * 1000
+      )
+      .slice(0, 8)
+      .forEach((p) => {
+        autoCheckedRef.current.add(p.postForMePostId!);
+        void handleCheckPostStatus(p, true);
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, activePostForMeKey, posts.length]);
 
   const handleOpenDirectPublisher = (post: ScheduledPost) => {
     const targetChannel = channels.find((c) => c.channelId === post.channelId);
@@ -2040,6 +2150,7 @@ export function PostSchedulerView({
                 const isCopied = copiedId === post.id;
                 const isPublished = post.status === "published";
                 const isCancelled = post.status === "cancelled";
+                const isFailed = post.status === "failed";
 
                 return (
                   <div
@@ -2075,14 +2186,41 @@ export function PostSchedulerView({
                             "text-[10px] font-bold px-2 py-0.5 rounded-full border",
                             isPublished
                               ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                              : isFailed
+                              ? "bg-red-500/20 text-red-300 border-red-500/40"
                               : isCancelled
                               ? "bg-red-500/20 text-red-300 border-red-500/40"
                               : "bg-orange-500/20 text-orange-300 border-orange-500/40"
                           )}
                         >
-                          {isPublished ? "✅ Veröffentlicht" : isCancelled ? "❌ Abgebrochen" : "🕒 Geplant"}
+                          {isPublished
+                            ? "✅ Veröffentlicht"
+                            : isFailed
+                            ? "⚠️ Fehlgeschlagen"
+                            : isCancelled
+                            ? "❌ Abgebrochen"
+                            : "🕒 Geplant"}
                         </span>
                       </div>
+
+                      {isFailed && post.errorMessage && (
+                        <div className="flex items-start gap-1.5 text-[11px] text-red-300 bg-red-500/10 border border-red-500/25 rounded-lg px-2.5 py-1.5 mt-3">
+                          <XCircle className="h-3.5 w-3.5 text-red-400 shrink-0 mt-0.5" />
+                          <span className="break-words">{post.errorMessage}</span>
+                        </div>
+                      )}
+
+                      {isPublished && post.externalPostUrl && (
+                        <a
+                          href={post.externalPostUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center gap-1.5 text-[11px] text-emerald-300 hover:text-emerald-200 bg-emerald-500/10 border border-emerald-500/25 rounded-lg px-2.5 py-1.5 mt-3 cursor-pointer"
+                        >
+                          <ExternalLink className="h-3.5 w-3.5 shrink-0" />
+                          <span className="truncate">Live ansehen</span>
+                        </a>
+                      )}
 
                       {/* Scheduled Time Banner */}
                       <div className="flex items-center justify-between gap-1.5 text-xs text-orange-300 bg-orange-500/10 border border-orange-500/20 rounded-lg px-2.5 py-1.5 mt-3">
@@ -2212,6 +2350,19 @@ export function PostSchedulerView({
                             >
                               <XCircle className="h-3 w-3" />
                               <span>Abbrechen</span>
+                            </button>
+                          )}
+
+                          {post.postForMePostId && !isCancelled && (
+                            <button
+                              type="button"
+                              onClick={() => handleCheckPostStatus(post)}
+                              disabled={checkingStatusId === post.id}
+                              className="text-sky-400 hover:text-sky-300 flex items-center gap-1 cursor-pointer transition disabled:opacity-50"
+                              title="Echten Veröffentlichungs-Status bei der Plattform abfragen"
+                            >
+                              <RefreshCw className={cn("h-3 w-3", checkingStatusId === post.id && "animate-spin")} />
+                              <span>Status prüfen</span>
                             </button>
                           )}
                         </div>
@@ -2855,6 +3006,18 @@ export function PostSchedulerView({
                   {/* INSTAGRAM SPECIFIC SETTINGS */}
                   {selectedChannel.platform === "instagram" && (
                     <div className="space-y-2.5 pt-2 border-t border-white/5 text-xs">
+                      <div>
+                        <label className="text-[11px] text-zinc-400 block mb-1">Platzierung:</label>
+                        <select
+                          value={instagramPlacement}
+                          onChange={(e) => setInstagramPlacement(e.target.value as any)}
+                          className="w-full bg-[#120F17] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                        >
+                          <option value="timeline">Feed (Timeline)</option>
+                          <option value="reels">Reel</option>
+                          <option value="stories">Story</option>
+                        </select>
+                      </div>
                       <div className="flex items-center gap-4">
                         <label className="flex items-center gap-2 cursor-pointer text-zinc-300">
                           <input
@@ -2863,7 +3026,7 @@ export function PostSchedulerView({
                             onChange={(e) => setInstagramShareToFeed(e.target.checked)}
                             className="accent-orange-500 rounded"
                           />
-                          <span>Im Hauptfeed teilen</span>
+                          <span>Reel auch im Hauptfeed teilen</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer text-zinc-300">
                           <input
@@ -2874,6 +3037,16 @@ export function PostSchedulerView({
                           />
                           <span>KI-Label anzeigen</span>
                         </label>
+                      </div>
+                      <div>
+                        <label className="text-[11px] text-zinc-400 block mb-1">Kollaborateure (Instagram-Namen, mit Komma getrennt):</label>
+                        <input
+                          type="text"
+                          value={instagramCollaborators}
+                          onChange={(e) => setInstagramCollaborators(e.target.value)}
+                          placeholder="z. B. @marke, @partnerin"
+                          className="w-full bg-[#120F17] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white"
+                        />
                       </div>
                       <div>
                         <label className="text-[11px] text-zinc-400 block mb-1">Erster Kommentar (First Comment für Links):</label>
@@ -2891,6 +3064,27 @@ export function PostSchedulerView({
                   {/* FACEBOOK SPECIFIC SETTINGS */}
                   {selectedChannel.platform === "facebook" && (
                     <div className="space-y-2.5 pt-2 border-t border-white/5 text-xs">
+                      <div>
+                        <label className="text-[11px] text-zinc-400 block mb-1">Platzierung:</label>
+                        <select
+                          value={facebookPlacement}
+                          onChange={(e) => setFacebookPlacement(e.target.value as any)}
+                          className="w-full bg-[#120F17] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                        >
+                          <option value="timeline">Feed (Timeline)</option>
+                          <option value="reels">Reel</option>
+                          <option value="stories">Story</option>
+                        </select>
+                      </div>
+                      <label className="flex items-center gap-2 cursor-pointer text-zinc-300">
+                        <input
+                          type="checkbox"
+                          checked={facebookCaptionEachImage}
+                          onChange={(e) => setFacebookCaptionEachImage(e.target.checked)}
+                          className="accent-orange-500 rounded"
+                        />
+                        <span>Bei Karussell: Text unter jedem Bild</span>
+                      </label>
                       <label className="flex items-center gap-2 cursor-pointer text-zinc-300">
                         <input
                           type="checkbox"

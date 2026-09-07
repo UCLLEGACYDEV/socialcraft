@@ -58,10 +58,29 @@ export interface PostForMeTiktokConfiguration {
   title?: string;
 }
 
+export interface PostForMeInstagramConfiguration {
+  placement?: "reels" | "stories" | "timeline";
+  /** Instagram usernames tagged as collaborators. */
+  collaborators?: string[];
+  /** If false, a video only shows in the Reels tab. */
+  share_to_feed?: boolean;
+  location?: string;
+  audio_name?: string;
+}
+
+export interface PostForMeFacebookConfiguration {
+  placement?: "reels" | "stories" | "timeline";
+  location?: string;
+  /** Caption on every carousel image (true) vs. only the final post (false). */
+  set_caption_for_each_image?: boolean;
+}
+
 export interface PostForMePlatformConfiguration {
   pinterest?: PostForMePinterestConfiguration;
   tiktok?: PostForMeTiktokConfiguration;
   tiktok_business?: PostForMeTiktokConfiguration;
+  instagram?: PostForMeInstagramConfiguration;
+  facebook?: PostForMeFacebookConfiguration;
   [key: string]: any;
 }
 
@@ -92,12 +111,16 @@ export interface PostForMeSocialPost {
 export interface PostForMePostResult {
   id: string;
   post_id: string;
-  platform: string;
   social_account_id: string;
-  status: "success" | "failure" | "pending";
-  platform_url?: string;
-  error_message?: string;
-  created_at?: string;
+  /** Whether publishing to this account succeeded. */
+  success: boolean;
+  /** Present when `success` is false. Free-form object from the platform. */
+  error?: Record<string, any> | null;
+  /** Detailed logs from the platform attempt. */
+  details?: Record<string, any> | null;
+  /** Where the published content lives on the platform. */
+  platform_data?: { id?: string; url?: string } | null;
+  media?: PostForMeMediaItem[] | null;
 }
 
 export interface PostForMePlatformPostMetrics {
