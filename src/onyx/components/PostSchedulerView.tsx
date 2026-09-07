@@ -46,6 +46,7 @@ import { ZernioApiClient, createZernioClient } from "../zernio/client";
 import { buildZernioPayload } from "../zernio/formatter";
 import { TikTokMusicLibraryModal } from "./TikTokMusicLibraryModal";
 import { TIKTOK_MUSIC_LIBRARY, type TikTokSoundItem } from "../data/tiktok-sounds";
+import { generateViralCaption } from "../caption-generator";
 
 interface PostSchedulerViewProps {
   channels: SocialChannel[];
@@ -194,6 +195,39 @@ export function PostSchedulerView({
     return validSlideImages.length > 0 ? validSlideImages : [];
   });
   const [customMediaUrl, setCustomMediaUrl] = useState("");
+  const [isGeneratingCaption, setIsGeneratingCaption] = useState(false);
+
+  const handleGenerateAiCaption = async () => {
+    const currentTopic = postTitle.trim() || "Virale Social Media Strategie & Mehrwert";
+    setIsGeneratingCaption(true);
+    try {
+      const res = await generateViralCaption({
+        topic: currentTopic,
+        platform: selectedChannel?.platform || "instagram",
+        apiKey: settings?.geminiApiKey,
+      });
+
+      if (res.success) {
+        setPostCaption(res.caption);
+        if (res.hashtags && res.hashtags.length > 0) {
+          setPostHashtags(res.hashtags.join(" "));
+        }
+        toast.success(
+          res.provider === "gemini"
+            ? "Virale Caption mit Google Gemini AI generiert! ✨"
+            : "Virale Caption erstellt! 🚀",
+          {
+            description: "Struktur: Scroll-Stopping Hook + Mehrwert + CTA (strikt ohne Gedankenstriche).",
+          }
+        );
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Fehler beim Erstellen der Caption";
+      toast.error(msg);
+    } finally {
+      setIsGeneratingCaption(false);
+    }
+  };
 
   // Update when initialScheduledItem changes
   useEffect(() => {
@@ -1322,9 +1356,21 @@ export function PostSchedulerView({
 
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
-                    <label className="text-xs font-semibold text-zinc-300">
-                      Beitragstext / Caption:
-                    </label>
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs font-semibold text-zinc-300">
+                        Beitragstext / Caption:
+                      </label>
+                      <button
+                        type="button"
+                        disabled={isGeneratingCaption}
+                        onClick={handleGenerateAiCaption}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-purple-500/40 bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 hover:text-white text-[11px] font-semibold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+                        title="Erstellt mit Gemini AI eine virale, SEO-optimierte Caption (Hook + Value + CTA, ohne Gedankenstriche)"
+                      >
+                        <Sparkles className={cn("h-3 w-3 text-purple-400", isGeneratingCaption && "animate-spin")} />
+                        <span>{isGeneratingCaption ? "Generiert…" : "✨ KI-Caption (Gemini)"}</span>
+                      </button>
+                    </div>
                     <span className={cn(
                       "text-[10px] font-mono px-2 py-0.5 rounded",
                       selectedChannel.platform === "bluesky" && (postCaption.length + postHashtags.length > 300)

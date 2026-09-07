@@ -30,6 +30,7 @@ import {
 import { toast } from "sonner";
 import { BATCH_NICHE_PRESETS, type NichePreset, type BatchDayTemplate } from "../data/batch-niche-presets";
 import { ZernioApiClient } from "../zernio/client";
+import { sanitizeNoGedankenstriche, generateViralCaption } from "../caption-generator";
 import type { ApiSettings, ScheduledPost, SocialChannel } from "../types";
 import { cn } from "@/lib/utils";
 
@@ -162,8 +163,8 @@ export function ThirtyDayBatchModal({
 
         const newPost: ScheduledPost = {
           id: `batch-post-${Date.now()}-${i + 1}`,
-          title: `Tag ${template.day}: ${template.headline}`,
-          caption: template.universalCaption,
+          title: `Tag ${template.day}: ${sanitizeNoGedankenstriche(template.headline)}`,
+          caption: sanitizeNoGedankenstriche(template.universalCaption),
           hashtags: template.hashtags,
           mediaUrls,
           mediaType: "carousel",
