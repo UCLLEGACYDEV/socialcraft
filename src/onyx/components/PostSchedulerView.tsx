@@ -53,6 +53,7 @@ import type { SocialChannel, ScheduledPost, SocialPlatform, SlideContent, Histor
 import { DEFAULT_SOCIAL_CHANNELS } from "../defaults";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { PostForMeApiClient, createPostForMeClient } from "../postforme/client";
 import { ZernioApiClient, createZernioClient } from "../zernio/client";
 import { buildZernioPayload } from "../zernio/formatter";
 import { TikTokMusicLibraryModal } from "./TikTokMusicLibraryModal";
@@ -69,6 +70,7 @@ interface PostSchedulerViewProps {
   initialScheduledItem?: { title: string; imageUrls: string[]; prompt?: string } | null;
   onNavigateToCarousel?: () => void;
   settings?: ApiSettings;
+  onOpenPostForMeSetup?: () => void;
   onOpenZernioSetup?: () => void;
   onOpen30DayBatch?: () => void;
 }
@@ -173,9 +175,13 @@ export function PostSchedulerView({
   initialScheduledItem = null,
   onNavigateToCarousel,
   settings,
+  onOpenPostForMeSetup,
   onOpenZernioSetup,
   onOpen30DayBatch,
 }: PostSchedulerViewProps) {
+  const openDirectSetup = onOpenPostForMeSetup || onOpenZernioSetup;
+  const hasPublisherKey = !!(settings?.postForMeApiKey || settings?.zernioApiKey);
+
   const [activeTab, setActiveTab] = useState<"queue" | "composer" | "channels">(
     initialScheduledItem ? "composer" : "queue"
   );
@@ -467,44 +473,90 @@ export function PostSchedulerView({
   const [quickReschedulePost, setQuickReschedulePost] = useState<ScheduledPost | null>(null);
   const [quickRescheduleDate, setQuickRescheduleDate] = useState<string>("");
 
-  const handleSyncZernioAccounts = async () => {
-    if (!settings?.zernioApiKey) {
-      toast.info("Bitte hinterlege zuerst deinen Publisher Engine Key.", {
-        action: onOpenZernioSetup ? { label: "Setup öffnen", onClick: onOpenZernioSetup } : undefined,
+  const handleSyncAccounts = async () => {
+    const postForMeKey = settings?.postForMeApiKey;
+    const zernioKey = settings?.zernioApiKey;
+
+    if (!postForMeKey && !zernioKey) {
+      toast.info("Bitte hinterlege zuerst deinen Post for Me API Key.", {
+        action: openDirectSetup ? { label: "Setup öffnen", onClick: openDirectSetup } : undefined,
       });
       return;
     }
 
     setIsSyncingChannels(true);
     try {
-      const client = new ZernioApiClient(settings.zernioApiKey);
-      const res = await client.listAccounts(settings.zernioProfileId);
+      if (postForMeKey) {
+        const client = new PostForMeApiClient(postForMeKey);
+        const accounts = await client.getSocialAccounts();
 
-      if (!res.accounts || res.accounts.length === 0) {
-        toast.info("Keine verbundenen Social-Media-Accounts gefunden. Verbinde Kanäle im Setup.");
-        return;
-      }
+        if (!accounts || accounts.length === 0) {
+          toast.info("Keine verknüpften Accounts bei Post for Me gefunden. Verbinde Kanäle im Setup.");
+          return;
+        }
 
-      const imported: SocialChannel[] = res.accounts.map((acc) => ({
-        id: `direct-${acc._id}`,
-        platform: (acc.platform as SocialPlatform) || "facebook",
-        name: acc.displayName || acc.username || `${acc.platform} Account`,
-        channelId: acc._id,
-        zernioAccountId: acc._id,
-        handle: acc.username ? (acc.username.startsWith("@") ? acc.username : `@${acc.username}`) : undefined,
-        avatarUrl: acc.avatarUrl || "/images/socialcraft-logo.png",
-        isDefault: false,
-      }));
+        const platformMapping: Record<string, SocialPlatform> = {
+          tiktok: "tiktok",
+          instagram: "instagram",
+          facebook: "facebook",
+          linkedin: "linkedin",
+          x: "twitter",
+          twitter: "twitter",
+          youtube: "youtube",
+          threads: "threads",
+          pinterest: "pinterest",
+          bluesky: "bluesky",
+        };
 
-      // Merge with current channels, deduplicating by channelId
-      const existingIds = new Set(channels.map((c) => c.channelId));
-      const newChannels = imported.filter((c) => !existingIds.has(c.channelId));
+        const imported: SocialChannel[] = accounts.map((acc) => ({
+          id: `pfm-${acc.id}`,
+          platform: platformMapping[acc.platform.toLowerCase()] || "facebook",
+          name: acc.display_name || acc.username || `${acc.platform} Account`,
+          channelId: acc.id,
+          postForMeAccountId: acc.id,
+          handle: acc.username ? (acc.username.startsWith("@") ? acc.username : `@${acc.username}`) : undefined,
+          avatarUrl: acc.profile_picture_url || "/images/socialcraft-logo.png",
+          isDefault: false,
+        }));
 
-      if (newChannels.length > 0) {
-        onUpdateChannels([...channels, ...newChannels]);
-        toast.success(`${newChannels.length} Social-Media-Kanäle erfolgreich synchronisiert! 🎉`);
-      } else {
-        toast.info("Alle verknüpften Accounts sind bereits in deiner Kanalliste.");
+        const existingIds = new Set(channels.map((c) => c.channelId));
+        const newChannels = imported.filter((c) => !existingIds.has(c.channelId));
+
+        if (newChannels.length > 0) {
+          onUpdateChannels([...channels, ...newChannels]);
+          toast.success(`${newChannels.length} Kanäle von Post for Me synchronisiert! 🎉`);
+        } else {
+          toast.info("Alle Post for Me Accounts sind bereits in deiner Kanalliste.");
+        }
+      } else if (zernioKey) {
+        const client = new ZernioApiClient(zernioKey);
+        const res = await client.listAccounts(settings?.zernioProfileId);
+
+        if (!res.accounts || res.accounts.length === 0) {
+          toast.info("Keine verbundenen Social-Media-Accounts gefunden. Verbinde Kanäle im Setup.");
+          return;
+        }
+
+        const imported: SocialChannel[] = res.accounts.map((acc) => ({
+          id: `direct-${acc._id}`,
+          platform: (acc.platform as SocialPlatform) || "facebook",
+          name: acc.displayName || acc.username || `${acc.platform} Account`,
+          channelId: acc._id,
+          zernioAccountId: acc._id,
+          handle: acc.username ? (acc.username.startsWith("@") ? acc.username : `@${acc.username}`) : undefined,
+          avatarUrl: acc.avatarUrl || "/images/socialcraft-logo.png",
+          isDefault: false,
+        }));
+
+        const existingIds = new Set(channels.map((c) => c.channelId));
+        const newChannels = imported.filter((c) => !existingIds.has(c.channelId));
+
+        if (newChannels.length > 0) {
+          onUpdateChannels([...channels, ...newChannels]);
+          toast.success(`${newChannels.length} Social-Media-Kanäle erfolgreich synchronisiert! 🎉`);
+        } else {
+          toast.info("Alle verknüpften Accounts sind bereits in deiner Kanalliste.");
+        }
       }
     } catch (err: any) {
       toast.error(`Sync-Fehler: ${err.message}`);
@@ -513,8 +565,17 @@ export function PostSchedulerView({
     }
   };
 
+  const handleSyncZernioAccounts = handleSyncAccounts;
+
   const handleCancelPost = async (post: ScheduledPost) => {
-    if (post.zernioPostId && settings?.zernioApiKey) {
+    if (post.postForMePostId && settings?.postForMeApiKey) {
+      try {
+        const client = new PostForMeApiClient(settings.postForMeApiKey);
+        await client.deletePost(post.postForMePostId);
+      } catch (err: any) {
+        console.warn("Could not delete from Post for Me:", err.message);
+      }
+    } else if (post.zernioPostId && settings?.zernioApiKey) {
       try {
         const client = new ZernioApiClient(settings.zernioApiKey);
         await client.deletePost(post.zernioPostId);
@@ -612,7 +673,7 @@ export function PostSchedulerView({
     setQuickReschedulePost(null);
   };
 
-  const handlePublishViaZernio = async (publishNow = true) => {
+  const handlePublishViaPublisher = async (publishNow = true) => {
     if (!postCaption.trim() && !postTitle.trim()) {
       toast.error("Bitte gib einen Titel oder einen Beitragstext ein.");
       return;
@@ -626,16 +687,75 @@ export function PostSchedulerView({
 
     const mediaList = selectedMediaUrls.length > 0 ? selectedMediaUrls : customMediaUrl ? [customMediaUrl] : [];
 
-    if (!settings?.zernioApiKey) {
-      toast.error("Kein Publisher Engine Key hinterlegt. Öffne das Direct Hub Setup!", {
-        action: onOpenZernioSetup ? { label: "Setup", onClick: onOpenZernioSetup } : undefined,
+    const pfmKey = settings?.postForMeApiKey;
+    const zernioKey = settings?.zernioApiKey;
+
+    if (!pfmKey && !zernioKey) {
+      toast.error("Kein Post for Me API Key hinterlegt. Öffne das Setup!", {
+        action: openDirectSetup ? { label: "Setup", onClick: openDirectSetup } : undefined,
       });
       return;
     }
 
     setIsPublishingZernio(true);
     try {
-      const client = new ZernioApiClient(settings.zernioApiKey);
+      if (pfmKey) {
+        const client = new PostForMeApiClient(pfmKey);
+        const targetAccountId = channel.postForMeAccountId || channel.zernioAccountId || channel.channelId;
+
+        const fullCaption = postCaption.trim() + (allHashtags.length > 0 ? "\n\n" + allHashtags.join(" ") : "");
+        const postResult = await client.createPost({
+          caption: fullCaption,
+          scheduled_at: publishNow ? null : new Date(scheduledDate).toISOString(),
+          social_accounts: [targetAccountId],
+          media: mediaList.map((url) => ({ url })),
+        });
+
+        const newPost: ScheduledPost = {
+          id: editingPostId || `post-${Date.now()}`,
+          title: postTitle.trim() || "Socialcraft Beitrag",
+          caption: postCaption.trim(),
+          hashtags: allHashtags,
+          mediaUrls: mediaList,
+          mediaType: mediaList.length > 1 ? "carousel" : "image",
+          channelId: channel.channelId,
+          platform: channel.platform,
+          scheduledFor: new Date(scheduledDate).toISOString(),
+          status: publishNow ? "published" : "scheduled",
+          createdAt: new Date().toISOString(),
+          publishedAt: publishNow ? new Date().toISOString() : undefined,
+          postForMePostId: postResult.id,
+          postForMeStatus: postResult.status,
+          musicTitle: selectedSound?.title,
+          musicArtist: selectedSound?.artist,
+        };
+
+        if (editingPostId) {
+          onUpdatePosts(posts.map((p) => (p.id === editingPostId ? newPost : p)));
+          setEditingPostId(null);
+        } else {
+          onUpdatePosts([newPost, ...posts]);
+        }
+
+        if (publishNow) {
+          toast.success("🚀 Erfolgreich via Post for Me übertragen!", {
+            description: `Status: ${postResult.status || "Live"} (ID: ${postResult.id})`,
+          });
+        } else {
+          toast.success("📅 Erfolgreich mit Post for Me terminiert!", {
+            description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")}`,
+          });
+        }
+
+        setPostTitle("");
+        setPostCaption("");
+        setSelectedSound(null);
+        setActiveTab("queue");
+        return;
+      }
+
+      // Fallback to Zernio
+      const client = new ZernioApiClient(zernioKey!);
       const postResult = await client.publishOrSchedulePost({
         title: postTitle.trim() || "Socialcraft Post",
         caption: postCaption.trim(),
@@ -692,7 +812,7 @@ export function PostSchedulerView({
       } else {
         onUpdatePosts([newPost, ...posts]);
       }
-      
+
       if (publishNow) {
         toast.success(
           tiktokDraft && channel.platform === "tiktok"
@@ -703,7 +823,7 @@ export function PostSchedulerView({
           }
         );
       } else {
-        toast.success("📅 Erfolgreich im Direct Hub terminiert!", {
+        toast.success("📅 Erfolgreich terminiert!", {
           description: `Geplant für ${new Date(scheduledDate).toLocaleString("de-DE")}`,
         });
       }
@@ -726,7 +846,7 @@ export function PostSchedulerView({
             onClick: () => {
               setTiktokDraft(true);
               setTimeout(() => {
-                handlePublishViaZernio(publishNow);
+                handlePublishViaPublisher(publishNow);
               }, 100);
             },
           },
@@ -739,6 +859,8 @@ export function PostSchedulerView({
       setIsPublishingZernio(false);
     }
   };
+
+  const handlePublishViaZernio = handlePublishViaPublisher;
 
   const handleSchedulePost = () => {
     if (!postCaption.trim() && !postTitle.trim()) {
@@ -928,19 +1050,19 @@ export function PostSchedulerView({
               </button>
             )}
 
-            {onOpenZernioSetup && (
+            {openDirectSetup && (
               <button
                 type="button"
-                onClick={onOpenZernioSetup}
+                onClick={openDirectSetup}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border",
-                  settings?.zernioApiKey
+                  hasPublisherKey
                     ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30 hover:bg-emerald-500/20"
                     : "bg-white/[0.04] text-zinc-300 border-white/10 hover:bg-white/[0.08] hover:text-white"
                 )}
               >
                 <Share2 className="h-3.5 w-3.5" />
-                <span>{settings?.zernioApiKey ? "Direct Hub aktiv" : "Direct Hub"}</span>
+                <span>{hasPublisherKey ? "Post for Me aktiv" : "Post for Me Hub"}</span>
               </button>
             )}
           </div>
@@ -964,12 +1086,12 @@ export function PostSchedulerView({
             })}
           </div>
 
-          {settings?.zernioApiKey && (
+          {hasPublisherKey && (
             <button
               type="button"
               disabled={isSyncingChannels}
-              onClick={handleSyncZernioAccounts}
-              className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-white/5 disabled:opacity-50"
+              onClick={handleSyncAccounts}
+              className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-white/5 disabled:opacity-50 cursor-pointer"
             >
               <RefreshCw className={cn("h-3 w-3", isSyncingChannels && "animate-spin text-orange-400")} />
               <span>Accounts syncen</span>
@@ -2339,22 +2461,22 @@ export function PostSchedulerView({
               </p>
             </div>
             <div className="flex items-center gap-2">
-              {onOpenZernioSetup && (
+              {openDirectSetup && (
                 <button
                   type="button"
-                  onClick={onOpenZernioSetup}
+                  onClick={openDirectSetup}
                   className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-[#FF4D1C] to-[#FF8038] text-white text-xs font-bold shadow-lg shadow-[#FF4D1C]/25 hover:brightness-110 flex items-center gap-1.5 transition cursor-pointer"
                 >
                   <Key className="h-3.5 w-3.5" />
-                  <span>Direct Hub Wizard</span>
+                  <span>Post for Me Setup</span>
                 </button>
               )}
 
-              {settings?.zernioApiKey && (
+              {hasPublisherKey && (
                 <button
                   type="button"
                   disabled={isSyncingChannels}
-                  onClick={handleSyncZernioAccounts}
+                  onClick={handleSyncAccounts}
                   className="px-3 py-2 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-white text-xs font-semibold flex items-center gap-1.5 transition disabled:opacity-50 cursor-pointer"
                 >
                   <RefreshCw className={cn("h-3.5 w-3.5", isSyncingChannels && "animate-spin text-orange-400")} />

@@ -51,24 +51,27 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
 
   const endpoint = pathname.replace(/^\/api\/(cloud|webhooks?)\/?/, "").replace(/\/+$/, "");
 
-  // 0. Zernio / Direct Hub Webhook Receiver
+  // 0. Post for Me / Direct Hub Webhook Receiver
   if (
+    endpoint === "postforme" ||
+    endpoint === "webhook/postforme" ||
+    endpoint === "webhooks/postforme" ||
     endpoint === "zernio" ||
     endpoint === "webhook/zernio" ||
     endpoint === "webhooks/zernio" ||
-    (isWebhookRoute && (endpoint === "" || endpoint === "zernio"))
+    (isWebhookRoute && (endpoint === "" || endpoint === "postforme" || endpoint === "zernio"))
   ) {
     if (request.method === "GET") {
       return jsonResponse({
         status: "active",
-        service: "Socialcraft Direct Hub Webhook Receiver",
+        service: "Socialcraft Post for Me / Direct Hub Webhook Receiver",
         supportedEvents: [
-          "post.published",
+          "post.scheduled",
+          "post.processing",
+          "post.processed",
           "post.failed",
           "account.connected",
           "account.disconnected",
-          "post.scheduled",
-          "media.processed",
         ],
         timestamp: new Date().toISOString(),
       });
@@ -84,15 +87,17 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
       }
 
       const signature =
+        request.headers.get("post-for-me-webhook-secret") ||
+        request.headers.get("x-post-for-me-secret") ||
         request.headers.get("x-zernio-signature") ||
         request.headers.get("x-webhook-signature") ||
         request.headers.get("x-signature") ||
         "";
 
-      console.log("[Zernio Webhook Event Received]", {
-        event: payload.event || payload.type || "post.event",
+      console.log("[Social Webhook Event Received]", {
+        event: payload.event || payload.type || payload.status || "post.event",
         timestamp: new Date().toISOString(),
-        postId: payload.postId || payload.data?._id || payload._id,
+        postId: payload.postId || payload.data?.id || payload.data?._id || payload.id || payload._id,
         signaturePresent: !!signature,
       });
 

@@ -47,6 +47,7 @@ export interface SocialChannel {
   webhookUrl?: string;
   isDefault?: boolean;
   zernioAccountId?: string;
+  postForMeAccountId?: string;
 }
 
 export type ScheduledPostStatus = "scheduled" | "queued" | "published" | "draft" | "failed" | "cancelled";
@@ -68,6 +69,8 @@ export interface ScheduledPost {
   errorMessage?: string;
   zernioPostId?: string;
   zernioStatus?: string;
+  postForMePostId?: string;
+  postForMeStatus?: string;
   musicTitle?: string;
   musicArtist?: string;
 }
@@ -130,6 +133,8 @@ export interface ApiSettings {
   zernioApiKey?: string | undefined;
   zernioProfileId?: string | undefined;
   zernioWebhookSecret?: string | undefined;
+  postForMeApiKey?: string | undefined;
+  postForMeWebhookSecret?: string | undefined;
 }
 
 export type JobStatus =
