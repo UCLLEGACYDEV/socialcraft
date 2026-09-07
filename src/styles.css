@@ -78,7 +78,7 @@
   --secondary: oklch(0.235 0.017 45);
   --secondary-foreground: oklch(0.97 0.006 70);
   --muted: oklch(0.228 0.014 45);
-  --muted-foreground: oklch(0.82 0.012 70);
+  --muted-foreground: oklch(0.86 0.012 70);
   --accent: oklch(0.285 0.045 40);
   --accent-foreground: oklch(0.97 0.006 70);
   --destructive: oklch(0.68 0.185 25);
@@ -118,10 +118,19 @@
     border-color: var(--color-border);
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    line-height: 1.55;
     background-image:
       radial-gradient(80rem 46rem at 50% -18%, oklch(0.635 0.208 34 / 20%), transparent 62%),
       radial-gradient(50rem 32rem at 4% 22%, oklch(0.635 0.208 34 / 9%), transparent 60%),
@@ -508,6 +517,77 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* ── Global readability pass ──────────────────────────────────────
+ * Dense micro-typography and very low-contrast greys hurt legibility
+ * across the whole app. Rather than touching ~1200 call sites, we lift
+ * the smallest font sizes to a readable floor and brighten the dimmest
+ * text colours here. These plain rules sit outside every @layer, so
+ * they win over Tailwind's generated utilities without !important.
+ * Line-height is nudged up with each size so tighter rows still breathe.
+ */
+
+/* Size floor — nothing renders below ~11px, sub-xs sizes get air. */
+.text-\[8px\],
+.text-\[9px\] {
+  font-size: 10.5px;
+  line-height: 1.45;
+}
+.text-\[10px\] {
+  font-size: 11.5px;
+  line-height: 1.5;
+  letter-spacing: 0.005em;
+}
+.text-\[11px\] {
+  font-size: 12px;
+  line-height: 1.5;
+}
+.text-xs {
+  font-size: 0.795rem; /* ~12.7px, up from 12px */
+  line-height: 1.5;
+}
+.text-\[13px\] {
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+.text-sm {
+  font-size: 0.9rem; /* ~14.4px, up from 14px */
+  line-height: 1.6;
+}
+
+/* Contrast floor — remap the dimmest greys one step brighter.
+ * zinc-500/600 and low-opacity whites are the worst offenders on the
+ * dark glass surfaces; nudged so body/secondary copy stays comfortably
+ * above WCAG AA without flattening the visual hierarchy.
+ */
+.text-zinc-600 { color: #8a8a93; }
+.text-zinc-500 { color: #a1a1aa; }
+.text-zinc-400 { color: #babac2; }
+.text-neutral-500 { color: #a1a1aa; }
+.text-neutral-400 { color: #babac2; }
+.text-gray-500 { color: #a1a1aa; }
+.text-gray-400 { color: #babac2; }
+.text-slate-500 { color: #a0a5b0; }
+.text-slate-400 { color: #b6bac4; }
+
+.text-white\/40 { color: rgba(255, 255, 255, 0.62); }
+.text-white\/50 { color: rgba(255, 255, 255, 0.68); }
+.text-white\/60 { color: rgba(255, 255, 255, 0.76); }
+.text-white\/70 { color: rgba(255, 255, 255, 0.84); }
+
+/* Placeholders were near-invisible at zinc-500/600. */
+::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+  opacity: 1;
+}
+.placeholder-zinc-600::placeholder,
+.placeholder-zinc-500::placeholder,
+.placeholder-zinc-400::placeholder,
+.placeholder-neutral-500::placeholder,
+.placeholder-gray-500::placeholder {
+  color: rgba(255, 255, 255, 0.52);
+  opacity: 1;
 }
 
 
