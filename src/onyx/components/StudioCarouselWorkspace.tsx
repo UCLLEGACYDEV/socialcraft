@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   Check,
   Cpu,
   Download,
+  FileSpreadsheet,
   Flame,
   HelpCircle,
   Layers,
@@ -15,12 +16,14 @@ import {
   RotateCcw,
   Sparkles,
   TrendingUp,
+  Upload,
   UserCheck,
   Users,
   Zap,
 } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { DESIGN_TEMPLATES } from "../defaults";
+import { parseUniversalPromptFile } from "../csv-prompt-parser";
 import type { AiCloneProfile, ApiSettings, BrandKit, BriefValues } from "../types";
 import type { User } from "../auth";
 import { cn } from "@/lib/utils";
@@ -159,6 +162,32 @@ export function StudioCarouselWorkspace({
     });
   };
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleFileUpload = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = String(e.target?.result || "");
+      const parsedCarousels = parseUniversalPromptFile(content, file.name);
+      if (parsedCarousels.length > 0) {
+        const first = parsedCarousels[0];
+        onChangeBrief({
+          topic: first.title,
+          slideCount: Math.min(10, Math.max(3, first.slides.length)),
+        });
+        toast.success(`Karussell „${first.title}“ (${first.slides.length} Slides) erkannt! 🚀`, {
+          description: parsedCarousels.length > 1
+            ? `Hinweis: Es wurden ${parsedCarousels.length} Karussells in der Datei gefunden. Wechsle zu „Serie“ für den Massen-Export.`
+            : "Prompts von Claude / Gemini / ChatGPT wurden automatisch aufbereitet.",
+        });
+      } else {
+        onChangeBrief({ topic: content.slice(0, 300) });
+        toast.info("Inhalt aus Datei ins Themenfeld übernommen.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="space-y-6 animate-in fade-in-50 duration-300">
       {/* ── 1. Clean Top Studio Header ──────────────────────────────── */}
@@ -169,7 +198,7 @@ export function StudioCarouselWorkspace({
             <span>Karussell Studio</span>
           </h1>
           <p className="text-xs text-zinc-400 mt-0.5">
-            Thema eingeben, Hook wählen und professionelle Folien im Format 4:5 generieren.
+            Thema eingeben, Hook wählen oder CSV- / Prompt-Datei von Claude, Gemini & ChatGPT importieren.
           </p>
         </div>
 
@@ -202,23 +231,46 @@ export function StudioCarouselWorkspace({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* LEFT/CENTER: Prompt & Hook Workspace (8 Cols) */}
         <div className="cryptox-card p-6 space-y-5 lg:col-span-8 border border-white/[0.08]">
+          {/* Hidden File Input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.tsv,.txt,.json,.md"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleFileUpload(file);
+              e.target.value = "";
+            }}
+            className="hidden"
+          />
+
           {/* Prompt Header */}
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider">
               Thema & Kernbotschaft
             </span>
-            {brief.topic && (
+            <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={() => {
-                  onChangeBrief({ topic: "" });
-                  setSelectedHookType(null);
-                }}
-                className="text-xs text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
+                onClick={() => fileInputRef.current?.click()}
+                className="text-xs font-semibold text-purple-400 hover:text-purple-300 hover:underline flex items-center gap-1 cursor-pointer transition-colors"
+                title="CSV, Markdown oder Prompt-Datei von Claude / ChatGPT hochladen"
               >
-                <RotateCcw className="h-3 w-3" /> Zurücksetzen
+                <Upload className="h-3 w-3" /> CSV / Datei importieren
               </button>
-            )}
+              {brief.topic && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onChangeBrief({ topic: "" });
+                    setSelectedHookType(null);
+                  }}
+                  className="text-xs text-zinc-400 hover:text-white flex items-center gap-1 transition-colors"
+                >
+                  <RotateCcw className="h-3 w-3" /> Zurücksetzen
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Big Clean Prompt Textarea */}

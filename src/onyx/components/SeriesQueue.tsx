@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, ChevronRight, CloudUpload, Cpu, Loader2, Play, Sparkles, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, ChevronRight, CloudUpload, Cpu, FileSpreadsheet, FileText, Loader2, Play, Sparkles, Upload, X } from "lucide-react";
 import { parseBlock } from "../parse-prompt-block";
+import { parseUniversalPromptFile } from "../csv-prompt-parser";
 import { mockNameTopic } from "../mock-api";
+import { toast } from "sonner";
 import type { ApiSettings, ParsedCarousel, SeriesJob, JobStatus } from "../types";
 import { SlideCard } from "./SlideCard";
 import { SlideInspectModal } from "./SlideInspectModal";
@@ -131,19 +133,66 @@ export function SeriesQueue({
     setSelectedSlideIds((prev) => ({ ...prev, [jobId]: [] }));
   };
 
-  const currentInspectingJob = inspecting ? queue.find((j) => j.id === inspecting.jobId) : null;
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleFileUpload = (file: File) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const content = String(e.target?.result || "");
+      const parsedCarousels = parseUniversalPromptFile(content, file.name);
+      if (parsedCarousels.length > 0) {
+        onAddJobs(parsedCarousels);
+        const totalSlides = parsedCarousels.reduce((sum, c) => sum + c.slides.length, 0);
+        toast.success(`🎉 ${parsedCarousels.length} Karussells (${totalSlides} Slides) aus ${file.name} importiert!`, {
+          description: "Prompts von Claude / Gemini / ChatGPT wurden automatisch erkannt und strukturiert.",
+        });
+        setText("");
+      } else {
+        setText(content);
+        toast.info("Dateiinhalt ins Textfeld eingefügt.");
+      }
+    };
+    reader.readAsText(file);
+  };
 
   return (
     <div className="space-y-5">
       <div className="cryptox-card relative overflow-hidden space-y-5 p-6 sm:p-7 border border-white/[0.08]">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">Serien-Generator</h1>
-            <p className="text-xs text-zinc-400">
-              Prompt-Blöcke einfügen, Titel prüfen, Warteschlange abarbeiten oder 30-Tage Monats-Batch laden.
+            <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl flex items-center gap-2">
+              <FileSpreadsheet className="h-5 w-5 text-[#FF6A1F]" />
+              <span>Serien-Generator & CSV-Import</span>
+            </h1>
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Füge Prompts ein oder lade CSV-, TXT- oder Markdown-Exporte von Claude, ChatGPT & Gemini hoch.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
+            {/* Hidden File Input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,.tsv,.txt,.json,.md"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFileUpload(file);
+                e.target.value = "";
+              }}
+              className="hidden"
+            />
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center gap-1.5 rounded-full border border-purple-500/40 bg-purple-500/15 hover:bg-purple-500/25 px-3.5 py-2 text-xs font-semibold text-purple-300 hover:text-white transition-all cursor-pointer shadow-sm"
+              title="CSV, TSV, JSON oder Claude/ChatGPT Prompts hochladen"
+            >
+              <Upload className="h-3.5 w-3.5 text-purple-400" />
+              <span>CSV / Datei importieren</span>
+            </button>
+
             {onOpen30DayBatch && (
               <button
                 type="button"
@@ -175,14 +224,42 @@ export function SeriesQueue({
           </div>
         </div>
 
+        {/* Drag & Drop Area / Text Area */}
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setIsDragging(false);
+            const file = e.dataTransfer.files?.[0];
+            if (file) handleFileUpload(file);
+          }}
+          className={cn(
+            "relative rounded-2xl transition-all border",
+            isDragging
+              ? "border-[#FF4D17] bg-[#FF4D17]/10 ring-2 ring-[#FF4D17]/50"
+              : "border-white/10"
+          )}
+        >
+          {isDragging && (
+            <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 rounded-2xl backdrop-blur-sm pointer-events-none text-orange-400">
+              <Upload className="h-8 w-8 mb-2 animate-bounce" />
+              <p className="text-sm font-bold text-white">CSV oder Prompt-Datei hier loslassen</p>
+              <p className="text-xs text-zinc-400">Automatische Trennung & Karussell-Erkennung</p>
+            </div>
+          )}
 
-        <textarea
-          rows={9}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          placeholder={"Thema: Disziplin\n\nSlide 1 – Hook\nPrompt text…\n\nSlide 2 – Konzept\nPrompt text…\n\n===\n\nThema: Fokus\nSlide 1 – Hook\n…"}
-          className="field-input text-xs sm:text-sm leading-relaxed font-mono"
-        />
+          <textarea
+            rows={8}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder={"Tippe oder ziehe eine CSV- / Prompt-Datei hierher (von Claude, ChatGPT oder Gemini):\n\nThema: Disziplin\nSlide 1: Hook\nVisual Prompt: Minimalist obsidian statue...\n\nSlide 2: Konzept\nVisual Prompt: ...\n\n===\n\nThema: Kaltakquise\nSlide 1: ..."}
+            className="field-input text-xs sm:text-sm leading-relaxed font-mono w-full"
+          />
+        </div>
 
         {/* ── Model & Resolution Selector ─────────────────────────── */}
         <div className="rounded-2xl border border-white/[0.08] bg-white/[0.02] p-4 space-y-3">
