@@ -173,7 +173,8 @@ export class PostForMeApiClient {
    */
   async createAuthUrl(
     platform: PostForMePlatform | string,
-    redirectUrlOverride?: string
+    redirectUrlOverride?: string,
+    platformDataOverride?: Record<string, any>
   ): Promise<string> {
     const normPlatform = platform.toLowerCase();
     // LinkedIn restricts r_member_postAnalytics on personal member accounts and fails OAuth if requested.
@@ -192,6 +193,19 @@ export class PostForMeApiClient {
       payload.platform = "x";
       payload.platform_data = {
         x: { connection_type: "oauth2" },
+      };
+    } else if (normPlatform === "linkedin") {
+      // Per Post for Me official specification:
+      // "If using our provided credentials always use 'organization'."
+      payload.platform_data = {
+        linkedin: { connection_type: "organization" },
+      };
+    }
+
+    if (platformDataOverride) {
+      payload.platform_data = {
+        ...(payload.platform_data || {}),
+        ...platformDataOverride,
       };
     }
 

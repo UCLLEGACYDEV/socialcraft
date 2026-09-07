@@ -28,6 +28,7 @@ import type { PostForMeSocialAccount, PostForMePlatform } from "../postforme/typ
 import type { ApiSettings, SocialChannel, SocialPlatform } from "../types";
 import { ANCHORED_POSTFORME_API_KEY } from "../defaults";
 import { cn } from "@/lib/utils";
+import { BlueskyConnectModal } from "./BlueskyConnectModal";
 
 interface PostForMeSetupModalProps {
   isOpen: boolean;
@@ -83,6 +84,7 @@ export function PostForMeSetupModal({
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
   const [connectedAccounts, setConnectedAccounts] = useState<PostForMeSocialAccount[]>([]);
   const [disconnectingId, setDisconnectingId] = useState<string | null>(null);
+  const [showBlueskyModal, setShowBlueskyModal] = useState(false);
 
   const webhookEndpointUrl = typeof window !== "undefined"
     ? `${window.location.origin}/api/cloud/webhook/postforme`
@@ -171,6 +173,11 @@ export function PostForMeSetupModal({
     if (!key) {
       toast.error("Bitte zuerst im Schritt 1 deinen Post for Me API Key verifizieren.");
       setCurrentStep(1);
+      return;
+    }
+
+    if (platformId === "bluesky") {
+      setShowBlueskyModal(true);
       return;
     }
 
@@ -695,6 +702,15 @@ export function PostForMeSetupModal({
           </button>
         </div>
       </div>
+
+      <BlueskyConnectModal
+        isOpen={showBlueskyModal}
+        onClose={() => setShowBlueskyModal(false)}
+        apiKey={activeKey}
+        onSuccess={() => {
+          setTimeout(() => loadAccounts(activeKey), 1500);
+        }}
+      />
     </div>
   );
 }

@@ -61,6 +61,7 @@ import { PostForMeApiClient, createPostForMeClient } from "../postforme/client";
 import { ZernioApiClient, createZernioClient } from "../zernio/client";
 import { buildZernioPayload } from "../zernio/formatter";
 import { TikTokMusicLibraryModal } from "./TikTokMusicLibraryModal";
+import { BlueskyConnectModal } from "./BlueskyConnectModal";
 import { TIKTOK_MUSIC_LIBRARY, type TikTokSoundItem } from "../data/tiktok-sounds";
 import { generateViralCaption } from "../caption-generator";
 
@@ -605,6 +606,7 @@ export function PostSchedulerView({
   const [connectingPlatform, setConnectingPlatform] = useState<string | null>(null);
   const [disconnectingChannelId, setDisconnectingChannelId] = useState<string | null>(null);
   const [showComposerConnectQuick, setShowComposerConnectQuick] = useState(false);
+  const [showBlueskyModal, setShowBlueskyModal] = useState(false);
 
   // Edit / Reschedule state
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
@@ -616,6 +618,11 @@ export function PostSchedulerView({
     if (!key) {
       toast.error("Kein Post for Me API Key hinterlegt.");
       if (openDirectSetup) openDirectSetup();
+      return;
+    }
+
+    if (platformId === "bluesky") {
+      setShowBlueskyModal(true);
       return;
     }
 
@@ -3176,6 +3183,16 @@ export function PostSchedulerView({
         onClose={() => setShowMusicLibraryModal(false)}
         selectedSound={selectedSound}
         onSelectSound={(sound) => setSelectedSound(sound)}
+      />
+
+      {/* ── BLUESKY AT PROTOCOL MODAL ─────────────────────────────────── */}
+      <BlueskyConnectModal
+        isOpen={showBlueskyModal}
+        onClose={() => setShowBlueskyModal(false)}
+        apiKey={activePostForMeKey}
+        onSuccess={() => {
+          setTimeout(() => handleSyncAccounts(true), 1500);
+        }}
       />
 
       {/* ── QUICK RESCHEDULE MODAL ────────────────────────────────────── */}
