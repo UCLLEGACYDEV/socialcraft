@@ -9,6 +9,7 @@ import type {
   PostForMeFeedResponse,
   PostForMeSocialPostPreview,
   PostForMeWebhookDto,
+  PostForMeMediaItem,
 } from "./types";
 
 export const POSTFORME_API_BASE_URL = "https://api.postforme.dev/v1";
@@ -364,10 +365,16 @@ export class PostForMeApiClient {
   }
 
   /**
-   * Creates previews for how a post will look on each platform
+   * Creates previews for how a post will look on each platform.
    * POST /v1/social-post-previews
+   * Also doubles as a validation call — an invalid post returns 400 with the reason.
    */
-  async createPreviews(payload: PostForMeCreatePostDto): Promise<PostForMeSocialPostPreview[]> {
+  async createPreviews(payload: {
+    caption: string;
+    preview_social_accounts: Array<{ id: string; platform: string; username?: string }>;
+    media?: PostForMeMediaItem[];
+    platform_configurations?: PostForMeCreatePostDto["platform_configurations"];
+  }): Promise<PostForMeSocialPostPreview[]> {
     const res = await this.request<any>("/social-post-previews", {
       method: "POST",
       body: JSON.stringify(payload),

@@ -45,6 +45,9 @@ import {
   List,
   Smartphone,
   Heart,
+  BarChart3,
+  MessageCircle,
+  Repeat2,
   Bookmark,
   MoreHorizontal,
   Zap,
@@ -87,7 +90,7 @@ interface PostSchedulerViewProps {
   onNavigateToCarousel?: () => void;
   settings?: ApiSettings;
   currentUser?: User | null;
-  initialTab?: "queue" | "composer" | "channels";
+  initialTab?: "queue" | "composer" | "channels" | "insights";
   onOpenPostForMeSetup?: () => void;
   onOpenZernioSetup?: () => void;
   onOpen30DayBatch?: () => void;
@@ -314,6 +317,14 @@ function toLocalDatetimeValue(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+/** Compact metric formatting: 1234 → "1.2k", 2_500_000 → "2.5M". */
+function formatMetric(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(n)) return "–";
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}k`;
+  return String(n);
+}
+
 /** Parses an `<input type="datetime-local">` value as local time. Returns null when empty/invalid. */
 function parseLocalDatetimeValue(value: string): Date | null {
   if (!value) return null;
@@ -412,7 +423,7 @@ export function PostSchedulerView({
     (p) => !p.profileId || p.profileId === activeProfile?.id
   );
 
-  const [activeTab, setActiveTab] = useState<"queue" | "composer" | "channels">(
+  const [activeTab, setActiveTab] = useState<"queue" | "composer" | "channels" | "insights">(
     initialTab || (initialScheduledItem ? "composer" : "queue")
   );
 
@@ -1588,6 +1599,102 @@ export function PostSchedulerView({
     }
   };
 
+  // ── Insights / Analytics feed (GET /social-account-feeds) ──────────
+  const [insightsAccountId, setInsightsAccountId] = useState<string>("");
+  const [insightsPosts, setInsightsPosts] = useState<any[]>([]);
+  const [insightsCursor, setInsightsCursor] = useState<string | null>(null);
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
+
+  const insightsChannels = profileChannels.filter((c) => c.postForMeAccountId || c.channelId?.startsWith("spc_"));
+
+  const loadInsights = async (accountId: string, append = false) => {
+    if (!accountId || !activePostForMeKey) return;
+    setInsightsLoading(true);
+    setInsightsError(null);
+    try {
+      const client = new PostForMeApiClient(activePostForMeKey);
+      const feed = await client.getAccountFeed(accountId, {
+        limit: 12,
+        expandMetrics: true,
+        cursor: append && insightsCursor ? insightsCursor : undefined,
+      });
+      const items = Array.isArray(feed?.data) ? feed.data : [];
+      setInsightsPosts((prev) => (append ? [...prev, ...items] : items));
+      let nextCursor: string | null = null;
+      const nextUrl = feed?.meta?.next;
+      if (nextUrl) {
+        try {
+          nextCursor = new URL(nextUrl).searchParams.get("cursor");
+        } catch {
+          nextCursor = feed?.meta?.cursor || null;
+        }
+      }
+      setInsightsCursor(nextCursor);
+    } catch (err: any) {
+      setInsightsError(err?.message || "Feed konnte nicht geladen werden.");
+      if (!append) setInsightsPosts([]);
+    } finally {
+      setInsightsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab !== "insights") return;
+    const first = insightsAccountId || insightsChannels[0]?.postForMeAccountId || insightsChannels[0]?.channelId || "";
+    if (first && first !== insightsAccountId) {
+      setInsightsAccountId(first);
+    }
+    if (first) void loadInsights(first, false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, insightsAccountId]);
+
+  // ── Post preview / validation (POST /social-post-previews) ─────────
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewData, setPreviewData] = useState<any[]>([]);
+
+  const handleOpenPreview = async () => {
+    if (!activePostForMeKey) {
+      toast.error("Publishing-Dienst nicht bereit.");
+      return;
+    }
+    const channel = channels.find((c) => c.id === selectedChannelId) || defaultChannel;
+    const targetAccountId = channel.postForMeAccountId || channel.channelId;
+    const allHashtags = postHashtags
+      .split(/[\s,]+/)
+      .filter((t) => t.startsWith("#") || t.length > 1)
+      .map((t) => (t.startsWith("#") ? t : `#${t}`));
+    const mediaList = selectedMediaUrls.length > 0 ? selectedMediaUrls : customMediaUrl ? [customMediaUrl] : [];
+    const fullCaption = postCaption.trim() + (allHashtags.length > 0 ? "\n\n" + allHashtags.join(" ") : "");
+
+    setPreviewOpen(true);
+    setPreviewLoading(true);
+    setPreviewError(null);
+    setPreviewData([]);
+    try {
+      const client = new PostForMeApiClient(activePostForMeKey);
+      const publishMedia = mediaList.length > 0 ? await ensurePublicMedia(client, mediaList) : [];
+      const previews = await client.createPreviews({
+        caption: fullCaption,
+        preview_social_accounts: [
+          {
+            id: targetAccountId,
+            platform: channel.platform === "twitter" ? "x" : channel.platform,
+            username: channel.handle?.replace(/^@/, ""),
+          },
+        ],
+        media: publishMedia.map((url) => ({ url })),
+      });
+      setPreviewData(Array.isArray(previews) ? previews : []);
+    } catch (err: any) {
+      setPreviewError(err?.message || "Vorschau fehlgeschlagen – die Plattform hat den Beitrag abgelehnt.");
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
   // When the queue opens, quietly reconcile posts that should have gone out by now.
   useEffect(() => {
     if (activeTab !== "queue" || !activePostForMeKey) return;
@@ -1783,6 +1890,19 @@ export function PostSchedulerView({
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>+ Planen</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab("insights")}
+                className={cn(
+                  "flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                  activeTab === "insights"
+                    ? "bg-[#FF4D17] text-white shadow-[0_0_15px_rgba(255,77,23,0.35)]"
+                    : "text-zinc-400 hover:text-white"
+                )}
+              >
+                <BarChart3 className="w-3.5 h-3.5" />
+                <span>Insights</span>
               </button>
               <button
                 type="button"
@@ -3171,6 +3291,17 @@ export function PostSchedulerView({
                 <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
+                    onClick={handleOpenPreview}
+                    disabled={previewLoading}
+                    className="px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                    title="Zeigt die Plattform-Vorschau und prüft, ob der Beitrag akzeptiert wird"
+                  >
+                    <Eye className={cn("h-3.5 w-3.5", previewLoading && "animate-pulse")} />
+                    <span>Vorschau & Prüfen</span>
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={handleSchedulePost}
                     className="px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-zinc-300 transition-all"
                     title="Beitrag in lokaler Socialcraft-Queue speichern"
@@ -3603,6 +3734,128 @@ export function PostSchedulerView({
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* ── TAB: INSIGHTS / ANALYTICS FEED ─────────────────────────── */}
+      {activeTab === "insights" && (
+        <div className="space-y-5 animate-in fade-in duration-300">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-orange-400" />
+              <h3 className="text-sm font-bold text-white">Insights & Performance</h3>
+              <span className="text-[10px] text-zinc-400 font-mono">Live von Post for Me</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <select
+                value={insightsAccountId}
+                onChange={(e) => setInsightsAccountId(e.target.value)}
+                className="bg-[#120F17] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white"
+              >
+                {insightsChannels.length === 0 && <option value="">Kein verbundenes Profil</option>}
+                {insightsChannels.map((c) => (
+                  <option key={c.id} value={c.postForMeAccountId || c.channelId}>
+                    {c.name} ({c.platform})
+                  </option>
+                ))}
+              </select>
+              <button
+                type="button"
+                onClick={() => insightsAccountId && loadInsights(insightsAccountId, false)}
+                disabled={insightsLoading || !insightsAccountId}
+                className="p-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 disabled:opacity-50"
+                title="Aktualisieren"
+              >
+                <RefreshCw className={cn("h-3.5 w-3.5", insightsLoading && "animate-spin")} />
+              </button>
+            </div>
+          </div>
+
+          {insightsError && (
+            <div className="text-xs text-red-300 bg-red-500/10 border border-red-500/25 rounded-xl px-3 py-2">
+              {insightsError}
+            </div>
+          )}
+
+          {insightsLoading && insightsPosts.length === 0 ? (
+            <div className="text-center py-16 text-zinc-500 text-sm">Lade Feed…</div>
+          ) : insightsPosts.length === 0 && !insightsError ? (
+            <div className="text-center py-16 text-zinc-500 text-sm">
+              Noch keine Beiträge im Feed. Für Metriken muss das Profil mit der „feeds"-Berechtigung verbunden sein.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {insightsPosts.map((p, i) => {
+                const m = p.metrics || {};
+                const mediaUrl =
+                  typeof p.media?.[0] === "string" ? p.media[0] : p.media?.[0]?.url || undefined;
+                return (
+                  <div key={p.platform_post_id || i} className="cryptox-card p-4 border border-white/[0.08] space-y-3">
+                    <div className="flex items-center justify-between text-[11px] text-zinc-400">
+                      <span className="font-mono uppercase">{p.platform}</span>
+                      {p.posted_at && <span>{new Date(p.posted_at).toLocaleDateString("de-DE")}</span>}
+                    </div>
+                    {mediaUrl && (
+                      <img src={mediaUrl} alt="" className="w-full h-36 object-cover rounded-lg border border-white/10" />
+                    )}
+                    <p className="text-xs text-zinc-300 line-clamp-3">{p.caption || "(ohne Text)"}</p>
+                    <div className="grid grid-cols-3 gap-2 text-center pt-2 border-t border-white/5">
+                      <div>
+                        <div className="flex items-center justify-center gap-1 text-white text-sm font-bold">
+                          <Heart className="h-3 w-3 text-rose-400" />
+                          {formatMetric(m.likes ?? m.favorites)}
+                        </div>
+                        <div className="text-[10px] text-zinc-500">Likes</div>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-center gap-1 text-white text-sm font-bold">
+                          <MessageCircle className="h-3 w-3 text-sky-400" />
+                          {formatMetric(m.comments)}
+                        </div>
+                        <div className="text-[10px] text-zinc-500">Kommentare</div>
+                      </div>
+                      <div>
+                        <div className="flex items-center justify-center gap-1 text-white text-sm font-bold">
+                          {m.video_views != null ? (
+                            <Eye className="h-3 w-3 text-emerald-400" />
+                          ) : (
+                            <Repeat2 className="h-3 w-3 text-emerald-400" />
+                          )}
+                          {formatMetric(m.video_views ?? m.reach ?? m.shares)}
+                        </div>
+                        <div className="text-[10px] text-zinc-500">
+                          {m.video_views != null ? "Views" : m.reach != null ? "Reichweite" : "Shares"}
+                        </div>
+                      </div>
+                    </div>
+                    {p.platform_url && (
+                      <a
+                        href={p.platform_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="flex items-center gap-1.5 text-[11px] text-orange-300 hover:text-orange-200"
+                      >
+                        <ExternalLink className="h-3 w-3" /> Auf {p.platform} ansehen
+                      </a>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {insightsCursor && (
+            <div className="text-center">
+              <button
+                type="button"
+                onClick={() => loadInsights(insightsAccountId, true)}
+                disabled={insightsLoading}
+                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-semibold text-zinc-300 disabled:opacity-50"
+              >
+                {insightsLoading ? "Lädt…" : "Mehr laden"}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
@@ -4083,6 +4336,76 @@ export function PostSchedulerView({
           setTimeout(() => handleSyncAccounts(true), 1500);
         }}
       />
+
+      {/* ── PREVIEW / VALIDATION MODAL ───────────────────────────────── */}
+      {previewOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg max-h-[85vh] overflow-y-auto bg-[#0F0D15] border border-white/15 rounded-2xl shadow-2xl p-6 text-white space-y-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4 text-orange-400" />
+                <h3 className="text-sm font-bold text-white">Vorschau & Prüfung</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setPreviewOpen(false)}
+                className="text-zinc-500 hover:text-white p-1 cursor-pointer transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {previewLoading ? (
+              <div className="py-12 text-center text-sm text-zinc-400">Prüfe Beitrag bei der Plattform…</div>
+            ) : previewError ? (
+              <div className="space-y-2">
+                <div className="flex items-start gap-2 text-xs text-red-300 bg-red-500/10 border border-red-500/25 rounded-xl px-3 py-2.5">
+                  <XCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span className="break-words">{previewError}</span>
+                </div>
+                <p className="text-[11px] text-zinc-500">
+                  Der Beitrag würde in dieser Form von der Plattform abgelehnt. Passe Text/Medien/Einstellungen an.
+                </p>
+              </div>
+            ) : previewData.length === 0 ? (
+              <div className="py-10 text-center text-sm text-zinc-400">Keine Vorschau-Daten erhalten.</div>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 text-xs text-emerald-300 bg-emerald-500/10 border border-emerald-500/25 rounded-xl px-3 py-2">
+                  <Check className="h-4 w-4" />
+                  <span>Sieht gut aus – der Beitrag wird von der Plattform akzeptiert.</span>
+                </div>
+                {previewData.map((pv, i) => {
+                  const mediaUrl =
+                    typeof pv.media?.[0] === "string" ? pv.media[0] : pv.media?.[0]?.url || undefined;
+                  return (
+                    <div key={i} className="rounded-xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
+                      <div className="text-[11px] font-mono uppercase text-zinc-400">
+                        {pv.platform || "Plattform"}
+                        {pv.social_account_username ? ` · @${pv.social_account_username}` : ""}
+                      </div>
+                      {mediaUrl && (
+                        <img src={mediaUrl} alt="" className="w-full max-h-64 object-cover rounded-lg border border-white/10" />
+                      )}
+                      <p className="text-xs text-zinc-200 whitespace-pre-wrap">{pv.caption}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="flex justify-end pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => setPreviewOpen(false)}
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-white bg-white/10 hover:bg-white/15 transition cursor-pointer"
+              >
+                Schließen
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── QUICK RESCHEDULE MODAL ────────────────────────────────────── */}
       {quickReschedulePost && (

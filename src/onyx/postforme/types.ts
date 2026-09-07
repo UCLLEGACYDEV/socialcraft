@@ -124,23 +124,32 @@ export interface PostForMePostResult {
 }
 
 export interface PostForMePlatformPostMetrics {
-  views?: number;
   likes?: number;
   comments?: number;
   shares?: number;
-  impressions?: number;
-  saves?: number;
+  favorites?: number;
+  reach?: number;
+  video_views?: number;
+  total_time_watched?: number;
+  average_time_watched?: number;
+  new_followers?: number;
+  profile_views?: number;
+  website_clicks?: number;
   [key: string]: any;
 }
 
 export interface PostForMePlatformPost {
-  id: string;
   platform: string;
+  posted_at?: string;
+  social_post_id?: string | null;
+  external_post_id?: string | null;
+  platform_post_id?: string;
+  social_account_id?: string;
+  platform_url?: string;
   caption?: string;
-  url?: string;
-  media?: PostForMeMediaItem[];
-  created_at?: string;
-  metrics?: PostForMePlatformPostMetrics;
+  media?: Array<{ url?: string } | string> | null;
+  metrics?: PostForMePlatformPostMetrics | null;
+  platform_data?: Record<string, any> | null;
 }
 
 export interface PostForMeFeedResponse {
