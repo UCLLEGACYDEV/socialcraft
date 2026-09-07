@@ -20,6 +20,7 @@ import {
 import { CloudGalleryView } from "@/onyx/components/CloudGalleryView";
 import { PostSchedulerView } from "@/onyx/components/PostSchedulerView";
 import { PostForMeSetupModal } from "@/onyx/components/PostForMeSetupModal";
+import { PostForMeApiClient } from "@/onyx/postforme/client";
 import { ThirtyDayBatchModal } from "@/onyx/components/ThirtyDayBatchModal";
 import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder, saveHistoryToS4, loadHistoryFromS4, makeProjectFolderName, syncCloudIdentityCookie } from "@/onyx/s4-storage";
 import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
@@ -228,6 +229,68 @@ function OnyxStudio() {
       setSettings((prev) => ({ ...prev, postForMeApiKey: ANCHORED_POSTFORME_API_KEY }));
     }
   }, [settings.postForMeApiKey, setSettings]);
+
+  // Listen for Post for Me OAuth completion (via popup or redirect)
+  useEffect(() => {
+    const handleAuthMessage = async (event: MessageEvent) => {
+      if (event.data?.type === "POSTFORME_AUTH_SUCCESS") {
+        try {
+          const client = new PostForMeApiClient(settings.postForMeApiKey || ANCHORED_POSTFORME_API_KEY);
+          const accounts = await client.getSocialAccounts();
+          if (accounts.length > 0) {
+            const platformMapping: Record<string, SocialPlatform> = {
+              tiktok: "tiktok",
+              instagram: "instagram",
+              facebook: "facebook",
+              linkedin: "linkedin",
+              x: "twitter",
+              twitter: "twitter",
+              youtube: "youtube",
+              threads: "threads",
+              pinterest: "pinterest",
+              bluesky: "bluesky",
+            };
+
+            const imported: SocialChannel[] = accounts.map((acc) => ({
+              id: `pfm-${acc.id}`,
+              platform: platformMapping[acc.platform.toLowerCase()] || "facebook",
+              name: acc.display_name || acc.username || `${acc.platform} Account`,
+              channelId: acc.id,
+              postForMeAccountId: acc.id,
+              handle: acc.username ? (acc.username.startsWith("@") ? acc.username : `@${acc.username}`) : undefined,
+              avatarUrl: acc.profile_picture_url || "/images/socialcraft-logo.png",
+              isDefault: false,
+            }));
+
+            const existingIds = new Set(socialChannels.map((c) => c.channelId));
+            const newOnes = imported.filter((c) => !existingIds.has(c.channelId));
+            if (newOnes.length > 0) {
+              setSocialChannels([...socialChannels, ...newOnes]);
+            }
+          }
+        } catch {}
+
+        setActiveTab("scheduler");
+        toast.success("Social-Media-Kanal erfolgreich verbunden! 🎉", {
+          description: "Dein Account ist jetzt im Beitrags-Planer verfügbar.",
+        });
+      }
+    };
+
+    window.addEventListener("message", handleAuthMessage);
+
+    // Also check URL params if redirected to root directly
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tab") === "scheduler" || params.get("connected") === "true") {
+        setActiveTab("scheduler");
+      }
+    }
+
+    return () => {
+      window.removeEventListener("message", handleAuthMessage);
+    };
+  }, [settings.postForMeApiKey, socialChannels, setSocialChannels, setActiveTab]);
 
   // Restore history from the user's private cloud folder when local history is empty
   useEffect(() => {
