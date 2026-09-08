@@ -132,6 +132,7 @@ export function ThirtyDayBatchModal({
     geminiApiKey: settings.geminiApiKey || "",
     openaiApiKey: settings.openaiApiKey || "",
   });
+  const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
 
   const selectedPreset = BATCH_NICHE_PRESETS.find((p) => p.id === selectedNicheId) || BATCH_NICHE_PRESETS[0];
 
@@ -146,7 +147,8 @@ export function ThirtyDayBatchModal({
     setSelectedNicheId(nicheId);
   };
 
-  const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
+
+
 
   const handleScheduleAll30Days = async () => {
     const targetChannels = selectedChannelIds.length
