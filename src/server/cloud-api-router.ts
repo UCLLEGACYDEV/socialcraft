@@ -237,6 +237,95 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
     }
   }
 
+  // 0.1 AI Engine Proxy (Server-side API key protection for KIE.AI / Nano-Banana)
+  if (endpoint.startsWith("ai/")) {
+    const aiSub = endpoint.replace(/^ai\/?/, "");
+    const serverKieKey =
+      (typeof process !== "undefined" &&
+        (process.env?.["KIE_API_KEY"] || process.env?.["VITE_KIE_API_KEY"])) ||
+      "";
+
+    if (aiSub === "credit" && (request.method === "GET" || request.method === "POST")) {
+      let customKey = request.headers.get("x-kie-api-key") || "";
+      if (!customKey && request.method === "POST") {
+        try {
+          const body = (await request.clone().json()) as { apiKey?: string };
+          if (body?.apiKey) customKey = body.apiKey;
+        } catch {}
+      }
+      const effectiveKey = (customKey || serverKieKey).trim();
+      if (!effectiveKey) {
+        return jsonResponse(
+          { code: 401, msg: "Kein API-Key auf Server oder im Request konfiguriert." },
+          401,
+        );
+      }
+      try {
+        const resp = await fetch("https://api.kie.ai/api/v1/chat/credit", {
+          method: "GET",
+          headers: { Authorization: `Bearer ${effectiveKey}` },
+        });
+        const data = await resp.json();
+        return jsonResponse(data, resp.status);
+      } catch (err: unknown) {
+        return jsonResponse({ code: 500, msg: String(err) }, 500);
+      }
+    }
+
+    if (aiSub === "create-task" && request.method === "POST") {
+      try {
+        const body = (await request.json()) as Record<string, unknown>;
+        const rawKey = body["apiKey"];
+        const customKey =
+          (typeof rawKey === "string" ? rawKey : "") ||
+          request.headers.get("x-kie-api-key") ||
+          "";
+        const effectiveKey = (customKey || serverKieKey).trim();
+        if (!effectiveKey) {
+          return jsonResponse(
+            { code: 401, msg: "Kein API-Key auf Server oder im Request konfiguriert." },
+            401,
+          );
+        }
+        delete body["apiKey"]; // Do not leak forward
+        const resp = await fetch("https://api.kie.ai/api/v1/jobs/createTask", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${effectiveKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(body),
+        });
+        const data = await resp.json();
+        return jsonResponse(data, resp.status);
+      } catch (err: unknown) {
+        return jsonResponse({ code: 500, msg: String(err) }, 500);
+      }
+    }
+
+    if (aiSub === "task-status" && request.method === "GET") {
+      const taskId = url.searchParams.get("taskId");
+      if (!taskId) {
+        return jsonResponse({ code: 400, msg: "Parameter taskId fehlt." }, 400);
+      }
+      const customKey = request.headers.get("x-kie-api-key") || "";
+      const effectiveKey = (customKey || serverKieKey).trim();
+      try {
+        const resp = await fetch(
+          `https://api.kie.ai/api/v1/jobs/recordInfo?taskId=${encodeURIComponent(taskId)}`,
+          {
+            method: "GET",
+            headers: effectiveKey ? { Authorization: `Bearer ${effectiveKey}` } : {},
+          },
+        );
+        const data = await resp.json();
+        return jsonResponse(data, resp.status);
+      } catch (err: unknown) {
+        return jsonResponse({ code: 500, msg: String(err) }, 500);
+      }
+    }
+  }
+
   const identity = await resolveCloudIdentity(request);
 
   // 1. Ensure Folder

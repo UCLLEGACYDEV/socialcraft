@@ -249,10 +249,11 @@ export function SlideCard({
                   e.stopPropagation();
                   onReroll();
                 }}
+                aria-label={`Slide ${slide.slideNumber} neu generieren`}
                 title="Neu generieren"
-                className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-400 hover:bg-white/10 hover:text-orange-400 transition-colors cursor-pointer"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 hover:bg-white/10 hover:text-orange-400 transition-colors cursor-pointer"
               >
-                <RefreshCw className="h-3 w-3" />
+                <RefreshCw className="h-3.5 w-3.5" />
               </button>
               <button
                 type="button"
@@ -261,10 +262,11 @@ export function SlideCard({
                   if (onPreview) onPreview();
                   else onEdit();
                 }}
+                aria-label={`Slide ${slide.slideNumber} Großansicht & Anpassen`}
                 title="Großansicht & Anpassen"
-                className="flex h-6 w-6 items-center justify-center rounded-md text-zinc-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
+                className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-400 hover:bg-white/10 hover:text-white transition-colors cursor-pointer"
               >
-                <Eye className="h-3 w-3" />
+                <Eye className="h-3.5 w-3.5" />
               </button>
             </div>
           </div>

@@ -181,7 +181,13 @@ export class PostForMeApiClient {
     // LinkedIn restricts r_member_postAnalytics on personal member accounts and fails OAuth if requested.
     // Using ['posts'] requests openid, w_member_social, profile, email which works universally.
     const permissions = normPlatform === "linkedin" ? ["posts"] : ["posts", "feeds"];
-    const payload: Record<string, any> = {
+    const payload: {
+      platform: string;
+      permissions: string[];
+      platform_data?: Record<string, any>;
+      redirect_url_override?: string;
+      [key: string]: any;
+    } = {
       platform: normPlatform === "twitter" ? "x" : normPlatform,
       permissions,
     };

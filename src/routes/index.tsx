@@ -19,6 +19,7 @@ import {
 } from "@/onyx/components/SimpleViews";
 import { CloudGalleryView } from "@/onyx/components/CloudGalleryView";
 import { PostSchedulerView } from "@/onyx/components/PostSchedulerView";
+import { ViewBoundary } from "@/onyx/components/ViewBoundary";
 import { PostForMeSetupModal } from "@/onyx/components/PostForMeSetupModal";
 import { PostForMeApiClient } from "@/onyx/postforme/client";
 import { ThirtyDayBatchModal } from "@/onyx/components/ThirtyDayBatchModal";
@@ -64,6 +65,7 @@ import type {
   SeriesJob,
   SlideContent,
   SocialChannel,
+  SocialPlatform,
   TabKey,
 } from "@/onyx/types";
 
@@ -97,11 +99,36 @@ export const Route = createFileRoute("/")({
   component: OnyxStudio,
 });
 
-function OnyxStudio() {
+export const TAB_ROUTE_MAP: Record<TabKey, string> = {
+  carousel: "/studio",
+  bulk: "/serie",
+  "direct-prompt": "/einzelbild",
+  scheduler: "/planer",
+  "ai-clone": "/klon",
+  "prompt-gallery": "/prompts",
+  history: "/galerie",
+};
+
+export const ROUTE_TAB_MAP: Record<string, TabKey> = {
+  "/studio": "carousel",
+  "/serie": "bulk",
+  "/einzelbild": "direct-prompt",
+  "/planer": "scheduler",
+  "/klon": "ai-clone",
+  "/prompts": "prompt-gallery",
+  "/galerie": "history",
+};
+
+export interface OnyxStudioProps {
+  routeTab?: TabKey;
+  initialView?: "landing" | "studio" | "admin";
+}
+
+export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
   const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredCurrentUser());
   const [currentView, setCurrentView] = usePersistentState<"landing" | "studio" | "admin">(
     "onyx.currentView",
-    currentUser ? "studio" : "landing",
+    initialView || (currentUser || routeTab ? "studio" : "landing"),
   );
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -110,15 +137,24 @@ function OnyxStudio() {
 
   // SaaS rule: Authenticated users stay in the Studio workspace; never bounced to marketing landing page
   useEffect(() => {
-    if (currentUser && currentView === "landing") {
+    if ((currentUser || routeTab) && currentView === "landing") {
       setCurrentView("studio");
     }
-  }, [currentUser, currentView, setCurrentView]);
+  }, [currentUser, routeTab, currentView, setCurrentView]);
+
+  useEffect(() => {
+    if (initialView) {
+      setCurrentView(initialView);
+    }
+  }, [initialView, setCurrentView]);
 
   const handleLogout = () => {
     saveStoredCurrentUser(null);
     setCurrentUser(null);
     setCurrentView("landing");
+    if (typeof window !== "undefined" && window.location.pathname !== "/") {
+      window.history.pushState(null, "", "/");
+    }
     toast.info("Erfolgreich abgemeldet.");
   };
 
@@ -153,6 +189,9 @@ function OnyxStudio() {
       });
     }
     setCurrentView("admin");
+    if (typeof window !== "undefined" && window.location.pathname !== "/admin") {
+      window.history.pushState(null, "", "/admin");
+    }
   };
 
   // Prevent automatic downward scroll on reload and tab switch
@@ -187,7 +226,62 @@ function OnyxStudio() {
     });
   }, [currentUser]);
 
-  const [activeTab, setActiveTab] = usePersistentState<TabKey>(LS.activeTab, "carousel");
+  const [activeTab, setActiveTab] = usePersistentState<TabKey>(
+    LS.activeTab,
+    routeTab || "carousel",
+  );
+
+  useEffect(() => {
+    if (routeTab) {
+      setActiveTab(routeTab);
+      setCurrentView("studio");
+    }
+  }, [routeTab, setActiveTab, setCurrentView]);
+
+  // Sync initial URL path if opened directly without routeTab
+  useEffect(() => {
+    if (typeof window !== "undefined" && !routeTab) {
+      const path = window.location.pathname;
+      const matched = ROUTE_TAB_MAP[path];
+      if (matched) {
+        setActiveTab(matched);
+        setCurrentView("studio");
+      } else if (path === "/admin") {
+        setCurrentView("admin");
+      }
+    }
+  }, [routeTab, setActiveTab, setCurrentView]);
+
+  // Handle browser back and forward navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const path = window.location.pathname;
+      const matched = ROUTE_TAB_MAP[path];
+      if (matched) {
+        setActiveTab(matched);
+        setCurrentView("studio");
+      } else if (path === "/admin") {
+        setCurrentView("admin");
+      } else if (path === "/") {
+        if (!currentUser) {
+          setCurrentView("landing");
+        }
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [currentUser, setActiveTab, setCurrentView]);
+
+  const handleTabChange = useCallback(
+    (newTab: TabKey) => {
+      setActiveTab(newTab);
+      const targetUrl = TAB_ROUTE_MAP[newTab];
+      if (targetUrl && typeof window !== "undefined" && window.location.pathname !== targetUrl) {
+        window.history.pushState(null, "", targetUrl);
+      }
+    },
+    [setActiveTab],
+  );
   const [collapsed, setCollapsed] = usePersistentState<boolean>(LS.sidebarCollapsed, false);
   const [brandKit, setBrandKit] = usePersistentState<BrandKit>(LS.brandKit, DEFAULT_BRAND_KIT, true);
   const [settings, setSettings] = usePersistentState<ApiSettings>(
@@ -1117,8 +1211,14 @@ function OnyxStudio() {
         {/* Floating Top Navbar */}
         <CryptoxNavbar
           activeTab={activeTab}
-          onNavigate={setActiveTab}
+          onNavigate={handleTabChange}
           onNavigateAdmin={handleOpenAdmin}
+          onNavigateLanding={() => {
+            setCurrentView("landing");
+            if (typeof window !== "undefined" && window.location.pathname !== "/") {
+              window.history.pushState(null, "", "/");
+            }
+          }}
           currentUser={currentUser}
           onOpenAuth={(mode) => {
             setAuthModalMode(mode);
@@ -1138,7 +1238,7 @@ function OnyxStudio() {
           onOpen30DayBatch={() => setShow30DayBatch(true)}
           onNavigateScheduler={(subTab) => {
             setSchedulerSubTab(subTab);
-            setActiveTab("scheduler");
+            handleTabChange("scheduler");
           }}
           brandProfiles={brandProfiles}
           activeProfileId={activeBrandProfileId}
@@ -1147,177 +1247,192 @@ function OnyxStudio() {
         />
 
         <main className="mx-auto w-full flex-1 p-4 sm:p-6 max-w-[1600px]">
-          {activeTab === "carousel" &&
-            (slides.length === 0 ? (
-              <StudioCarouselWorkspace
-                brief={brief}
-                onChangeBrief={patchBrief}
-                onSubmit={() => void generateCarousel()}
-                isGenerating={isGeneratingCarousel}
-                settings={settings}
-                onChangeSettings={patchSettings}
-                brandKit={brandKit}
-                onChangeBrandKit={patchBrandKit}
-                activeClone={activeClone}
-                onOpenCloneStudio={() => setActiveTab("ai-clone")}
-                onOpenPromptHub={() => setActiveTab("prompt-gallery")}
-                onOpenBrandKit={() => setShowBrandKit(true)}
-                onOpenSettings={() => setShowSettings(true)}
-                currentUser={currentUser}
-              />
-            ) : (
-              <div className="pt-4">
-                <CarouselViewer
-                  slides={slides}
-                  topic={topic}
-                  isGeneratingImages={isGeneratingImages}
-                  onGenerateImages={() => void generateAllImages()}
-                  onCancelGeneration={() => abortRef.current?.abort()}
-                  onRerollImage={(id) => void rerollImage(id)}
-                  onEditSlide={(id) => setEditing({ slideId: id })}
-                  onDownloadSingle={(id, withOverlay) => {
-                    const slide = slides.find((s) => s.id === id);
-                    if (slide) void downloadSlide(slide, brandKit, withOverlay);
-                  }}
-                  onExportZip={(withOverlay) => void exportZip(withOverlay)}
-                  onSaveToCloud={() => void saveCarouselToCloud()}
-                  onSchedulePost={() => setActiveTab("scheduler")}
-                  onReset={resetCarousel}
+          {activeTab === "carousel" && (
+            <ViewBoundary name="Karussell-Studio" storageKeyToClearOnEmergency={LS.activeSlides}>
+              {slides.length === 0 ? (
+                <StudioCarouselWorkspace
+                  brief={brief}
+                  onChangeBrief={patchBrief}
+                  onSubmit={() => void generateCarousel()}
+                  isGenerating={isGeneratingCarousel}
                   settings={settings}
+                  onChangeSettings={patchSettings}
                   brandKit={brandKit}
-                  onUpdateSlides={setSlides}
-                  onAddSlide={handleAddSlide}
+                  onChangeBrandKit={patchBrandKit}
+                  activeClone={activeClone}
+                  onOpenCloneStudio={() => handleTabChange("ai-clone")}
+                  onOpenPromptHub={() => handleTabChange("prompt-gallery")}
+                  onOpenBrandKit={() => setShowBrandKit(true)}
+                  onOpenSettings={() => setShowSettings(true)}
+                  currentUser={currentUser}
                 />
-              </div>
-            ))}
+              ) : (
+                <div className="pt-4">
+                  <CarouselViewer
+                    slides={slides}
+                    topic={topic}
+                    isGeneratingImages={isGeneratingImages}
+                    onGenerateImages={() => void generateAllImages()}
+                    onCancelGeneration={() => abortRef.current?.abort()}
+                    onRerollImage={(id) => void rerollImage(id)}
+                    onEditSlide={(id) => setEditing({ slideId: id })}
+                    onDownloadSingle={(id, withOverlay) => {
+                      const slide = slides.find((s) => s.id === id);
+                      if (slide) void downloadSlide(slide, brandKit, withOverlay);
+                    }}
+                    onExportZip={(withOverlay) => void exportZip(withOverlay)}
+                    onSaveToCloud={() => void saveCarouselToCloud()}
+                    onSchedulePost={() => handleTabChange("scheduler")}
+                    onReset={resetCarousel}
+                    settings={settings}
+                    brandKit={brandKit}
+                    onUpdateSlides={setSlides}
+                    onAddSlide={handleAddSlide}
+                  />
+                </div>
+              )}
+            </ViewBoundary>
+          )}
 
           {activeTab === "bulk" && (
-            <SeriesQueue
-              queue={queue}
-              isRunning={isRunningQueue}
-              onAddJobs={addJobs}
-              onRunQueue={() => void runQueue()}
-              onStopQueue={cancelAllQueue}
-              onDeleteJob={(id) => setQueue((prev) => prev.filter((j) => j.id !== id))}
-              onRenameJob={(id, value) => updateJob(id, { topic: value })}
-              onEditSlide={(jobId, slideId) => setEditing({ jobId, slideId })}
-              onRerollSlide={(jobId, slideId) => void runSingleJobSlide(jobId, slideId)}
-              onDownloadSlide={(jobId, slideId) => void downloadFromJob(jobId, slideId)}
-              onStartSlide={(jobId, slideId) => void runSingleJobSlide(jobId, slideId)}
-              onCancelSlide={(jobId, slideId) => cancelJobSlide(jobId, slideId)}
-              onRunSelectedSlides={(jobId, slideIds) => void runSelectedJobSlides(jobId, slideIds)}
-              onCancelJobSlides={(jobId) => cancelJobSlides(jobId)}
-              onSaveJobToCloud={(jobId) => void saveJobToCloud(jobId)}
-              onOpen30DayBatch={() => setShow30DayBatch(true)}
-              settings={settings}
-              onChangeSettings={patchSettings}
-            />
+            <ViewBoundary name="Serien-Warteschlange" storageKeyToClearOnEmergency={LS.seriesQueue}>
+              <SeriesQueue
+                queue={queue}
+                isRunning={isRunningQueue}
+                onAddJobs={addJobs}
+                onRunQueue={() => void runQueue()}
+                onStopQueue={cancelAllQueue}
+                onDeleteJob={(id) => setQueue((prev) => prev.filter((j) => j.id !== id))}
+                onRenameJob={(id, value) => updateJob(id, { topic: value })}
+                onEditSlide={(jobId, slideId) => setEditing({ jobId, slideId })}
+                onRerollSlide={(jobId, slideId) => void runSingleJobSlide(jobId, slideId)}
+                onDownloadSlide={(jobId, slideId) => void downloadFromJob(jobId, slideId)}
+                onStartSlide={(jobId, slideId) => void runSingleJobSlide(jobId, slideId)}
+                onCancelSlide={(jobId, slideId) => cancelJobSlide(jobId, slideId)}
+                onRunSelectedSlides={(jobId, slideIds) => void runSelectedJobSlides(jobId, slideIds)}
+                onCancelJobSlides={(jobId) => cancelJobSlides(jobId)}
+                onSaveJobToCloud={(jobId) => void saveJobToCloud(jobId)}
+                onOpen30DayBatch={() => setShow30DayBatch(true)}
+                settings={settings}
+                onChangeSettings={patchSettings}
+              />
+            </ViewBoundary>
           )}
 
           {activeTab === "direct-prompt" && (
-            <DirectPromptView
-              initialPrompt={directPrompt}
-              currentUser={currentUser}
-              onNavigateToClone={() => setActiveTab("ai-clone")}
-              onUseInCarousel={(imageUrl, promptText) => {
-                patchBrief({ topic: promptText });
-                setActiveTab("carousel");
-                toast.success("Einzelbild ins Karussell übertragen!");
-              }}
-              onDeductCredits={(amt) => {
-                if (currentUser) {
-                  const updated = Math.max(0, (currentUser.credits ?? 0) - amt);
-                  setCurrentUser((prev) => (prev ? { ...prev, credits: updated } : null));
-                }
-                void refreshCredits();
-              }}
-            />
+            <ViewBoundary name="Direkt-Prompt Einzelbild" storageKeyToClearOnEmergency="onyx.directPrompt">
+              <DirectPromptView
+                initialPrompt={directPrompt}
+                currentUser={currentUser}
+                onNavigateToClone={() => handleTabChange("ai-clone")}
+                onUseInCarousel={(imageUrl, promptText) => {
+                  patchBrief({ topic: promptText });
+                  handleTabChange("carousel");
+                  toast.success("Einzelbild ins Karussell übertragen!");
+                }}
+                onDeductCredits={(amt) => {
+                  if (currentUser) {
+                    const updated = Math.max(0, (currentUser.credits ?? 0) - amt);
+                    setCurrentUser((prev) => (prev ? { ...prev, credits: updated } : null));
+                  }
+                  void refreshCredits();
+                }}
+              />
+            </ViewBoundary>
           )}
           {activeTab === "scheduler" && (
-            <PostSchedulerView
-              channels={socialChannels}
-              onUpdateChannels={setSocialChannels}
-              posts={scheduledPosts}
-              onUpdatePosts={setScheduledPosts}
-              currentSlides={slides}
-              historyEntries={history}
-              initialScheduledItem={schedulerInitialItem}
-              onNavigateToCarousel={() => setActiveTab("carousel")}
-              settings={settings}
-              currentUser={currentUser}
-              initialTab={schedulerSubTab}
-              onOpenPostForMeSetup={currentUser?.role === "admin" ? () => setShowPostForMeSetup(true) : undefined}
-              onOpenZernioSetup={currentUser?.role === "admin" ? () => setShowPostForMeSetup(true) : undefined}
-              onOpen30DayBatch={() => setShow30DayBatch(true)}
-              brandProfiles={brandProfiles}
-              activeProfileId={activeBrandProfileId}
-              onSelectProfile={setActiveBrandProfileId}
-              onUpdateBrandProfiles={setBrandProfiles}
-              onOpenBrandProfileManager={() => setShowBrandProfileManager(true)}
-            />
+            <ViewBoundary name="Post-Planer & Kalender" storageKeyToClearOnEmergency={LS.scheduledPosts}>
+              <PostSchedulerView
+                channels={socialChannels}
+                onUpdateChannels={setSocialChannels}
+                posts={scheduledPosts}
+                onUpdatePosts={setScheduledPosts}
+                currentSlides={slides}
+                historyEntries={history}
+                initialScheduledItem={schedulerInitialItem}
+                onNavigateToCarousel={() => handleTabChange("carousel")}
+                settings={settings}
+                currentUser={currentUser}
+                initialTab={schedulerSubTab}
+                onOpenPostForMeSetup={currentUser?.role === "admin" ? () => setShowPostForMeSetup(true) : undefined}
+                onOpenZernioSetup={currentUser?.role === "admin" ? () => setShowPostForMeSetup(true) : undefined}
+                onOpen30DayBatch={() => setShow30DayBatch(true)}
+                brandProfiles={brandProfiles}
+                activeProfileId={activeBrandProfileId}
+                onSelectProfile={setActiveBrandProfileId}
+                onUpdateBrandProfiles={setBrandProfiles}
+                onOpenBrandProfileManager={() => setShowBrandProfileManager(true)}
+              />
+            </ViewBoundary>
           )}
           {activeTab === "ai-clone" && (
-            <AiCloneView
-              currentUser={currentUser}
-              onDeductCredits={(amt) => {
-                if (currentUser) {
-                  const updated = Math.max(0, (currentUser.credits ?? 0) - amt);
-                  setCurrentUser((prev) => (prev ? { ...prev, credits: updated } : null));
-                }
-                void refreshCredits();
-              }}
-              onUseInCarousel={() => {
-                patchBrief({ useClone: true });
-                setActiveTab("carousel");
-                toast.success("KI Clone für Karussell aktiviert!");
-              }}
-              onUseInDirectPrompt={(clonePrompt) => {
-                setDirectPrompt(clonePrompt);
-                setActiveTab("direct-prompt");
-                toast.success("KI Clone ins Einzelbild übertragen!");
-              }}
-            />
+            <ViewBoundary name="KI-Klon Persona">
+              <AiCloneView
+                currentUser={currentUser}
+                onDeductCredits={(amt) => {
+                  if (currentUser) {
+                    const updated = Math.max(0, (currentUser.credits ?? 0) - amt);
+                    setCurrentUser((prev) => (prev ? { ...prev, credits: updated } : null));
+                  }
+                  void refreshCredits();
+                }}
+                onUseInCarousel={() => {
+                  patchBrief({ useClone: true });
+                  handleTabChange("carousel");
+                  toast.success("KI Clone für Karussell aktiviert!");
+                }}
+                onUseInDirectPrompt={(clonePrompt) => {
+                  setDirectPrompt(clonePrompt);
+                  handleTabChange("direct-prompt");
+                  toast.success("KI Clone ins Einzelbild übertragen!");
+                }}
+              />
+            </ViewBoundary>
           )}
           {activeTab === "prompt-gallery" && (
-            <PromptGallery
-              onUseInCarousel={(promptText, title) => {
-                patchBrief({ topic: `${title}: ${promptText}` });
-                setActiveTab("carousel");
-                toast.success("Prompt ins Karussell übertragen!");
-              }}
-              onUseInDirectPrompt={(promptText) => {
-                setDirectPrompt(promptText);
-                setActiveTab("direct-prompt");
-                toast.success("Prompt ins Einzelbild übertragen!");
-              }}
-            />
+            <ViewBoundary name="Prompt-Bibliothek">
+              <PromptGallery
+                onUseInCarousel={(promptText, title) => {
+                  patchBrief({ topic: `${title}: ${promptText}` });
+                  handleTabChange("carousel");
+                  toast.success("Prompt ins Karussell übertragen!");
+                }}
+                onUseInDirectPrompt={(promptText) => {
+                  setDirectPrompt(promptText);
+                  handleTabChange("direct-prompt");
+                  toast.success("Prompt ins Einzelbild übertragen!");
+                }}
+              />
+            </ViewBoundary>
           )}
           {activeTab === "history" && (
-            <CloudGalleryView
-              currentUser={currentUser}
-              historyEntries={history}
-              onOpenHistory={(entry) => {
-                setSlides(entry.slides);
-                setTopic(entry.topic);
-                setActiveTab("carousel");
-              }}
-              onDeleteHistory={(id) => setHistory((prev) => prev.filter((e) => e.id !== id))}
-              onUseInCarousel={(imageUrl, prompt) => {
-                patchBrief({ topic: prompt });
-                setActiveTab("carousel");
-                toast.success("Bild ins Karussell geladen!");
-              }}
-              onUseInDirectPrompt={(prompt) => {
-                setDirectPrompt(prompt);
-                setActiveTab("direct-prompt");
-                toast.success("Prompt ins Einzelbild übernommen!");
-              }}
-              onScheduleItem={(item) => {
-                setSchedulerInitialItem(item);
-                setActiveTab("scheduler");
-                toast.success(`Projekt „${item.title}“ im Planer geöffnet! 📅`);
-              }}
-            />
+            <ViewBoundary name="Cloud-Galerie & Verlauf" storageKeyToClearOnEmergency={LS.history}>
+              <CloudGalleryView
+                currentUser={currentUser}
+                historyEntries={history}
+                onOpenHistory={(entry) => {
+                  setSlides(entry.slides);
+                  setTopic(entry.topic);
+                  handleTabChange("carousel");
+                }}
+                onDeleteHistory={(id) => setHistory((prev) => prev.filter((e) => e.id !== id))}
+                onUseInCarousel={(imageUrl, prompt) => {
+                  patchBrief({ topic: prompt });
+                  handleTabChange("carousel");
+                  toast.success("Bild ins Karussell geladen!");
+                }}
+                onUseInDirectPrompt={(prompt) => {
+                  setDirectPrompt(prompt);
+                  handleTabChange("direct-prompt");
+                  toast.success("Prompt ins Einzelbild übernommen!");
+                }}
+                onScheduleItem={(item) => {
+                  setSchedulerInitialItem(item);
+                  handleTabChange("scheduler");
+                  toast.success(`Projekt „${item.title}“ im Planer geöffnet! 📅`);
+                }}
+              />
+            </ViewBoundary>
           )}
         </main>
 

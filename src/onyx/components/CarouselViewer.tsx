@@ -1,11 +1,15 @@
 import {
   ArrowLeft,
   Calendar,
+  CheckCircle2,
+  Clock,
   CloudUpload,
   Download,
   Grid3X3,
+  Loader2,
   Plus,
   RotateCcw,
+  ShieldCheck,
   Sparkles,
   X,
 } from "lucide-react";
@@ -85,6 +89,109 @@ export function CarouselViewer({
 
   return (
     <div className="space-y-5">
+      {/* ── Step 2 Guidance & Generation Banner ──────────────────────── */}
+      <div
+        className={cn(
+          "rounded-2xl border p-4.5 transition-all shadow-sm",
+          isGeneratingImages
+            ? "border-orange-500/50 bg-gradient-to-r from-orange-500/15 via-amber-500/10 to-orange-500/15"
+            : done === slides.length
+              ? "border-emerald-500/40 bg-emerald-500/10"
+              : "border-orange-500/30 bg-orange-500/[0.06]",
+        )}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="space-y-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="flex h-5 items-center rounded-md bg-orange-500/20 px-2 text-[11px] font-extrabold uppercase tracking-wider text-orange-400 border border-orange-500/30">
+                Schritt 2 von 2
+              </span>
+              {done === slides.length ? (
+                <span className="flex items-center gap-1 text-xs font-bold text-emerald-400">
+                  <CheckCircle2 className="h-3.5 w-3.5" />
+                  Alle Visuals vollständig bereit!
+                </span>
+              ) : isGeneratingImages ? (
+                <span className="flex items-center gap-1.5 text-xs font-bold text-orange-300 animate-pulse">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin text-orange-400" />
+                  Visuals werden gerendert…
+                </span>
+              ) : (
+                <span className="text-xs font-semibold text-zinc-300">
+                  Text-Konzept steht · Visuals bereit zur Generierung
+                </span>
+              )}
+            </div>
+
+            <p className="text-xs text-zinc-300 leading-relaxed">
+              {done === slides.length ? (
+                "Perfekt! Du kannst einzelne Slides über das Stift-Symbol bearbeiten, Bilder neu würfeln oder das Karussell als 1080×1350 ZIP exportieren."
+              ) : isGeneratingImages ? (
+                `Generiere Bild ${Math.min(slides.length, done + 1)} von ${slides.length} (ca. ${Math.max(1, (slides.length - done) * 4)} Sek. verbleibend). Bereits generierte Bilder bleiben beim Abbrechen erhalten.`
+              ) : (
+                <>
+                  Überprüfe die Texte unten. Starte anschließend die KI-Bildgenerierung (<strong className="text-white">{slides.length - done} Credits</strong>, ca. {(slides.length - done) * 4} Sek.).
+                </>
+              )}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            {isGeneratingImages ? (
+              <button
+                type="button"
+                onClick={onCancelGeneration}
+                className="flex items-center gap-1.5 rounded-xl border border-destructive/50 bg-destructive/20 px-4 py-2 text-xs font-bold text-destructive hover:bg-destructive/30 transition-colors cursor-pointer"
+              >
+                <X className="h-3.5 w-3.5" /> Abbrechen (fertige Folien behalten)
+              </button>
+            ) : done < slides.length ? (
+              <button
+                type="button"
+                onClick={onGenerateImages}
+                className="cryptox-orange-btn !py-2.5 !px-5 text-xs font-bold shadow-[0_0_20px_rgba(255,77,23,0.35)] flex items-center gap-2 cursor-pointer"
+              >
+                <Sparkles className="h-4 w-4" />
+                <span>
+                  {done === 0
+                    ? `Alle ${slides.length} Visuals rendern (${slides.length} Credits)`
+                    : `Restliche ${slides.length - done} Visuals rendern`}
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => onExportZip(withOverlay)}
+                className="cryptox-orange-btn !py-2.5 !px-5 text-xs font-bold shadow-[0_0_20px_rgba(255,77,23,0.35)] flex items-center gap-2 cursor-pointer"
+              >
+                <Download className="h-4 w-4" />
+                <span>Als ZIP herunterladen</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Progress bar when generating or partially done */}
+        {(isGeneratingImages || (done > 0 && done < slides.length)) && (
+          <div className="mt-3 pt-3 border-t border-white/10">
+            <div className="flex items-center justify-between text-[11px] mb-1.5">
+              <span className="text-zinc-400 font-medium">
+                Fortschritt: <strong className="text-orange-400">{done}</strong> von {slides.length} Bildern fertig
+              </span>
+              <span className="text-zinc-400 font-mono">
+                {Math.round((done / slides.length) * 100)}%
+              </span>
+            </div>
+            <div className="h-2 w-full rounded-full bg-black/40 overflow-hidden p-0.5 border border-white/10">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-400 transition-all duration-300"
+                style={{ width: `${Math.max(4, (done / slides.length) * 100)}%` }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="cryptox-card relative overflow-hidden flex flex-wrap items-center justify-between gap-3 p-5 border border-white/[0.08]">
         <div className="min-w-0">
           <h1 className="truncate text-lg sm:text-xl font-bold text-white tracking-tight">{topic || "Karussell"}</h1>

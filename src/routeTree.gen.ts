@@ -10,8 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CallbackRouteImport } from './routes/callback'
+import { Route as EinzelbildRouteImport } from './routes/einzelbild'
+import { Route as GalerieRouteImport } from './routes/galerie'
+import { Route as KlonRouteImport } from './routes/klon'
+import { Route as PlanerRouteImport } from './routes/planer'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as PromptsRouteImport } from './routes/prompts'
+import { Route as SerieRouteImport } from './routes/serie'
+import { Route as StudioRouteImport } from './routes/studio'
 import { Route as TermsRouteImport } from './routes/terms'
 
 const IndexRoute = IndexRouteImport.update({
@@ -19,14 +27,54 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CallbackRoute = CallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EinzelbildRoute = EinzelbildRouteImport.update({
+  id: '/einzelbild',
+  path: '/einzelbild',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GalerieRoute = GalerieRouteImport.update({
+  id: '/galerie',
+  path: '/galerie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KlonRoute = KlonRouteImport.update({
+  id: '/klon',
+  path: '/klon',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PlanerRoute = PlanerRouteImport.update({
+  id: '/planer',
+  path: '/planer',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PrivacyRoute = PrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PromptsRoute = PromptsRouteImport.update({
+  id: '/prompts',
+  path: '/prompts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SerieRoute = SerieRouteImport.update({
+  id: '/serie',
+  path: '/serie',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StudioRoute = StudioRouteImport.update({
+  id: '/studio',
+  path: '/studio',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -37,35 +85,104 @@ const TermsRoute = TermsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/callback': typeof CallbackRoute
+  '/einzelbild': typeof EinzelbildRoute
+  '/galerie': typeof GalerieRoute
+  '/klon': typeof KlonRoute
+  '/planer': typeof PlanerRoute
   '/privacy': typeof PrivacyRoute
+  '/prompts': typeof PromptsRoute
+  '/serie': typeof SerieRoute
+  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/callback': typeof CallbackRoute
+  '/einzelbild': typeof EinzelbildRoute
+  '/galerie': typeof GalerieRoute
+  '/klon': typeof KlonRoute
+  '/planer': typeof PlanerRoute
   '/privacy': typeof PrivacyRoute
+  '/prompts': typeof PromptsRoute
+  '/serie': typeof SerieRoute
+  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
   '/callback': typeof CallbackRoute
+  '/einzelbild': typeof EinzelbildRoute
+  '/galerie': typeof GalerieRoute
+  '/klon': typeof KlonRoute
+  '/planer': typeof PlanerRoute
   '/privacy': typeof PrivacyRoute
+  '/prompts': typeof PromptsRoute
+  '/serie': typeof SerieRoute
+  '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/callback' | '/privacy' | '/terms'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/callback'
+    | '/einzelbild'
+    | '/galerie'
+    | '/klon'
+    | '/planer'
+    | '/privacy'
+    | '/prompts'
+    | '/serie'
+    | '/studio'
+    | '/terms'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/callback' | '/privacy' | '/terms'
-  id: '__root__' | '/' | '/callback' | '/privacy' | '/terms'
+  to:
+    | '/'
+    | '/admin'
+    | '/callback'
+    | '/einzelbild'
+    | '/galerie'
+    | '/klon'
+    | '/planer'
+    | '/privacy'
+    | '/prompts'
+    | '/serie'
+    | '/studio'
+    | '/terms'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/callback'
+    | '/einzelbild'
+    | '/galerie'
+    | '/klon'
+    | '/planer'
+    | '/privacy'
+    | '/prompts'
+    | '/serie'
+    | '/studio'
+    | '/terms'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
   CallbackRoute: typeof CallbackRoute
+  EinzelbildRoute: typeof EinzelbildRoute
+  GalerieRoute: typeof GalerieRoute
+  KlonRoute: typeof KlonRoute
+  PlanerRoute: typeof PlanerRoute
   PrivacyRoute: typeof PrivacyRoute
+  PromptsRoute: typeof PromptsRoute
+  SerieRoute: typeof SerieRoute
+  StudioRoute: typeof StudioRoute
   TermsRoute: typeof TermsRoute
 }
 
@@ -78,6 +195,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/callback': {
       id: '/callback'
       path: '/callback'
@@ -85,11 +209,60 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/einzelbild': {
+      id: '/einzelbild'
+      path: '/einzelbild'
+      fullPath: '/einzelbild'
+      preLoaderRoute: typeof EinzelbildRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/galerie': {
+      id: '/galerie'
+      path: '/galerie'
+      fullPath: '/galerie'
+      preLoaderRoute: typeof GalerieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/klon': {
+      id: '/klon'
+      path: '/klon'
+      fullPath: '/klon'
+      preLoaderRoute: typeof KlonRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/planer': {
+      id: '/planer'
+      path: '/planer'
+      fullPath: '/planer'
+      preLoaderRoute: typeof PlanerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/privacy': {
       id: '/privacy'
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/prompts': {
+      id: '/prompts'
+      path: '/prompts'
+      fullPath: '/prompts'
+      preLoaderRoute: typeof PromptsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/serie': {
+      id: '/serie'
+      path: '/serie'
+      fullPath: '/serie'
+      preLoaderRoute: typeof SerieRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/studio': {
+      id: '/studio'
+      path: '/studio'
+      fullPath: '/studio'
+      preLoaderRoute: typeof StudioRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -104,8 +277,16 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
   CallbackRoute: CallbackRoute,
+  EinzelbildRoute: EinzelbildRoute,
+  GalerieRoute: GalerieRoute,
+  KlonRoute: KlonRoute,
+  PlanerRoute: PlanerRoute,
   PrivacyRoute: PrivacyRoute,
+  PromptsRoute: PromptsRoute,
+  SerieRoute: SerieRoute,
+  StudioRoute: StudioRoute,
   TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport

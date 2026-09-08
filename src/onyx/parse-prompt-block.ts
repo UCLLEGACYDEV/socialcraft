@@ -25,8 +25,10 @@ export function cleanPrompt(raw: string): string {
   // Remove leading "Prompt:" or "Prompt :" or "Visual Prompt:"
   text = text.replace(/^(?:visual\s+)?prompt\s*:\s*/i, "").trim();
 
-  // Remove wrapping quotes if the whole prompt was in quotes
-  text = text.replace(/^["'“”„]/, "").replace(/["'“”]$/, "").trim();
+  // Remove wrapping quotes ONLY if the whole prompt was wrapped in quotes
+  if (/^["'“”„]/.test(text) && /["'“”]$/.test(text)) {
+    text = text.slice(1, -1).trim();
+  }
 
   return text;
 }

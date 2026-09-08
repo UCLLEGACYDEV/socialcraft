@@ -503,6 +503,31 @@ export function CryptoxNavbar({
           )}
         </div>
       </div>
+
+      {/* ── Mobile Navigation Strip (Accessible on touch & small screens) ── */}
+      <nav
+        aria-label="Mobile Hauptnavigation"
+        className="flex md:hidden items-center gap-1.5 overflow-x-auto no-scrollbar pt-2 pb-1 px-1 border-t border-white/[0.06] mt-2"
+      >
+        {[...CREATION_TABS, ...LIBRARY_TABS].map((tab) => {
+          const isActive = activeTab === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => onNavigate(tab.key)}
+              className={cn(
+                "shrink-0 rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer min-h-[34px] flex items-center justify-center select-none",
+                isActive
+                  ? "bg-[#FF4D17] text-white shadow-[0_0_14px_-2px_#FF4D17]"
+                  : "text-zinc-400 bg-white/[0.04] border border-white/10 hover:text-white hover:bg-white/[0.08]",
+              )}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </nav>
     </header>
   );
 }

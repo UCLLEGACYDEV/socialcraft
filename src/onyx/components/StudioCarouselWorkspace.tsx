@@ -14,6 +14,7 @@ import {
   Palette,
   Plus,
   RotateCcw,
+  ShieldCheck,
   Sparkles,
   TrendingUp,
   Upload,
@@ -83,39 +84,61 @@ const HOOK_ARCHETYPES = [
   },
 ] as const;
 
-// 4 Echte Karussell-Format-Vorlagen
+// 6 Echte Karussell-Format-Vorlagen für den Schnellstart
 const CAROUSEL_PRESETS = [
   {
     title: "Mythen vs. Realität",
     tag: "Viraler Hook",
+    icon: Flame,
     topic: "5 gefährliche Mythen über organisches Instagram-Wachstum 2026",
-    audience: "Content Creator, Social Media Manager & Agenturen",
+    audience: "Content Creator & Agenturen",
     slides: 7,
     designId: "ember-ignite",
   },
   {
     title: "Die 5-Schritte-Formel",
     tag: "High Saves",
+    icon: Layers,
     topic: "In 5 Schritten vom anonymen Profil zur gebuchten Personenmarke",
-    audience: "Solopreneure, Coaches & B2B Dienstleister",
+    audience: "Solopreneure & Coaches",
     slides: 6,
     designId: "high-contrast",
   },
   {
-    title: "Tool-Stack & Workflows",
-    tag: "Technik & KI",
-    topic: "Die 7 unverzichtbaren KI-Tools, die wir für 10x schnellere Content-Produktion nutzen",
-    audience: "Tech-Enthusiasten & Marketing-Teams",
+    title: "Experten-Tippliste",
+    tag: "Quick Value",
+    icon: Lightbulb,
+    topic: "7 unverzeihliche Fehler bei der Kundengewinnung (und wie du sie vermeidest)",
+    audience: "B2B Dienstleister & Gründer",
+    slides: 7,
+    designId: "ember-ignite",
+  },
+  {
+    title: "Vorher / Nachher",
+    tag: "Case Study",
+    icon: TrendingUp,
+    topic: "Warum dieser einfache Hook-Wechsel die Verweildauer um 94.8% steigerte",
+    audience: "Wachstumsorientierte Brands",
+    slides: 5,
+    designId: "ember-ignite",
+  },
+  {
+    title: "Tool-Stack & KI",
+    tag: "Produktivität",
+    icon: Zap,
+    topic: "Die 7 unverzichtbaren KI-Tools für 10x schnellere Content-Produktion",
+    audience: "Marketing-Teams & Creator",
     slides: 8,
     designId: "neo-brutal",
   },
   {
-    title: "Vorher vs. Nachher Transformation",
-    tag: "Case Study",
-    topic: "Warum dieser einfache Hook-Wechsel die Verweildauer um 94.8% steigerte",
-    audience: "Wachstumsorientierte Gründer:innen",
-    slides: 5,
-    designId: "ember-ignite",
+    title: "Story & Zitat",
+    tag: "Storytelling",
+    icon: Sparkles,
+    topic: "Die eine Lektion, die mich 10.000 € Lehrgeld gekostet hat",
+    audience: "Gründer & Personal Brands",
+    slides: 6,
+    designId: "high-contrast",
   },
 ];
 
@@ -224,6 +247,88 @@ export function StudioCarouselWorkspace({
           <span className="rounded-full border border-white/10 bg-white/[0.03] px-2.5 py-1 text-xs text-zinc-400 font-mono">
             4:5 Portrait
           </span>
+        </div>
+      </div>
+
+      {/* ── 2-Step Workflow Indicator ────────────────────────────────── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="flex items-center gap-3 rounded-2xl border border-orange-500/40 bg-orange-500/10 p-3.5 text-white shadow-sm">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 text-black font-extrabold text-sm shadow-md">
+            1
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-orange-400">Schritt 1 (Jetzt)</span>
+              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-300 border border-emerald-500/30">
+                100% Kostenlos
+              </span>
+            </div>
+            <p className="text-xs text-zinc-200 font-medium truncate">
+              Thema & Hook festlegen · Folientexte generieren
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3.5 text-zinc-400">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white/10 text-zinc-300 font-bold text-sm">
+            2
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-zinc-400">Schritt 2 (Danach)</span>
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-zinc-300">
+                {brief.slideCount} Credits
+              </span>
+            </div>
+            <p className="text-xs text-zinc-400 truncate">
+              Texte prüfen & finale KI-Visuals rendern
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Schnellstart-Vorlagen (6 High-Conversion Presets) ────────── */}
+      <div className="space-y-2.5">
+        <div className="flex items-center justify-between px-1">
+          <span className="text-xs font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+            <Sparkles className="h-3.5 w-3.5 text-orange-400" />
+            Schnellstart-Vorlagen (1 Klick)
+          </span>
+          <span className="text-[11px] text-zinc-500">Übernimmt Thema, Struktur & ideale Slide-Anzahl</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+          {CAROUSEL_PRESETS.map((preset, idx) => {
+            const Icon = preset.icon;
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => applyPreset(preset)}
+                className="group flex flex-col justify-between p-3 rounded-xl border border-white/[0.08] bg-white/[0.02] hover:border-orange-500/50 hover:bg-orange-500/10 transition-all text-left cursor-pointer"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/[0.05] group-hover:bg-orange-500/20 text-orange-400 transition-colors">
+                      <Icon className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-[10px] font-semibold font-mono text-zinc-400 group-hover:text-orange-300">
+                      {preset.slides} Folien
+                    </span>
+                  </div>
+                  <div className="text-xs font-bold text-zinc-200 group-hover:text-white transition-colors line-clamp-1">
+                    {preset.title}
+                  </div>
+                  <div className="text-[10px] text-zinc-400 line-clamp-2 mt-0.5 leading-snug">
+                    {preset.topic}
+                  </div>
+                </div>
+                <div className="mt-2.5 pt-1.5 border-t border-white/[0.05] flex items-center justify-between text-[10px]">
+                  <span className="text-orange-400/80 font-medium">{preset.tag}</span>
+                  <span className="text-white/40 group-hover:text-white group-hover:translate-x-0.5 transition-all">→</span>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -359,8 +464,24 @@ export function StudioCarouselWorkspace({
             </div>
           </div>
 
+          {/* ── Kostenvorschau & Credit-Schutz Box ──────────────────── */}
+          <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/[0.07] p-3.5 text-xs text-zinc-300 space-y-1.5">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5 font-bold text-emerald-400">
+                <ShieldCheck className="h-4 w-4" />
+                <span>Credit-Schutz aktiv</span>
+              </div>
+              <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-300 border border-emerald-500/30">
+                0 Credits in Schritt 1
+              </span>
+            </div>
+            <p className="text-[11px] text-zinc-300 leading-relaxed">
+              In Schritt 1 generiert die KI das vollständige Text-Konzept (Hooks, Folientexte & Visual-Prompts). Du verbrauchst <strong className="text-white">keine Bild-Credits</strong>. Erst in Schritt 2 entscheidest du nach der Text-Prüfung, ob Visuals gerendert werden ({brief.slideCount} Credits, ~{brief.slideCount * 4}s).
+            </p>
+          </div>
+
           {/* ── Primary Action Button ───────────────────────────────── */}
-          <div className="pt-3 border-t border-white/[0.08]">
+          <div className="pt-2 border-t border-white/[0.08]">
             <button
               type="button"
               onClick={onSubmit}
@@ -370,12 +491,12 @@ export function StudioCarouselWorkspace({
               {isGenerating ? (
                 <span className="flex items-center justify-center gap-2">
                   <div className="h-4 w-4 rounded-full border-2 border-white/90 border-t-transparent animate-spin" />
-                  <span>Karussell wird generiert…</span>
+                  <span>Schritt 1: Text-Konzept wird generiert… (~3-5s)</span>
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
                   <Sparkles className="h-4 w-4" />
-                  <span>Karussell mit {brief.slideCount} Slides generieren</span>
+                  <span>Schritt 1: Text-Konzept für {brief.slideCount} Slides erstellen (Kostenlos)</span>
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </span>
               )}

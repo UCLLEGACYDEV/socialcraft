@@ -89,6 +89,35 @@ export interface NanoBananaGenerateResult {
 }
 
 const KIE_BASE_URL = "https://api.kie.ai/api/v1";
+const PROXY_AI_BASE = "/api/cloud/ai";
+
+/**
+ * Executes a request via the local secure server-side AI proxy first,
+ * falling back gracefully to direct KIE.AI calls if proxy is unavailable.
+ */
+async function fetchWithFallback(
+  proxyPath: string,
+  directUrl: string,
+  init: RequestInit,
+  apiKey?: string,
+): Promise<Response> {
+  if (typeof window !== "undefined") {
+    try {
+      const headers = new Headers(init.headers);
+      if (apiKey) headers.set("x-kie-api-key", apiKey);
+      const proxyResp = await fetch(`${PROXY_AI_BASE}${proxyPath}`, {
+        ...init,
+        headers,
+      });
+      if (proxyResp.status !== 404 && proxyResp.status !== 502 && proxyResp.status !== 503) {
+        return proxyResp;
+      }
+    } catch {
+      // Local server proxy unreachable, fall back to direct call
+    }
+  }
+  return fetch(directUrl, init);
+}
 
 /**
  * 1. Fetch live credit balance from KIE.AI
@@ -106,12 +135,17 @@ export async function fetchKieCredits(apiKey?: string): Promise<KieCreditResult>
   }
 
   try {
-    const response = await fetch(`${KIE_BASE_URL}/chat/credit`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${cleanKey}`,
+    const response = await fetchWithFallback(
+      "/credit",
+      `${KIE_BASE_URL}/chat/credit`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${cleanKey}`,
+        },
       },
-    });
+      cleanKey,
+    );
 
     const json = (await response.json()) as { code: number; msg: string; data?: number | string };
 
@@ -210,15 +244,20 @@ export async function createNanoBananaTask(params: NanoBananaTaskParams): Promis
     ...(params.callBackUrl ? { callBackUrl: params.callBackUrl } : {}),
   };
 
-  const response = await fetch(`${KIE_BASE_URL}/jobs/createTask`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${cleanKey}`,
-      "Content-Type": "application/json",
+  const response = await fetchWithFallback(
+    "/create-task",
+    `${KIE_BASE_URL}/jobs/createTask`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${cleanKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      signal: params.signal ?? null,
     },
-    body: JSON.stringify(payload),
-    signal: params.signal ?? null,
-  });
+    cleanKey,
+  );
 
   const json = (await response.json()) as CreateTaskResponse;
 
@@ -261,13 +300,18 @@ export async function pollNanoBananaTask(
       throw new DOMException("Generierung durch Benutzer abgebrochen", "AbortError");
     }
 
-    const response = await fetch(`${KIE_BASE_URL}/jobs/recordInfo?taskId=${encodeURIComponent(taskId)}`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${cleanKey}`,
+    const response = await fetchWithFallback(
+      `/task-status?taskId=${encodeURIComponent(taskId)}`,
+      `${KIE_BASE_URL}/jobs/recordInfo?taskId=${encodeURIComponent(taskId)}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${cleanKey}`,
+        },
+        signal: signal ?? null,
       },
-      signal: signal ?? null,
-    });
+      cleanKey,
+    );
 
     const json = (await response.json()) as RecordInfoResponse;
 
