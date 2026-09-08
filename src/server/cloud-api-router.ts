@@ -150,9 +150,10 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
       if (!token) {
         return jsonResponse(
           { error: "Kein TikTok Access Token verfügbar (Konto neu verbinden?)" },
-          502
+          424
         );
       }
+
 
       const ttResp = await fetch(
         "https://open.tiktokapis.com/v2/post/publish/creator_info/query/",
