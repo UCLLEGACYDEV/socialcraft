@@ -15,6 +15,7 @@ import {
   Layers,
   LayoutGrid,
   Maximize2,
+  MoreHorizontal,
   Plus,
   RefreshCw,
   Search,
@@ -40,6 +41,8 @@ import { HistoryView } from "./SimpleViews";
 import { LS } from "../storage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import "./cloud-gallery.css";
 
 /** Wandelt technische Ordnernamen (2026-09-06_WARUM_DEINE_GESPRAeCHE..._c8bc6f) in lesbare Titel um. */
 function prettyProjectName(raw: string): string {
@@ -325,55 +328,19 @@ export function CloudGalleryView({
   const currentFolderName = currentUser ? currentUser.name : "Mein Cloud-Workspace";
 
   return (
-    <div className="space-y-6">
-      {/* ── Top Header & Tab Switcher ──────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="gallery-workspace space-y-6">
+      <div className="gallery-heading">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl flex items-center gap-2.5">
-            <span>Cloud-Galerie & Mediathek</span>
-            <span className="rounded-full border border-orange-500/30 bg-orange-500/10 px-2.5 py-0.5 text-xs font-semibold text-orange-400">
-              Cloud-Sync aktiv
-            </span>
-          </h1>
-          <p className="text-xs text-zinc-400 mt-0.5">
-            Alle deine generierten Bilder sicher in deinem persönlichen Cloud-Ordner abgelegt.
-          </p>
+          <p className="gallery-eyebrow">DEIN CONTENT-WORKSPACE</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Galerie & Mediathek</h1>
+          <p className="mt-2 text-sm text-zinc-400">Deine Bilder und Projekte. Bereit für den nächsten Post.</p>
         </div>
-
-        {/* Tab Switcher: Mein Cloud-Ordner vs Lokales Archiv */}
-        <div className="flex items-center rounded-2xl border border-white/[0.08] bg-[#0F0D15] p-1 shadow-inner">
-          <button
-            type="button"
-            onClick={() => setActiveSubTab("cloud")}
-            className={cn(
-              "flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all",
-              activeSubTab === "cloud"
-                ? "border border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF6A1F] shadow-[0_0_15px_-3px_#FF4D17]"
-                : "text-zinc-400 hover:text-white",
-            )}
-          >
-            <Cloud className="h-4 w-4 text-[#FF6A1F]" />
-            <span>Mein Cloud-Ordner</span>
-            <span className="rounded-full bg-white/10 px-1.5 py-0.2 text-[10px] text-zinc-300">
-              {allImages.length}
-            </span>
+        <div className="gallery-tabs" role="group" aria-label="Speicherort">
+          <button type="button" aria-pressed={activeSubTab === "cloud"} onClick={() => setActiveSubTab("cloud")}>
+            <Cloud className="h-4 w-4" /><span>Cloud-Galerie</span><span className="gallery-count">{allImages.length}</span>
           </button>
-
-          <button
-            type="button"
-            onClick={() => setActiveSubTab("local")}
-            className={cn(
-              "flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all",
-              activeSubTab === "local"
-                ? "border border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF6A1F] shadow-[0_0_15px_-3px_#FF4D17]"
-                : "text-zinc-400 hover:text-white",
-            )}
-          >
-            <Folder className="h-4 w-4 text-zinc-400" />
-            <span>Lokale Entwürfe</span>
-            <span className="rounded-full bg-white/10 px-1.5 py-0.2 text-[10px] text-zinc-300">
-              {historyEntries.length}
-            </span>
+          <button type="button" aria-pressed={activeSubTab === "local"} onClick={() => setActiveSubTab("local")}>
+            <Folder className="h-4 w-4" /><span>Lokale Entwürfe</span><span className="gallery-count">{historyEntries.length}</span>
           </button>
         </div>
       </div>
@@ -390,129 +357,64 @@ export function CloudGalleryView({
       {/* ── SubTab 1: Mein Cloud-Ordner ────────────────────────────── */}
       {activeSubTab === "cloud" && (
         <div className="space-y-5">
-          {/* Cloud Connection Banner & Folder Management */}
-          <div className="cryptox-card relative overflow-hidden border border-white/[0.08] p-5 sm:p-6 bg-gradient-to-r from-[#120F1C]/90 to-[#1A1424]/90">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <div className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
-                  <span className="text-xs font-bold text-white uppercase tracking-wider">
-                    Cloud-Speicher aktiv · Gesichert
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
-                  <span className="inline-flex items-center gap-1.5 rounded-xl border border-white/10 bg-black/40 px-3 py-1 font-semibold text-xs text-orange-400">
-                    <Folder className="h-3.5 w-3.5 text-orange-400" />
-                    Dein privater Cloud-Ordner
-                  </span>
-                  <button
-                    type="button"
-                    onClick={handleSyncCloudFolder}
-                    disabled={isSyncingFolder}
-                    className="inline-flex items-center gap-1 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 px-2.5 py-1 text-[11px] font-medium text-emerald-400 transition-colors disabled:opacity-50 cursor-pointer"
-                    title="Ordner im Cloud-Speicher prüfen & anlegen"
-                  >
-                    <RefreshCw className={cn("h-3 w-3", isSyncingFolder && "animate-spin")} />
-                    <span>{isSyncingFolder ? "Synchronisiere..." : "Ordner im Speicher anlegen"}</span>
-                  </button>
-                  <span className="text-xs text-zinc-400">
-                    {stats.count} {stats.count === 1 ? "Bild" : "Bilder"} gespeichert ({stats.formattedSize})
-                  </span>
+          <div className="gallery-storage">
+            <div className="gallery-storage-row">
+              <div className="flex items-center gap-3 min-w-0">
+                <span className="gallery-storage-icon"><Cloud className="h-5 w-5" /></span>
+                <div>
+                  <p className="text-sm font-semibold text-white">{stats.count} {stats.count === 1 ? "Bild" : "Bilder"}<span className="mx-2 text-zinc-600">·</span><span className="font-normal text-zinc-400">{stats.formattedSize}</span></p>
+                  <p className="mt-1 text-xs text-zinc-400">{folderFilter === "my" ? "Dein persönlicher Cloud-Ordner" : folderFilter === "users" ? "Ordner aller Benutzer" : "Gesamte Mediathek"}</p>
                 </div>
               </div>
-
-              {/* Action Buttons: ZIP Download & Upload */}
-              <div className="flex flex-wrap items-center gap-2">
-                {/* Download entire folder as ZIP */}
-                <button
-                  type="button"
-                  onClick={handleDownloadFolderZip}
-                  disabled={isZipping || allImages.length === 0}
-                  className="flex items-center gap-1.5 rounded-xl border border-white/15 bg-white/[0.05] px-4 py-2 text-xs font-semibold text-white transition-all hover:bg-white/[0.1] hover:border-white/25 disabled:opacity-40 disabled:pointer-events-none shadow-sm"
-                  title="Alle Bilder dieses Ordners als ZIP herunterladen"
-                >
-                  <FolderDown className="h-4 w-4 text-[#FF6A1F]" />
-                  <span>Ganzen Ordner herunterladen (ZIP)</span>
+              <div className="gallery-storage-actions">
+                <button type="button" onClick={handleDownloadFolderZip} disabled={isZipping || allImages.length === 0} className="gallery-button gallery-secondary">
+                  <FolderDown className="h-4 w-4" /><span>{isZipping ? "ZIP wird erstellt…" : "Ordner herunterladen"}</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => setShowUploadModal(true)}
-                  className="flex items-center gap-1.5 rounded-xl border border-orange-500/40 bg-orange-500/15 px-3.5 py-2 text-xs font-semibold text-orange-400 transition-all hover:bg-orange-500/25 hover:text-white shadow-[0_0_15px_rgba(255,77,23,0.15)]"
-                >
-                  <Plus className="h-3.5 w-3.5" />
-                  Bild hinzufügen
+                <button type="button" onClick={() => setShowUploadModal(true)} className="gallery-button gallery-primary">
+                  <Plus className="h-4 w-4" />Bild hinzufügen
                 </button>
-
-                <button
-                  type="button"
-                  onClick={() => setRefreshTrigger((p) => p + 1)}
-                  className="rounded-xl border border-white/10 bg-white/5 p-2 text-zinc-400 hover:text-white hover:bg-white/10 transition-colors"
-                  title="Ordner aktualisieren"
-                  aria-label="Aktualisieren"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                </button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button type="button" className="gallery-button gallery-secondary gallery-icon-button" aria-label="Ordneraktionen"><MoreHorizontal className="h-5 w-5" /></button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="border-white/10 bg-[#14131b] text-zinc-200">
+                    <DropdownMenuItem onClick={() => setRefreshTrigger((p) => p + 1)} className="gap-2 py-3"><RefreshCw className="h-4 w-4" />Galerie aktualisieren</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => void handleSyncCloudFolder()} disabled={isSyncingFolder} className="gap-2 py-3"><Cloud className="h-4 w-4" />{isSyncingFolder ? "Synchronisiere…" : "Cloud-Ordner synchronisieren"}</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
-
-            {/* Admin Folder Switcher */}
             {isAdmin && (
-              <div className="mt-4 pt-4 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-semibold text-zinc-300">Admin-Ansicht:</span>
-                  <div className="flex rounded-xl border border-white/10 bg-black/30 p-0.5 text-xs">
-                    {(
-                      [
-                        { id: "my", label: "Mein Ordner" },
-                        { id: "users", label: "Alle Benutzer" },
-                        { id: "all", label: "Gesamte Mediathek" },
-                      ] as const
-                    ).map((tab) => (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => setFolderFilter(tab.id)}
-                        className={cn(
-                          "rounded-lg px-3 py-1 font-medium transition-all",
-                          folderFilter === tab.id
-                            ? "bg-white/15 text-white font-semibold shadow-sm"
-                            : "text-zinc-400 hover:text-zinc-200",
-                        )}
-                      >
-                        {tab.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <span className="text-[11px] text-zinc-500">
-                  Als Administrator kannst du zwischen deinen eigenen und den Ordnern aller Nutzer wechseln.
-                </span>
+              <div className="gallery-admin-row">
+                <label htmlFor="gallery-folder-scope" className="text-xs font-medium text-zinc-400">Admin-Ansicht</label>
+                <select id="gallery-folder-scope" value={folderFilter} onChange={(e) => setFolderFilter(e.target.value as typeof folderFilter)} className="gallery-scope-select">
+                  <option value="my">Mein Ordner</option><option value="users">Alle Benutzer</option><option value="all">Gesamte Mediathek</option>
+                </select>
               </div>
             )}
           </div>
 
           {/* ── Search, Categories & Bulk Actions Bar ──────────────── */}
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+          <div className="gallery-toolbar">
             {/* Search Input & View Switcher */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 flex-1 max-w-xl">
+            <div className="gallery-search-row">
               <div className="relative flex-1">
                 <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Nach Bildname, Thema oder Motiv suchen…"
-                  className="field-input !pl-10 !py-2 text-xs sm:text-sm w-full"
+                  placeholder="Bilder, Themen oder Motive suchen…"
+                  aria-label="Galerie durchsuchen"
+                  className="field-input !pl-10 !py-3 !text-sm w-full"
                 />
               </div>
 
               {/* View Switcher: Ordner-Struktur vs Kachel-Raster */}
-              <div className="flex items-center rounded-xl border border-white/10 bg-[#0B0910] p-1 text-xs shrink-0">
+              <div className="gallery-tabs gallery-view-tabs" role="group" aria-label="Galerieansicht">
                 <button
                   type="button"
+                  aria-pressed={galleryViewMode === "folders"}
                   onClick={() => setGalleryViewMode("folders")}
                   className={cn(
                     "flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-semibold transition-all cursor-pointer",
@@ -523,10 +425,11 @@ export function CloudGalleryView({
                   title="Strukturierte Ordner-Ansicht nach Projekten und Kategorien"
                 >
                   <FolderOpen className="h-3.5 w-3.5 text-[#FF6A1F]" />
-                  <span>Ordner-Struktur</span>
+                  <span>Projekte</span>
                 </button>
                 <button
                   type="button"
+                  aria-pressed={galleryViewMode === "grid"}
                   onClick={() => setGalleryViewMode("grid")}
                   className={cn(
                     "flex items-center gap-1.5 rounded-lg px-3 py-1.5 font-semibold transition-all cursor-pointer",
@@ -537,13 +440,13 @@ export function CloudGalleryView({
                   title="Flaches Kachel-Raster aller Bilder"
                 >
                   <LayoutGrid className="h-3.5 w-3.5" />
-                  <span>Kachel-Raster</span>
+                  <span>Alle Bilder</span>
                 </button>
               </div>
             </div>
 
             {/* Category Pills */}
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div className="gallery-category-filters" role="group" aria-label="Inhalte filtern">
               {[
                 { id: "all", label: "Alle" },
                 { id: "carousel", label: "Karussell" },
@@ -555,6 +458,7 @@ export function CloudGalleryView({
                 <button
                   key={cat.id}
                   type="button"
+                  aria-pressed={categoryFilter === cat.id}
                   onClick={() => setCategoryFilter(cat.id)}
                   className={cn(
                     "rounded-xl border px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer",
@@ -571,7 +475,7 @@ export function CloudGalleryView({
 
           {/* Bulk Selection Bar */}
           {filteredImages.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-2xl border border-white/[0.08] bg-[#0E0C14] px-4 py-2.5">
+            <div className="gallery-selection-bar">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-medium text-zinc-300">
                   <span className="font-bold text-orange-400">{selectedIds.length}</span> von {filteredImages.length} ausgewählt
@@ -625,7 +529,7 @@ export function CloudGalleryView({
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
                 <Cloud className="h-7 w-7 text-orange-400" />
               </div>
-              <h3 className="text-base font-bold text-white">Noch keine Bilder im Cloud-Ordner</h3>
+              <h3 className="text-base font-bold text-white">{searchQuery || categoryFilter !== "all" ? "Keine passenden Bilder gefunden" : "Noch keine Bilder im Cloud-Ordner"}</h3>
               <p className="text-xs text-zinc-400 max-w-md mx-auto">
                 {searchQuery || categoryFilter !== "all"
                   ? "Keine Treffer für deine Suche."
@@ -650,14 +554,14 @@ export function CloudGalleryView({
                   <div className="flex items-center gap-2">
                     <FolderOpen className="h-4 w-4 text-[#FF6A1F]" />
                     <h2 className="text-sm font-bold text-white tracking-wide">
-                      Unterordner: <span className="text-[#FF6A1F]">carousels/</span>
+                      Karussell-Projekte
                     </h2>
                     <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-zinc-300">
                       {Object.keys(folderTree.carousels).length} {Object.keys(folderTree.carousels).length === 1 ? "Projekt" : "Projekte"}
                     </span>
                   </div>
                   <span className="text-[11px] text-zinc-400">
-                    Jedes Posting erhält automatisch einen eigenen Unterordner mit allen Slides
+                    Alle Slides eines Karussells an einem Ort
                   </span>
                 </div>
 
@@ -832,7 +736,7 @@ export function CloudGalleryView({
                                         />
 
                                         {/* Hover Overlay */}
-                                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-1.5 bg-black/70 opacity-0 backdrop-blur-[2px] transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
+                                        <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-1.5 bg-black/70 opacity-0 backdrop-blur-[2px] transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
                                           <button
                                             type="button"
                                             onClick={(e) => {
@@ -887,7 +791,7 @@ export function CloudGalleryView({
                     <div className="flex items-center gap-2">
                       <FolderOpen className="h-4 w-4 text-blue-400" />
                       <h2 className="text-sm font-bold text-white tracking-wide">
-                        Unterordner: <span className="text-blue-400">series/</span>
+                        Deine Serien
                       </h2>
                       <span className="rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-zinc-300">
                         {Object.keys(folderTree.series).length} Serien
@@ -905,11 +809,13 @@ export function CloudGalleryView({
                       return (
                         <div
                           key={projectName}
-                          className="group rounded-2xl border border-white/[0.08] bg-[#100E17]/90 backdrop-blur-xl overflow-hidden shadow-lg transition-all hover:border-blue-500/40"
+                          className="gallery-project-card group"
                         >
                           {/* Cover-Bild */}
                           <div
-                            className="relative aspect-[4/3] w-full overflow-hidden bg-black/40 cursor-pointer"
+                            className="gallery-project-cover"
+                            role="button" tabIndex={0} aria-label={`Projekt ${title} ansehen`}
+                            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setViewerProject(projectName); } }}
                             onClick={() => setViewerProject(projectName)}
                           >
                             {cover && (
@@ -917,27 +823,26 @@ export function CloudGalleryView({
                                 src={cover.displayUrl || cover.url}
                                 alt={title}
                                 loading="lazy"
-                                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                className="h-full w-full object-contain"
                                 onError={(e) => {
                                   const proxy = `/api/cloud/file?key=${encodeURIComponent(cover.key)}`;
                                   if (e.currentTarget.src !== proxy) e.currentTarget.src = proxy;
                                 }}
                               />
                             )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                             <div className="absolute top-2 left-2 rounded-md bg-black/70 border border-white/15 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
                               {slides.length} Slides
                             </div>
-                            <div className="absolute bottom-2 left-3 right-3">
-                              <h3 className="text-sm font-bold text-white leading-snug line-clamp-2">{title}</h3>
-                              <p className="text-[10px] text-zinc-400 mt-0.5">
+                          </div>
+                          <div className="gallery-project-meta">
+                              <h3 className="text-sm font-semibold text-white leading-snug line-clamp-2 min-h-[2.5rem]">{title}</h3>
+                              <p className="text-xs text-zinc-400 mt-2">
                                 {date ? `${date} · ` : ""}{totalSizeMB} MB
                               </p>
-                            </div>
                           </div>
 
                           {/* Aktionen */}
-                          <div className="flex items-center gap-2 p-3 border-t border-white/[0.06]">
+                          <div className="gallery-project-actions">
                             <button
                               type="button"
                               onClick={() => setViewerProject(projectName)}
@@ -967,10 +872,10 @@ export function CloudGalleryView({
                               type="button"
                               onClick={() => handleDownloadProjectZip(projectName, slides)}
                               disabled={isZipping}
-                              className="flex items-center justify-center gap-1 rounded-lg bg-blue-500/15 border border-blue-500/30 px-2.5 py-1.5 text-xs font-medium text-blue-300 hover:bg-blue-500/25 transition-colors disabled:opacity-50 cursor-pointer"
+                              aria-label={`Projekt ${title} als ZIP herunterladen`}
+                              className="gallery-button gallery-secondary gallery-icon-button"
                             >
                               {isZipping ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
-                              <span>ZIP</span>
                             </button>
                           </div>
                         </div>
@@ -1227,7 +1132,7 @@ export function CloudGalleryView({
                       />
 
                       {/* Hover Overlay with Action Buttons */}
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-2.5 bg-black/75 opacity-0 backdrop-blur-[2px] transition-opacity group-hover:pointer-events-auto group-hover:opacity-100">
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-2.5 bg-black/75 opacity-0 backdrop-blur-[2px] transition-opacity group-hover:pointer-events-auto group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:opacity-100">
                         <button
                           type="button"
                           onClick={(e) => {
