@@ -283,14 +283,14 @@ export async function analyzePersonaPhoto(
             {
               role: "system",
               content:
-                "You are an expert AI art director specializing in photorealistic character consistency for high-end Instagram carousels. Analyze the photo and output strict JSON with keys: genderAge, hairFace, tattoosFeatures, wardrobe, lightingLook, framingCamera, negativePrompt, customPrefix, analysisSummary (array of 4 bullet points). Crucial: Ignore or smooth out temporary skin flaws like pimples or acne, emphasize tattoos/jewelry and signature wardrobe.",
+                "You are an expert AI art director specializing in photorealistic character consistency for high-end Instagram carousels. Analyze the photo and output strict JSON with keys: genderAge (e.g. 'Mann, ca. 32 Jahre' or 'Frau, ca. 29 Jahre'), hairFace, tattoosFeatures, wardrobe, lightingLook, framingCamera, negativePrompt, customPrefix, analysisSummary (array of 4 bullet points in German). Crucial: Correctly and strictly detect gender (male / man vs female / woman). Ignore or smooth out temporary skin flaws like pimples or acne, emphasize signature features and wardrobe.",
             },
             {
               role: "user",
               content: [
                 {
                   type: "text",
-                  text: "Analyze this person for an AI image generation character prompt. Output only valid JSON.",
+                  text: "Analyze this person for an AI image generation character prompt. Correctly detect gender (male or female) and age. Output only valid JSON.",
                 },
                 {
                   type: "image_url",
@@ -310,7 +310,7 @@ export async function analyzePersonaPhoto(
           const parsed = JSON.parse(content);
           if (parsed.hairFace && parsed.wardrobe) {
             return {
-              genderAge: parsed.genderAge || "Person, ca. 28-35 Jahre",
+              genderAge: parsed.genderAge || "Mann, ca. 28-35 Jahre",
               hairFace: parsed.hairFace,
               tattoosFeatures: parsed.tattoosFeatures || "Keine auffälligen Narben, reine Hautstruktur",
               wardrobe: parsed.wardrobe,
@@ -335,14 +335,12 @@ export async function analyzePersonaPhoto(
 
   // Built-in intelligent persona analysis engine
   // Analyzes image filename or visual characteristics to synthesize a bespoke profile
-  const isMale = /mann|male|herr|boy|guy|founder/i.test(imageUrl);
-  const isFemale = /frau|female|dame|girl|woman|editorial/i.test(imageUrl);
+  const isFemale = /frau|female|dame|girl|woman|she|her/i.test(imageUrl);
+  const isMale = !isFemale || /mann|male|herr|boy|guy|founder|him|his|daniel|alex|michael|chris/i.test(imageUrl);
 
-  const genderAge = isFemale
+  const genderAge = isFemale && !isMale
     ? "Frau, Ende 20 / Anfang 30, natürlicher eleganter Typ"
-    : isMale
-      ? "Mann, Anfang 30, markanter europäischer Typ"
-      : "Person, ca. 28–34 Jahre, athletisch-elegantes Auftreten";
+    : "Mann, Anfang 30, markanter europäischer Typ";
 
   const hairFace = isFemale
     ? "Glatte braune/dunkle Haare mit leichtem Glanz, natürliche Augenbrauenlinie, definierte Wangenknochen, fokussierter Blick"
