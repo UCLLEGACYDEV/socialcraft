@@ -103,11 +103,12 @@ export function CryptoxNavbar({
   useEffect(() => setHydrated(true), []);
 
   // Clean credit count without noisy provider text
-  const creditDisplay = creditStatus?.kie.success
+  const resolvedCreditDisplay = creditStatus?.kie.success
     ? `${creditStatus.kie.credits.toLocaleString()} cr`
     : currentUser
     ? `${currentUser.credits.toLocaleString()} cr`
     : creditStatus?.kie.formatted ?? "Credits";
+  const creditDisplay = hydrated ? resolvedCreditDisplay : "Credits";
 
   return (
     <header className="sticky top-0 z-50 w-full px-4 pt-3 pb-2 transition-all">
