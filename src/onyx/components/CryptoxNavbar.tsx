@@ -18,6 +18,7 @@ import {
   Share2,
   Link2,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { CreditStatus, TabKey } from "../types";
 import type { User } from "../auth";
 import { cn } from "@/lib/utils";
@@ -98,6 +99,9 @@ export function CryptoxNavbar({
   const isAdmin = currentUser?.role === "admin";
   const activeBrand = brandProfiles?.find((p) => p.id === activeProfileId) || brandProfiles?.[0];
 
+  const [hydrated, setHydrated] = useState(false);
+  useEffect(() => setHydrated(true), []);
+
   // Clean credit count without noisy provider text
   const creditDisplay = creditStatus?.kie.success
     ? `${creditStatus.kie.credits.toLocaleString()} cr`
@@ -133,7 +137,7 @@ export function CryptoxNavbar({
                 Socialcraft
               </span>
               <span className="rounded-md border border-primary/40 bg-primary/15 px-1.5 py-0.5 text-[9px] font-bold text-primary-bright uppercase tracking-wider">
-                {isAdmin ? "Admin" : currentUser ? "Pro" : "Studio"}
+                {!hydrated ? "Studio" : isAdmin ? "Admin" : currentUser ? "Pro" : "Studio"}
               </span>
             </div>
           </div>

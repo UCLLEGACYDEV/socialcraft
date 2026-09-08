@@ -226,23 +226,20 @@ export function GalleryScheduleModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
       <div
-        className="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-3xl border border-white/15 bg-[#0e0c16]/95 p-5 sm:p-7 shadow-[0_25px_80px_rgba(0,0,0,0.9)] ring-1 ring-white/10 space-y-6 text-white custom-scrollbar"
+        className="relative w-full max-w-5xl max-h-[92vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#0b0a0d] shadow-[0_40px_80px_-20px_rgba(0,0,0,0.9)] text-white custom-scrollbar"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Glow Header Accent */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-24 bg-[#FF4D17]/15 blur-3xl pointer-events-none" />
-
         {/* Modal Top Header */}
-        <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-[#FF5722] to-[#FF3D00] flex items-center justify-center text-white shadow-[0_0_20px_rgba(255,87,34,0.4)]">
-              <CalendarIcon className="w-5 h-5" />
+        <div className="flex items-center justify-between border-b border-white/10 p-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#ff652e] to-[#ff4500] flex items-center justify-center text-white shadow-lg shadow-[#ff652e]/20">
+              <CalendarIcon className="w-6 h-6" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
+              <h2 className="text-xl font-semibold text-white tracking-tight flex items-center gap-2">
                 <span>Beitrag im Planer terminieren</span>
               </h2>
-              <p className="text-xs text-zinc-400">
+              <p className="text-sm text-zinc-400">
                 Wähle Kanal, Veröffentlichungszeitpunkt & optimiere deine Caption.
               </p>
             </div>
@@ -251,26 +248,26 @@ export function GalleryScheduleModal({
           <button
             type="button"
             onClick={onClose}
-            className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-white transition cursor-pointer"
+            className="p-2 rounded-lg hover:bg-white/5 text-zinc-500 hover:text-white transition cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Two-Column Structured Form */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12">
           {/* Left Column: Visual Media Preview & Caption (5 cols) */}
-          <div className="lg:col-span-5 space-y-4">
+          <div className="lg:col-span-5 space-y-6 p-6 sm:p-8 lg:border-r border-white/10 bg-[#121118]/50">
             <div className="space-y-2">
-              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider flex items-center justify-between">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest flex items-center justify-between">
                 <span>Vorschau & Medien</span>
-                <span className="text-[10px] font-mono font-bold text-orange-400 bg-orange-500/10 border border-orange-500/30 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-bold text-[#ff652e] bg-[#ff652e]/10 border border-[#ff652e]/20 px-2 py-0.5 rounded">
                   {item.imageUrls.length} {item.imageUrls.length === 1 ? "Bild" : "Slides"}
                 </span>
               </span>
 
               {/* Media Preview Box */}
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden border border-white/10 bg-black/60 shadow-inner group">
+              <div className="relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-[#1c1b22] shadow-inner group">
                 {item.imageUrls[0] ? (
                   <img
                     src={item.imageUrls[0]}
@@ -296,7 +293,7 @@ export function GalleryScheduleModal({
                   {item.imageUrls.slice(0, 6).map((url, idx) => (
                     <div
                       key={idx}
-                      className="relative w-12 h-12 rounded-xl overflow-hidden border border-white/15 shrink-0 bg-black/40"
+                      className="relative w-14 h-14 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-[#1c1b22] opacity-70 hover:opacity-100 transition-opacity"
                     >
                       <img src={url} alt="" className="w-full h-full object-cover" />
                       <span className="absolute bottom-0 right-0 bg-black/80 text-[8px] font-mono px-1 py-0.2 rounded-tl text-zinc-300">
@@ -310,20 +307,20 @@ export function GalleryScheduleModal({
 
             {/* Post Title Input */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-zinc-300 block">Titel des Beitrags:</label>
+              <label className="text-xs font-semibold text-zinc-400 block">Titel des Beitrags:</label>
               <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="z. B. 5 Tipps für mehr Reichweite"
-                className="w-full rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition"
+                className="w-full rounded-lg border border-white/10 bg-[#1c1b22] px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-[#ff652e]/50 transition-all"
               />
             </div>
 
             {/* Post Caption / Text */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-zinc-300">Caption / Beschreibung:</label>
+                <label className="text-xs font-semibold text-zinc-400">Caption / Beschreibung:</label>
                 <button
                   type="button"
                   disabled={isGeneratingCaption}
@@ -340,7 +337,7 @@ export function GalleryScheduleModal({
                 onChange={(e) => setCaption(e.target.value)}
                 rows={4}
                 placeholder="Schreibe deine Caption oder nutze den KI-Button oben..."
-                className="w-full rounded-xl border border-white/10 bg-white/[0.04] p-3 text-xs text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition resize-none custom-scrollbar"
+                className="w-full rounded-lg border border-white/10 bg-[#1c1b22] px-4 py-3 text-sm text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-[#ff652e]/50 transition-all resize-none custom-scrollbar"
               />
               <div className="text-right text-[10px] text-zinc-500 font-mono">
                 {caption.length} Zeichen
@@ -349,11 +346,11 @@ export function GalleryScheduleModal({
           </div>
 
           {/* Right Column: Channels & Sexy Time Selection (7 cols) */}
-          <div className="lg:col-span-7 space-y-5">
+          <div className="lg:col-span-7 space-y-8 p-6 sm:p-8">
             {/* 1. Kanal / Platform Selector */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+                <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
                   1. Veröffentlichungs-Kanal:
                 </span>
                 <span className="text-[11px] text-zinc-400">
@@ -373,22 +370,22 @@ export function GalleryScheduleModal({
                       type="button"
                       onClick={() => setSelectedChannelId(chan.id)}
                       className={cn(
-                        "flex items-center gap-2 p-2.5 rounded-2xl border text-left transition-all cursor-pointer shadow-sm relative overflow-hidden group",
+                        "relative flex items-center gap-3 p-3 rounded-xl border text-left transition-all cursor-pointer",
                         isSel
-                          ? "bg-[#FF4D17]/15 border-[#FF4D17] ring-1 ring-[#FF4D17]/50 text-white shadow-[0_0_20px_-3px_rgba(255,77,23,0.3)]"
-                          : "bg-white/[0.03] border-white/10 text-zinc-300 hover:bg-white/[0.06] hover:border-white/20"
+                          ? "bg-[#ff652e]/5 border-[#ff652e] text-white"
+                          : "bg-[#1c1b22] border-white/10 text-zinc-300 hover:border-white/20"
                       )}
                     >
-                      <div className={cn("p-1.5 rounded-xl border shrink-0", style.bg, style.border)}>
-                        <ChanIcon className={cn("w-4 h-4", style.text)} />
+                      <div className={cn("w-10 h-10 rounded-lg border flex items-center justify-center shrink-0", style.bg, style.border)}>
+                        <ChanIcon className={cn("w-5 h-5", style.text)} />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="text-xs font-bold truncate">{chan.name}</div>
-                        <div className="text-[10px] text-zinc-500 truncate capitalize">{chan.platform}</div>
+                        <div className="text-[10px] text-zinc-500 truncate uppercase font-mono tracking-tighter">{chan.platform}</div>
                       </div>
                       {isSel && (
-                        <div className="w-4 h-4 rounded-full bg-[#FF4D17] text-white flex items-center justify-center shrink-0">
-                          <Check className="w-2.5 h-2.5 stroke-[3]" />
+                        <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[#ff652e] text-white flex items-center justify-center shrink-0 shadow-lg ring-2 ring-[#0b0a0d]">
+                          <Check className="w-3 h-3 stroke-[3]" />
                         </div>
                       )}
                     </button>
@@ -399,14 +396,14 @@ export function GalleryScheduleModal({
 
             {/* 2. Datum & Uhrzeit (Sexy Smart Slots + Picker) */}
             <div className="space-y-3 pt-2 border-t border-white/[0.08]">
-              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider block">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block">
                 2. Veröffentlichungszeitpunkt:
               </span>
 
               {/* Quick Presets Chips */}
               <div className="space-y-1.5">
-                <span className="text-[11px] font-medium text-zinc-400 flex items-center gap-1.5">
-                  <Zap className="w-3 h-3 text-orange-400" />
+                <span className="text-xs font-semibold text-[#ffb800] flex items-center gap-1.5">
+                  <Zap className="w-3.5 h-3.5" />
                   <span>Smart Peak-Time Slots (1-Klick Auswahl):</span>
                 </span>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -422,12 +419,10 @@ export function GalleryScheduleModal({
                       key={i}
                       type="button"
                       onClick={() => setQuickSlot(preset.days, preset.h, preset.m, preset.label)}
-                      className="px-3 py-2 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-orange-500/10 hover:border-orange-500/40 text-left transition-all cursor-pointer group"
+                      className="p-3 rounded-xl border border-white/5 bg-white/5 hover:bg-white/[0.08] hover:border-white/20 text-left transition-all cursor-pointer group"
                     >
-                      <div className="text-xs font-bold text-white group-hover:text-orange-300 transition-colors">
-                        {preset.label}
-                      </div>
-                      <div className="text-[10px] text-zinc-400 font-mono mt-0.5">{preset.desc}</div>
+                      <div className="text-xs font-bold text-zinc-200 mb-1">{preset.label}</div>
+                      <div className="text-[10px] text-zinc-500 font-mono uppercase">{preset.desc}</div>
                     </button>
                   ))}
                 </div>
@@ -445,7 +440,7 @@ export function GalleryScheduleModal({
                     value={dateStr}
                     onChange={(e) => setDateStr(e.target.value)}
                     min={new Date().toISOString().split("T")[0]}
-                    className="w-full rounded-xl border border-white/15 bg-white/[0.05] px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition font-mono"
+                    className="w-full rounded-lg border border-white/10 bg-[#1c1b22] px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#ff652e]/50 transition-all font-mono"
                   />
                 </div>
 
@@ -458,19 +453,21 @@ export function GalleryScheduleModal({
                     type="time"
                     value={timeStr}
                     onChange={(e) => setTimeStr(e.target.value)}
-                    className="w-full rounded-xl border border-white/15 bg-white/[0.05] px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-[#FF5722] focus:ring-1 focus:ring-[#FF5722] transition font-mono"
+                    className="w-full rounded-lg border border-white/10 bg-[#1c1b22] px-4 py-2.5 text-sm text-white focus:outline-none focus:border-[#ff652e]/50 transition-all font-mono"
                   />
                 </div>
               </div>
             </div>
 
             {/* Selected Summary Badge */}
-            <div className="p-3.5 rounded-2xl border border-white/10 bg-white/[0.02] flex items-center justify-between text-xs">
+            <div className="p-4 rounded-xl border border-white/5 bg-white/[0.02] flex items-center gap-4 text-xs">
+              <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center shrink-0", activeStyle.bg)}>
+                <Icon className={cn("w-5 h-5", activeStyle.text)} />
+              </div>
               <div className="flex items-center gap-2">
-                <Icon className={cn("w-4 h-4", activeStyle.text)} />
-                <span className="text-zinc-300">
+                <span className="text-zinc-400 leading-relaxed">
                   Wird gepostet auf <strong className="text-white">{selectedChannel.name}</strong> am{" "}
-                  <strong className="text-orange-400 font-mono">
+                  <strong className="text-[#ffb800] font-mono">
                     {dateStr ? new Date(`${dateStr}T${timeStr}:00`).toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric" }) : "–"} um {timeStr} Uhr
                   </strong>
                 </span>
@@ -480,11 +477,11 @@ export function GalleryScheduleModal({
         </div>
 
         {/* Modal Bottom Actions */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-white/[0.08]">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-6 border-t border-white/10 bg-[#0b0a0d]">
           <button
             type="button"
             onClick={onClose}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-full border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-300 hover:text-white transition cursor-pointer"
+            className="w-full sm:w-auto px-6 py-2.5 rounded-xl border border-white/10 text-sm font-semibold text-zinc-300 hover:bg-white/5 hover:text-white transition cursor-pointer"
           >
             Abbrechen
           </button>
@@ -493,7 +490,7 @@ export function GalleryScheduleModal({
             type="button"
             disabled={isSubmitting}
             onClick={handleScheduleSubmit}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-[#FF5722] to-[#FF3D00] hover:from-[#FF6E40] hover:to-[#FF5722] text-white text-xs font-bold shadow-[0_0_25px_rgba(255,87,34,0.45)] hover:shadow-[0_0_35px_rgba(255,87,34,0.6)] transition-all cursor-pointer disabled:opacity-50"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-[#ff652e] hover:bg-[#ff7b4d] text-white text-sm font-bold shadow-lg shadow-[#ff652e]/20 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer disabled:opacity-50"
           >
             {isSubmitting ? (
               <RefreshCw className="w-4 h-4 animate-spin" />
