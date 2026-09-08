@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -49,6 +49,7 @@ export function SlideInspectModal({
 }: SlideInspectModalProps) {
   const currentIndex = Math.max(0, slides.findIndex((s) => s.id === activeSlideId));
   const currentSlide = slides[currentIndex] || slides[0];
+  const filmstripRef = useRef<HTMLDivElement | null>(null);
 
   const [headline, setHeadline] = useState(currentSlide?.headline || "");
   const [subtext, setSubtext] = useState(currentSlide?.subtext || "");
@@ -56,6 +57,16 @@ export function SlideInspectModal({
   const [isEditingPrompt, setIsEditingPrompt] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
   const [isRerolling, setIsRerolling] = useState(false);
+
+  // Auto-scroll active thumbnail into view
+  useEffect(() => {
+    if (filmstripRef.current && currentSlide) {
+      const activeEl = filmstripRef.current.querySelector(`[data-slide-id="${currentSlide.id}"]`);
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+      }
+    }
+  }, [currentSlide?.id]);
 
   useEffect(() => {
     if (currentSlide) {
@@ -398,72 +409,120 @@ export function SlideInspectModal({
           </div>
         </div>
 
-        {/* ── Bottom Filmstrip Dock (Ultra-clean Lightroom/Apple Style) ─ */}
-        <div className="shrink-0 border-t border-white/[0.08] bg-[#07060B]/95 px-4 py-3 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-full items-center justify-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar py-1">
-            {slides.map((s) => {
-              const isActive = s.id === currentSlide.id;
-              const sHasImg = Boolean(s.imageUrl);
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  onClick={() => onSelectSlideId(s.id)}
-                  title={`Slide ${s.slideNumber}: ${s.roleLabel || "Visual"}`}
-                  className={cn(
-                    "group relative flex flex-col items-center justify-between overflow-hidden rounded-xl border transition-all duration-200 cursor-pointer shrink-0",
-                    "w-14 sm:w-16 h-[72px] sm:h-[82px]",
-                    isActive
-                      ? "border-[#FF4D17] ring-2 ring-[#FF4D17]/70 shadow-[0_0_20px_rgba(255,77,23,0.5)] -translate-y-1 scale-105 bg-[#171422]"
-                      : "border-white/10 bg-white/[0.02] opacity-60 hover:opacity-100 hover:border-white/30 hover:scale-102",
-                  )}
-                >
-                  {/* Background Image / Placeholder */}
-                  {sHasImg ? (
-                    <img
-                      src={s.imageUrl}
-                      alt={`Slide ${s.slideNumber}`}
-                      className="absolute inset-0 h-full w-full object-cover"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 font-mono text-xs font-black text-white/20">
-                      {String(s.slideNumber).padStart(2, "0")}
-                    </div>
-                  )}
+        {/* ── Bottom Filmstrip Dock (Ultra-clean Lightroom/Apple Studio Style) ─ */}
+        <div className="shrink-0 border-t border-white/[0.08] bg-[#07060B]/95 px-4 py-3 backdrop-blur-2xl relative">
+          {/* Subtle Top Glowing Rim */}
+          <div className="absolute -top-[1px] left-1/2 -translate-x-1/2 h-[1px] w-3/4 bg-gradient-to-r from-transparent via-[#FF4D17]/40 to-transparent pointer-events-none" />
 
-                  {/* Top Slide Number Pill */}
-                  <div className="relative z-10 w-full flex justify-start p-1">
-                    <span
-                      className={cn(
-                        "flex h-4 min-w-4 items-center justify-center rounded px-1 font-mono text-[9px] font-black shadow-sm",
-                        isActive
-                          ? "bg-[#FF4D17] text-white"
-                          : "bg-black/75 text-zinc-300 border border-white/10",
+          <div className="relative mx-auto flex max-w-full items-center justify-between gap-2">
+            {/* Scroll Left Button */}
+            {slides.length > 5 && (
+              <button
+                type="button"
+                onClick={() => filmstripRef.current?.scrollBy({ left: -220, behavior: "smooth" })}
+                className="hidden sm:flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white hover:border-[#FF4D17]/40 hover:bg-[#FF4D17]/10 transition-all cursor-pointer shadow-sm"
+                title="Nach links scrollen"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+            )}
+
+            {/* Scrollable Filmstrip Track (Zero native scrollbars, smooth mouse wheel support) */}
+            <div
+              ref={filmstripRef}
+              onWheel={(e) => {
+                if (e.deltaY) {
+                  e.currentTarget.scrollLeft += e.deltaY;
+                }
+              }}
+              className="flex flex-1 items-center justify-start sm:justify-center gap-2.5 sm:gap-3.5 overflow-x-auto no-scrollbar scrollbar-none py-2 px-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+              style={{
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
+              {slides.map((s, idx) => {
+                const isActive = s.id === currentSlide.id;
+                const sHasImg = Boolean(s.imageUrl);
+                return (
+                  <button
+                    key={s.id}
+                    data-slide-id={s.id}
+                    type="button"
+                    onClick={() => onSelectSlideId(s.id)}
+                    title={`Slide ${s.slideNumber}: ${s.roleLabel || "Visual"}`}
+                    className={cn(
+                      "group relative flex flex-col items-center justify-between overflow-hidden rounded-2xl border transition-all duration-300 cursor-pointer shrink-0 select-none",
+                      "w-16 sm:w-20 h-[76px] sm:h-[92px]",
+                      isActive
+                        ? "border-[#FF4D17] ring-2 ring-[#FF4D17]/80 shadow-[0_0_25px_rgba(255,77,23,0.55)] -translate-y-1 scale-105 bg-[#171422] z-10"
+                        : "border-white/10 bg-black/40 opacity-60 hover:opacity-100 hover:border-white/30 hover:scale-102 hover:-translate-y-0.5",
+                    )}
+                  >
+                    {/* Background Image / Placeholder */}
+                    {sHasImg ? (
+                      <img
+                        src={s.imageUrl}
+                        alt={`Slide ${s.slideNumber}`}
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-zinc-900 to-black font-mono text-xs font-black text-white/20">
+                        {String(s.slideNumber).padStart(2, "0")}
+                      </div>
+                    )}
+
+                    {/* Top Slide Number Pill */}
+                    <div className="relative z-10 w-full flex items-center justify-between p-1.5 pointer-events-none">
+                      <span
+                        className={cn(
+                          "flex h-4 min-w-4 items-center justify-center rounded px-1 font-mono text-[9px] font-black shadow-md backdrop-blur-sm",
+                          isActive
+                            ? "bg-[#FF4D17] text-white"
+                            : "bg-black/80 text-zinc-300 border border-white/10",
+                        )}
+                      >
+                        #{s.slideNumber}
+                      </span>
+                      {isActive && (
+                        <span className="flex h-2 w-2 rounded-full bg-[#FF4D17] shadow-[0_0_8px_#FF4D17] animate-pulse" />
                       )}
-                    >
-                      #{s.slideNumber}
-                    </span>
-                  </div>
-
-                  {/* Generating Spinner Overlay */}
-                  {s.isGeneratingImage && (
-                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/70 backdrop-blur-[2px]">
-                      <Loader2 className="h-4 w-4 animate-spin text-[#FF6A1F]" />
                     </div>
-                  )}
 
-                  {/* Bottom Role Label Banner */}
-                  <div className="relative z-10 w-full bg-black/85 px-1 py-0.5 text-center backdrop-blur-sm border-t border-white/10">
-                    <p className={cn(
-                      "truncate font-semibold leading-tight text-[8px] sm:text-[9px]",
-                      isActive ? "text-[#FFA043]" : "text-zinc-400 group-hover:text-zinc-200"
-                    )}>
-                      {s.roleLabel || `Slide ${s.slideNumber}`}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
+                    {/* Generating Spinner Overlay */}
+                    {s.isGeneratingImage && (
+                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/75 backdrop-blur-[2px]">
+                        <Loader2 className="h-4 w-4 animate-spin text-[#FF6A1F]" />
+                      </div>
+                    )}
+
+                    {/* Bottom Role Label Banner */}
+                    <div className="relative z-10 w-full bg-black/90 px-1 py-1 text-center backdrop-blur-md border-t border-white/10">
+                      <p
+                        className={cn(
+                          "truncate font-bold leading-tight text-[8px] sm:text-[9px] tracking-tight",
+                          isActive ? "text-[#FFA043]" : "text-zinc-400 group-hover:text-zinc-200",
+                        )}
+                      >
+                        {s.roleLabel || `Slide ${s.slideNumber}`}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Scroll Right Button */}
+            {slides.length > 5 && (
+              <button
+                type="button"
+                onClick={() => filmstripRef.current?.scrollBy({ left: 220, behavior: "smooth" })}
+                className="hidden sm:flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] text-zinc-400 hover:text-white hover:border-[#FF4D17]/40 hover:bg-[#FF4D17]/10 transition-all cursor-pointer shadow-sm"
+                title="Nach rechts scrollen"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            )}
           </div>
         </div>
       </div>
