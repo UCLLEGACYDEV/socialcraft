@@ -329,90 +329,78 @@ export function PostSchedulerView({
     writeLS(LS.postingSlots, next);
   };
   const [isAutoScheduling, setIsAutoScheduling] = useState(false);
-  const [showSlotEditor, setShowSlotEditor] = useState(false);
+  const [showQuickPlan, setShowQuickPlan] = useState(false);
 
-  /**
-   * One click: takes every still-open post (draft or scheduled) for the active
-   * profile, drops each into the next free posting slot, and pushes the new time
-   * to Post for Me (update if it already exists there, otherwise create it).
-   */
-  const handleAutoScheduleAll = async () => {
-    const open = profilePosts
-      .filter((p) => p.status === "draft" || p.status === "scheduled" || p.status === "queued")
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  /** Every still-open post of the active profile, oldest first. */
+  const openPosts = profilePosts
+    .filter((p) => p.status === "draft" || p.status === "scheduled" || p.status === "queued")
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
-    if (open.length === 0) {
+  const openQuickPlan = () => {
+    if (openPosts.length === 0) {
       toast.info("Keine offenen Beiträge zum Einplanen. Erstelle zuerst Content.");
       return;
     }
+    setShowQuickPlan(true);
+  };
 
-    const taken = posts
-      .filter((p) => !open.some((o) => o.id === p.id) && (p.status === "scheduled" || p.status === "queued"))
-      .map((p) => new Date(p.scheduledFor).getTime())
-      .filter((t) => !Number.isNaN(t));
+  /** Times already blocked by posts that are not part of the quick-plan list. */
+  const takenTimes = posts
+    .filter((p) => !openPosts.some((o) => o.id === p.id) && (p.status === "scheduled" || p.status === "queued"))
+    .map((p) => new Date(p.scheduledFor).getTime())
+    .filter((t) => !Number.isNaN(t));
 
-    const slots = computeNextSlots(postingSlots, open.length, taken);
-    if (slots.length < open.length) {
-      toast.warning(`Nur ${slots.length} freie Slots gefunden – erweitere die Posting-Zeiten.`);
-    }
-
-    setIsAutoScheduling(true);
+  /**
+   * Schedules a single confirmed row from the quick-plan window: pushes the time
+   * and target accounts to Post for Me (update if it already exists, else create).
+   */
+  const scheduleQuickPlanEntry = async (
+    entry: { postId: string; scheduledForISO: string; channelIds: string[] },
+    post: ScheduledPost
+  ) => {
     const pfmKey = activePostForMeKey;
     const client = pfmKey ? new PostForMeApiClient(pfmKey) : null;
-    const updates = new Map<string, Partial<ScheduledPost>>();
+    const iso = entry.scheduledForISO;
 
-    const jobs = open.slice(0, slots.length).map((post, i) => async () => {
-      const iso = slots[i].toISOString();
-      try {
-        if (client) {
-          const channel = channels.find((c) => c.channelId === post.channelId || c.id === post.channelId);
-          const target = channel?.postForMeAccountId || channel?.channelId || post.channelId;
-          const media = post.mediaUrls.length > 0 ? await ensurePublicMedia(client, post.mediaUrls) : [];
-          const payload = {
-            caption: post.caption + (post.hashtags.length ? "\n\n" + post.hashtags.join(" ") : ""),
-            scheduled_at: iso,
-            social_accounts: [target],
-            media: media.map((url) => ({ url })),
-          };
-          if (post.postForMePostId) {
-            await client.updatePost(post.postForMePostId, payload as any);
-            updates.set(post.id, { scheduledFor: iso, status: "scheduled", mediaUrls: media, errorMessage: undefined });
-          } else {
-            const res = await client.createPost(payload);
-            updates.set(post.id, {
-              scheduledFor: iso,
-              status: "scheduled",
-              mediaUrls: media,
-              postForMePostId: res.id,
-              postForMeStatus: res.status,
-              errorMessage: undefined,
-            });
-          }
-        } else {
-          updates.set(post.id, { scheduledFor: iso, status: "scheduled" });
-        }
-        return true;
-      } catch (err: any) {
-        console.warn("Auto-schedule failed for", post.id, err?.message || err);
-        updates.set(post.id, { errorMessage: err?.message || "Einplanen fehlgeschlagen" });
-        return false;
+    const targets = entry.channelIds
+      .map((id) => channels.find((c) => c.id === id || c.channelId === id))
+      .map((c, i) => c?.postForMeAccountId || c?.channelId || entry.channelIds[i])
+      .filter(Boolean) as string[];
+
+    const primaryChannelId = entry.channelIds[0] || post.channelId;
+    const primaryChannel = channels.find((c) => c.id === primaryChannelId);
+    const patch: Partial<ScheduledPost> = {
+      scheduledFor: iso,
+      status: "scheduled",
+      channelId: primaryChannelId,
+      platform: primaryChannel?.platform || post.platform,
+      errorMessage: undefined,
+    };
+
+    if (client && targets.length > 0) {
+      const media = post.mediaUrls.length > 0 ? await ensurePublicMedia(client, post.mediaUrls) : [];
+      const payload = {
+        caption: post.caption + (post.hashtags.length ? "\n\n" + post.hashtags.join(" ") : ""),
+        scheduled_at: iso,
+        social_accounts: targets,
+        media: media.map((url) => ({ url })),
+      };
+      if (post.postForMePostId) {
+        await client.updatePost(post.postForMePostId, payload as any);
+        Object.assign(patch, { mediaUrls: media });
+      } else {
+        const res = await client.createPost(payload);
+        Object.assign(patch, {
+          mediaUrls: media,
+          postForMePostId: res.id,
+          postForMeStatus: res.status,
+        });
       }
-    });
-
-    // Run 4 at a time — fast, but gentle on the API.
-    let ok = 0;
-    for (let i = 0; i < jobs.length; i += 4) {
-      const results = await Promise.all(jobs.slice(i, i + 4).map((j) => j()));
-      ok += results.filter(Boolean).length;
     }
 
-    onUpdatePosts(posts.map((p) => (updates.has(p.id) ? { ...p, ...updates.get(p.id) } : p)));
-    if (slots[0]) setCalendarDate(new Date(slots[0]));
-    setIsAutoScheduling(false);
-    toast.success(`✅ ${ok} von ${open.length} Beiträgen automatisch eingeplant.`, {
-      description: `Slots: ${postingSlots.times.join(", ")} an ${postingSlots.days.length} Wochentagen.`,
-    });
+    onUpdatePosts(posts.map((p) => (p.id === post.id ? { ...p, ...patch } : p)));
   };
+
 
   // Composer Form State (scoped to active brand profile)
   const defaultChannel = profileChannels.find((c) => c.isDefault) || profileChannels[0] || DEFAULT_SOCIAL_CHANNELS[0];
