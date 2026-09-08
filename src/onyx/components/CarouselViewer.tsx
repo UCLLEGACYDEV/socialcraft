@@ -92,12 +92,12 @@ export function CarouselViewer({
       {/* ── Step 2 Guidance & Generation Banner ──────────────────────── */}
       <div
         className={cn(
-          "rounded-2xl border p-4.5 transition-all shadow-sm",
+          "rounded-3xl border p-5 sm:p-6 transition-all shadow-xl backdrop-blur-2xl relative overflow-hidden",
           isGeneratingImages
-            ? "border-orange-500/50 bg-gradient-to-r from-orange-500/15 via-amber-500/10 to-orange-500/15"
+            ? "border-orange-500/50 bg-gradient-to-r from-orange-500/15 via-amber-500/10 to-orange-500/15 shadow-[0_0_40px_rgba(255,77,23,0.15)]"
             : done === slides.length
-              ? "border-emerald-500/40 bg-emerald-500/10"
-              : "border-orange-500/30 bg-orange-500/[0.06]",
+              ? "border-emerald-500/40 bg-emerald-950/20 shadow-[0_0_40px_rgba(16,185,129,0.1)]"
+              : "cryptox-card",
         )}
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
