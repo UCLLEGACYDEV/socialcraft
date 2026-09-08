@@ -56,6 +56,7 @@ import {
   Unlink,
   UploadCloud,
   Upload,
+  Settings,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -1945,199 +1946,170 @@ export function PostSchedulerView({
   return (
     <div className="space-y-6 max-w-[1550px] mx-auto pb-16">
       {/* ── Top Hero & Clean Control Bar ────────────────────────────── */}
-      <div className="cryptox-card p-6 border border-white/[0.08]">
+      <div className="cryptox-card p-5 sm:p-6 border border-white/[0.08] bg-[#0e0c15]/90 backdrop-blur-xl shadow-2xl space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-                <CalendarIcon className="h-4 w-4 text-[#FF6A1F]" />
-                <span>Beitrags-Planer</span>
-              </h1>
-
-              {/* Brand Profile Selector Dropdown */}
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 text-xs font-semibold text-white transition shadow-sm cursor-pointer"
-                    title="Brand-Profil wechseln (Kanäle & Posts getrennt)"
-                  >
-                    <div
-                      className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold overflow-hidden shrink-0 border border-white/20"
-                      style={{
-                        backgroundColor: activeProfile.color ? `${activeProfile.color}30` : "#F04A2030",
-                        color: activeProfile.color || "#F04A20",
-                      }}
-                    >
-                      {activeProfile.avatarUrl ? (
-                        <img src={activeProfile.avatarUrl} alt="" className="w-full h-full object-cover" />
-                      ) : (
-                        activeProfile.name.slice(0, 1).toUpperCase()
-                      )}
-                    </div>
-                    <span className="font-bold text-white max-w-[130px] truncate">{activeProfile.name}</span>
-                    <span className="text-[10px] text-zinc-400 font-mono">@{activeProfile.slug}</span>
-                    <ChevronDown className="w-3.5 h-3.5 text-zinc-400 ml-0.5" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-64 bg-[#0F0D15] border-white/15 text-white shadow-2xl">
-                  <DropdownMenuLabel className="text-[10px] uppercase font-mono text-zinc-400 px-3 py-1.5">
-                    Brand-Profil wechseln
-                  </DropdownMenuLabel>
-                  {resolvedProfiles.map((p) => {
-                    const count = channels.filter(
-                      (c) => (c.profileId || DEFAULT_BRAND_PROFILES[0].id) === p.id
-                    ).length;
-                    const isSel = p.id === activeProfile.id;
-                    return (
-                      <DropdownMenuItem
-                        key={p.id}
-                        onClick={() => handleSwitchProfile(p.id)}
-                        className={cn(
-                          "flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs",
-                          isSel ? "bg-orange-500/15 text-orange-300 font-bold" : "hover:bg-white/10"
-                        )}
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          <span
-                            className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
-                            style={{ backgroundColor: p.color || "#F04A20" }}
-                          />
-                          <span className="truncate">{p.name}</span>
-                        </div>
-                        <span className="text-[10px] text-zinc-400 font-mono">{count} Kanäle</span>
-                      </DropdownMenuItem>
-                    );
-                  })}
-                  {isAdmin && onOpenBrandProfileManager && (
-                    <>
-                      <DropdownMenuSeparator className="bg-white/10" />
-                      <DropdownMenuItem
-                        onClick={onOpenBrandProfileManager}
-                        className="flex items-center gap-2 px-3 py-2 text-xs text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 cursor-pointer font-bold"
-                      >
-                        <Layers className="w-3.5 h-3.5" />
-                        <span>Profile verwalten / Neu anlegen...</span>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-[#FF4D17]/15 border border-[#FF4D17]/30 flex items-center justify-center text-[#FF4D17] shadow-[0_0_15px_-3px_rgba(255,77,23,0.3)]">
+                <CalendarIcon className="h-5 w-5" />
+              </div>
+              <h1 className="text-xl font-bold text-white tracking-tight">Beitrags-Planer</h1>
             </div>
-            <p className="text-xs text-zinc-400 mt-1">
-              Aktives Profil: <strong className="text-white">{activeProfile.name}</strong> • Kanäle & Posts sind isoliert.
-            </p>
+
+            {/* Brand Profile Selector Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  type="button"
+                  className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs font-semibold text-white transition shadow-sm cursor-pointer"
+                  title="Brand-Profil wechseln (Kanäle & Posts getrennt)"
+                >
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold overflow-hidden shrink-0 border border-white/20"
+                    style={{
+                      backgroundColor: activeProfile.color ? `${activeProfile.color}30` : "#F04A2030",
+                      color: activeProfile.color || "#F04A20",
+                    }}
+                  >
+                    {activeProfile.avatarUrl ? (
+                      <img src={activeProfile.avatarUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      activeProfile.name.slice(0, 1).toUpperCase()
+                    )}
+                  </div>
+                  <span className="font-bold text-white max-w-[140px] truncate">{activeProfile.name}</span>
+                  <ChevronDown className="w-3.5 h-3.5 text-zinc-400 ml-0.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-64 bg-[#0F0D15] border-white/15 text-white shadow-2xl">
+                <DropdownMenuLabel className="text-[10px] uppercase font-mono text-zinc-400 px-3 py-1.5">
+                  Brand-Profil wechseln
+                </DropdownMenuLabel>
+                {resolvedProfiles.map((p) => {
+                  const count = channels.filter(
+                    (c) => (c.profileId || DEFAULT_BRAND_PROFILES[0].id) === p.id
+                  ).length;
+                  const isSel = p.id === activeProfile.id;
+                  return (
+                    <DropdownMenuItem
+                      key={p.id}
+                      onClick={() => handleSwitchProfile(p.id)}
+                      className={cn(
+                        "flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs",
+                        isSel ? "bg-orange-500/15 text-orange-300 font-bold" : "hover:bg-white/10"
+                      )}
+                    >
+                      <div className="flex items-center gap-2 truncate">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                          style={{ backgroundColor: p.color || "#F04A20" }}
+                        />
+                        <span className="truncate">{p.name}</span>
+                      </div>
+                      <span className="text-[10px] text-zinc-400 font-mono">{count} Kanäle</span>
+                    </DropdownMenuItem>
+                  );
+                })}
+                {isAdmin && onOpenBrandProfileManager && (
+                  <>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    <DropdownMenuItem
+                      onClick={onOpenBrandProfileManager}
+                      className="flex items-center gap-2 px-3 py-2 text-xs text-orange-400 hover:text-orange-300 hover:bg-orange-500/10 cursor-pointer font-bold"
+                    >
+                      <Layers className="w-3.5 h-3.5" />
+                      <span>Profile verwalten / Neu anlegen...</span>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          {/* Quick Action Navigation */}
+          {/* Header Action Buttons on the Right */}
           <div className="flex flex-wrap items-center gap-2">
-            {/* View Switcher Tabs */}
-            <div className="flex items-center rounded-2xl border border-white/10 bg-white/[0.04] p-1 shadow-lg backdrop-blur-md">
-              <button
-                type="button"
-                onClick={() => setActiveTab("queue")}
-                className={cn(
-                  "flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                  activeTab === "queue"
-                    ? "bg-[#FF4D17] text-white shadow-[0_0_15px_rgba(255,77,23,0.35)]"
-                    : "text-zinc-400 hover:text-white"
-                )}
-              >
-                <CalendarIcon className="w-3.5 h-3.5" />
-                <span>Planer ({profilePosts.length})</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("composer")}
-                className={cn(
-                  "flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                  activeTab === "composer"
-                    ? "bg-[#FF4D17] text-white shadow-[0_0_15px_rgba(255,77,23,0.35)]"
-                    : "text-zinc-400 hover:text-white"
-                )}
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>+ Planen</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("insights")}
-                className={cn(
-                  "flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
-                  activeTab === "insights"
-                    ? "bg-[#FF4D17] text-white shadow-[0_0_15px_rgba(255,77,23,0.35)]"
-                    : "text-zinc-400 hover:text-white"
-                )}
-              >
-                <BarChart3 className="w-3.5 h-3.5" />
-                <span>Insights</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab("channels")}
-                className={cn(
-                  "flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer relative",
-                  activeTab === "channels"
-                    ? "bg-gradient-to-r from-[#FF4D17] to-[#FF8038] text-white shadow-[0_0_20px_rgba(255,77,23,0.4)]"
-                    : "text-zinc-300 hover:text-white hover:bg-white/5"
-                )}
-              >
-                <Link2 className="w-3.5 h-3.5 text-orange-400" />
-                <span>Profile verbinden</span>
-                <span className="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold bg-white/20 text-white ml-0.5">
-                  {profileChannels.length}
-                </span>
-                {profileChannels.length > 0 && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse ml-0.5" />
-                )}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setActiveTab("insights")}
+              className={cn(
+                "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-sm",
+                activeTab === "insights"
+                  ? "bg-white/15 border-white/30 text-white font-bold"
+                  : "bg-white/[0.04] border-white/10 text-zinc-300 hover:bg-white/[0.08] hover:text-white"
+              )}
+            >
+              <BarChart3 className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Insights</span>
+            </button>
 
-            {onOpen30DayBatch && (
-              <button
-                type="button"
-                onClick={onOpen30DayBatch}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border border-[#FF4D17]/40 bg-[#FF4D17]/10 text-orange-300 hover:bg-[#FF4D17]/20 hover:text-white transition-all cursor-pointer"
-              >
-                <Sparkles className="h-3.5 w-3.5 text-orange-400" />
-                <span>30-Tage Batch</span>
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => setActiveTab("channels")}
+              className={cn(
+                "flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-sm",
+                activeTab === "channels"
+                  ? "bg-[#FF4D17]/20 border-orange-500/50 text-orange-200 font-bold"
+                  : "bg-white/[0.04] border-white/10 text-zinc-300 hover:bg-white/[0.08] hover:text-white"
+              )}
+            >
+              <Link2 className="w-3.5 h-3.5 text-orange-400" />
+              <span>Profile verbinden</span>
+              <span className="w-4 h-4 rounded-full bg-white/10 text-[10px] font-mono font-bold flex items-center justify-center text-zinc-200">
+                {profileChannels.length}
+              </span>
+              {profileChannels.length > 0 && (
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              )}
+            </button>
 
             {isAdmin && openDirectSetup && (
               <button
                 type="button"
                 onClick={openDirectSetup}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border bg-white/[0.04] text-zinc-300 border-white/10 hover:bg-white/[0.08] hover:text-white"
+                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08] hover:text-white transition-all cursor-pointer shadow-sm"
                 title="Admin Publishing-Engine Setup"
               >
-                <Key className="h-3.5 w-3.5 text-orange-400" />
+                <Settings className="w-3.5 h-3.5 text-orange-400" />
                 <span>Admin Setup</span>
               </button>
             )}
           </div>
         </div>
 
-        {/* ── Compact Channel Status ──────────────────────────────────── */}
-        <div className="mt-4 pt-3 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-2">
+        {/* ── Connected Platforms Bar ───────────────────────────────── */}
+        <div className="pt-3 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] text-zinc-500 font-medium">Kanäle ({activeProfile.name}):</span>
-            {profileChannels.length === 0 ? (
-              <span className="text-[11px] text-zinc-500 italic">Noch keine Kanäle verknüpft</span>
-            ) : (
-              profileChannels.map((chan) => {
-                const Icon = PLATFORM_ICONS[chan.platform] || Share2;
-                return (
-                  <div
-                    key={chan.id}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-white/10 bg-white/[0.02] text-[11px] text-zinc-300"
-                  >
-                    <Icon className="h-3 w-3 text-orange-400" />
-                    <span className="font-medium text-white">{chan.name}</span>
-                  </div>
-                );
-              })
-            )}
+            {[
+              { id: "facebook", name: "Facebook", icon: Facebook, color: "text-blue-400 bg-blue-500/10 border-blue-500/20" },
+              { id: "instagram", name: "Instagram", icon: Instagram, color: "text-pink-400 bg-pink-500/10 border-pink-500/20" },
+              { id: "tiktok", name: "TikTok", icon: Video, color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20" },
+              { id: "youtube", name: "YouTube", icon: Youtube, color: "text-red-400 bg-red-500/10 border-red-500/20" },
+              { id: "linkedin", name: "LinkedIn", icon: Linkedin, color: "text-sky-400 bg-sky-500/10 border-sky-500/20" },
+            ].map((p) => {
+              const Icon = p.icon;
+              return (
+                <div
+                  key={p.id}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all",
+                    p.color
+                  )}
+                >
+                  <Icon className="w-3.5 h-3.5 shrink-0" />
+                  <span>{p.name}</span>
+                </div>
+              );
+            })}
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("channels")}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.02] hover:bg-white/5 text-xs text-zinc-300 transition cursor-pointer"
+            >
+              <Link2 className="w-3 h-3 text-orange-400" />
+              <span className="font-semibold">{profileChannels.length} Konten verbunden</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            </button>
           </div>
 
           {hasPublisherKey && (
@@ -2146,7 +2118,7 @@ export function PostSchedulerView({
                 type="button"
                 disabled={isSyncingChannels}
                 onClick={() => handleSyncAccounts(false)}
-                className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-white/5 disabled:opacity-50 cursor-pointer"
+                className="flex items-center gap-1.5 text-[11px] text-zinc-400 hover:text-white transition px-2.5 py-1 rounded-lg hover:bg-white/5 disabled:opacity-50 cursor-pointer"
               >
                 <RefreshCw className={cn("h-3 w-3", isSyncingChannels && "animate-spin text-orange-400")} />
                 <span>Accounts syncen</span>
@@ -2173,43 +2145,53 @@ export function PostSchedulerView({
       {/* ── TAB 1: QUEUE / GEPLANTE BEITRÄGE ────────────────────────── */}
       {activeTab === "queue" && (
         <div className="space-y-5">
+          {/* ── Filter & Action Row ─────────────────────────────────── */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
+            {/* Filter Pills */}
+            <div className="flex flex-wrap items-center gap-1.5">
               <button
                 type="button"
                 onClick={() => setFilterPlatform("all")}
                 className={cn(
-                  "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer",
-                  filterPlatform === "all" ? "bg-white/15 text-white" : "text-zinc-400 hover:text-white"
+                  "px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer",
+                  filterPlatform === "all"
+                    ? "bg-white/15 text-white border border-white/20 shadow-sm"
+                    : "text-zinc-400 hover:text-white hover:bg-white/5"
                 )}
               >
-                Alle ({posts.length})
+                Alle ({profilePosts.length})
               </button>
-              {(["facebook", "instagram", "tiktok", "youtube", "linkedin"] as const).map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setFilterPlatform(p)}
-                  className={cn(
-                    "px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all cursor-pointer",
-                    filterPlatform === p ? "bg-[#FF4D17]/20 text-orange-400 border border-orange-500/40" : "text-zinc-400 hover:text-white"
-                  )}
-                >
-                  {p}
-                </button>
-              ))}
+              {(["facebook", "instagram", "tiktok", "youtube", "linkedin"] as const).map((p) => {
+                const count = profilePosts.filter((post) => post.platform === p).length;
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setFilterPlatform(p)}
+                    className={cn(
+                      "px-3.5 py-1.5 rounded-xl text-xs font-semibold capitalize transition-all cursor-pointer",
+                      filterPlatform === p
+                        ? "bg-[#FF4D17]/20 text-orange-400 border border-orange-500/40 shadow-sm"
+                        : "text-zinc-400 hover:text-white hover:bg-white/5"
+                    )}
+                  >
+                    {p} {count > 0 && <span className="text-[10px] font-mono text-zinc-500 ml-0.5">({count})</span>}
+                  </button>
+                );
+              })}
             </div>
 
+            {/* Action Controls & View Switcher */}
             <div className="flex flex-wrap items-center gap-2">
               {/* View Switcher: Kalender vs. Liste */}
-              <div className="flex items-center rounded-lg border border-white/10 bg-white/[0.03] p-0.5">
+              <div className="flex items-center rounded-xl border border-white/10 bg-[#12111b] p-0.5 shadow-inner">
                 <button
                   type="button"
                   onClick={() => setViewMode("calendar")}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer",
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer",
                     viewMode === "calendar"
-                      ? "bg-[#FF4D17] text-white shadow-sm"
+                      ? "bg-[#FF4D17] text-white shadow-md font-bold"
                       : "text-zinc-400 hover:text-white"
                   )}
                 >
@@ -2220,9 +2202,9 @@ export function PostSchedulerView({
                   type="button"
                   onClick={() => setViewMode("list")}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-semibold transition-all cursor-pointer",
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer",
                     viewMode === "list"
-                      ? "bg-[#FF4D17] text-white shadow-sm"
+                      ? "bg-[#FF4D17] text-white shadow-md font-bold"
                       : "text-zinc-400 hover:text-white"
                   )}
                 >
@@ -2231,11 +2213,22 @@ export function PostSchedulerView({
                 </button>
               </div>
 
+              {onOpen30DayBatch && (
+                <button
+                  type="button"
+                  onClick={onOpen30DayBatch}
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl border border-orange-500/30 bg-orange-500/10 hover:bg-orange-500/20 text-orange-300 text-xs font-bold transition-all cursor-pointer shadow-sm"
+                >
+                  <Sparkles className="h-3.5 w-3.5 text-orange-400" />
+                  <span>30-Tage Batch</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={handleAutoScheduleAll}
                 disabled={isAutoScheduling}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-500/40 bg-orange-500/15 hover:bg-orange-500/25 text-orange-200 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-orange-500/40 bg-orange-500/15 hover:bg-orange-500/25 text-orange-200 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
                 title="Plant alle offenen Beiträge automatisch in die nächsten freien Posting-Slots und sendet die Termine an die Plattformen"
               >
                 {isAutoScheduling ? (
@@ -2243,17 +2236,17 @@ export function PostSchedulerView({
                 ) : (
                   <Zap className="h-3.5 w-3.5 text-orange-400" />
                 )}
-                <span>{isAutoScheduling ? "Plane ein…" : "Alle auto-einplanen"}</span>
+                <span>{isAutoScheduling ? "Plane ein…" : "Auto-Planen"}</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => setShowSlotEditor((v) => !v)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-300 transition-all cursor-pointer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-300 transition-all cursor-pointer"
                 title="Posting-Zeiten festlegen"
               >
                 <Clock className="h-3.5 w-3.5 text-orange-400" />
-                <span>Posting-Zeiten</span>
+                <span>Zeiten</span>
               </button>
 
               {historyEntries.length > 0 && (
@@ -2263,7 +2256,7 @@ export function PostSchedulerView({
                     setShowHistoryPicker(true);
                     setActiveTab("composer");
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/15 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-200 transition-all cursor-pointer"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-200 transition-all cursor-pointer"
                 >
                   <BookOpen className="h-3.5 w-3.5 text-orange-400" />
                   <span>Aus Historie ({historyEntries.length})</span>
@@ -2273,10 +2266,11 @@ export function PostSchedulerView({
               <button
                 type="button"
                 onClick={() => setActiveTab("composer")}
-                className="cryptox-orange-btn !py-1.5 !px-3.5 text-xs font-bold"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-[#FF5722] to-[#FF3D00] hover:from-[#FF6E40] hover:to-[#FF5722] text-white text-xs font-bold shadow-[0_0_20px_rgba(255,87,34,0.4)] transition-all cursor-pointer"
               >
-                <Plus className="h-4 w-4 mr-1" />
-                Beitrag planen
+                <Plus className="h-4 w-4" />
+                <span>Beitrag planen</span>
+                <ChevronDown className="h-3.5 w-3.5 ml-0.5 opacity-80" />
               </button>
             </div>
           </div>
@@ -2294,7 +2288,7 @@ export function PostSchedulerView({
                 </button>
               </div>
               <p className="text-xs text-zinc-400">
-                „Alle auto-einplanen" verteilt offene Beiträge auf diese Slots — pro Wochentag der Reihe nach.
+                „Auto-Planen" verteilt offene Beiträge auf diese Slots — pro Wochentag der Reihe nach.
               </p>
 
               <div>
@@ -2368,18 +2362,18 @@ export function PostSchedulerView({
 
           {/* ── CALENDAR VIEW ───────────────────────────────────────── */}
           {viewMode === "calendar" && (
-            <div className="cryptox-card p-5 border border-white/[0.08] space-y-4">
+            <div className="cryptox-card p-5 sm:p-6 border border-white/[0.08] bg-[#0e0c15]/90 backdrop-blur-xl shadow-2xl space-y-4">
               {/* Calendar Month Navigation Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/[0.06]">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
-                    <CalendarDays className="h-4 w-4 text-[#FF6A1F]" />
+                  <h2 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2.5">
+                    <CalendarDays className="h-5 w-5 text-[#FF5722]" />
                     <span className="capitalize">
                       {calendarDate.toLocaleDateString("de-DE", { month: "long", year: "numeric" })}
                     </span>
                   </h2>
-                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-zinc-400">
-                    {filteredPosts.length} Beiträge terminiert
+                  <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-zinc-300">
+                    {filteredPosts.length} {filteredPosts.length === 1 ? "Beitrag" : "Beiträge"} geplant
                   </span>
                 </div>
 
@@ -2387,7 +2381,7 @@ export function PostSchedulerView({
                   <button
                     type="button"
                     onClick={handlePrevMonth}
-                    className="p-1.5 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/10 text-zinc-300 hover:text-white transition cursor-pointer"
+                    className="p-1.5 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/10 text-zinc-300 hover:text-white transition cursor-pointer"
                     title="Vorheriger Monat"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -2395,14 +2389,14 @@ export function PostSchedulerView({
                   <button
                     type="button"
                     onClick={handleTodayMonth}
-                    className="px-2.5 py-1 text-xs font-semibold rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/10 text-zinc-300 hover:text-white transition cursor-pointer"
+                    className="px-3 py-1 text-xs font-semibold rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/10 text-zinc-300 hover:text-white transition cursor-pointer"
                   >
                     Heute
                   </button>
                   <button
                     type="button"
                     onClick={handleNextMonth}
-                    className="p-1.5 rounded-lg border border-white/10 bg-white/[0.02] hover:bg-white/10 text-zinc-300 hover:text-white transition cursor-pointer"
+                    className="p-1.5 rounded-xl border border-white/10 bg-white/[0.03] hover:bg-white/10 text-zinc-300 hover:text-white transition cursor-pointer"
                     title="Nächster Monat"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -2411,18 +2405,18 @@ export function PostSchedulerView({
               </div>
 
               {/* Weekday Names Header */}
-              <div className="grid grid-cols-7 gap-1.5 text-center text-xs font-bold text-zinc-400 uppercase tracking-wider py-1 border-b border-white/[0.04]">
-                <span>Mo</span>
-                <span>Di</span>
-                <span>Mi</span>
-                <span>Do</span>
-                <span>Fr</span>
-                <span>Sa</span>
-                <span>So</span>
+              <div className="grid grid-cols-7 gap-2 text-center text-xs font-bold text-zinc-400 uppercase tracking-wider py-1.5 border-b border-white/[0.04]">
+                <span>MO</span>
+                <span>DI</span>
+                <span>MI</span>
+                <span>DO</span>
+                <span>FR</span>
+                <span>SA</span>
+                <span>SO</span>
               </div>
 
               {/* Month Grid Cells */}
-              <div className="grid grid-cols-7 gap-1.5">
+              <div className="grid grid-cols-7 gap-2">
                 {getCalendarDays(calendarDate.getFullYear(), calendarDate.getMonth()).map((cell, idx) => {
                   const isToday = cell.date.toDateString() === new Date().toDateString();
                   const y = cell.date.getFullYear();
@@ -2441,20 +2435,20 @@ export function PostSchedulerView({
                     <div
                       key={idx}
                       className={cn(
-                        "min-h-[110px] rounded-xl border p-1.5 flex flex-col justify-between transition-all group relative",
+                        "min-h-[120px] rounded-2xl border p-2 flex flex-col justify-between transition-all group relative",
                         cell.isCurrentMonth
-                          ? "bg-white/[0.02] border-white/[0.07] hover:border-white/20"
-                          : "bg-black/40 border-white/[0.03] opacity-35",
+                          ? "bg-[#14121d]/80 border-white/[0.06] hover:border-white/20"
+                          : "bg-black/40 border-white/[0.02] opacity-30",
                         isToday &&
-                          "border-[#FF4D17]/60 bg-[#FF4D17]/[0.06] shadow-[0_0_15px_-4px_rgba(255,77,23,0.3)] ring-1 ring-[#FF4D17]/40"
+                          "border-[#FF5722] bg-[#FF5722]/[0.06] shadow-[0_0_20px_-3px_rgba(255,87,34,0.35)] ring-1 ring-[#FF5722]/50"
                       )}
                     >
                       {/* Cell Header: Day Number + Add Button */}
                       <div className="flex items-center justify-between">
                         <span
                           className={cn(
-                            "text-xs font-mono font-bold px-1.5 py-0.5 rounded",
-                            isToday ? "bg-[#FF4D17] text-white" : "text-zinc-400"
+                            "text-xs font-mono font-bold px-2 py-0.5 rounded-lg",
+                            isToday ? "bg-[#FF5722] text-white shadow" : "text-zinc-400"
                           )}
                         >
                           {cell.date.getDate()}
@@ -2468,7 +2462,7 @@ export function PostSchedulerView({
                             setScheduledDate(toLocalDatetimeValue(newD));
                             setActiveTab("composer");
                           }}
-                          className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded bg-white/10 hover:bg-[#FF4D17] text-white flex items-center justify-center cursor-pointer"
+                          className="opacity-0 group-hover:opacity-100 transition-opacity h-5 w-5 rounded-lg bg-white/10 hover:bg-[#FF5722] text-white flex items-center justify-center cursor-pointer shadow"
                           title={`Beitrag für den ${cell.date.toLocaleDateString("de-DE")} planen`}
                         >
                           <Plus className="h-3 w-3" />
@@ -2476,7 +2470,7 @@ export function PostSchedulerView({
                       </div>
 
                       {/* Day Posts List */}
-                      <div className="space-y-1 mt-1 flex-1 overflow-hidden">
+                      <div className="space-y-1.5 mt-1.5 flex-1 overflow-hidden">
                         {dayPosts.map((p) => {
                           const Icon = PLATFORM_ICONS[p.platform] || Share2;
                           const style = PLATFORM_COLORS[p.platform] || PLATFORM_COLORS.facebook;
@@ -2486,6 +2480,7 @@ export function PostSchedulerView({
                           });
                           const isPublished = p.status === "published";
                           const isCancelled = p.status === "cancelled";
+                          const thumbUrl = p.mediaUrls && p.mediaUrls.length > 0 ? p.mediaUrls[0] : null;
 
                           return (
                             <button
@@ -2493,25 +2488,39 @@ export function PostSchedulerView({
                               type="button"
                               onClick={() => setInspectPost(p)}
                               className={cn(
-                                "w-full text-left p-1 rounded-md border text-[10px] transition-all flex items-center gap-1 truncate cursor-pointer",
+                                "w-full text-left p-1.5 rounded-xl border transition-all flex items-center justify-between gap-2 cursor-pointer shadow-sm group/card",
                                 isPublished
                                   ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-300"
                                   : isCancelled
                                   ? "bg-red-500/10 border-red-500/30 text-red-300 opacity-60"
-                                  : "bg-white/[0.05] border-white/10 hover:border-orange-500/40 text-white"
+                                  : "bg-[#1a1727]/90 border-white/[0.08] hover:border-[#FF5722]/60 hover:bg-[#221e33] text-white"
                               )}
                               title={`${p.title} (${postTime} Uhr)`}
                             >
-                              <Icon className={cn("h-3 w-3 shrink-0", style.text)} />
-                              <span className="font-mono text-[9px] text-zinc-400 shrink-0">{postTime}</span>
-                              <span className="truncate font-medium">{p.title || p.caption.slice(0, 20)}</span>
+                              <div className="flex-1 min-w-0 flex flex-col justify-center gap-0.5">
+                                <div className="flex items-center gap-1.5">
+                                  <Icon className={cn("h-3.5 w-3.5 shrink-0", style.text)} />
+                                  <span className="font-mono text-[10px] text-zinc-400 font-medium">{postTime}</span>
+                                </div>
+                                <span className="truncate text-xs font-semibold text-white group-hover/card:text-orange-300 transition-colors">
+                                  {p.title || p.caption.slice(0, 24)}
+                                </span>
+                                <span className="text-[10px] text-zinc-500 capitalize">
+                                  {isPublished ? "Veröffentlicht" : isCancelled ? "Abgebrochen" : "Geplant"}
+                                </span>
+                              </div>
+                              {thumbUrl && (
+                                <div className="w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-white/10 bg-black/40 shadow-inner">
+                                  <img src={thumbUrl} alt="" className="w-full h-full object-cover" />
+                                </div>
+                              )}
                             </button>
                           );
                         })}
                       </div>
 
                       {dayPosts.length === 0 && (
-                        <div className="text-[10px] text-zinc-600 font-mono text-center pb-1 select-none">
+                        <div className="text-[10px] text-zinc-700 font-mono text-center pb-0.5 select-none">
                           —
                         </div>
                       )}
