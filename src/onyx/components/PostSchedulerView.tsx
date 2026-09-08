@@ -2776,9 +2776,9 @@ export function PostSchedulerView({
           )}
 
           {/* ── Main Composer Grid ────────────────────────────────────── */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div data-scheduler-composer className="scheduler-composer grid grid-cols-1 xl:grid-cols-12 gap-3 items-start">
             {/* Left Form: Planungsdetails & Content */}
-            <div className="cryptox-card p-6 border border-white/[0.08] lg:col-span-7 space-y-5">
+            <div className="xl:col-span-9 space-y-2.5">
               {/* Edit Mode Banner */}
               {editingPostId && (
                 <div className="flex items-center justify-between p-3.5 rounded-xl bg-orange-500/15 border border-orange-500/30 text-xs text-orange-300 animate-in fade-in">
@@ -2799,10 +2799,10 @@ export function PostSchedulerView({
                 </div>
               )}
 
-              <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
+              <div className="scheduler-composer-intro flex items-center justify-between gap-4 px-1 pb-1">
                 <div>
-                  <h3 className="text-lg font-bold text-white">Beitrag konfigurieren</h3>
-                  <p className="text-xs text-zinc-400">Verknüpft mit deiner Kanal-ID für nahtlose Veröffentlichung</p>
+                  <h3 className="text-lg font-bold text-white">Neuen Beitrag erstellen</h3>
+                  <p className="text-xs text-zinc-400">Kanal wählen, Inhalt ergänzen und direkt veröffentlichen.</p>
                 </div>
                 <button
                   type="button"
@@ -2818,11 +2818,15 @@ export function PostSchedulerView({
               </div>
 
               {/* 1. Target Channel Selection */}
-              <div className="space-y-3">
+              <section className="scheduler-step space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-                    <span>1. Ziel-Kanal & Profil wählen:</span>
-                  </label>
+                  <div className="flex items-center gap-3">
+                    <span className="scheduler-step-number">1</span>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">Kanal & Profil wählen</h4>
+                      <p className="text-[11px] text-zinc-400">Wo soll der Beitrag veröffentlicht werden?</p>
+                    </div>
+                  </div>
                   <button
                     type="button"
                     onClick={() => setShowComposerConnectQuick((prev) => !prev)}
@@ -2927,7 +2931,7 @@ export function PostSchedulerView({
                         type="button"
                         onClick={() => setSelectedChannelId(chan.id)}
                         className={cn(
-                          "flex items-center justify-between p-3 rounded-xl border text-left transition-all cursor-pointer",
+                          "flex items-center justify-between p-2.5 rounded-lg border text-left transition-all cursor-pointer",
                           isSelected
                             ? "bg-[#FF4D17]/15 border-[#FF4D17] shadow-[0_0_15px_rgba(255,77,23,0.3)] ring-1 ring-[#FF4D17]"
                             : "bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.05]"
@@ -2968,21 +2972,24 @@ export function PostSchedulerView({
                     <span>Weiteres Profil verknüpfen</span>
                   </button>
                 </div>
-              </div>
+              </section>
 
               {/* 2. When — one clear choice: now vs. schedule */}
-              <div className="space-y-3">
-                <label className="text-sm font-bold text-white flex items-center gap-2">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-md bg-orange-500/15 text-[11px] font-bold text-orange-400">2</span>
-                  <span>Wann veröffentlichen?</span>
-                </label>
+              <section className="scheduler-step space-y-2.5">
+                <div className="flex items-center gap-3">
+                  <span className="scheduler-step-number">2</span>
+                  <div>
+                    <h4 className="text-sm font-bold text-white">Veröffentlichung planen</h4>
+                    <p className="text-[11px] text-zinc-400">Sofort senden oder einen passenden Zeitpunkt festlegen.</p>
+                  </div>
+                </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setPublishMode("now")}
                     className={cn(
-                      "flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold transition-all",
+                      "flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold transition-all",
                       publishMode === "now"
                         ? "border-orange-500 bg-orange-500/15 text-white shadow-[0_0_18px_rgba(255,77,23,0.2)]"
                         : "border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white hover:border-white/25"
@@ -2995,7 +3002,7 @@ export function PostSchedulerView({
                     type="button"
                     onClick={() => setPublishMode("schedule")}
                     className={cn(
-                      "flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-sm font-bold transition-all",
+                      "flex items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-bold transition-all",
                       publishMode === "schedule"
                         ? "border-orange-500 bg-orange-500/15 text-white shadow-[0_0_18px_rgba(255,77,23,0.2)]"
                         : "border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white hover:border-white/25"
@@ -3045,10 +3052,20 @@ export function PostSchedulerView({
                     </div>
                   </div>
                 )}
-              </div>
+              </section>
 
               {/* 3. Title & Caption */}
-              <div className="space-y-3">
+              <section className="scheduler-step space-y-2.5">
+                <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] pb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="scheduler-step-number">3</span>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">Beitragstext & Details</h4>
+                      <p className="text-[11px] text-zinc-400">Formuliere eine klare Botschaft für deine Zielgruppe.</p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] text-zinc-500">Optionaler Titel</span>
+                </div>
                 <div>
                   <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
                     Titel / Thema des Beitrags:
@@ -3091,7 +3108,7 @@ export function PostSchedulerView({
                     </span>
                   </div>
                   <textarea
-                    rows={5}
+                    rows={4}
                     value={postCaption}
                     onChange={(e) => setPostCaption(e.target.value)}
                     placeholder="Schreibe hier deinen Beitragstext, Bulletpoints und Call-to-Action..."
@@ -3113,7 +3130,7 @@ export function PostSchedulerView({
                 </div>
 
                 {/* ── 4. AUDIO-TRACK / EIGENE MP3S / TIKTOK SOUNDS ────────── */}
-                <div className="rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-cyan-950/30 via-black/40 to-teal-950/20 p-4 space-y-3 shadow-lg shadow-cyan-950/20">
+                <div className="scheduler-media-panel rounded-xl p-3 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-teal-400 flex items-center justify-center text-black font-bold shadow-md shadow-cyan-500/20">
@@ -3647,14 +3664,14 @@ export function PostSchedulerView({
                     </div>
                   )}
                 </div>
-              </div>
+              </section>
 
               {/* Action Buttons — one primary action, driven by the Sofort/Zeitplan choice */}
-              <div className="pt-4 border-t border-white/[0.08] flex flex-wrap items-center justify-between gap-3">
+              <div className="scheduler-actions flex flex-wrap items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={() => setActiveTab("queue")}
-                  className="px-4 py-2.5 rounded-xl border border-white/10 text-sm font-semibold text-zinc-400 hover:text-white"
+                  className="px-3 py-2 rounded-lg border border-white/10 text-xs font-semibold text-zinc-400 hover:text-white"
                 >
                   Abbrechen
                 </button>
@@ -3664,7 +3681,7 @@ export function PostSchedulerView({
                     type="button"
                     onClick={handleOpenPreview}
                     disabled={previewLoading}
-                    className="px-3.5 py-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-sm font-bold text-zinc-300 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                    className="px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5 disabled:opacity-50"
                     title="Zeigt die Plattform-Vorschau und prüft, ob der Beitrag akzeptiert wird"
                   >
                     <Eye className={cn("h-4 w-4", previewLoading && "animate-pulse")} />
@@ -3675,7 +3692,7 @@ export function PostSchedulerView({
                     type="button"
                     disabled={isPublishingZernio}
                     onClick={() => handlePublishViaPublisher(publishMode === "now")}
-                    className="cryptox-orange-btn !py-2.5 !px-5 text-sm font-bold flex items-center gap-2 disabled:opacity-50"
+                    className="cryptox-orange-btn !py-2 !px-4 text-xs font-bold flex items-center gap-2 disabled:opacity-50"
                   >
                     {isPublishingZernio ? (
                       <>
@@ -3706,9 +3723,9 @@ export function PostSchedulerView({
             </div>
 
             {/* Right Column: Live Feed Mockup Preview & Media Management */}
-            <div className="space-y-5 lg:col-span-5">
+            <aside className="space-y-3 xl:col-span-3 xl:sticky xl:top-3">
               {/* Media & Preview Card */}
-              <div className="cryptox-card p-6 border border-white/[0.08] space-y-4">
+              <div className="scheduler-preview-card p-3 space-y-3">
                 {/* Header Switcher */}
                 <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
                   <div className="flex items-center rounded-lg border border-white/10 bg-white/[0.03] p-0.5">
@@ -3777,7 +3794,7 @@ export function PostSchedulerView({
                     onDragLeave={handleDragLeave}
                     onDrop={handleDrop}
                     className={cn(
-                      "relative rounded-2xl border bg-black/60 p-4 space-y-3 shadow-xl transition-all",
+                       "scheduler-feed-preview relative rounded-xl border p-3 space-y-2.5 transition-all",
                       isDraggingOver
                         ? "border-[#FF4D17] ring-4 ring-[#FF4D17]/30 bg-[#FF4D17]/[0.06]"
                         : "border-white/10"
@@ -3819,7 +3836,7 @@ export function PostSchedulerView({
 
                     {/* Media Carousel Preview */}
                     {selectedMediaUrls.length > 0 ? (
-                      <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-black/80 border border-white/10 group">
+                       <div className="relative aspect-square rounded-xl overflow-hidden bg-black/80 border border-white/10 group">
                         <img
                           src={selectedMediaUrls[previewSlideIdx % selectedMediaUrls.length]}
                           alt={`Slide ${previewSlideIdx + 1}`}
@@ -3870,7 +3887,7 @@ export function PostSchedulerView({
                     ) : (
                       <div
                         onClick={() => fileInputRef.current?.click()}
-                        className="aspect-[4/5] rounded-xl border border-dashed border-white/20 hover:border-orange-500/60 bg-white/[0.02] hover:bg-orange-500/[0.04] flex flex-col items-center justify-center p-6 text-center text-zinc-400 hover:text-white transition-all cursor-pointer group"
+                         className="aspect-square rounded-xl border border-dashed border-white/20 hover:border-orange-500/60 bg-white/[0.02] hover:bg-orange-500/[0.04] flex flex-col items-center justify-center p-6 text-center text-zinc-400 hover:text-white transition-all cursor-pointer group"
                       >
                         <div className="w-12 h-12 rounded-xl bg-white/5 group-hover:bg-[#FF4D17]/20 border border-white/10 group-hover:border-[#FF4D17]/40 flex items-center justify-center text-zinc-400 group-hover:text-orange-400 mb-3 transition">
                           <UploadCloud className="w-6 h-6" />
@@ -4095,7 +4112,7 @@ export function PostSchedulerView({
                   </div>
                 )}
               </div>
-            </div>
+            </aside>
           </div>
         </div>
       )}
