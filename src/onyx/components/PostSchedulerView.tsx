@@ -2221,28 +2221,15 @@ export function PostSchedulerView({
 
               <button
                 type="button"
-                onClick={handleAutoScheduleAll}
+                onClick={openQuickPlan}
                 disabled={isAutoScheduling}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-500/40 bg-orange-500/15 hover:bg-orange-500/25 text-orange-200 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
-                title="Plant alle offenen Beiträge automatisch in die nächsten freien Posting-Slots und sendet die Termine an die Plattformen"
+                title="Öffnet das Schnell-Planen-Fenster: Konten, Tage und Uhrzeiten prüfen, dann alles auf einmal einplanen"
               >
-                {isAutoScheduling ? (
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Zap className="h-3.5 w-3.5 text-orange-400" />
-                )}
-                <span>{isAutoScheduling ? "Plane ein…" : "Alle auto-einplanen"}</span>
+                <Zap className="h-3.5 w-3.5 text-orange-400" />
+                <span>Schnell planen</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setShowSlotEditor((v) => !v)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-300 transition-all cursor-pointer"
-                title="Posting-Zeiten festlegen"
-              >
-                <Clock className="h-3.5 w-3.5 text-orange-400" />
-                <span>Posting-Zeiten</span>
-              </button>
 
               {historyEntries.length > 0 && (
                 <button
