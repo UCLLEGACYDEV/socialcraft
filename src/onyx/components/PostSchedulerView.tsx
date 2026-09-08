@@ -407,6 +407,7 @@ export function PostSchedulerView({
     }
 
     onUpdatePosts(posts.map((p) => (updates.has(p.id) ? { ...p, ...updates.get(p.id) } : p)));
+    if (slots[0]) setCalendarDate(new Date(slots[0]));
     setIsAutoScheduling(false);
     toast.success(`✅ ${ok} von ${open.length} Beiträgen automatisch eingeplant.`, {
       description: `Slots: ${postingSlots.times.join(", ")} an ${postingSlots.days.length} Wochentagen.`,
@@ -606,7 +607,10 @@ export function PostSchedulerView({
       .map((p) => new Date(p.scheduledFor).getTime())
       .filter((t) => !Number.isNaN(t));
     const [slot] = computeNextSlots(postingSlots, 1, taken);
-    if (slot) setScheduledDate(toLocalDatetimeValue(slot));
+    if (slot) {
+      setScheduledDate(toLocalDatetimeValue(slot));
+      setCalendarDate(new Date(slot));
+    }
 
     // AI caption + hashtags
     (async () => {
@@ -1173,6 +1177,7 @@ export function PostSchedulerView({
           : p
       )
     );
+    setCalendarDate(new Date(when));
     toast.success(`Termin aktualisiert: ${when.toLocaleString("de-DE")} Uhr 🕒`);
     setQuickReschedulePost(null);
   };
@@ -1218,6 +1223,7 @@ export function PostSchedulerView({
         return;
       }
       scheduledIso = when.toISOString();
+      setCalendarDate(new Date(when)); // keep the calendar on the month we just scheduled into
     }
 
     // Pinterest specifics: a pin must be published to at least one board.
@@ -1592,6 +1598,7 @@ export function PostSchedulerView({
       return;
     }
     const scheduledIso = when.toISOString();
+    setCalendarDate(new Date(when));
     const mediaUrls = selectedMediaUrls.length > 0 ? selectedMediaUrls : customMediaUrl ? [customMediaUrl] : [];
 
     const newPost: ScheduledPost = {
