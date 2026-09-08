@@ -84,6 +84,7 @@ export function GalleryScheduleModal({
   const [caption, setCaption] = useState(item.prompt || item.title || "");
   const [isGeneratingCaption, setIsGeneratingCaption] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
 
   // Date & Time calculation default: Tomorrow 18:00
   const defaultDate = useMemo(() => {
@@ -268,9 +269,9 @@ export function GalleryScheduleModal({
 
               {/* Media Preview Box */}
               <div className="relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-[#1c1b22] shadow-inner group">
-                {item.imageUrls[0] ? (
+                {item.imageUrls[Math.min(activeSlide, item.imageUrls.length - 1)] ? (
                   <img
-                    src={item.imageUrls[0]}
+                    src={item.imageUrls[Math.min(activeSlide, item.imageUrls.length - 1)]}
                     alt=""
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
@@ -282,7 +283,9 @@ export function GalleryScheduleModal({
                 {item.imageUrls.length > 1 && (
                   <div className="absolute bottom-2.5 right-2.5 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-md border border-white/20 text-[11px] font-bold text-white flex items-center gap-1.5 shadow-lg">
                     <Layers className="w-3.5 h-3.5 text-orange-400" />
-                    <span>+{item.imageUrls.length - 1} weitere Slides</span>
+                    <span>
+                      Slide {Math.min(activeSlide, item.imageUrls.length - 1) + 1} von {item.imageUrls.length}
+                    </span>
                   </div>
                 )}
               </div>
@@ -290,17 +293,29 @@ export function GalleryScheduleModal({
               {/* Slide strip if multi-image */}
               {item.imageUrls.length > 1 && (
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 pt-0.5 custom-scrollbar">
-                  {item.imageUrls.slice(0, 6).map((url, idx) => (
-                    <div
-                      key={idx}
-                      className="relative w-14 h-14 rounded-lg overflow-hidden border border-white/10 shrink-0 bg-[#1c1b22] opacity-70 hover:opacity-100 transition-opacity"
-                    >
-                      <img src={url} alt="" className="w-full h-full object-cover" />
-                      <span className="absolute bottom-0 right-0 bg-black/80 text-[8px] font-mono px-1 py-0.2 rounded-tl text-zinc-300">
-                        #{idx + 1}
-                      </span>
-                    </div>
-                  ))}
+                  {item.imageUrls.slice(0, 8).map((url, idx) => {
+                    const isActive = idx === Math.min(activeSlide, item.imageUrls.length - 1);
+                    return (
+                      <button
+                        type="button"
+                        key={idx}
+                        onClick={() => setActiveSlide(idx)}
+                        aria-label={`Slide ${idx + 1} anzeigen`}
+                        className={`relative w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-[#1c1b22] transition-all cursor-pointer ${
+                          isActive
+                            ? "border-2 border-[#ff652e] opacity-100 shadow-[0_0_0_2px_rgba(255,101,46,0.15)]"
+                            : "border border-white/10 opacity-60 hover:opacity-100"
+                        }`}
+                      >
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    );
+                  })}
+                  {item.imageUrls.length > 8 && (
+                    <span className="shrink-0 px-2 text-[11px] font-semibold text-zinc-500">
+                      +{item.imageUrls.length - 8}
+                    </span>
+                  )}
                 </div>
               )}
             </div>
