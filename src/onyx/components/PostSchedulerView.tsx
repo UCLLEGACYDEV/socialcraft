@@ -397,37 +397,39 @@ function parseLocalDatetimeValue(value: string): Date | null {
  * Pinterest is the strictest validator). This re-hosts any such URL onto the
  * publisher's own storage and returns URLs it can always fetch.
  */
+const rehostCache = new Map<string, string>();
+
 async function ensurePublicMedia(client: PostForMeApiClient, urls: string[]): Promise<string[]> {
   const origin = typeof window !== "undefined" ? window.location.origin : "";
-  const resolved: string[] = [];
 
-  for (const url of urls) {
-    const isSameOrigin = url.startsWith("/") || (origin && url.startsWith(origin));
-    const needsRehost =
-      url.startsWith("data:") ||
-      url.startsWith("blob:") ||
-      isSameOrigin ||
-      /[?&]X-Amz-|\.amazonaws\.com/i.test(url); // pre-signed → expires
+  // Re-host all media in parallel — this is the slow part of publishing.
+  const resolved = await Promise.all(
+    urls.map(async (url) => {
+      const isSameOrigin = url.startsWith("/") || (origin ? url.startsWith(origin) : false);
+      const needsRehost =
+        url.startsWith("data:") ||
+        url.startsWith("blob:") ||
+        isSameOrigin ||
+        /[?&](X-Amz-|Signature=)/i.test(url); // only *pre-signed* (expiring) URLs, not plain public S3
 
-    if (!needsRehost) {
-      resolved.push(url);
-      continue;
-    }
+      if (!needsRehost) return url;
+      if (rehostCache.has(url)) return rehostCache.get(url)!;
 
-    try {
-      const resp = await fetch(url, isSameOrigin ? { credentials: "include" } : {});
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const blob = await resp.blob();
-      const hosted = await client.uploadMedia(blob, blob.type || "image/jpeg");
-      resolved.push(hosted);
-    } catch (err) {
-      console.warn("[PostScheduler] Could not re-host media for publishing:", url, err);
-      // Keep the original only if it is at least an absolute https URL; otherwise drop it.
-      if (/^https:\/\//i.test(url)) resolved.push(url);
-    }
-  }
+      try {
+        const resp = await fetch(url, isSameOrigin ? { credentials: "include" } : {});
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const blob = await resp.blob();
+        const hosted = await client.uploadMedia(blob, blob.type || "image/jpeg");
+        rehostCache.set(url, hosted);
+        return hosted;
+      } catch (err) {
+        console.warn("[PostScheduler] Could not re-host media for publishing:", url, err);
+        return /^https:\/\//i.test(url) ? url : null;
+      }
+    })
+  );
 
-  return resolved;
+  return resolved.filter((u): u is string => !!u);
 }
 
 export function PostSchedulerView({
@@ -600,11 +602,9 @@ export function PostSchedulerView({
     setIsAutoScheduling(true);
     const pfmKey = activePostForMeKey;
     const client = pfmKey ? new PostForMeApiClient(pfmKey) : null;
-    let ok = 0;
     const updates = new Map<string, Partial<ScheduledPost>>();
 
-    for (let i = 0; i < open.length && i < slots.length; i++) {
-      const post = open[i];
+    const jobs = open.slice(0, slots.length).map((post, i) => async () => {
       const iso = slots[i].toISOString();
       try {
         if (client) {
@@ -619,7 +619,7 @@ export function PostSchedulerView({
           };
           if (post.postForMePostId) {
             await client.updatePost(post.postForMePostId, payload as any);
-            updates.set(post.id, { scheduledFor: iso, status: "scheduled", mediaUrls: media });
+            updates.set(post.id, { scheduledFor: iso, status: "scheduled", mediaUrls: media, errorMessage: undefined });
           } else {
             const res = await client.createPost(payload);
             updates.set(post.id, {
@@ -628,16 +628,25 @@ export function PostSchedulerView({
               mediaUrls: media,
               postForMePostId: res.id,
               postForMeStatus: res.status,
+              errorMessage: undefined,
             });
           }
         } else {
           updates.set(post.id, { scheduledFor: iso, status: "scheduled" });
         }
-        ok++;
+        return true;
       } catch (err: any) {
         console.warn("Auto-schedule failed for", post.id, err?.message || err);
         updates.set(post.id, { errorMessage: err?.message || "Einplanen fehlgeschlagen" });
+        return false;
       }
+    });
+
+    // Run 4 at a time — fast, but gentle on the API.
+    let ok = 0;
+    for (let i = 0; i < jobs.length; i += 4) {
+      const results = await Promise.all(jobs.slice(i, i + 4).map((j) => j()));
+      ok += results.filter(Boolean).length;
     }
 
     onUpdatePosts(posts.map((p) => (updates.has(p.id) ? { ...p, ...updates.get(p.id) } : p)));
@@ -818,18 +827,61 @@ export function PostSchedulerView({
     }
   };
 
-  // Update when initialScheduledItem changes
+  // 1-click from the gallery: land in the composer with everything pre-filled —
+  // media, an AI caption + hashtags, and the next free posting slot — so the user
+  // only has to hit the primary button (or the "Direkt einplanen" toast action).
+  const preparedItemRef = useRef<string>("");
   useEffect(() => {
-    if (initialScheduledItem) {
-      setPostTitle(initialScheduledItem.title || "");
-      if (initialScheduledItem.imageUrls && initialScheduledItem.imageUrls.length > 0) {
-        setSelectedMediaUrls(initialScheduledItem.imageUrls);
+    if (!initialScheduledItem) return;
+    const key = JSON.stringify(initialScheduledItem);
+    if (preparedItemRef.current === key) return;
+    preparedItemRef.current = key;
+
+    setPostTitle(initialScheduledItem.title || "");
+    const imgs = initialScheduledItem.imageUrls || [];
+    if (imgs.length > 0) setSelectedMediaUrls(imgs);
+    setActiveTab("composer");
+    setPublishMode("schedule");
+
+    // Next free slot
+    const taken = posts
+      .filter((p) => p.status === "scheduled" || p.status === "queued")
+      .map((p) => new Date(p.scheduledFor).getTime())
+      .filter((t) => !Number.isNaN(t));
+    const [slot] = computeNextSlots(postingSlots, 1, taken);
+    if (slot) setScheduledDate(toLocalDatetimeValue(slot));
+
+    // AI caption + hashtags
+    (async () => {
+      setIsGeneratingCaption(true);
+      try {
+        const res = await generateViralCaption({
+          topic: initialScheduledItem.title || initialScheduledItem.prompt || "Social Media Content",
+          platform: (["facebook", "general", "instagram", "linkedin", "tiktok", "youtube"] as const).includes(
+            selectedChannel?.platform as never
+          )
+            ? (selectedChannel?.platform as "facebook" | "general" | "instagram" | "linkedin" | "tiktok" | "youtube")
+            : "general",
+          apiKey: settings?.geminiApiKey,
+        });
+        if (res.success) {
+          setPostCaption(res.caption);
+          if (res.hashtags?.length) setPostHashtags(res.hashtags.join(" "));
+        } else if (initialScheduledItem.prompt) {
+          setPostCaption(`${initialScheduledItem.title}\n\n${initialScheduledItem.prompt}`);
+        }
+      } catch {
+        if (initialScheduledItem.prompt) setPostCaption(`${initialScheduledItem.title}\n\n${initialScheduledItem.prompt}`);
+      } finally {
+        setIsGeneratingCaption(false);
+        toast.success("Beitrag vorbereitet — Caption & Slot gefüllt.", {
+          description: slot
+            ? `Vorschlag: ${slot.toLocaleDateString("de-DE", { weekday: "short", day: "2-digit", month: "short" })} ${String(slot.getHours()).padStart(2, "0")}:${String(slot.getMinutes()).padStart(2, "0")} Uhr — unten bestätigen.`
+            : "Zeit unten wählen und bestätigen.",
+        });
       }
-      if (initialScheduledItem.prompt) {
-        setPostCaption(`${initialScheduledItem.title}\n\n${initialScheduledItem.prompt}`);
-      }
-      setActiveTab("composer");
-    }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialScheduledItem]);
 
   // New Channel Dialog State
