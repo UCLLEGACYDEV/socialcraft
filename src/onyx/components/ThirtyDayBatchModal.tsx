@@ -33,6 +33,10 @@ import { ZernioApiClient } from "../zernio/client";
 import { sanitizeNoGedankenstriche, generateViralCaption } from "../caption-generator";
 import type { ApiSettings, ScheduledPost, SocialChannel } from "../types";
 import { cn } from "@/lib/utils";
+import { PostForMeApiClient } from "../postforme/client";
+import { ANCHORED_POSTFORME_API_KEY } from "../defaults";
+import { LS, readLS } from "../storage";
+import { computeNextSlots, DEFAULT_POSTING_SLOTS, renderQuoteCard, type PostingSlotConfig } from "../scheduling";
 
 interface ThirtyDayBatchModalProps {
   isOpen: boolean;
@@ -110,6 +114,9 @@ export function ThirtyDayBatchModal({
   // Selected schedule configuration
   const defaultChannel = channels.find((c) => c.isDefault) || channels[0];
   const [selectedChannelId, setSelectedChannelId] = useState<string>(defaultChannel?.id || "fb-main-page");
+  const [selectedChannelIds, setSelectedChannelIds] = useState<string[]>(
+    defaultChannel ? [defaultChannel.id] : []
+  );
   const [batchStartDate, setBatchStartDate] = useState<string>(() => {
     const d = new Date();
     d.setDate(d.getDate() + 1);
@@ -139,56 +146,143 @@ export function ThirtyDayBatchModal({
     setSelectedNicheId(nicheId);
   };
 
+  const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
+
   const handleScheduleAll30Days = async () => {
-    const targetChannel = channels.find((c) => c.id === selectedChannelId) || defaultChannel;
-    if (!targetChannel) {
-      toast.error("Bitte wähle zuerst einen Ziel-Kanal.");
+    const targetChannels = selectedChannelIds.length
+      ? channels.filter((c) => selectedChannelIds.includes(c.id))
+      : [channels.find((c) => c.id === selectedChannelId) || defaultChannel].filter(Boolean) as SocialChannel[];
+
+    if (targetChannels.length === 0) {
+      toast.error("Bitte wähle mindestens einen Ziel-Kanal.");
       return;
     }
 
+    const days = selectedPreset.days;
+    const total = days.length * targetChannels.length;
+    const pfmKey = settings.postForMeApiKey || ANCHORED_POSTFORME_API_KEY;
+    const client = pfmKey ? new PostForMeApiClient(pfmKey) : null;
+    const slotConfig = readLS<PostingSlotConfig>(LS.postingSlots, DEFAULT_POSTING_SLOTS);
+
+    const takenTimes = existingPosts
+      .filter((p) => p.status === "scheduled" || p.status === "queued")
+      .map((p) => new Date(p.scheduledFor).getTime())
+      .filter((t) => !Number.isNaN(t));
+
+    // One slot per day-template; every selected channel posts at that same slot.
+    const slots = computeNextSlots(slotConfig, days.length, takenTimes);
+    if (slots.length < days.length) {
+      toast.warning(`Nur ${slots.length} freie Slots in den nächsten Wochen – erweitere die Posting-Zeiten im Planer.`);
+    }
+
     setIsSchedulingBatch(true);
-    try {
-      const startDate = new Date(batchStartDate);
-      const newScheduledPosts: ScheduledPost[] = [];
+    setBatchProgress({ done: 0, total });
 
-      for (let i = 0; i < selectedPreset.days.length; i++) {
-        const template = selectedPreset.days[i];
-        const postDate = new Date(startDate);
-        postDate.setDate(postDate.getDate() + i);
+    const topicSeed = customTopic.trim();
+    const audienceSeed = customAudience.trim() || selectedPreset.targetAudience;
+    const results: ScheduledPost[] = [];
+    let done = 0;
 
-        // Fallback visual URLs or prompt-based indicators
-        const mediaUrls = [
-          `/images/socialcraft-logo.png`,
-        ];
+    // Build all jobs, then run them in small parallel batches.
+    const jobs: Array<() => Promise<void>> = [];
+    for (let i = 0; i < days.length && i < slots.length; i++) {
+      const template = days[i];
+      const iso = slots[i].toISOString();
+      for (const channel of targetChannels) {
+        jobs.push(async () => {
+          const headline = sanitizeNoGedankenstriche(template.headline);
+          let caption = sanitizeNoGedankenstriche(template.universalCaption);
+          let hashtags = template.hashtags;
+          try {
+            const res = await generateViralCaption({
+              topic: topicSeed
+                ? `${topicSeed} — ${template.theme}: ${headline}`
+                : `${template.pillarLabel} · ${template.theme}: ${headline} (Zielgruppe: ${audienceSeed})`,
+              platform: (["facebook", "general", "instagram", "linkedin", "tiktok", "youtube"] as const).includes(
+                channel.platform as never
+              )
+                ? (channel.platform as "facebook" | "general" | "instagram" | "linkedin" | "tiktok" | "youtube")
+                : "general",
+              apiKey: settings.geminiApiKey,
+            });
+            if (res.success) {
+              caption = res.caption;
+              if (res.hashtags?.length) hashtags = res.hashtags;
+            }
+          } catch {
+            /* keep template caption */
+          }
 
-        const newPost: ScheduledPost = {
-          id: `batch-post-${Date.now()}-${i + 1}`,
-          title: `Tag ${template.day}: ${sanitizeNoGedankenstriche(template.headline)}`,
-          caption: sanitizeNoGedankenstriche(template.universalCaption),
-          hashtags: template.hashtags,
-          mediaUrls,
-          mediaType: "carousel",
-          channelId: targetChannel.channelId,
-          platform: targetChannel.platform,
-          scheduledFor: postDate.toISOString(),
-          status: "scheduled",
-          createdAt: new Date().toISOString(),
-        };
+          // Always give the post a usable visual.
+          const card = renderQuoteCard(headline, {
+            kicker: template.pillarLabel,
+            handle: channel.handle || selectedPreset.name.replace(/^\S+\s/, ""),
+          });
+          let mediaUrls: string[] = [];
+          if (card && client) {
+            try {
+              const blob = await (await fetch(card)).blob();
+              mediaUrls = [await client.uploadMedia(blob, "image/jpeg")];
+            } catch {
+              /* text-only fallback */
+            }
+          }
 
-        newScheduledPosts.push(newPost);
+          let postForMePostId: string | undefined;
+          let postForMeStatus: string | undefined;
+          if (client) {
+            try {
+              const target = channel.postForMeAccountId || channel.channelId;
+              const r = await client.createPost({
+                caption: caption + (hashtags.length ? "\n\n" + hashtags.join(" ") : ""),
+                scheduled_at: iso,
+                social_accounts: [target],
+                media: mediaUrls.map((url) => ({ url })),
+              });
+              postForMePostId = r.id;
+              postForMeStatus = r.status;
+            } catch (err: any) {
+              console.warn("Batch schedule failed", template.day, channel.name, err?.message || err);
+            }
+          }
+
+          results.push({
+            id: `batch-${Date.now()}-${template.day}-${channel.id}`,
+            title: `Tag ${template.day}: ${headline}`,
+            caption,
+            hashtags,
+            mediaUrls,
+            mediaType: mediaUrls.length > 1 ? "carousel" : "image",
+            channelId: channel.channelId,
+            platform: channel.platform,
+            scheduledFor: iso,
+            status: "scheduled",
+            createdAt: new Date().toISOString(),
+            postForMePostId,
+            postForMeStatus,
+          });
+          done++;
+          setBatchProgress({ done, total });
+        });
       }
+    }
 
-      onUpdatePosts([...newScheduledPosts, ...existingPosts]);
-      toast.success(`🎉 30 Beiträge für die nächsten 30 Tage erfolgreich terminiert!`, {
-        description: `Start: ${startDate.toLocaleDateString("de-DE")} auf ${targetChannel.name} (${targetChannel.platform})`,
-        duration: 8000,
+    try {
+      for (let i = 0; i < jobs.length; i += 4) {
+        await Promise.all(jobs.slice(i, i + 4).map((j) => j()));
+      }
+      onUpdatePosts([...results, ...existingPosts]);
+      const live = results.filter((r) => r.postForMePostId).length;
+      toast.success(`🎉 ${results.length} Beiträge eingeplant${client ? `, ${live} davon live bei Post for Me` : " (lokal)"}.`, {
+        description: `${days.length} Tage · ${targetChannels.length} Kanal(e) · Zeiten: ${slotConfig.times.join(", ")}`,
+        duration: 9000,
       });
-
       onClose();
     } catch (err: any) {
-      toast.error(`Fehler bei der Batch-Planung: ${err.message}`);
+      toast.error(`Fehler bei der Batch-Planung: ${err?.message || err}`);
     } finally {
       setIsSchedulingBatch(false);
+      setBatchProgress(null);
     }
   };
 
@@ -462,36 +556,42 @@ export function ThirtyDayBatchModal({
           {/* ── STEP 3: 30-DAY PREVIEW & 1-CLICK AUTO-SCHEDULE ─────────── */}
           {activeStep === 3 && (
             <div className="space-y-5">
-              {/* Target Channel & Start Date Bar */}
-              <div className="p-4 rounded-xl border border-white/10 bg-black/50 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                    1. Ziel-Kanal für Veröffentlichung:
-                  </label>
-                  <select
-                    value={selectedChannelId}
-                    onChange={(e) => setSelectedChannelId(e.target.value)}
-                    className="w-full bg-[#120F17] border border-white/10 rounded-lg px-3 py-2 text-xs text-white"
-                  >
-                    {channels.map((chan) => (
-                      <option key={chan.id} value={chan.id}>
-                        {chan.name} ({chan.platform.toUpperCase()} - ID: {chan.channelId})
-                      </option>
-                    ))}
-                  </select>
+              {/* Target Channels */}
+              <div className="p-4 rounded-xl border border-white/10 bg-black/50 space-y-2">
+                <label className="text-xs font-semibold text-zinc-300 block">
+                  Auf welchen Kanälen posten? (Mehrfachauswahl)
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {channels.map((chan) => {
+                    const on = selectedChannelIds.includes(chan.id);
+                    return (
+                      <button
+                        key={chan.id}
+                        type="button"
+                        onClick={() =>
+                          setSelectedChannelIds((prev) =>
+                            on ? prev.filter((id) => id !== chan.id) : [...prev, chan.id]
+                          )
+                        }
+                        className={cn(
+                          "px-3 py-1.5 rounded-lg text-xs font-semibold border transition",
+                          on
+                            ? "bg-orange-500/20 border-orange-500/50 text-orange-200"
+                            : "bg-white/5 border-white/10 text-zinc-400 hover:text-white"
+                        )}
+                      >
+                        {chan.name} · {chan.platform}
+                      </button>
+                    );
+                  })}
+                  {channels.length === 0 && (
+                    <span className="text-xs text-zinc-500">Keine Kanäle verbunden — zuerst im Planer verknüpfen.</span>
+                  )}
                 </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-zinc-300 block mb-1.5">
-                    2. Startdatum & Uhrzeit der 30-Tage Serie:
-                  </label>
-                  <input
-                    type="datetime-local"
-                    value={batchStartDate}
-                    onChange={(e) => setBatchStartDate(e.target.value)}
-                    className="w-full bg-[#120F17] border border-white/10 rounded-lg px-3 py-2 text-xs text-white"
-                  />
-                </div>
+                <p className="text-[11px] text-zinc-500">
+                  Zeiten & Wochentage kommen aus „Posting-Zeiten" im Planer. Jeder Tag bekommt eine KI-Caption
+                  und ein automatisch erzeugtes Text-Bild.
+                </p>
               </div>
 
               {/* Week Filter Buttons */}
@@ -591,12 +691,16 @@ export function ThirtyDayBatchModal({
                     {isSchedulingBatch ? (
                       <>
                         <RefreshCw className="w-4 h-4 animate-spin" />
-                        <span>Terminiere 30 Tage...</span>
+                        <span>
+                          {batchProgress
+                            ? `Erstelle & plane… ${batchProgress.done}/${batchProgress.total}`
+                            : "Starte…"}
+                        </span>
                       </>
                     ) : (
                       <>
                         <CalendarIcon className="w-4 h-4" />
-                        <span>🚀 Alle 30 Tage jetzt einplanen</span>
+                        <span>🚀 {selectedPreset.days.length} Beiträge erstellen & einplanen</span>
                       </>
                     )}
                   </button>

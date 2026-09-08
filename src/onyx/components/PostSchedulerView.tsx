@@ -68,6 +68,7 @@ import {
 import type { SocialChannel, ScheduledPost, SocialPlatform, SlideContent, HistoryEntry, ApiSettings, BrandProfile } from "../types";
 import type { PostForMePlatform } from "../postforme/types";
 import { LS, readLS, writeLS } from "../storage";
+import { computeNextSlots, DEFAULT_POSTING_SLOTS, type PostingSlotConfig } from "../scheduling";
 import { DEFAULT_SOCIAL_CHANNELS, DEFAULT_BRAND_PROFILES, ANCHORED_POSTFORME_API_KEY } from "../defaults";
 import { getStoredCurrentUser, type User } from "../auth";
 import { cn } from "@/lib/utils";
@@ -316,54 +317,6 @@ export const SCHEDULER_CONNECT_PLATFORMS: SchedulerConnectPlatformConfig[] = [
 function toLocalDatetimeValue(date: Date): string {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
-export interface PostingSlotConfig {
-  /** Weekdays that get posts, 0 = Sunday … 6 = Saturday. */
-  days: number[];
-  /** Times of day in "HH:MM" (local), earliest first. */
-  times: string[];
-}
-
-export const DEFAULT_POSTING_SLOTS: PostingSlotConfig = {
-  days: [1, 2, 3, 4, 5],
-  times: ["09:00", "13:00", "18:00"],
-};
-
-/**
- * Returns the next `count` posting datetimes that match the slot config, start at
- * least ~15 min from now, and don't collide (±5 min) with an already-taken time.
- */
-function computeNextSlots(config: PostingSlotConfig, count: number, taken: number[]): Date[] {
-  const days = config.days.length ? config.days : DEFAULT_POSTING_SLOTS.days;
-  const times = (config.times.length ? config.times : DEFAULT_POSTING_SLOTS.times)
-    .map((t) => t.split(":").map(Number))
-    .filter(([h, m]) => Number.isFinite(h) && Number.isFinite(m))
-    .sort((a, b) => a[0] * 60 + a[1] - (b[0] * 60 + b[1]));
-
-  const out: Date[] = [];
-  const min = Date.now() + 15 * 60 * 1000;
-  const cursor = new Date();
-  cursor.setHours(0, 0, 0, 0);
-
-  for (let dayOffset = 0; dayOffset < 400 && out.length < count; dayOffset++) {
-    const day = new Date(cursor);
-    day.setDate(day.getDate() + dayOffset);
-    if (!days.includes(day.getDay())) continue;
-    for (const [h, m] of times) {
-      if (out.length >= count) break;
-      const slot = new Date(day);
-      slot.setHours(h, m, 0, 0);
-      const ts = slot.getTime();
-      if (ts < min) continue;
-      const clash =
-        taken.some((t) => Math.abs(t - ts) < 5 * 60 * 1000) ||
-        out.some((d) => Math.abs(d.getTime() - ts) < 5 * 60 * 1000);
-      if (clash) continue;
-      out.push(slot);
-    }
-  }
-  return out;
 }
 
 /** Slide images in guaranteed carousel order (by slideNumber, then array order). */
