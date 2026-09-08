@@ -101,7 +101,89 @@
   --sidebar-accent-foreground: oklch(0.97 0.006 70);
   --sidebar-border: oklch(1 0 0 / 8%);
   --sidebar-ring: oklch(0.635 0.208 34 / 60%);
+  --scheduler-surface: oklch(0.145 0.012 35 / 92%);
+  --scheduler-surface-raised: oklch(0.175 0.014 38 / 94%);
+  --scheduler-line: oklch(1 0 0 / 9%);
+  --scheduler-glow: oklch(0.635 0.208 34 / 24%);
 
+}
+
+/* Modern publishing composer: calm hierarchy, distinct steps, persistent preview. */
+.scheduler-composer {
+  isolation: isolate;
+}
+
+.scheduler-composer-intro {
+  min-height: 3.25rem;
+}
+
+.scheduler-step,
+.scheduler-preview-card {
+  border: 1px solid var(--scheduler-line);
+  background: linear-gradient(145deg, var(--scheduler-surface-raised), var(--scheduler-surface));
+  box-shadow: 0 18px 50px -32px oklch(0 0 0 / 90%), inset 0 1px 0 oklch(1 0 0 / 5%);
+}
+
+.scheduler-step {
+  border-radius: 1rem;
+  padding: 1.1rem;
+}
+
+.scheduler-step:focus-within {
+  border-color: color-mix(in oklab, var(--primary) 44%, transparent);
+  box-shadow: 0 22px 58px -34px var(--scheduler-glow), inset 0 1px 0 oklch(1 0 0 / 7%);
+}
+
+.scheduler-step-number {
+  display: inline-flex;
+  width: 1.9rem;
+  height: 1.9rem;
+  flex: 0 0 1.9rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  color: var(--primary-foreground);
+  background: linear-gradient(145deg, var(--primary-bright), var(--primary));
+  box-shadow: 0 0 1.4rem var(--scheduler-glow);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.scheduler-media-panel {
+  border: 1px solid color-mix(in oklab, var(--chart-2) 28%, transparent);
+  background: color-mix(in oklab, var(--card) 88%, var(--chart-2) 12%);
+}
+
+.scheduler-actions {
+  position: sticky;
+  bottom: 0.75rem;
+  z-index: 20;
+  margin-top: 0.75rem;
+  border: 1px solid var(--scheduler-line);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--background) 86%, transparent);
+  padding: 0.75rem;
+  box-shadow: 0 1.25rem 3.5rem -1.5rem oklch(0 0 0 / 95%);
+  backdrop-filter: blur(22px) saturate(145%);
+}
+
+.scheduler-preview-card {
+  border-radius: 1rem;
+}
+
+.scheduler-feed-preview {
+  background: color-mix(in oklab, var(--background) 92%, var(--card) 8%);
+  box-shadow: 0 1.5rem 4rem -2rem oklch(0 0 0 / 90%);
+}
+
+@media (max-width: 767px) {
+  .scheduler-step {
+    padding: 0.9rem;
+  }
+
+  .scheduler-actions {
+    bottom: 0.4rem;
+  }
 }
 
 
