@@ -1147,20 +1147,55 @@ export function PostSchedulerView({
     setQuickRescheduleDate(toLocalDatetimeValue(new Date(post.scheduledFor)));
   };
 
-  const handleQuickRescheduleSubmit = (e: React.FormEvent) => {
+  const [isReschedulingRemote, setIsReschedulingRemote] = useState(false);
+
+  const handleQuickRescheduleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!quickReschedulePost || !quickRescheduleDate) return;
-    const updated = posts.map((p) =>
-      p.id === quickReschedulePost.id
-        ? {
-            ...p,
-            scheduledFor: new Date(quickRescheduleDate).toISOString(),
-            status: p.status === "cancelled" ? ("scheduled" as const) : p.status,
-          }
-        : p
+
+    const when = parseLocalDatetimeValue(quickRescheduleDate);
+    if (!when) {
+      toast.error("Bitte wähle ein gültiges Datum und eine Uhrzeit.");
+      return;
+    }
+    if (when.getTime() < Date.now() + 60 * 1000) {
+      toast.error("Der Zeitpunkt liegt in der Vergangenheit – wähle eine Zeit in der Zukunft.");
+      return;
+    }
+    const iso = when.toISOString();
+    const post = quickReschedulePost;
+
+    // Push the new time to the publisher, otherwise only the local queue moves
+    // and the platform still fires at the old time.
+    if (post.postForMePostId && activePostForMeKey && post.status !== "published") {
+      setIsReschedulingRemote(true);
+      try {
+        await new PostForMeApiClient(activePostForMeKey).updatePost(post.postForMePostId, {
+          scheduled_at: iso,
+        });
+      } catch (err: any) {
+        setIsReschedulingRemote(false);
+        toast.error(`Terminänderung bei Post for Me fehlgeschlagen: ${err?.message || err}`, {
+          description: "Der Beitrag bleibt beim alten Zeitpunkt. Ggf. löschen und neu planen.",
+        });
+        return;
+      }
+      setIsReschedulingRemote(false);
+    }
+
+    onUpdatePosts(
+      posts.map((p) =>
+        p.id === post.id
+          ? {
+              ...p,
+              scheduledFor: iso,
+              status: p.status === "cancelled" || p.status === "failed" ? ("scheduled" as const) : p.status,
+              errorMessage: undefined,
+            }
+          : p
+      )
     );
-    onUpdatePosts(updated);
-    toast.success(`Termin erfolgreich aktualisiert: ${new Date(quickRescheduleDate).toLocaleString("de-DE")} 🕒`);
+    toast.success(`Termin aktualisiert: ${when.toLocaleString("de-DE")} Uhr 🕒`);
     setQuickReschedulePost(null);
   };
 
@@ -4761,9 +4796,11 @@ export function PostSchedulerView({
                 </button>
                 <button
                   type="submit"
-                  className="cryptox-orange-btn !py-1.5 !px-4 text-xs font-bold"
+                  disabled={isReschedulingRemote}
+                  className="cryptox-orange-btn !py-1.5 !px-4 text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
                 >
-                  Termin speichern
+                  {isReschedulingRemote && <RefreshCw className="h-3 w-3 animate-spin" />}
+                  <span>{isReschedulingRemote ? "Speichere…" : "Termin speichern"}</span>
                 </button>
               </div>
             </form>
