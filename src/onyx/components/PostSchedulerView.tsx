@@ -1067,6 +1067,10 @@ export function PostSchedulerView({
   const [quickReschedulePost, setQuickReschedulePost] = useState<ScheduledPost | null>(null);
   const [quickRescheduleDate, setQuickRescheduleDate] = useState<string>("");
 
+  const [removedAccountIds, setRemovedAccountIds] = useState<string[]>(() =>
+    readLS<string[]>(LS.removedAccountIds, [])
+  );
+
   const handleDirectConnectPlatform = async (platformId: string) => {
     const key = activePostForMeKey;
     if (!key) {
@@ -1080,21 +1084,40 @@ export function PostSchedulerView({
       return;
     }
 
+    // Open the popup NOW, inside the click gesture, so the browser doesn't block it.
+    const popup = window.open("about:blank", "pfm_oauth", "width=650,height=780");
+
     setConnectingPlatform(platformId);
     try {
       const client = new PostForMeApiClient(key);
       const redirectUrl = `${window.location.origin}/callback?platform=${platformId}`;
       const authUrl = await client.createAuthUrl(platformId as any, redirectUrl);
 
-      if (authUrl) {
-        window.open(authUrl, "_blank", "width=650,height=750");
-        toast.info(`Autorisierungsfenster für ${platformId.toUpperCase()} geöffnet... 🔗`, {
-          description: "Schließe die Anmeldung im Popup ab. Dein Profil wird automatisch hier verknüpft.",
-        });
+      if (!authUrl) throw new Error("Keine Autorisierungs-URL erhalten.");
+
+      if (popup && !popup.closed) {
+        popup.location.href = authUrl;
+      } else {
+        // Popup was blocked — fall back to a full-page redirect.
+        window.location.href = authUrl;
+        return;
       }
+
+      toast.info(`Autorisierung für ${platformId.toUpperCase()} läuft… 🔗`, {
+        description: "Schließe die Anmeldung im Popup ab — danach wird automatisch synchronisiert.",
+      });
+
+      // Re-sync automatically once the popup closes.
+      const timer = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(timer);
+          setConnectingPlatform(null);
+          void handleSyncAccounts(true);
+        }
+      }, 1200);
     } catch (err: any) {
+      popup?.close();
       toast.error(`Verbindungsfehler (${platformId}): ${err.message}`);
-    } finally {
       setConnectingPlatform(null);
     }
   };
@@ -1102,19 +1125,42 @@ export function PostSchedulerView({
   const handleDisconnectChannel = async (chan: SocialChannel) => {
     const accId = chan.postForMeAccountId || chan.channelId;
     setDisconnectingChannelId(chan.id);
+
+    // Remember the removal locally so the auto-sync never re-adds it,
+    // even if Post for Me keeps the record around.
+    if (accId) {
+      const next = Array.from(new Set([...removedAccountIds, accId]));
+      setRemovedAccountIds(next);
+      writeLS(LS.removedAccountIds, next);
+    }
+
+    let remoteError: string | null = null;
     try {
       if (chan.postForMeAccountId && activePostForMeKey) {
         const client = new PostForMeApiClient(activePostForMeKey);
-        await client.disconnectSocialAccount(accId);
+        try {
+          await client.disconnectSocialAccount(accId);
+        } catch {
+          // Fall back to a hard delete if disconnect isn't permitted.
+          await client.deleteSocialAccount(accId);
+        }
       }
-      toast.success(`Account „${chan.name}“ erfolgreich getrennt.`);
     } catch (err: any) {
-      console.warn("Could not disconnect remote account:", err.message);
+      remoteError = err?.message || String(err);
+      console.warn("Could not remove remote account:", remoteError);
     } finally {
       setDisconnectingChannelId(null);
     }
 
     onUpdateChannels(channels.filter((c) => c.id !== chan.id));
+
+    if (remoteError) {
+      toast.warning(`„${chan.name}" lokal entfernt.`, {
+        description: `Bei Post for Me blieb der Eintrag (${remoteError}) — trenne ihn ggf. dort im Dashboard. Er taucht hier nicht wieder auf.`,
+      });
+    } else {
+      toast.success(`Account „${chan.name}" entfernt.`);
+    }
   };
 
   const handleSyncAccounts = async (silent = false) => {
@@ -1158,35 +1204,44 @@ export function PostSchedulerView({
         bluesky: "bluesky",
       };
 
-      const imported: SocialChannel[] = accounts.map((acc) => ({
-        id: `pfm-${acc.id}`,
-        platform: platformMapping[acc.platform.toLowerCase()] || "facebook",
-        name: acc.display_name || acc.username || `${acc.platform} Account`,
-        channelId: acc.id,
-        postForMeAccountId: acc.id,
-        handle: acc.username ? (acc.username.startsWith("@") ? acc.username : `@${acc.username}`) : undefined,
-        avatarUrl: acc.profile_picture_url || "/images/socialcraft-logo.png",
-        isDefault: false,
-      }));
+      const imported: SocialChannel[] = accounts
+        .filter((acc) => acc.status !== "disconnected" && !removedAccountIds.includes(acc.id))
+        .map((acc) => ({
+          id: `pfm-${acc.id}`,
+          platform: platformMapping[acc.platform.toLowerCase()] || "facebook",
+          name: acc.display_name || acc.username || `${acc.platform} Account`,
+          channelId: acc.id,
+          postForMeAccountId: acc.id,
+          handle: acc.username ? (acc.username.startsWith("@") ? acc.username : `@${acc.username}`) : undefined,
+          avatarUrl: acc.profile_picture_url || "/images/socialcraft-logo.png",
+          isDefault: false,
+        }));
 
+      const liveIds = new Set(imported.map((c) => c.channelId));
       const existingIds = new Set(channels.map((c) => c.channelId));
       const newChannels = imported.filter((c) => !existingIds.has(c.channelId));
 
-      const updatedChannels = channels.map((existing) => {
-        const fresh = imported.find((i) => i.channelId === existing.channelId);
-        return fresh ? { ...existing, ...fresh } : existing;
-      });
+      // Keep local channels that either aren't Post-for-Me-backed or are still live;
+      // drop ones whose remote account is gone / was removed. Refresh live ones.
+      const keptChannels = channels
+        .filter((c) => !c.postForMeAccountId || liveIds.has(c.channelId))
+        .map((existing) => {
+          const fresh = imported.find((i) => i.channelId === existing.channelId);
+          return fresh ? { ...existing, ...fresh } : existing;
+        });
 
-      if (newChannels.length > 0) {
-        onUpdateChannels([...updatedChannels, ...newChannels]);
-        if (newChannels[0]) {
-          setSelectedChannelId(newChannels[0].id);
-        }
-        toast.success(`${newChannels.length} Social-Media-Profil(e) erfolgreich synchronisiert! 🎉`);
-      } else {
-        onUpdateChannels(updatedChannels);
-        if (!silent) {
-          toast.info("Alle Profile sind aktuell synchronisiert.");
+      const removedCount = channels.length - keptChannels.length;
+      onUpdateChannels([...keptChannels, ...newChannels]);
+
+      if (newChannels[0]) setSelectedChannelId(newChannels[0].id);
+
+      if (!silent || newChannels.length > 0) {
+        if (newChannels.length > 0) {
+          toast.success(`${newChannels.length} Profil(e) synchronisiert! 🎉`);
+        } else if (removedCount > 0) {
+          toast.info(`${removedCount} nicht mehr verbundene(s) Profil(e) entfernt.`);
+        } else if (!silent) {
+          toast.info("Alle Profile sind aktuell.");
         }
       }
     } catch (err: any) {
@@ -1200,27 +1255,29 @@ export function PostSchedulerView({
 
   const handleSyncZernioAccounts = handleSyncAccounts;
 
-  // Auto-sync listener when returning from OAuth popup or when window regains focus
+  // Auto-sync when returning from the OAuth popup, or on window focus (throttled).
+  const lastSyncRef = useRef(0);
   useEffect(() => {
-    const handleAuthMessage = async (event: MessageEvent) => {
-      if (event.data?.type === "POSTFORME_AUTH_SUCCESS") {
-        await handleSyncAccounts(true);
-      }
+    const syncThrottled = () => {
+      if (!activePostForMeKey) return;
+      if (Date.now() - lastSyncRef.current < 30_000) return;
+      lastSyncRef.current = Date.now();
+      void handleSyncAccounts(true);
     };
-
-    const handleWindowFocus = () => {
-      if (activePostForMeKey) {
-        handleSyncAccounts(true);
+    const handleAuthMessage = (event: MessageEvent) => {
+      if (event.data?.type === "POSTFORME_AUTH_SUCCESS") {
+        lastSyncRef.current = Date.now();
+        void handleSyncAccounts(true);
       }
     };
 
     window.addEventListener("message", handleAuthMessage);
-    window.addEventListener("focus", handleWindowFocus);
+    window.addEventListener("focus", syncThrottled);
     return () => {
       window.removeEventListener("message", handleAuthMessage);
-      window.removeEventListener("focus", handleWindowFocus);
+      window.removeEventListener("focus", syncThrottled);
     };
-  }, [activePostForMeKey, channels]);
+  }, [activePostForMeKey]);
 
   const handleCancelPost = async (post: ScheduledPost) => {
     if (post.postForMePostId && settings?.postForMeApiKey) {
@@ -2314,15 +2371,31 @@ export function PostSchedulerView({
           </div>
 
           {hasPublisherKey && (
-            <button
-              type="button"
-              disabled={isSyncingChannels}
-              onClick={handleSyncAccounts}
-              className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-white/5 disabled:opacity-50 cursor-pointer"
-            >
-              <RefreshCw className={cn("h-3 w-3", isSyncingChannels && "animate-spin text-orange-400")} />
-              <span>Accounts syncen</span>
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                disabled={isSyncingChannels}
+                onClick={() => handleSyncAccounts(false)}
+                className="flex items-center gap-1 text-[11px] text-zinc-400 hover:text-white transition px-2 py-1 rounded-lg hover:bg-white/5 disabled:opacity-50 cursor-pointer"
+              >
+                <RefreshCw className={cn("h-3 w-3", isSyncingChannels && "animate-spin text-orange-400")} />
+                <span>Accounts syncen</span>
+              </button>
+              {removedAccountIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRemovedAccountIds([]);
+                    writeLS(LS.removedAccountIds, []);
+                    toast.info(`${removedAccountIds.length} entfernte(s) Profil(e) wieder freigegeben – jetzt syncen.`);
+                  }}
+                  className="text-[11px] text-zinc-500 hover:text-white transition px-2 py-1 rounded-lg hover:bg-white/5 cursor-pointer"
+                  title="Zuvor entfernte Profile wieder einblenden"
+                >
+                  Entfernte zurücksetzen ({removedAccountIds.length})
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>
