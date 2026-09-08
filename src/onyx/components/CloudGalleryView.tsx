@@ -26,7 +26,7 @@ import {
   X,
 } from "lucide-react";
 import type { User } from "../auth";
-import type { HistoryEntry } from "../types";
+import type { HistoryEntry, ApiSettings } from "../types";
 import {
   deleteBatchS4Images,
   deleteS4Image,
@@ -42,6 +42,7 @@ import { LS } from "../storage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { GalleryScheduleModal } from "./GalleryScheduleModal";
 import "./cloud-gallery.css";
 
 /** Wandelt technische Ordnernamen (2026-09-06_WARUM_DEINE_GESPRAeCHE..._c8bc6f) in lesbare Titel um. */
@@ -73,6 +74,8 @@ interface CloudGalleryViewProps {
   onUseInCarousel?: ((imageUrl: string, prompt: string) => void) | undefined;
   onUseInDirectPrompt?: ((prompt: string) => void) | undefined;
   onScheduleItem?: ((item: { title: string; imageUrls: string[]; prompt?: string }) => void) | undefined;
+  onNavigateToScheduler?: (() => void) | undefined;
+  settings?: ApiSettings;
 }
 
 export function CloudGalleryView({
@@ -83,6 +86,8 @@ export function CloudGalleryView({
   onUseInCarousel,
   onUseInDirectPrompt,
   onScheduleItem,
+  onNavigateToScheduler,
+  settings,
 }: CloudGalleryViewProps) {
   const [activeSubTab, setActiveSubTab] = useState<"cloud" | "local">("cloud");
   const [folderFilter, setFolderFilter] = useState<"my" | "users" | "admins" | "all">("my");
@@ -91,6 +96,11 @@ export function CloudGalleryView({
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [previewImage, setPreviewImage] = useState<S4CloudImage | null>(null);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [scheduleModalItem, setScheduleModalItem] = useState<{
+    title: string;
+    imageUrls: string[];
+    prompt?: string;
+  } | null>(null);
   const [uploadUrl, setUploadUrl] = useState("");
   const [uploadPrompt, setUploadPrompt] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -636,23 +646,21 @@ export function CloudGalleryView({
                                 <span>Projekt als ZIP</span>
                               </button>
 
-                              {onScheduleItem && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    onScheduleItem({
-                                      title: prettyProjectName(projectName),
-                                      imageUrls: slides.map((s) => s.displayUrl || s.url).filter(Boolean),
-                                      prompt: slides[0]?.prompt,
-                                    });
-                                  }}
-                                  className="flex items-center gap-1.5 rounded-xl border border-orange-500/40 bg-orange-500/15 hover:bg-orange-500/25 px-3 py-1.5 text-xs font-semibold text-orange-400 transition-colors cursor-pointer"
-                                  title="Dieses Projekt im Beitrags-Planer einplanen"
-                                >
-                                  <Calendar className="h-3.5 w-3.5" />
-                                  <span>Planen</span>
-                                </button>
-                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setScheduleModalItem({
+                                    title: prettyProjectName(projectName),
+                                    imageUrls: slides.map((s) => s.displayUrl || s.url).filter(Boolean),
+                                    prompt: slides[0]?.prompt,
+                                  });
+                                }}
+                                className="flex items-center gap-1.5 rounded-xl border border-orange-500/40 bg-orange-500/15 hover:bg-orange-500/25 px-3 py-1.5 text-xs font-semibold text-orange-400 transition-colors cursor-pointer"
+                                title="Dieses Karussell-Projekt im Beitrags-Planer terminieren"
+                              >
+                                <Calendar className="h-3.5 w-3.5" />
+                                <span>Planen</span>
+                              </button>
 
                               {onOpenHistory && (
                                 <button
@@ -851,23 +859,21 @@ export function CloudGalleryView({
                               <Eye className="h-3.5 w-3.5" />
                               <span>Ansehen</span>
                             </button>
-                            {onScheduleItem && (
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  onScheduleItem({
-                                    title: title,
-                                    imageUrls: slides.map((s) => s.displayUrl || s.url).filter(Boolean),
-                                    prompt: slides[0]?.prompt,
-                                  });
-                                }}
-                                className="flex items-center justify-center gap-1 rounded-lg bg-orange-500/15 border border-orange-500/30 px-2.5 py-1.5 text-xs font-medium text-orange-300 hover:bg-orange-500/25 transition-colors cursor-pointer"
-                                title="Im Planer einplanen"
-                              >
-                                <Calendar className="h-3.5 w-3.5" />
-                                <span>Planen</span>
-                              </button>
-                            )}
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setScheduleModalItem({
+                                  title: title,
+                                  imageUrls: slides.map((s) => s.displayUrl || s.url).filter(Boolean),
+                                  prompt: slides[0]?.prompt,
+                                });
+                              }}
+                              className="flex items-center justify-center gap-1.5 rounded-lg bg-orange-500/15 border border-orange-500/30 px-2.5 py-1.5 text-xs font-medium text-orange-300 hover:bg-orange-500/25 transition-colors cursor-pointer"
+                              title="Diese Serie im Beitrags-Planer terminieren"
+                            >
+                              <Calendar className="h-3.5 w-3.5" />
+                              <span>Planen</span>
+                            </button>
                             <button
                               type="button"
                               onClick={() => handleDownloadProjectZip(projectName, slides)}
@@ -1148,6 +1154,21 @@ export function CloudGalleryView({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
+                            setScheduleModalItem({
+                              title: img.prompt || img.filename,
+                              imageUrls: [img.displayUrl || img.url],
+                              prompt: img.prompt,
+                            });
+                          }}
+                          className="flex h-10 w-10 items-center justify-center rounded-full border border-orange-500/40 bg-orange-500/20 text-orange-300 hover:bg-orange-500/40 hover:text-white transition-transform hover:scale-110 shadow-[0_0_15px_rgba(255,77,23,0.3)]"
+                          title="Im Planer terminieren"
+                        >
+                          <Calendar className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
                             void handleDownloadSingle(img);
                           }}
                           className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-black hover:bg-zinc-100 shadow-[0_0_15px_rgba(255,255,255,0.3)] transition-transform hover:scale-110"
@@ -1271,6 +1292,22 @@ export function CloudGalleryView({
                     Herunterladen
                   </button>
 
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setScheduleModalItem({
+                        title: previewImage.prompt || previewImage.filename,
+                        imageUrls: [previewImage.displayUrl || previewImage.url],
+                        prompt: previewImage.prompt,
+                      });
+                    }}
+                    className="flex-1 rounded-xl border border-orange-500/40 bg-orange-500/15 hover:bg-orange-500/25 px-3 py-2 text-xs font-semibold text-orange-300 hover:text-white flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    title="Dieses Bild im Beitrags-Planer terminieren"
+                  >
+                    <Calendar className="h-3.5 w-3.5" />
+                    <span>Planen</span>
+                  </button>
+
                   {onUseInCarousel && (
                     <button
                       type="button"
@@ -1372,6 +1409,16 @@ export function CloudGalleryView({
           </form>
         </div>
       )}
+
+      {/* ── Sexy Planen & Scheduling Dialog ────────────────────────── */}
+      <GalleryScheduleModal
+        isOpen={Boolean(scheduleModalItem)}
+        onClose={() => setScheduleModalItem(null)}
+        item={scheduleModalItem}
+        onNavigateToScheduler={onNavigateToScheduler}
+        settings={settings}
+        currentUser={currentUser}
+      />
     </div>
   );
 }

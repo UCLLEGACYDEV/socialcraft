@@ -1431,6 +1431,7 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
                   handleTabChange("scheduler");
                   toast.success(`Projekt „${item.title}“ im Planer geöffnet! 📅`);
                 }}
+                onNavigateToScheduler={() => handleTabChange("scheduler")}
               />
             </ViewBoundary>
           )}
