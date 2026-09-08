@@ -78,6 +78,7 @@ import { ZernioApiClient, createZernioClient } from "../zernio/client";
 import { buildZernioPayload } from "../zernio/formatter";
 import { TikTokMusicLibraryModal } from "./TikTokMusicLibraryModal";
 import { BlueskyConnectModal } from "./BlueskyConnectModal";
+import { QuickPlanModal } from "./scheduler/QuickPlanModal";
 import { TIKTOK_MUSIC_LIBRARY, type TikTokSoundItem } from "../data/tiktok-sounds";
 import { generateViralCaption } from "../caption-generator";
 import {
@@ -329,90 +330,78 @@ export function PostSchedulerView({
     writeLS(LS.postingSlots, next);
   };
   const [isAutoScheduling, setIsAutoScheduling] = useState(false);
-  const [showSlotEditor, setShowSlotEditor] = useState(false);
+  const [showQuickPlan, setShowQuickPlan] = useState(false);
 
-  /**
-   * One click: takes every still-open post (draft or scheduled) for the active
-   * profile, drops each into the next free posting slot, and pushes the new time
-   * to Post for Me (update if it already exists there, otherwise create it).
-   */
-  const handleAutoScheduleAll = async () => {
-    const open = profilePosts
-      .filter((p) => p.status === "draft" || p.status === "scheduled" || p.status === "queued")
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  /** Every still-open post of the active profile, oldest first. */
+  const openPosts = profilePosts
+    .filter((p) => p.status === "draft" || p.status === "scheduled" || p.status === "queued")
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
-    if (open.length === 0) {
+  const openQuickPlan = () => {
+    if (openPosts.length === 0) {
       toast.info("Keine offenen Beiträge zum Einplanen. Erstelle zuerst Content.");
       return;
     }
+    setShowQuickPlan(true);
+  };
 
-    const taken = posts
-      .filter((p) => !open.some((o) => o.id === p.id) && (p.status === "scheduled" || p.status === "queued"))
-      .map((p) => new Date(p.scheduledFor).getTime())
-      .filter((t) => !Number.isNaN(t));
+  /** Times already blocked by posts that are not part of the quick-plan list. */
+  const takenTimes = posts
+    .filter((p) => !openPosts.some((o) => o.id === p.id) && (p.status === "scheduled" || p.status === "queued"))
+    .map((p) => new Date(p.scheduledFor).getTime())
+    .filter((t) => !Number.isNaN(t));
 
-    const slots = computeNextSlots(postingSlots, open.length, taken);
-    if (slots.length < open.length) {
-      toast.warning(`Nur ${slots.length} freie Slots gefunden – erweitere die Posting-Zeiten.`);
-    }
-
-    setIsAutoScheduling(true);
+  /**
+   * Schedules a single confirmed row from the quick-plan window: pushes the time
+   * and target accounts to Post for Me (update if it already exists, else create).
+   */
+  const scheduleQuickPlanEntry = async (
+    entry: { postId: string; scheduledForISO: string; channelIds: string[] },
+    post: ScheduledPost
+  ) => {
     const pfmKey = activePostForMeKey;
     const client = pfmKey ? new PostForMeApiClient(pfmKey) : null;
-    const updates = new Map<string, Partial<ScheduledPost>>();
+    const iso = entry.scheduledForISO;
 
-    const jobs = open.slice(0, slots.length).map((post, i) => async () => {
-      const iso = slots[i].toISOString();
-      try {
-        if (client) {
-          const channel = channels.find((c) => c.channelId === post.channelId || c.id === post.channelId);
-          const target = channel?.postForMeAccountId || channel?.channelId || post.channelId;
-          const media = post.mediaUrls.length > 0 ? await ensurePublicMedia(client, post.mediaUrls) : [];
-          const payload = {
-            caption: post.caption + (post.hashtags.length ? "\n\n" + post.hashtags.join(" ") : ""),
-            scheduled_at: iso,
-            social_accounts: [target],
-            media: media.map((url) => ({ url })),
-          };
-          if (post.postForMePostId) {
-            await client.updatePost(post.postForMePostId, payload as any);
-            updates.set(post.id, { scheduledFor: iso, status: "scheduled", mediaUrls: media, errorMessage: undefined });
-          } else {
-            const res = await client.createPost(payload);
-            updates.set(post.id, {
-              scheduledFor: iso,
-              status: "scheduled",
-              mediaUrls: media,
-              postForMePostId: res.id,
-              postForMeStatus: res.status,
-              errorMessage: undefined,
-            });
-          }
-        } else {
-          updates.set(post.id, { scheduledFor: iso, status: "scheduled" });
-        }
-        return true;
-      } catch (err: any) {
-        console.warn("Auto-schedule failed for", post.id, err?.message || err);
-        updates.set(post.id, { errorMessage: err?.message || "Einplanen fehlgeschlagen" });
-        return false;
+    const targets = entry.channelIds
+      .map((id) => channels.find((c) => c.id === id || c.channelId === id))
+      .map((c, i) => c?.postForMeAccountId || c?.channelId || entry.channelIds[i])
+      .filter(Boolean) as string[];
+
+    const primaryChannelId = entry.channelIds[0] || post.channelId;
+    const primaryChannel = channels.find((c) => c.id === primaryChannelId);
+    const patch: Partial<ScheduledPost> = {
+      scheduledFor: iso,
+      status: "scheduled",
+      channelId: primaryChannelId,
+      platform: primaryChannel?.platform || post.platform,
+      errorMessage: undefined,
+    };
+
+    if (client && targets.length > 0) {
+      const media = post.mediaUrls.length > 0 ? await ensurePublicMedia(client, post.mediaUrls) : [];
+      const payload = {
+        caption: post.caption + (post.hashtags.length ? "\n\n" + post.hashtags.join(" ") : ""),
+        scheduled_at: iso,
+        social_accounts: targets,
+        media: media.map((url) => ({ url })),
+      };
+      if (post.postForMePostId) {
+        await client.updatePost(post.postForMePostId, payload as any);
+        Object.assign(patch, { mediaUrls: media });
+      } else {
+        const res = await client.createPost(payload);
+        Object.assign(patch, {
+          mediaUrls: media,
+          postForMePostId: res.id,
+          postForMeStatus: res.status,
+        });
       }
-    });
-
-    // Run 4 at a time — fast, but gentle on the API.
-    let ok = 0;
-    for (let i = 0; i < jobs.length; i += 4) {
-      const results = await Promise.all(jobs.slice(i, i + 4).map((j) => j()));
-      ok += results.filter(Boolean).length;
     }
 
-    onUpdatePosts(posts.map((p) => (updates.has(p.id) ? { ...p, ...updates.get(p.id) } : p)));
-    if (slots[0]) setCalendarDate(new Date(slots[0]));
-    setIsAutoScheduling(false);
-    toast.success(`✅ ${ok} von ${open.length} Beiträgen automatisch eingeplant.`, {
-      description: `Slots: ${postingSlots.times.join(", ")} an ${postingSlots.days.length} Wochentagen.`,
-    });
+    onUpdatePosts(posts.map((p) => (p.id === post.id ? { ...p, ...patch } : p)));
   };
+
 
   // Composer Form State (scoped to active brand profile)
   const defaultChannel = profileChannels.find((c) => c.isDefault) || profileChannels[0] || DEFAULT_SOCIAL_CHANNELS[0];
@@ -2233,28 +2222,15 @@ export function PostSchedulerView({
 
               <button
                 type="button"
-                onClick={handleAutoScheduleAll}
+                onClick={openQuickPlan}
                 disabled={isAutoScheduling}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-orange-500/40 bg-orange-500/15 hover:bg-orange-500/25 text-orange-200 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
-                title="Plant alle offenen Beiträge automatisch in die nächsten freien Posting-Slots und sendet die Termine an die Plattformen"
+                title="Öffnet das Schnell-Planen-Fenster: Konten, Tage und Uhrzeiten prüfen, dann alles auf einmal einplanen"
               >
-                {isAutoScheduling ? (
-                  <RefreshCw className="h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Zap className="h-3.5 w-3.5 text-orange-400" />
-                )}
-                <span>{isAutoScheduling ? "Plane ein…" : "Alle auto-einplanen"}</span>
+                <Zap className="h-3.5 w-3.5 text-orange-400" />
+                <span>Schnell planen</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setShowSlotEditor((v) => !v)}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-white/15 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-300 transition-all cursor-pointer"
-                title="Posting-Zeiten festlegen"
-              >
-                <Clock className="h-3.5 w-3.5 text-orange-400" />
-                <span>Posting-Zeiten</span>
-              </button>
 
               {historyEntries.length > 0 && (
                 <button
@@ -2281,90 +2257,8 @@ export function PostSchedulerView({
             </div>
           </div>
 
-          {/* ── POSTING-SLOT EDITOR ─────────────────────────────────── */}
-          {showSlotEditor && (
-            <div className="cryptox-card p-4 border border-orange-500/20 space-y-3 animate-in fade-in duration-150">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-orange-400" />
-                  Posting-Zeiten
-                </h3>
-                <button type="button" onClick={() => setShowSlotEditor(false)} className="text-zinc-500 hover:text-white">
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-              <p className="text-xs text-zinc-400">
-                „Alle auto-einplanen" verteilt offene Beiträge auf diese Slots — pro Wochentag der Reihe nach.
-              </p>
+          {/* Posting-Zeiten leben jetzt im Schnell-Planen-Fenster. */}
 
-              <div>
-                <span className="text-[11px] font-semibold text-zinc-400 block mb-1.5">Wochentage:</span>
-                <div className="flex flex-wrap gap-1.5">
-                  {["So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"].map((label, idx) => {
-                    const on = postingSlots.days.includes(idx);
-                    return (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() =>
-                          updatePostingSlots({
-                            ...postingSlots,
-                            days: on
-                              ? postingSlots.days.filter((d) => d !== idx)
-                              : [...postingSlots.days, idx].sort((a, b) => a - b),
-                          })
-                        }
-                        className={cn(
-                          "px-3 py-1.5 rounded-lg text-xs font-bold border transition",
-                          on
-                            ? "bg-orange-500/20 border-orange-500/50 text-orange-200"
-                            : "bg-white/5 border-white/10 text-zinc-400 hover:text-white"
-                        )}
-                      >
-                        {label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div>
-                <span className="text-[11px] font-semibold text-zinc-400 block mb-1.5">Uhrzeiten pro Tag:</span>
-                <div className="flex flex-wrap items-center gap-2">
-                  {postingSlots.times.map((t, i) => (
-                    <div key={i} className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg pl-2 pr-1 py-1">
-                      <input
-                        type="time"
-                        value={t}
-                        onChange={(e) => {
-                          const times = [...postingSlots.times];
-                          times[i] = e.target.value;
-                          updatePostingSlots({ ...postingSlots, times });
-                        }}
-                        className="bg-transparent text-xs text-white focus:outline-none"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          updatePostingSlots({ ...postingSlots, times: postingSlots.times.filter((_, idx) => idx !== i) })
-                        }
-                        className="p-0.5 text-zinc-500 hover:text-red-400"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </div>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => updatePostingSlots({ ...postingSlots, times: [...postingSlots.times, "12:00"] })}
-                    className="px-2.5 py-1.5 rounded-lg border border-dashed border-white/20 text-xs font-semibold text-zinc-400 hover:text-white hover:border-orange-500/40"
-                  >
-                    + Uhrzeit
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
 
           {/* ── CALENDAR VIEW ───────────────────────────────────────── */}
           {viewMode === "calendar" && (
@@ -4777,6 +4671,27 @@ export function PostSchedulerView({
           )}
         </div>
       )}
+
+      {/* ── SCHNELL PLANEN ────────────────────────────────────────────── */}
+      <QuickPlanModal
+        open={showQuickPlan}
+        onClose={() => setShowQuickPlan(false)}
+        posts={openPosts}
+        channels={profileChannels}
+        takenTimes={takenTimes}
+        slots={postingSlots}
+        onChangeSlots={updatePostingSlots}
+        onSchedule={scheduleQuickPlanEntry}
+        onDone={(firstDate, ok, total) => {
+          if (firstDate) setCalendarDate(new Date(firstDate));
+          if (ok === total) {
+            toast.success(`✅ ${ok} ${ok === 1 ? "Beitrag" : "Beiträge"} eingeplant.`);
+          } else {
+            toast.warning(`${ok} von ${total} eingeplant — Details im Fenster.`);
+          }
+        }}
+      />
+
 
       {/* ── TIKTOK COMMERCIAL MUSIC LIBRARY MODAL ────────────────────── */}
       <TikTokMusicLibraryModal
