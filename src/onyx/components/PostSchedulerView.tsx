@@ -78,6 +78,7 @@ import { ZernioApiClient, createZernioClient } from "../zernio/client";
 import { buildZernioPayload } from "../zernio/formatter";
 import { TikTokMusicLibraryModal } from "./TikTokMusicLibraryModal";
 import { BlueskyConnectModal } from "./BlueskyConnectModal";
+import { QuickPlanModal } from "./scheduler/QuickPlanModal";
 import { TIKTOK_MUSIC_LIBRARY, type TikTokSoundItem } from "../data/tiktok-sounds";
 import { generateViralCaption } from "../caption-generator";
 import {
