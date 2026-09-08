@@ -25,6 +25,7 @@ export const LS = {
   scheduledPosts: "onyx_scheduled_posts",
   brandProfiles: "onyx_brand_profiles",
   activeBrandProfileId: "onyx_active_brand_profile_id",
+  postingSlots: "onyx_posting_slots",
 } as const;
 
 export function readLS<T>(key: string, fallback: T): T {
