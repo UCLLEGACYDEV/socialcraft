@@ -84,6 +84,7 @@ export function GalleryScheduleModal({
   const [caption, setCaption] = useState(item.prompt || item.title || "");
   const [isGeneratingCaption, setIsGeneratingCaption] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeSlide, setActiveSlide] = useState(0);
 
   // Date & Time calculation default: Tomorrow 18:00
   const defaultDate = useMemo(() => {
