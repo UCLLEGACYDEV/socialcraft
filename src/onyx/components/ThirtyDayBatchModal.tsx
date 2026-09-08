@@ -146,7 +146,8 @@ export function ThirtyDayBatchModal({
     setSelectedNicheId(nicheId);
   };
 
-  const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
+
+
 
   const handleScheduleAll30Days = async () => {
     const targetChannels = selectedChannelIds.length
