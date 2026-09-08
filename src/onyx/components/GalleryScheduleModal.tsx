@@ -18,7 +18,8 @@ import {
   Eye,
   SlidersHorizontal,
 } from "lucide-react";
-import type { SocialChannel, ScheduledPost, SocialPlatform, BrandProfile, ApiSettings, User } from "../types";
+import type { SocialChannel, ScheduledPost, SocialPlatform, BrandProfile, ApiSettings } from "../types";
+import type { User } from "../auth";
 import { LS, readLS, writeLS } from "../storage";
 import { DEFAULT_SOCIAL_CHANNELS, DEFAULT_BRAND_PROFILES, ANCHORED_POSTFORME_API_KEY } from "../defaults";
 import { PLATFORM_ICONS, toLocalDatetimeValue } from "./scheduler/scheduler-utils";
@@ -39,6 +40,8 @@ interface GalleryScheduleModalProps {
   currentUser?: User | null;
   onScheduled?: (post: ScheduledPost) => void;
 }
+
+const CAPTION_PLATFORMS = ["instagram", "tiktok", "facebook", "linkedin", "youtube"];
 
 const PLATFORM_COLORS: Record<string, { bg: string; border: string; text: string; badge: string }> = {
   facebook: { bg: "bg-blue-600/15", border: "border-blue-500/40", text: "text-blue-400", badge: "bg-blue-600/20 text-blue-300 border-blue-500/30" },
@@ -124,7 +127,9 @@ export function GalleryScheduleModal({
       const apiKey = settings?.geminiApiKey || "";
       const res = await generateViralCaption({
         topic: title,
-        platform: selectedChannel.platform,
+        platform: CAPTION_PLATFORMS.includes(selectedChannel.platform as string)
+          ? (selectedChannel.platform as "instagram" | "tiktok" | "facebook" | "linkedin" | "youtube")
+          : "general",
         apiKey,
         customInstructions: item.prompt ? `Kontext / Visuals: ${item.prompt}` : undefined,
       });
@@ -216,7 +221,7 @@ export function GalleryScheduleModal({
   };
 
   const Icon = PLATFORM_ICONS[selectedChannel.platform] || Share2;
-  const activeStyle = PLATFORM_COLORS[selectedChannel.platform] || PLATFORM_COLORS.instagram;
+  const activeStyle = PLATFORM_COLORS[selectedChannel.platform] || PLATFORM_COLORS["instagram"];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-xl animate-in fade-in duration-200">
@@ -360,7 +365,7 @@ export function GalleryScheduleModal({
                 {profileChannels.map((chan) => {
                   const ChanIcon = PLATFORM_ICONS[chan.platform] || Share2;
                   const isSel = chan.id === selectedChannelId;
-                  const style = PLATFORM_COLORS[chan.platform] || PLATFORM_COLORS.instagram;
+                  const style = PLATFORM_COLORS[chan.platform] || PLATFORM_COLORS["instagram"];
 
                   return (
                     <button
