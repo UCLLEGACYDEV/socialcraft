@@ -168,9 +168,7 @@ export function GalleryScheduleModal({
         mediaUrls: item.imageUrls,
         mediaType: item.imageUrls.length > 1 ? "carousel" : "image",
         channelId: selectedChannel.channelId || selectedChannel.id,
-        platform: CAPTION_PLATFORMS.includes(selectedChannel.platform as string)
-          ? (selectedChannel.platform as "instagram" | "tiktok" | "facebook" | "linkedin" | "youtube")
-          : "general",
+        platform: selectedChannel.platform,
         scheduledFor: scheduledDateObj.toISOString(),
         status: "scheduled",
         createdAt: new Date().toISOString(),
