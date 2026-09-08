@@ -122,7 +122,7 @@ export function ThirtyDayBatchModal({
   existingPosts,
 }: ThirtyDayBatchModalProps) {
   const [activeStep, setActiveStep] = useState<1 | 2 | 3>(1);
-  const [selectedNicheId, setSelectedNicheId] = useState<string>("b2b_sales");
+  const [selectedNicheId, setSelectedNicheId] = useState<string | null>(null);
   const [customTopic, setCustomTopic] = useState("");
   const [customAudience, setCustomAudience] = useState("");
   const [formatsConfig, setFormatsConfig] = useState<ContentFormatConfig[]>(DEFAULT_CONTENT_FORMATS);
@@ -142,7 +142,7 @@ export function ThirtyDayBatchModal({
   const [activeWeekFilter, setActiveWeekFilter] = useState<number>(1);
   const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
 
-  const selectedPreset = BATCH_NICHE_PRESETS.find((p) => p.id === selectedNicheId) || BATCH_NICHE_PRESETS[0];
+  const selectedPreset = BATCH_NICHE_PRESETS.find((p) => p.id === selectedNicheId) || null;
 
   // Helper to toggle format
   const toggleFormat = (id: string) => {
@@ -158,16 +158,17 @@ export function ThirtyDayBatchModal({
     );
   };
 
-  // Generate the 30-day schedule plan
+  // Generate the 30-day schedule plan (supports free custom topic or preset)
   const generatedDays = useMemo(() => {
     const enabledFormats = formatsConfig.filter((f) => f.enabled);
-    if (enabledFormats.length === 0) return selectedPreset.days;
+    const activeFormats = enabledFormats.length > 0 ? enabledFormats : DEFAULT_CONTENT_FORMATS;
 
-    const topicBase = customTopic.trim() || selectedPreset.name;
-    const audienceBase = customAudience.trim() || selectedPreset.targetAudience;
+    const baseDays = selectedPreset?.days || BATCH_NICHE_PRESETS[0].days;
+    const topicBase = customTopic.trim() || selectedPreset?.name || "B2B Wachstum & Personal Branding";
+    const audienceBase = customAudience.trim() || selectedPreset?.targetAudience || "Zielgruppe";
 
-    return selectedPreset.days.map((template, idx) => {
-      const format = enabledFormats[idx % enabledFormats.length];
+    return baseDays.map((template, idx) => {
+      const format = activeFormats[idx % activeFormats.length];
       const headline = customTopic.trim()
         ? `Tag ${template.day}: ${customTopic.trim()} — ${template.pillarLabel}`
         : template.headline;
@@ -186,11 +187,18 @@ export function ThirtyDayBatchModal({
 
   if (!isOpen) return null;
 
-  const handleSelectNiche = (nicheId: string) => {
-    setSelectedNicheId(nicheId);
-    const preset = BATCH_NICHE_PRESETS.find((p) => p.id === nicheId);
-    if (preset && !customTopic) {
-      setCustomAudience(preset.targetAudience);
+  // 1-Click Toggle (An- oder Abwählen)
+  const handleToggleNiche = (nicheId: string) => {
+    if (selectedNicheId === nicheId) {
+      setSelectedNicheId(null);
+      toast.info("Branchen-Vorlage abgewählt (Freie Themen-Generierung aktiv)");
+    } else {
+      setSelectedNicheId(nicheId);
+      const preset = BATCH_NICHE_PRESETS.find((p) => p.id === nicheId);
+      if (preset && !customTopic) {
+        setCustomAudience(preset.targetAudience);
+      }
+      toast.success(`Vorlage „${preset?.name}“ ausgewählt (Klick zum Abwählen)`);
     }
   };
 
@@ -493,10 +501,28 @@ export function ThirtyDayBatchModal({
               {/* Niche Presets Grid */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-black text-zinc-200 uppercase tracking-wider">
-                    Oder vorgefertigte Branchen-Vorlage wählen:
-                  </span>
-                  <span className="text-[11px] text-zinc-500">Übernimmt erprobte 30-Tage Content-Säulen</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-black text-zinc-200 uppercase tracking-wider">
+                      Branchen-Vorlagen (Optional):
+                    </span>
+                    <span className="text-[10px] text-zinc-500 hidden sm:inline">
+                      Per Klick an- oder abwählen
+                    </span>
+                  </div>
+
+                  {selectedNicheId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedNicheId(null);
+                        toast.info("Vorlage abgewählt. Freie Themen-Generierung aktiv.");
+                      }}
+                      className="text-[11px] font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      <span>Auswahl aufheben</span>
+                    </button>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -505,9 +531,9 @@ export function ThirtyDayBatchModal({
                     return (
                       <div
                         key={preset.id}
-                        onClick={() => handleSelectNiche(preset.id)}
+                        onClick={() => handleToggleNiche(preset.id)}
                         className={cn(
-                          "p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3",
+                          "group p-4 rounded-2xl border transition-all cursor-pointer flex flex-col justify-between space-y-3 select-none",
                           isSelected
                             ? "bg-[#FF4D17]/15 border-[#FF4D17] shadow-[0_0_20px_rgba(255,77,23,0.3)] ring-1 ring-[#FF4D17]"
                             : "bg-black/40 border-white/10 hover:border-white/20 hover:bg-white/[0.04]"
@@ -516,13 +542,22 @@ export function ThirtyDayBatchModal({
                         <div className="space-y-1.5">
                           <div className="flex items-center justify-between">
                             <span className="text-2xl">{preset.icon}</span>
-                            {isSelected && (
-                              <span className="flex h-5 w-5 items-center justify-center rounded-full bg-[#FF4D17] text-black">
-                                <Check className="w-3 h-3 stroke-[3]" />
-                              </span>
-                            )}
+                            <div className="flex items-center gap-1.5">
+                              {isSelected ? (
+                                <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FF4D17] text-black text-[10px] font-black shadow-sm">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                  Aktiv
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-semibold text-zinc-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  + Wählen
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <h5 className="text-xs font-black text-white">{preset.name}</h5>
+                          <h5 className="text-xs font-black text-white group-hover:text-orange-300 transition-colors">
+                            {preset.name}
+                          </h5>
                           <p className="text-[11px] text-zinc-400 line-clamp-2">{preset.description}</p>
                         </div>
 
