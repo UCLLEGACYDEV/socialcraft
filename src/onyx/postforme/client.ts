@@ -382,6 +382,35 @@ export class PostForMeApiClient {
     return Array.isArray(res) ? res : res?.data || [];
   }
 
+  /**
+   * Live TikTok "Query Creator Info" (nickname, allowed privacy levels, max duration,
+   * whether duet/stitch/comment are disabled). Routed through our server, which pulls
+   * the account's TikTok access token from Post for Me and calls TikTok directly.
+   * Required by the Content Posting API audit — the export screen must not use static data.
+   */
+  async getTikTokCreatorInfo(socialAccountId: string): Promise<{
+    creator_nickname?: string;
+    creator_username?: string;
+    creator_avatar_url?: string;
+    privacy_level_options?: string[];
+    comment_disabled?: boolean;
+    duet_disabled?: boolean;
+    stitch_disabled?: boolean;
+    max_video_post_duration_sec?: number;
+  } | null> {
+    if (typeof window === "undefined") return null;
+    const resp = await fetch("/api/cloud/tiktok/creator-info", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ socialAccountId, apiKey: this.apiKey }),
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      throw new Error(data?.error || data?.error_description || `creator_info ${resp.status}`);
+    }
+    return data?.data || data;
+  }
+
   // --- SOCIAL ACCOUNT FEEDS & ANALYTICS ---
 
   /**

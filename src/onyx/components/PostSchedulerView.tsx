@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Calendar as CalendarIcon,
   Clock,
@@ -767,13 +767,71 @@ export function PostSchedulerView({
   };
 
   // Platform-Specific Composer Options
-  const [tiktokPrivacy, setTiktokPrivacy] = useState<"PUBLIC_TO_EVERYONE" | "MUTUAL_FOLLOW_FRIENDS" | "FOLLOWER_OF_CREATOR" | "SELF_ONLY">("PUBLIC_TO_EVERYONE");
-  const [tiktokAllowComments, setTiktokAllowComments] = useState(true);
-  const [tiktokAllowDuet, setTiktokAllowDuet] = useState(true);
-  const [tiktokAllowStitch, setTiktokAllowStitch] = useState(true);
+  // TikTok Content Posting API audit rules: privacy has NO default (user must pick),
+  // and comment/duet/stitch start OFF (user must opt in).
+  const [tiktokPrivacy, setTiktokPrivacy] = useState<
+    "" | "PUBLIC_TO_EVERYONE" | "MUTUAL_FOLLOW_FRIENDS" | "FOLLOWER_OF_CREATOR" | "SELF_ONLY"
+  >("");
+  const [tiktokAllowComments, setTiktokAllowComments] = useState(false);
+  const [tiktokAllowDuet, setTiktokAllowDuet] = useState(false);
+  const [tiktokAllowStitch, setTiktokAllowStitch] = useState(false);
   const [tiktokAiDisclosure, setTiktokAiDisclosure] = useState(false);
+  const [tiktokDiscloseYourBrand, setTiktokDiscloseYourBrand] = useState(false);
+  const [tiktokDiscloseBrandedContent, setTiktokDiscloseBrandedContent] = useState(false);
   const [tiktokAutoMusic, setTiktokAutoMusic] = useState(true);
   const [tiktokDraft, setTiktokDraft] = useState(false);
+
+  // Live creator info (TikTok Query Creator Info) for the currently selected TikTok channel.
+  const [tiktokCreatorInfo, setTiktokCreatorInfo] = useState<{
+    creator_nickname?: string;
+    creator_username?: string;
+    creator_avatar_url?: string;
+    privacy_level_options?: string[];
+    comment_disabled?: boolean;
+    duet_disabled?: boolean;
+    stitch_disabled?: boolean;
+    max_video_post_duration_sec?: number;
+  } | null>(null);
+  const [tiktokCreatorInfoLoading, setTiktokCreatorInfoLoading] = useState(false);
+  const [tiktokCreatorInfoError, setTiktokCreatorInfoError] = useState<string | null>(null);
+
+  const loadTikTokCreatorInfo = useCallback(
+    async (accountId: string) => {
+      if (!accountId || !activePostForMeKey) return;
+      setTiktokCreatorInfoLoading(true);
+      setTiktokCreatorInfoError(null);
+      try {
+        const info = await new PostForMeApiClient(activePostForMeKey).getTikTokCreatorInfo(accountId);
+        setTiktokCreatorInfo(info);
+        // Force interaction toggles back off if the account disables them.
+        if (info?.comment_disabled) setTiktokAllowComments(false);
+        if (info?.duet_disabled) setTiktokAllowDuet(false);
+        if (info?.stitch_disabled) setTiktokAllowStitch(false);
+        // Drop a chosen privacy level that the account no longer allows.
+        setTiktokPrivacy((prev) =>
+          prev && info?.privacy_level_options && !info.privacy_level_options.includes(prev) ? "" : prev
+        );
+      } catch (err: any) {
+        setTiktokCreatorInfo(null);
+        setTiktokCreatorInfoError(err?.message || "Creator-Infos konnten nicht geladen werden.");
+      } finally {
+        setTiktokCreatorInfoLoading(false);
+      }
+    },
+    [activePostForMeKey]
+  );
+
+  useEffect(() => {
+    if (activeTab !== "composer") return;
+    if (selectedChannel.platform !== "tiktok") {
+      setTiktokCreatorInfo(null);
+      setTiktokCreatorInfoError(null);
+      return;
+    }
+    const accountId = selectedChannel.postForMeAccountId || selectedChannel.channelId;
+    void loadTikTokCreatorInfo(accountId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, selectedChannel.id, selectedChannel.platform]);
   const [selectedSound, setSelectedSound] = useState<TikTokSoundItem | null>(null);
   const [showMusicLibraryModal, setShowMusicLibraryModal] = useState(false);
 
@@ -1120,6 +1178,14 @@ export function PostSchedulerView({
 
     let mediaList = selectedMediaUrls.length > 0 ? selectedMediaUrls : customMediaUrl ? [customMediaUrl] : [];
 
+    // TikTok requires the creator to actively choose a visibility — no default is allowed.
+    if (channel.platform === "tiktok" && !tiktokPrivacy) {
+      toast.error("Bitte wähle die TikTok-Sichtbarkeit aus.", {
+        description: "Öffentlich, Freunde oder Privat – TikTok erlaubt keine Vorauswahl.",
+      });
+      return;
+    }
+
     // Resolve & validate the scheduled time up front. A datetime-local value is
     // local time; without this guard a stale/past value is sent to the publisher
     // as `scheduled_at`, which then posts immediately instead of scheduling.
@@ -1221,6 +1287,8 @@ export function PostSchedulerView({
             allow_stitch: tiktokAllowStitch,
             auto_add_music: tiktokAutoMusic,
             is_ai_generated: tiktokAiDisclosure,
+            disclose_your_brand: tiktokDiscloseYourBrand,
+            disclose_branded_content: tiktokDiscloseBrandedContent,
             is_draft: tiktokDraft,
             ...(postTitle.trim() ? { title: postTitle.trim() } : {}),
           };
@@ -1323,7 +1391,7 @@ export function PostSchedulerView({
         publishNow,
         scheduledFor: !publishNow ? scheduledIso : undefined,
         tiktokOptions: {
-          privacyLevel: tiktokPrivacy,
+          privacyLevel: tiktokPrivacy || "SELF_ONLY",
           allowComments: tiktokAllowComments,
           allowDuet: tiktokAllowDuet,
           allowStitch: tiktokAllowStitch,
@@ -3111,23 +3179,93 @@ export function PostSchedulerView({
                     <span className="text-[10px] text-zinc-400 font-mono">Socialcraft Direct Engine</span>
                   </div>
 
-                  {/* TIKTOK SPECIFIC SETTINGS */}
-                  {selectedChannel.platform === "tiktok" && (
+                  {/* TIKTOK SPECIFIC SETTINGS — layout & rules per TikTok Content Posting API audit */}
+                  {selectedChannel.platform === "tiktok" && (() => {
+                    const PRIVACY_LABELS: Record<string, string> = {
+                      PUBLIC_TO_EVERYONE: "Öffentlich",
+                      MUTUAL_FOLLOW_FRIENDS: "Freunde",
+                      FOLLOWER_OF_CREATOR: "Follower",
+                      SELF_ONLY: "Nur ich (privat)",
+                    };
+                    const allowedPrivacy =
+                      tiktokCreatorInfo?.privacy_level_options && tiktokCreatorInfo.privacy_level_options.length > 0
+                        ? tiktokCreatorInfo.privacy_level_options
+                        : ["PUBLIC_TO_EVERYONE", "MUTUAL_FOLLOW_FRIENDS", "SELF_ONLY"];
+                    const commentDisabled = !!tiktokCreatorInfo?.comment_disabled;
+                    const duetDisabled = !!tiktokCreatorInfo?.duet_disabled;
+                    const stitchDisabled = !!tiktokCreatorInfo?.stitch_disabled;
+                    const acctId = selectedChannel.postForMeAccountId || selectedChannel.channelId;
+
+                    return (
                     <div className="space-y-3 pt-2 border-t border-white/5 text-xs">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {/* Live creator info — must be fetched from TikTok, not static */}
+                      <div className="rounded-lg border border-white/10 bg-black/40 px-3 py-2">
+                        {tiktokCreatorInfoLoading ? (
+                          <div className="flex items-center gap-2 text-zinc-400">
+                            <RefreshCw className="h-3.5 w-3.5 animate-spin" />
+                            <span>Lade TikTok-Kontoinfo…</span>
+                          </div>
+                        ) : tiktokCreatorInfoError ? (
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-amber-300">{tiktokCreatorInfoError}</span>
+                            <button
+                              type="button"
+                              onClick={() => loadTikTokCreatorInfo(acctId)}
+                              className="text-[10px] font-semibold text-amber-300 hover:text-amber-200 underline shrink-0"
+                            >
+                              Erneut versuchen
+                            </button>
+                          </div>
+                        ) : tiktokCreatorInfo ? (
+                          <div className="flex items-center gap-2.5">
+                            {tiktokCreatorInfo.creator_avatar_url && (
+                              <img
+                                src={tiktokCreatorInfo.creator_avatar_url}
+                                alt=""
+                                className="h-7 w-7 rounded-full border border-white/15"
+                              />
+                            )}
+                            <div className="min-w-0">
+                              <p className="text-white font-semibold truncate">
+                                {tiktokCreatorInfo.creator_nickname || tiktokCreatorInfo.creator_username || "TikTok-Konto"}
+                              </p>
+                              <p className="text-[10px] text-zinc-500">
+                                Max. Videolänge:{" "}
+                                {tiktokCreatorInfo.max_video_post_duration_sec
+                                  ? `${Math.round(tiktokCreatorInfo.max_video_post_duration_sec / 60)} Min`
+                                  : "—"}
+                              </p>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-zinc-500">Kein verbundenes TikTok-Konto.</span>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="text-[11px] text-zinc-400 block mb-1">Sichtbarkeit (Privacy):</label>
+                          <label className="text-[11px] text-zinc-400 block mb-1">
+                            Wer darf dieses Video sehen? <span className="text-rose-400">*</span>
+                          </label>
                           <select
                             value={tiktokPrivacy}
                             onChange={(e) => setTiktokPrivacy(e.target.value as any)}
-                            className="w-full bg-[#120F17] border border-white/10 rounded-lg px-2.5 py-1.5 text-xs text-white"
+                            className={cn(
+                              "w-full bg-[#120F17] border rounded-lg px-2.5 py-1.5 text-xs text-white",
+                              tiktokPrivacy ? "border-white/10" : "border-rose-500/40"
+                            )}
                           >
-                            <option value="PUBLIC_TO_EVERYONE">Öffentlich für alle</option>
-                            <option value="MUTUAL_FOLLOW_FRIENDS">Nur Freunde</option>
-                            <option value="FOLLOWER_OF_CREATOR">Nur Follower</option>
-                            <option value="SELF_ONLY">Nur ich (Privat)</option>
+                            <option value="" disabled>
+                              Bitte auswählen …
+                            </option>
+                            {allowedPrivacy.map((p) => (
+                              <option key={p} value={p}>
+                                {PRIVACY_LABELS[p] || p}
+                              </option>
+                            ))}
                           </select>
                         </div>
+
                         <div className="flex flex-col justify-center gap-1.5 pt-1">
                           <label className="flex items-center gap-2 cursor-pointer text-zinc-300">
                             <input
@@ -3145,7 +3283,7 @@ export function PostSchedulerView({
                               onChange={(e) => setTiktokAutoMusic(e.target.checked)}
                               className="accent-orange-500 rounded"
                             />
-                            <span>Automatische Trend-Musik (TikTok)</span>
+                            <span>Automatische Trend-Musik (nur Foto-Posts)</span>
                           </label>
                           <label className="flex items-center gap-2 cursor-pointer text-zinc-300">
                             <input
@@ -3161,37 +3299,95 @@ export function PostSchedulerView({
                           </label>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4 text-[11px] text-zinc-400 pt-1">
-                        <label className="flex items-center gap-1.5 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={tiktokAllowComments}
-                            onChange={(e) => setTiktokAllowComments(e.target.checked)}
-                            className="accent-orange-500 rounded"
-                          />
-                          <span>Kommentare erlauben</span>
-                        </label>
-                        <label className="flex items-center gap-1.5 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={tiktokAllowDuet}
-                            onChange={(e) => setTiktokAllowDuet(e.target.checked)}
-                            className="accent-orange-500 rounded"
-                          />
-                          <span>Duette erlauben</span>
-                        </label>
-                        <label className="flex items-center gap-1.5 cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={tiktokAllowStitch}
-                            onChange={(e) => setTiktokAllowStitch(e.target.checked)}
-                            className="accent-orange-500 rounded"
-                          />
-                          <span>Stitch erlauben</span>
-                        </label>
+
+                      {/* Interaction toggles — start OFF, hidden when the account disables them */}
+                      <div>
+                        <p className="text-[11px] text-zinc-400 mb-1">Interaktionen (standardmäßig aus):</p>
+                        <div className="flex flex-wrap items-center gap-4 text-[11px] text-zinc-400">
+                          {!commentDisabled && (
+                            <label className="flex items-center gap-1.5 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={tiktokAllowComments}
+                                onChange={(e) => setTiktokAllowComments(e.target.checked)}
+                                className="accent-orange-500 rounded"
+                              />
+                              <span>Kommentare erlauben</span>
+                            </label>
+                          )}
+                          {!duetDisabled && (
+                            <label className="flex items-center gap-1.5 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={tiktokAllowDuet}
+                                onChange={(e) => setTiktokAllowDuet(e.target.checked)}
+                                className="accent-orange-500 rounded"
+                              />
+                              <span>Duette erlauben</span>
+                            </label>
+                          )}
+                          {!stitchDisabled && (
+                            <label className="flex items-center gap-1.5 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={tiktokAllowStitch}
+                                onChange={(e) => setTiktokAllowStitch(e.target.checked)}
+                                className="accent-orange-500 rounded"
+                              />
+                              <span>Stitch erlauben</span>
+                            </label>
+                          )}
+                          {(commentDisabled || duetDisabled || stitchDisabled) && (
+                            <span className="text-[10px] text-zinc-600">
+                              Einige Interaktionen sind für dieses Konto deaktiviert.
+                            </span>
+                          )}
+                        </div>
                       </div>
+
+                      {/* Commercial content disclosure — off by default */}
+                      <div>
+                        <p className="text-[11px] text-zinc-400 mb-1">Kommerzielle Inhalte offenlegen:</p>
+                        <div className="flex flex-wrap items-center gap-4 text-[11px] text-zinc-400">
+                          <label className="flex items-center gap-1.5 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={tiktokDiscloseYourBrand}
+                              onChange={(e) => setTiktokDiscloseYourBrand(e.target.checked)}
+                              className="accent-orange-500 rounded"
+                            />
+                            <span>Eigene Marke bewerben</span>
+                          </label>
+                          <label className="flex items-center gap-1.5 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={tiktokDiscloseBrandedContent}
+                              onChange={(e) => setTiktokDiscloseBrandedContent(e.target.checked)}
+                              className="accent-orange-500 rounded"
+                            />
+                            <span>Bezahlte Partnerschaft / Branded Content</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      <p className="text-[10px] text-zinc-500 leading-relaxed border-t border-white/5 pt-2">
+                        Mit dem Veröffentlichen stimmst du – je nach Auswahl – den{" "}
+                        <a href="https://www.tiktok.com/legal/page/global/music-usage-confirmation/en" target="_blank" rel="noreferrer" className="underline hover:text-zinc-300">
+                          TikTok Musik-Nutzungsbedingungen
+                        </a>
+                        {tiktokDiscloseBrandedContent || tiktokDiscloseYourBrand ? (
+                          <>
+                            {" "}und den{" "}
+                            <a href="https://www.tiktok.com/legal/page/global/bc-policy/en" target="_blank" rel="noreferrer" className="underline hover:text-zinc-300">
+                              Branded-Content-Richtlinien
+                            </a>
+                          </>
+                        ) : null}{" "}
+                        zu.
+                      </p>
                     </div>
-                  )}
+                    );
+                  })()}
 
                   {/* INSTAGRAM SPECIFIC SETTINGS */}
                   {selectedChannel.platform === "instagram" && (

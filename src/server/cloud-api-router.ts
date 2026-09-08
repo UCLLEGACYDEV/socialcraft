@@ -113,6 +113,67 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
     }
   }
 
+  // 0.05 TikTok Query Creator Info proxy.
+  // The Content Posting API audit requires the "Export to TikTok" screen to render
+  // from a LIVE creator_info/query call (nickname, allowed privacy levels, max
+  // duration, whether duet/stitch/comment are disabled). Post for Me does not expose
+  // this, but its GET /social-accounts/{id} returns the raw TikTok access_token, so
+  // we fetch the token server-side and call TikTok directly (browser is CORS-blocked).
+  if (endpoint === "tiktok/creator-info") {
+    if (request.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: corsHeaders });
+    }
+    try {
+      const body = (await request.json().catch(() => ({}))) as {
+        socialAccountId?: string;
+        apiKey?: string;
+      };
+      const pfmEnv =
+        (typeof process !== "undefined" && (process.env?.["POSTFORME_API_KEY"] || process.env?.["VITE_POSTFORME_API_KEY"])) ||
+        "";
+      const pfmKey =
+        (body.apiKey && body.apiKey.trim()) ||
+        request.headers.get("x-postforme-key") ||
+        pfmEnv ||
+        "pfm_live_X6AHnibZB1BjEu4j2ef1f4";
+
+      if (!body.socialAccountId) {
+        return jsonResponse({ error: "socialAccountId fehlt" }, 400);
+      }
+
+      const acctResp = await fetch(
+        `https://api.postforme.dev/v1/social-accounts/${encodeURIComponent(body.socialAccountId)}`,
+        { headers: { Authorization: `Bearer ${pfmKey}` } }
+      );
+      const acct = (await acctResp.json().catch(() => ({}))) as any;
+      const token: string | undefined = acct?.access_token || acct?.data?.access_token;
+      if (!token) {
+        return jsonResponse(
+          { error: "Kein TikTok Access Token verfügbar (Konto neu verbinden?)" },
+          502
+        );
+      }
+
+      const ttResp = await fetch(
+        "https://open.tiktokapis.com/v2/post/publish/creator_info/query/",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json; charset=UTF-8",
+          },
+        }
+      );
+      const ttData = (await ttResp.json().catch(() => ({}))) as any;
+      return new Response(JSON.stringify(ttData), {
+        status: ttResp.status,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    } catch (err: any) {
+      return jsonResponse({ error: err?.message || "creator_info fehlgeschlagen" }, 500);
+    }
+  }
+
   // 0.1 Post for Me Server Proxy (Prevents browser CORS blocks and protects credentials)
   if (endpoint === "postforme/proxy" || endpoint === "postforme-proxy") {
     if (request.method === "OPTIONS") {
@@ -134,8 +195,8 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
       const apiKey =
         (reqData.apiKey && reqData.apiKey.trim()) ||
         request.headers.get("x-postforme-key") ||
-        (typeof process !== "undefined" && process.env?.POSTFORME_API_KEY) ||
-        (typeof process !== "undefined" && process.env?.VITE_POSTFORME_API_KEY) ||
+        (typeof process !== "undefined" && process.env?.["POSTFORME_API_KEY"]) ||
+        (typeof process !== "undefined" && process.env?.["VITE_POSTFORME_API_KEY"]) ||
         "pfm_live_X6AHnibZB1BjEu4j2ef1f4";
 
       const targetUrl = `https://api.postforme.dev/v1${cleanEndpoint}`;
