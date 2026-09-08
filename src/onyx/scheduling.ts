@@ -15,14 +15,23 @@ export const DEFAULT_POSTING_SLOTS: PostingSlotConfig = {
   times: ["09:00", "13:00", "18:00"],
 };
 
+export interface SlotOptions {
+  /** Earliest allowed datetime. Defaults to ~15 min from now. */
+  startFrom?: Date;
+  /** Minimum distance between two generated slots, in minutes. */
+  minGapMinutes?: number;
+}
+
 /**
  * Returns the next `count` posting datetimes that match the slot config, start at
- * least ~15 min from now, and don't collide (±5 min) with an already-taken time.
+ * least ~15 min from now (or after `startFrom`), keep an optional minimum gap and
+ * don't collide (±5 min) with an already-taken time.
  */
 export function computeNextSlots(
   config: PostingSlotConfig,
   count: number,
-  taken: number[]
+  taken: number[],
+  options: SlotOptions = {}
 ): Date[] {
   const days = config.days.length ? config.days : DEFAULT_POSTING_SLOTS.days;
   const times = (config.times.length ? config.times : DEFAULT_POSTING_SLOTS.times)
@@ -31,8 +40,10 @@ export function computeNextSlots(
     .sort((a, b) => a[0] * 60 + a[1] - (b[0] * 60 + b[1]));
 
   const out: Date[] = [];
-  const min = Date.now() + 15 * 60 * 1000;
-  const cursor = new Date();
+  const soonest = Date.now() + 15 * 60 * 1000;
+  const min = Math.max(soonest, options.startFrom ? options.startFrom.getTime() : 0);
+  const gapMs = Math.max(0, options.minGapMinutes ?? 0) * 60 * 1000;
+  const cursor = new Date(min);
   cursor.setHours(0, 0, 0, 0);
 
   for (let dayOffset = 0; dayOffset < 400 && out.length < count; dayOffset++) {
@@ -45,6 +56,8 @@ export function computeNextSlots(
       slot.setHours(h, m, 0, 0);
       const ts = slot.getTime();
       if (ts < min) continue;
+      const last = out[out.length - 1];
+      if (last && ts - last.getTime() < gapMs) continue;
       const clash =
         taken.some((t) => Math.abs(t - ts) < 5 * 60 * 1000) ||
         out.some((d) => Math.abs(d.getTime() - ts) < 5 * 60 * 1000);
@@ -54,6 +67,7 @@ export function computeNextSlots(
   }
   return out;
 }
+
 
 /**
  * Renders a clean branded quote/statement card as a JPEG data URL (client-side,
