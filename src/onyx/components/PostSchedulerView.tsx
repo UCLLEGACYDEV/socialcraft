@@ -4671,6 +4671,27 @@ export function PostSchedulerView({
         </div>
       )}
 
+      {/* ── SCHNELL PLANEN ────────────────────────────────────────────── */}
+      <QuickPlanModal
+        open={showQuickPlan}
+        onClose={() => setShowQuickPlan(false)}
+        posts={openPosts}
+        channels={profileChannels}
+        takenTimes={takenTimes}
+        slots={postingSlots}
+        onChangeSlots={updatePostingSlots}
+        onSchedule={scheduleQuickPlanEntry}
+        onDone={(firstDate, ok, total) => {
+          if (firstDate) setCalendarDate(new Date(firstDate));
+          if (ok === total) {
+            toast.success(`✅ ${ok} ${ok === 1 ? "Beitrag" : "Beiträge"} eingeplant.`);
+          } else {
+            toast.warning(`${ok} von ${total} eingeplant — Details im Fenster.`);
+          }
+        }}
+      />
+
+
       {/* ── TIKTOK COMMERCIAL MUSIC LIBRARY MODAL ────────────────────── */}
       <TikTokMusicLibraryModal
         isOpen={showMusicLibraryModal}
