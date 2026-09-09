@@ -32,8 +32,29 @@ export interface SocialCraftStoreData {
   updatedAt: string;
 }
 
-const STORE_DIR = path.resolve(process.cwd(), "src/server/data");
-const STORE_FILE = path.join(STORE_DIR, "socialcraft-store.json");
+import { fileURLToPath } from "node:url";
+
+function resolveStorePaths(): { storeDir: string; storeFile: string } {
+  try {
+    const currentDir = path.dirname(fileURLToPath(import.meta.url));
+    let dir = currentDir;
+    for (let i = 0; i < 6; i++) {
+      const candidate = path.join(dir, "src", "server", "data");
+      if (fs.existsSync(candidate)) {
+        return { storeDir: candidate, storeFile: path.join(candidate, "socialcraft-store.json") };
+      }
+      const parent = path.dirname(dir);
+      if (!parent || parent === dir) break;
+      dir = parent;
+    }
+  } catch {
+    // Fallback if import.meta.url is unavailable
+  }
+  const fallbackDir = path.resolve(process.cwd(), "src/server/data");
+  return { storeDir: fallbackDir, storeFile: path.join(fallbackDir, "socialcraft-store.json") };
+}
+
+const { storeDir: STORE_DIR, storeFile: STORE_FILE } = resolveStorePaths();
 
 function getInitialStore(): SocialCraftStoreData {
   return {

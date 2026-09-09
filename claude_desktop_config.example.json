@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "socialcraft": {
-      "command": "npx",
-      "args": ["-y", "tsx", "src/mcp/index.ts"],
+      "command": "node",
+      "args": ["ABSOLUTER/PFAD/ZU/socialcraft/dist/mcp/index.js"],
       "cwd": "ABSOLUTER/PFAD/ZU/socialcraft"
     }
   }

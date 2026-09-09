@@ -2,11 +2,9 @@
   "mcpServers": {
     "socialcraft": {
       "type": "stdio",
-      "command": "npx",
+      "command": "node",
       "args": [
-        "-y",
-        "tsx",
-        "src/mcp/index.ts"
+        "dist/mcp/index.js"
       ],
       "env": {}
     }

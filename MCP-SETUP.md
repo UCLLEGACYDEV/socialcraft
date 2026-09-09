@@ -18,6 +18,7 @@ neuen Nutzer nichts weiter zu tun:
 git clone https://github.com/UCLLEGACYDEV/socialcraft
 cd socialcraft
 npm install
+npm run mcp:build
 claude
 ```
 
@@ -27,9 +28,9 @@ werden sollen → **Ja**. Danach ist der Server `socialcraft` verbunden.
 Manuell / zum Prüfen:
 
 ```bash
-claude mcp add socialcraft -- npx -y tsx src/mcp/index.ts   # falls .mcp.json fehlt
+claude mcp add socialcraft -- node dist/mcp/index.js         # falls .mcp.json fehlt
 claude mcp list                                             # Status prüfen
-npx -y tsx src/mcp/index.ts --test                          # Server-Selbsttest
+node dist/mcp/index.js --test                               # Server-Selbsttest (blitzschnell)
 ```
 
 ---
@@ -77,8 +78,8 @@ Claude Desktop (`claude_desktop_config.json`):
 {
   "mcpServers": {
     "socialcraft": {
-      "command": "npx",
-      "args": ["-y", "tsx", "src/mcp/index.ts"],
+      "command": "node",
+      "args": ["ABSOLUTER/PFAD/ZU/socialcraft/dist/mcp/index.js"],
       "cwd": "ABSOLUTER/PFAD/ZU/socialcraft"
     }
   }

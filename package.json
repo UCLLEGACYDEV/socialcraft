@@ -12,6 +12,8 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "mcp": "tsx src/mcp/index.ts",
+    "mcp:run": "node dist/mcp/index.js",
+    "mcp:build": "esbuild src/mcp/index.ts --bundle --platform=node --format=esm --packages=external --outfile=dist/mcp/index.js",
     "mcp:remote": "tsx src/mcp/http-server.ts",
     "mcp:tunnel": "tsx src/mcp/tunnel.ts"
   },
