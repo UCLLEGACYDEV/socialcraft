@@ -4,16 +4,16 @@ import { OnyxStudio } from "./index";
 export const Route = createFileRoute("/serie")({
   head: () => ({
     meta: [
-      { title: "Serienproduktion & Warteschlange — ONYX Studio" },
+      { title: "Batch Studio & Content-Warteschlange — ONYX Studio" },
       {
         name: "description",
         content:
-          "Serienproduktion von Beiträgen im Batch mit automatischer Warteschlange, parallelem Rendering und Cloud-Speicherung.",
+          "Batch Studio für Massenproduktion von Beiträgen mit automatischer Warteschlange, parallelem Rendering und Cloud-Speicherung.",
       },
-      { property: "og:title", content: "Serienproduktion — ONYX Studio" },
+      { property: "og:title", content: "Batch Studio — ONYX Studio" },
       {
         property: "og:description",
-        content: "Erstelle Serien von Beiträgen auf Knopfdruck für deine gesamte Content-Pipeline.",
+        content: "Erstelle Mass-Content und Batches von Beiträgen auf Knopfdruck für deine gesamte Content-Pipeline.",
       },
     ],
   }),

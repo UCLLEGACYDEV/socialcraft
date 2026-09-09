@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 
 export const TABS: { key: TabKey; label: string; icon: LucideIcon }[] = [
   { key: "carousel", label: "Karussell", icon: Layers },
-  { key: "bulk", label: "Serie", icon: ListVideo },
+  { key: "bulk", label: "Batch Studio", icon: ListVideo },
   { key: "direct-prompt", label: "Einzelbild", icon: ImageIcon },
   { key: "ai-clone", label: "AI Clone", icon: UserCheck },
   { key: "prompt-gallery", label: "Prompt Hub", icon: Sparkles },

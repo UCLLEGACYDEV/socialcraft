@@ -737,9 +737,9 @@ export function registerTools(server: McpServer) {
   // 9. Tool: create_content_series
   server.tool(
     "create_content_series",
-    "Erstellt eine zusammenhängende Content-Serie (z. B. '3-Tage Creator Masterclass') mit mehreren Karussell-Teilen (Teil 1, Teil 2, Teil 3...) und fügt sie direkt in die SocialCraft Serien-Warteschlange (Tab 'Serie' / 'bulk') und/oder in den Kalender-Planer ein.",
+    "Erstellt einen Mass-Content-Batch (Batch Studio) mit mehreren Karussell-Teilen oder Posts und fügt die Folien direkt in das SocialCraft Batch Studio (Tab 'Batch Studio' / 'bulk') und/oder verbindlich in den Kalender-Planer ein.",
     {
-      seriesTitle: z.string().describe("Übergeordneter Name der Serie (z. B. 'Die 3-Tage Mindset Formel')"),
+      seriesTitle: z.string().describe("Übergeordneter Name des Batch-Pakets (z. B. '30-Tage Mindset Batch' oder 'Masterclass Batch')"),
       targetAudience: z.string().optional().describe("Zielgruppe der Serie"),
       platforms: z
         .array(
@@ -792,7 +792,7 @@ export function registerTools(server: McpServer) {
         )
         .min(2)
         .describe("Die einzelnen Teile der Serie"),
-      addToSeriesQueue: z.boolean().default(true).describe("Direkt in die SocialCraft Serien-Warteschlange (Tab 'Serie') einfügen"),
+      addToSeriesQueue: z.boolean().default(true).describe("Direkt in das SocialCraft Batch Studio (Tab 'Batch Studio' / 'bulk') einfügen"),
       scheduleInCalendar: z.boolean().default(true).describe("Gleichzeitig verbindlich in den Kalender vorplanen"),
       startFrom: z.string().optional(),
       channelId: z.string().optional().describe("Optional: Feste Kanal-ID (z. B. 'ig-loyaltytiger')"),
@@ -917,7 +917,7 @@ export function registerTools(server: McpServer) {
   // 10. Tool: get_series_queue
   server.tool(
     "get_series_queue",
-    "Gibt alle aktuellen Jobs aus der SocialCraft Serien-Warteschlange (Tab 'Serie' / 'bulk') zurück.",
+    "Gibt alle aktuellen Jobs aus dem SocialCraft Batch Studio (Tab 'Batch Studio' / 'bulk') zurück.",
     {},
     async () => {
       const queue = getSeriesQueue();

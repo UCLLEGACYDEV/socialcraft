@@ -23,7 +23,7 @@ const RESOLUTIONS: ApiSettings["kieResolution"][] = ["1K", "2K", "4K"];
 
 const NAV: { key: TabKey; label: string }[] = [
   { key: "carousel", label: "Karussell" },
-  { key: "bulk", label: "Serie" },
+  { key: "bulk", label: "Batch Studio" },
   { key: "direct-prompt", label: "Einzelbild" },
   { key: "prompt-gallery", label: "Prompt Hub" },
   { key: "history", label: "Galerie" },

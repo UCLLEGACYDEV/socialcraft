@@ -166,10 +166,10 @@ export function SeriesQueue({
           <div>
             <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl flex items-center gap-2">
               <FileSpreadsheet className="h-5 w-5 text-[#FF6A1F]" />
-              <span>Serien-Generator & CSV-Import</span>
+              <span>Batch Studio & Massen-Import</span>
             </h1>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Füge Prompts ein oder lade CSV-, TXT- oder Markdown-Exporte von Claude, ChatGPT & Gemini hoch.
+              Füge Prompts ein oder lade CSV-, TXT- oder Markdown-Exporte hoch, um Dutzende Karussells im Batch zu rendern.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">

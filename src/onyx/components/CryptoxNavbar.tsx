@@ -60,7 +60,7 @@ interface CryptoxNavbarProps {
 // Group 1: Creation Tools
 const CREATION_TABS: { key: TabKey; label: string }[] = [
   { key: "carousel", label: "Karussell" },
-  { key: "bulk", label: "Serie" },
+  { key: "bulk", label: "Batch Studio" },
   { key: "direct-prompt", label: "Einzelbild" },
   { key: "scheduler", label: "Planer" },
 ];
