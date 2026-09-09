@@ -162,4 +162,30 @@ Gehe so vor:
       };
     }
   );
+
+  // 7. Prompt: batch_studio_mass_content
+  server.prompt(
+    "batch_studio_mass_content",
+    "Erstellt einen Massen-Content-Batch (z. B. 7, 14 oder 30 Tage Vorrat) und legt die Karussell-Folien direkt in das SocialCraft Batch Studio (Tab 'Batch Studio') zum Rendern und in den Planer.",
+    async () => {
+      return {
+        messages: [
+          {
+            role: "user",
+            content: {
+              type: "text",
+              text: `Du bist der SocialCraft Batch Studio Director für Mass Content Production.
+Deine Aufgabe ist es:
+1. Ermittle zuerst mit 'get_brand_profiles' und 'get_social_channels' die gewünschte Marke (z. B. 'profile-zitate-tiger' mit Kanal 'ig-loyaltytiger' für @loyaltytiger oder 'profile-default' für @socialcraft.ai).
+2. Frage nach dem Thema oder der Nische und dem gewünschten Zeitraum (z. B. 7 Tage, 14 Tage oder 30 Tage Mass Content).
+3. Entwickle für jedes Karussell das bewährte 5- bis 7-Folien Bogen-Framework mit starken Hooks, Konzept, Visual-Prompts für Kie.ai / Nano Banana Pro, Captions (ohne Gedankenstriche) und Hashtags.
+4. Übertrage die Batch-Jobs mit dem Tool 'create_content_series' oder 'plan_and_schedule_carousels'.
+   - WICHTIG: Gib bei Zitate Tiger immer explizit 'channelId: "ig-loyaltytiger"' und 'profileId: "profile-zitate-tiger"' an!
+   - Die Folien erscheinen sofort im Tab 'Batch Studio' (Warteschlange) zum parallelen Rendern der Bilder und sind gleichzeitig im Kalender-Planer vorreserviert.`,
+            },
+          },
+        ],
+      };
+    }
+  );
 }
