@@ -65,6 +65,16 @@ export const DEFAULT_SOCIAL_CHANNELS: SocialChannel[] = [
     isDefault: false,
     profileId: "profile-default",
   },
+  {
+    id: "ig-loyaltytiger",
+    platform: "instagram",
+    name: "Loyalty Tiger (@loyaltytiger)",
+    channelId: "spc_yssDizpOVU5EXP8ANp",
+    handle: "@loyaltytiger",
+    avatarUrl: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=150&h=150&fit=crop&crop=face",
+    isDefault: true,
+    profileId: "profile-zitate-tiger",
+  },
 ];
 
 export const DEFAULT_BRAND_KIT: BrandKit = {

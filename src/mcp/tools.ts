@@ -511,6 +511,7 @@ export function registerTools(server: McpServer) {
       hashtags: z.array(z.string()).describe("Hashtags"),
       platform: z.enum(["instagram", "linkedin", "tiktok"]).default("instagram"),
       scheduledFor: z.string().optional().describe("Optionales Datum zum direkten Einplanen"),
+      channelId: z.string().optional().describe("Optional: Spezifische Kanal-ID (z. B. 'ig-loyaltytiger', 'ig-main-account')"),
       profileId: z.string().optional(),
     },
     async (params) => {
@@ -524,8 +525,12 @@ export function registerTools(server: McpServer) {
         scheduledFor = nextSlot ? nextSlot.toISOString() : new Date(Date.now() + 86400000).toISOString();
       }
 
-      const channels = getSocialChannels(params.profileId);
-      const channel = channels.find((c) => c.platform === params.platform) || channels[0];
+      let channelId = params.channelId;
+      if (!channelId) {
+        const channels = getSocialChannels(params.profileId);
+        const channel = channels.find((c) => c.platform === params.platform) || channels[0];
+        channelId = channel?.id || "default-channel";
+      }
 
       const post = addScheduledPost({
         title: `Karussell: ${params.topic}`,
@@ -533,7 +538,7 @@ export function registerTools(server: McpServer) {
         hashtags: params.hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`)),
         mediaType: "carousel",
         mediaUrls: [],
-        channelId: channel?.id || "default-channel",
+        channelId,
         platform: params.platform as SocialPlatform,
         scheduledFor,
         status: "scheduled",
@@ -790,9 +795,10 @@ export function registerTools(server: McpServer) {
       addToSeriesQueue: z.boolean().default(true).describe("Direkt in die SocialCraft Serien-Warteschlange (Tab 'Serie') einfügen"),
       scheduleInCalendar: z.boolean().default(true).describe("Gleichzeitig verbindlich in den Kalender vorplanen"),
       startFrom: z.string().optional(),
+      channelId: z.string().optional().describe("Optional: Feste Kanal-ID (z. B. 'ig-loyaltytiger')"),
       profileId: z.string().optional(),
     },
-    async ({ seriesTitle, targetAudience, platforms, parts, addToSeriesQueue, scheduleInCalendar, startFrom, profileId }) => {
+    async ({ seriesTitle, targetAudience, platforms, parts, addToSeriesQueue, scheduleInCalendar, startFrom, channelId, profileId }) => {
       const config = getPostingSlotConfig();
       const existing = getScheduledPosts();
       const taken = existing.map((p) => new Date(p.scheduledFor).getTime());
@@ -855,13 +861,14 @@ export function registerTools(server: McpServer) {
 
           platforms.forEach((plat) => {
             const match = channels.find((ch) => ch.platform === plat) || channels[0];
+            const targetChannelId = channelId || match?.id || "default-channel";
             addScheduledPost({
               title: `[Serie] ${seriesTitle} · Teil ${p.partNumber}/${parts.length}`,
               caption: cleanCaption,
               hashtags: p.hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`)),
               mediaType: "carousel",
               mediaUrls: [],
-              channelId: match?.id || "default-channel",
+              channelId: targetChannelId,
               platform: plat as SocialPlatform,
               scheduledFor: assignedSlot,
               status: "scheduled",
