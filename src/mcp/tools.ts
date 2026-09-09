@@ -13,6 +13,7 @@ import {
   getSeriesQueue,
   updateScheduledPost,
   deleteScheduledPost,
+  resolveChannelForPlatform,
 } from "./store";
 import type { PostingSlotConfig } from "../onyx/scheduling";
 import type { ScheduledPost, SocialPlatform, ScheduledPostStatus, SlideRole, SeriesJob } from "../onyx/types";
@@ -323,11 +324,11 @@ export function registerTools(server: McpServer) {
       }
 
       let channelId = params.channelId;
-      if (!channelId) {
-        const channels = getSocialChannels(params.profileId);
-        const match = channels.find((c) => c.platform === params.platform) || channels[0];
-        channelId = match?.id || "default-channel";
-      }
+      const targetChannel = channelId
+        ? getSocialChannels(params.profileId).find((c) => c.id === channelId)
+        : resolveChannelForPlatform(params.profileId, params.platform);
+      channelId = targetChannel?.id || resolveChannelForPlatform(params.profileId, params.platform).id;
+      const effectiveProfileId = targetChannel?.profileId || params.profileId || "profile-default";
 
       const cleanCaption = sanitizeNoGedankenstriche(params.caption);
 
@@ -341,7 +342,7 @@ export function registerTools(server: McpServer) {
         platform: params.platform as SocialPlatform,
         scheduledFor: finalSlot,
         status: params.status as ScheduledPostStatus,
-        profileId: params.profileId || "profile-default",
+        profileId: effectiveProfileId,
         musicTitle: params.visualPrompt ? `Prompt: ${params.visualPrompt.slice(0, 50)}...` : undefined,
       });
 
@@ -429,10 +430,9 @@ export function registerTools(server: McpServer) {
         const cleanCaption = sanitizeNoGedankenstriche(p.caption);
 
         let chId = p.channelId;
+        const targetProfile = p.profileId || profileId;
         if (!chId) {
-          const channels = getSocialChannels(p.profileId || profileId);
-          const match = channels.find((c) => c.platform === p.platform) || channels[0];
-          chId = match?.id || "default-channel";
+          chId = resolveChannelForPlatform(targetProfile, p.platform).id;
         }
 
         return {
@@ -445,7 +445,7 @@ export function registerTools(server: McpServer) {
           platform: p.platform as SocialPlatform,
           scheduledFor: slot,
           status: "scheduled",
-          profileId: p.profileId || profileId || "profile-default",
+          profileId: targetProfile || "profile-default",
           musicTitle: p.visualPrompt ? `Prompt: ${p.visualPrompt.slice(0, 50)}` : undefined,
         };
       });
@@ -527,9 +527,7 @@ export function registerTools(server: McpServer) {
 
       let channelId = params.channelId;
       if (!channelId) {
-        const channels = getSocialChannels(params.profileId);
-        const channel = channels.find((c) => c.platform === params.platform) || channels[0];
-        channelId = channel?.id || "default-channel";
+        channelId = resolveChannelForPlatform(params.profileId, params.platform).id;
       }
 
       const post = addScheduledPost({
@@ -678,18 +676,19 @@ export function registerTools(server: McpServer) {
         const channels = getSocialChannels(c.profileId || profileId);
 
         c.platforms.forEach((plat) => {
-          const match = channels.find((ch) => ch.platform === plat) || channels[0];
+          const targetProfile = c.profileId || profileId;
+          const assignedChannel = resolveChannelForPlatform(targetProfile, plat);
           const post = addScheduledPost({
             title: `Karussell (Tag ${dayNumber}): ${c.topic}`,
             caption: cleanCaption,
             hashtags: c.hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`)),
             mediaType: "carousel",
             mediaUrls: [],
-            channelId: match?.id || "default-channel",
+            channelId: assignedChannel.id,
             platform: plat as SocialPlatform,
             scheduledFor: assignedSlot,
             status: "scheduled",
-            profileId: c.profileId || profileId || "profile-default",
+            profileId: assignedChannel.profileId || targetProfile || "profile-default",
             musicTitle: `Karussell [${draft.id}] (${c.slides.length} Slides)`,
           });
 
@@ -860,19 +859,20 @@ export function registerTools(server: McpServer) {
           });
 
           platforms.forEach((plat) => {
-            const match = channels.find((ch) => ch.platform === plat) || channels[0];
-            const targetChannelId = channelId || match?.id || "default-channel";
+            const assignedChannel = channelId
+              ? channels.find((ch) => ch.id === channelId) || resolveChannelForPlatform(profileId, plat)
+              : resolveChannelForPlatform(profileId, plat);
             addScheduledPost({
               title: `[Serie] ${seriesTitle} · Teil ${p.partNumber}/${parts.length}`,
               caption: cleanCaption,
               hashtags: p.hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`)),
               mediaType: "carousel",
               mediaUrls: [],
-              channelId: targetChannelId,
+              channelId: assignedChannel.id,
               platform: plat as SocialPlatform,
               scheduledFor: assignedSlot,
               status: "scheduled",
-              profileId: profileId || "profile-default",
+              profileId: assignedChannel.profileId || profileId || "profile-default",
               musicTitle: `Serie [${draft.id}] (${p.slides.length} Slides)`,
             });
           });

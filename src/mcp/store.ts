@@ -30,6 +30,7 @@ export interface SocialCraftStoreData {
   carousels: CarouselDraft[];
   seriesQueue: SeriesJob[];
   deletedPostIds?: string[];
+  deletedSeriesIds?: string[];
   updatedAt: string;
 }
 
@@ -66,6 +67,7 @@ function getInitialStore(): SocialCraftStoreData {
     carousels: [],
     seriesQueue: [],
     deletedPostIds: [],
+    deletedSeriesIds: [],
     updatedAt: new Date().toISOString(),
   };
 }
@@ -87,6 +89,7 @@ export function readStore(): SocialCraftStoreData {
       carousels: parsed.carousels || [],
       seriesQueue: parsed.seriesQueue || [],
       deletedPostIds: parsed.deletedPostIds || [],
+      deletedSeriesIds: parsed.deletedSeriesIds || [],
       updatedAt: parsed.updatedAt || new Date().toISOString(),
     };
   } catch (err) {
@@ -121,6 +124,52 @@ export function getSocialChannels(profileId?: string): SocialChannel[] {
   const channels = readStore().socialChannels;
   if (!profileId) return channels;
   return channels.filter((c) => !c.profileId || c.profileId === profileId);
+}
+
+/**
+ * Resolves a real, valid SocialChannel for the given profile and platform.
+ * NEVER returns a fake fallback like "default-channel".
+ */
+export function resolveChannelForPlatform(profileId?: string, platform?: string): SocialChannel {
+  const store = readStore();
+  const allChannels = store.socialChannels.length > 0 ? store.socialChannels : DEFAULT_SOCIAL_CHANNELS;
+  const allProfiles = store.brandProfiles.length > 0 ? store.brandProfiles : DEFAULT_BRAND_PROFILES;
+
+  // 1. Resolve normalized profile id (supports id or slug)
+  let matchedProfile = allProfiles.find((p) => p.id === profileId || p.slug === profileId);
+  if (!matchedProfile && profileId) {
+    const lower = profileId.toLowerCase().replace(/[^a-z0-9]/g, "");
+    matchedProfile = allProfiles.find(
+      (p) =>
+        p.id.toLowerCase().replace(/[^a-z0-9]/g, "") === lower ||
+        p.slug.toLowerCase().replace(/[^a-z0-9]/g, "") === lower ||
+        p.name.toLowerCase().includes(lower)
+    );
+  }
+  const effectiveProfileId = matchedProfile?.id || allProfiles[0]?.id || "profile-default";
+
+  // 2. Profile-specific channels
+  const profileChannels = allChannels.filter((c) => (c.profileId || allProfiles[0]?.id) === effectiveProfileId);
+
+  // 3. Exact platform match in profile channels
+  if (platform) {
+    const directMatch = profileChannels.find((c) => c.platform.toLowerCase() === platform.toLowerCase());
+    if (directMatch) return directMatch;
+
+    // 4. Any channel with matching platform across all channels
+    const globalPlatformMatch = allChannels.find((c) => c.platform.toLowerCase() === platform.toLowerCase());
+    if (globalPlatformMatch) return globalPlatformMatch;
+  }
+
+  // 5. Default channel of the profile
+  const defaultProfileChannel = profileChannels.find((c) => c.isDefault) || profileChannels[0];
+  if (defaultProfileChannel) return defaultProfileChannel;
+
+  // 6. Global default channel or first channel
+  const globalDefault = allChannels.find((c) => c.isDefault) || allChannels[0];
+  if (globalDefault) return globalDefault;
+
+  return DEFAULT_SOCIAL_CHANNELS[0];
 }
 
 export function getScheduledPosts(filter?: {
@@ -261,15 +310,25 @@ export function deleteSeriesJob(id: string): boolean {
   const store = readStore();
   const initialLength = store.seriesQueue.length;
   store.seriesQueue = store.seriesQueue.filter((s) => s.id !== id);
-  if (store.seriesQueue.length !== initialLength) {
-    writeStore(store);
-    return true;
+  if (!store.deletedSeriesIds) store.deletedSeriesIds = [];
+  if (!store.deletedSeriesIds.includes(id)) {
+    store.deletedSeriesIds.push(id);
   }
-  return false;
+  if (store.deletedSeriesIds.length > 500) {
+    store.deletedSeriesIds = store.deletedSeriesIds.slice(-500);
+  }
+  writeStore(store);
+  return store.seriesQueue.length !== initialLength;
 }
 
 export function clearSeriesQueue(): void {
   const store = readStore();
+  if (!store.deletedSeriesIds) store.deletedSeriesIds = [];
+  store.seriesQueue.forEach((s) => {
+    if (!store.deletedSeriesIds!.includes(s.id)) {
+      store.deletedSeriesIds!.push(s.id);
+    }
+  });
   store.seriesQueue = [];
   writeStore(store);
 }
@@ -296,23 +355,29 @@ export function syncStoreWithClient(data: {
     data.deletedPostIds.forEach((id) => deletedIds.add(id));
   }
 
+  const deletedSeries = new Set<string>([...(current.deletedSeriesIds || [])]);
   if (data.deletedSeriesIds && Array.isArray(data.deletedSeriesIds)) {
-    current.seriesQueue = current.seriesQueue.filter((s) => !data.deletedSeriesIds!.includes(s.id));
+    data.deletedSeriesIds.forEach((id) => deletedSeries.add(id));
   }
 
   // Filter out any explicitly deleted posts from current server state
   current.scheduledPosts = current.scheduledPosts.filter((p) => !deletedIds.has(p.id));
+  current.seriesQueue = current.seriesQueue.filter((s) => !deletedSeries.has(s.id));
 
   let mergedPosts = current.scheduledPosts;
   if (data.scheduledPosts && Array.isArray(data.scheduledPosts)) {
-    // Only accept client posts that have NOT been deleted!
-    const validClientPosts = data.scheduledPosts.filter((p) => !deletedIds.has(p.id));
     const postMap = new Map<string, ScheduledPost>();
-    // Client posts first
-    validClientPosts.forEach((p) => postMap.set(p.id, p));
-    // Server posts take precedence (preserves channelId and server updates)
-    current.scheduledPosts.forEach((p) => postMap.set(p.id, p));
-    mergedPosts = Array.from(postMap.values());
+    // 1. Put current server posts into map (unless explicitly deleted)
+    current.scheduledPosts.forEach((p) => {
+      if (!deletedIds.has(p.id)) postMap.set(p.id, p);
+    });
+    // 2. Client posts update or add (only if not deleted)
+    data.scheduledPosts.forEach((p) => {
+      if (p && p.id && !deletedIds.has(p.id)) {
+        postMap.set(p.id, p);
+      }
+    });
+    mergedPosts = Array.from(postMap.values()).filter((p) => !deletedIds.has(p.id));
   }
 
   // Merge channels: union by id with server priority to NEVER lose system/server channels
@@ -339,16 +404,23 @@ export function syncStoreWithClient(data: {
     });
   }
 
+  // Merge series queue: union by id (NO timeout purge! Server & client jobs both preserved)
   let mergedSeries = current.seriesQueue;
   if (data.seriesQueue && Array.isArray(data.seriesQueue)) {
-    const clientSeriesIds = new Set(data.seriesQueue.map((s) => s.id));
-    const now = Date.now();
-    const externalNewSeries = current.seriesQueue.filter((s) => {
-      if (clientSeriesIds.has(s.id)) return false;
-      const createdMs = s.createdAt ? new Date(s.createdAt).getTime() : 0;
-      return now - createdMs < 120_000;
+    const seriesMap = new Map<string, SeriesJob>();
+    // 1. Existing server jobs (excluding deleted)
+    current.seriesQueue.forEach((s) => {
+      if (s && s.id && !deletedSeries.has(s.id)) {
+        seriesMap.set(s.id, s);
+      }
     });
-    mergedSeries = [...data.seriesQueue, ...externalNewSeries];
+    // 2. Client jobs (excluding deleted)
+    data.seriesQueue.forEach((s) => {
+      if (s && s.id && !deletedSeries.has(s.id)) {
+        seriesMap.set(s.id, s);
+      }
+    });
+    mergedSeries = Array.from(seriesMap.values()).filter((s) => !deletedSeries.has(s.id));
   }
 
   const updated: SocialCraftStoreData = {
@@ -359,6 +431,7 @@ export function syncStoreWithClient(data: {
     carousels: current.carousels,
     seriesQueue: mergedSeries,
     deletedPostIds: Array.from(deletedIds),
+    deletedSeriesIds: Array.from(deletedSeries),
     updatedAt: new Date().toISOString(),
   };
 

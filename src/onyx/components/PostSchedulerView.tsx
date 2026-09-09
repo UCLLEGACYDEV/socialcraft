@@ -221,7 +221,18 @@ export function PostSchedulerView({
   const resolvedProfiles = brandProfiles && brandProfiles.length > 0 ? brandProfiles : DEFAULT_BRAND_PROFILES;
   const [internalProfileId, setInternalProfileId] = useState<string>(activeProfileId || resolvedProfiles[0].id);
   const effectiveProfileId = activeProfileId || internalProfileId;
-  const activeProfile = resolvedProfiles.find((p) => p.id === effectiveProfileId) || resolvedProfiles[0];
+  const isAllProfiles = effectiveProfileId === "all";
+  const activeProfile = isAllProfiles
+    ? {
+        id: "all",
+        slug: "all",
+        name: "Alle Profile",
+        description: "Gesamtübersicht aller Markenprofile",
+        avatarUrl: "",
+        color: "#F04A20",
+        isDefault: false,
+      }
+    : resolvedProfiles.find((p) => p.id === effectiveProfileId) || resolvedProfiles[0];
 
   const handleSwitchProfile = (id: string) => {
     if (onSelectProfile) {
@@ -229,17 +240,18 @@ export function PostSchedulerView({
     } else {
       setInternalProfileId(id);
     }
-    toast.success(`Brand-Profil gewechselt: ${resolvedProfiles.find((p) => p.id === id)?.name || id}`);
+    const targetName = id === "all" ? "Alle Profile (Gesamtübersicht)" : (resolvedProfiles.find((p) => p.id === id)?.name || id);
+    toast.success(`Brand-Profil gewechselt: ${targetName}`);
   };
 
-  // Strictly filter channels & posts belonging to this Brand Profile
-  const profileChannels = channels.filter(
-    (c) => (c.profileId || DEFAULT_BRAND_PROFILES[0].id) === activeProfile?.id
-  );
+  // Filter channels & posts belonging to this Brand Profile (or all if isAllProfiles)
+  const profileChannels = isAllProfiles
+    ? channels
+    : channels.filter((c) => (c.profileId || DEFAULT_BRAND_PROFILES[0].id) === activeProfile?.id);
 
-  const profilePosts = posts.filter(
-    (p) => !p.profileId || p.profileId === activeProfile?.id
-  );
+  const profilePosts = isAllProfiles
+    ? posts
+    : posts.filter((p) => !p.profileId || p.profileId === activeProfile?.id);
 
   const [activeTab, setActiveTab] = useState<"queue" | "composer" | "channels" | "insights">(
     initialTab || (initialScheduledItem ? "composer" : "queue")
@@ -1638,6 +1650,10 @@ export function PostSchedulerView({
         console.warn("Could not delete from Post for Me:", err?.message || err);
       }
     }
+    // Delete immediately from MCP server store to prevent zombie reappearance
+    fetch(`/api/mcp/posts/${encodeURIComponent(id)}`, { method: "DELETE" }).catch((err) => {
+      console.warn("Could not delete from MCP server:", err);
+    });
     onUpdatePosts(posts.filter((p) => p.id !== id));
     toast.info("Geplanter Beitrag entfernt.");
   };
@@ -1974,11 +1990,29 @@ export function PostSchedulerView({
                 <DropdownMenuLabel className="text-[10px] uppercase font-mono text-zinc-400 px-3 py-1.5">
                   Brand-Profil wechseln
                 </DropdownMenuLabel>
+                <DropdownMenuItem
+                  key="all"
+                  onClick={() => handleSwitchProfile("all")}
+                  className={cn(
+                    "flex items-center justify-between px-3 py-2 cursor-pointer rounded-xl text-xs mb-1",
+                    isAllProfiles ? "bg-orange-500/15 text-orange-300 font-bold" : "hover:bg-white/10"
+                  )}
+                >
+                  <div className="flex items-center gap-2 truncate">
+                    <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm bg-gradient-to-r from-orange-400 to-amber-300" />
+                    <span className="truncate font-semibold">Alle Profile (Gesamt)</span>
+                  </div>
+                  <span className="text-[10px] text-zinc-400 font-mono">{posts.length} Posts</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-white/10 my-1" />
                 {resolvedProfiles.map((p) => {
-                  const count = channels.filter(
+                  const channelCount = channels.filter(
                     (c) => (c.profileId || DEFAULT_BRAND_PROFILES[0].id) === p.id
                   ).length;
-                  const isSel = p.id === activeProfile.id;
+                  const postCount = posts.filter(
+                    (post) => (post.profileId || DEFAULT_BRAND_PROFILES[0].id) === p.id
+                  ).length;
+                  const isSel = !isAllProfiles && p.id === activeProfile.id;
                   return (
                     <DropdownMenuItem
                       key={p.id}
@@ -1995,7 +2029,11 @@ export function PostSchedulerView({
                         />
                         <span className="truncate">{p.name}</span>
                       </div>
-                      <span className="text-[10px] text-zinc-400 font-mono">{count} Kanäle</span>
+                      <div className="flex items-center gap-1.5 shrink-0 text-[10px] text-zinc-400 font-mono">
+                        <span>{channelCount}K</span>
+                        <span>•</span>
+                        <span className="text-orange-400 font-semibold">{postCount}P</span>
+                      </div>
                     </DropdownMenuItem>
                   );
                 })}

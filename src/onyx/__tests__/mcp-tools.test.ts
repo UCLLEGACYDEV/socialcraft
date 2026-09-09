@@ -15,6 +15,7 @@ import {
   deleteSeriesJob,
   clearSeriesQueue,
   syncStoreWithClient,
+  resolveChannelForPlatform,
 } from "../../mcp/store";
 import { computeNextSlots, DEFAULT_POSTING_SLOTS } from "../scheduling";
 import { sanitizeNoGedankenstriche } from "../caption-generator";
@@ -161,7 +162,77 @@ describe("SocialCraft MCP Tools & Store", () => {
     expect(getSeriesQueue().some((j: any) => j.id === "test-series-1")).toBe(false);
 
     // Sync with empty queue does not revive the old job
-    const updated = syncStoreWithClient({ seriesQueue: [] });
+    const updated = syncStoreWithClient({ seriesQueue: [], deletedSeriesIds: ["test-series-1"] });
     expect(updated.seriesQueue.some((j: any) => j.id === "test-series-1")).toBe(false);
   });
+
+  it("preserves server series queue even when client syncs with empty queue after 2 hours", () => {
+    addSeriesJob({
+      id: "old-series-job",
+      topic: "Long running series job",
+      audience: "Creators",
+      status: "queued",
+      slidesTotal: 3,
+      slidesDone: 0,
+      slides: [],
+      createdAt: new Date(Date.now() - 7200 * 1000).toISOString(), // 2 hours old
+    });
+
+    expect(getSeriesQueue().some((j) => j.id === "old-series-job")).toBe(true);
+
+    // Client syncs with empty queue and NO deletedSeriesIds
+    const res = syncStoreWithClient({ seriesQueue: [] });
+    // Job MUST still exist! (120-second timeout bug is eliminated)
+    expect(res.seriesQueue.some((j) => j.id === "old-series-job")).toBe(true);
+    expect(getSeriesQueue().some((j) => j.id === "old-series-job")).toBe(true);
+  });
+
+  it("permanently removes deleted posts and does not revive them", () => {
+    const post = addScheduledPost({
+      title: "Zombie candidate post",
+      caption: "This post will be deleted",
+      hashtags: ["#test"],
+      platform: "instagram",
+      channelId: "ig-main-account",
+      scheduledFor: new Date(Date.now() + 3600 * 1000).toISOString(),
+      status: "scheduled",
+      mediaType: "image",
+      mediaUrls: [],
+    });
+
+    expect(getScheduledPosts().some((p) => p.id === post.id)).toBe(true);
+
+    // Explicit delete
+    deleteScheduledPost(post.id);
+    expect(getScheduledPosts().some((p) => p.id === post.id)).toBe(false);
+
+    // Client syncs remaining posts with deletedPostIds
+    const res = syncStoreWithClient({
+      scheduledPosts: [],
+      deletedPostIds: [post.id],
+    });
+    expect(res.scheduledPosts.some((p) => p.id === post.id)).toBe(false);
+    expect(getScheduledPosts().some((p) => p.id === post.id)).toBe(false);
+  });
+
+  it("resolves valid channels without returning default-channel", () => {
+    const zitateChannel = resolveChannelForPlatform("profile-zitate-tiger", "instagram");
+    expect(zitateChannel).toBeDefined();
+    expect(zitateChannel.id).toBe("ig-loyaltytiger");
+    expect(zitateChannel.id).not.toBe("default-channel");
+
+    const mainChannel = resolveChannelForPlatform("profile-default", "instagram");
+    expect(mainChannel).toBeDefined();
+    expect(mainChannel.id).toBe("ig-main-account");
+    expect(mainChannel.id).not.toBe("default-channel");
+
+    const slugChannel = resolveChannelForPlatform("zitate_tiger", "instagram");
+    expect(slugChannel.id).toBe("ig-loyaltytiger");
+
+    // Fallback for non-configured platform still returns an existing valid channel
+    const fallbackChannel = resolveChannelForPlatform("unknown-profile", "unknown-platform" as any);
+    expect(fallbackChannel).toBeDefined();
+    expect(fallbackChannel.id).not.toBe("default-channel");
+  });
 });
+
