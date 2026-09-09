@@ -11,7 +11,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test": "vitest run",
-    "mcp": "tsx src/mcp/index.ts"
+    "mcp": "tsx src/mcp/index.ts",
+    "mcp:remote": "tsx src/mcp/http-server.ts",
+    "mcp:tunnel": "tsx src/mcp/tunnel.ts"
   },
   "overrides": {
     "rolldown": "1.2.1"
@@ -64,6 +66,7 @@
     "gsap": "^3.15.0",
     "input-otp": "^1.4.2",
     "jszip": "^3.10.1",
+    "localtunnel": "^2.0.2",
     "lucide-react": "^0.575.0",
     "react": "^19.2.0",
     "react-day-picker": "^9.14.0",
