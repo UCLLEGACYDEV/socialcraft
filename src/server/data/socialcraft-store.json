@@ -85,6 +85,32 @@
       "musicTitle": "Karussell [carousel_1788944695185_3krd7] (6 Slides, 4:5, CTA folge fuer mehr)",
       "id": "post_1788944695187_doxkt",
       "createdAt": "2026-09-09T09:04:55.187Z"
+    },
+    {
+      "title": "Depression verstehen und was wirklich dagegen hilft",
+      "caption": "Depression ist keine schlechte Laune, die man einfach wegatmet. Sie ist eine Erkrankung, und sie ist behandelbar.\n\nWoran du sie erkennst: Du funktionierst noch, aber du sp�rst nichts mehr. Wochen ziehen vorbei. Schlaf, Antrieb und Appetit kippen. Alles f�hlt sich schwer an.\n\nWas wirklich hilft:\n1. Licht und Bewegung, jeden Tag ein kurzes St�ck. Struktur schl�gt Motivation.\n2. Ein Mensch, dem du es sagst. Der erste Satz ist der schwerste, danach wird jeder weitere leichter.\n3. Professionelle Hilfe ohne Scham. Hausarzt, Psychotherapie oder Beratungsstelle sind der schnellste Weg raus.\n\nR�ckschritte geh�ren dazu. Heilung verl�uft nicht gerade, aber sie verl�uft.\n\nWenn es akut wird: Telefonseelsorge 0800 111 0 111, kostenlos und rund um die Uhr. Im Notfall 112.\n\nSpeicher dir den Post f�r den Tag, an dem du ihn brauchst. FOLGE F�R MEHR.",
+      "hashtags": [
+        "#depression",
+        "#mentalegesundheit",
+        "#psychischegesundheit",
+        "#mentalhealth",
+        "#selbstf�rsorge",
+        "#achtsamkeit",
+        "#psychotherapie",
+        "#dubistnichtallein",
+        "#hilfeholen",
+        "#mindset"
+      ],
+      "mediaType": "carousel",
+      "mediaUrls": [],
+      "channelId": "loyaltytiger",
+      "platform": "instagram",
+      "scheduledFor": "2026-09-09T11:20:00+02:00",
+      "status": "scheduled",
+      "profileId": "profile-zitate-tiger",
+      "musicTitle": "Prompt: Ultra-detailed cinematic 3D render, vertical 4:5, ...",
+      "id": "post_1788945421634_3g777",
+      "createdAt": "2026-09-09T09:17:01.634Z"
     }
   ],
   "postingSlots": {
@@ -101,83 +127,7 @@
       "18:00"
     ]
   },
-  "carousels": [
-    {
-      "title": "5 Hebel für mehr Reichweite",
-      "topic": "Social Media Growth",
-      "audience": "Creator & Brands",
-      "slides": [
-        {
-          "slideNumber": 1,
-          "role": "hook",
-          "headline": "Hör auf täglich zu posten",
-          "subtext": "Mach stattdessen diese 3 Dinge.",
-          "visualPrompt": "Dramatic contrast, dark luxury studio lighting --ar 4:5"
-        },
-        {
-          "slideNumber": 2,
-          "role": "closing",
-          "headline": "Speichere dir diesen Post",
-          "subtext": "Folge @socialcraft für tägliche Strategien.",
-          "visualPrompt": "Clean minimal aesthetic with vibrant glow --ar 4:5"
-        }
-      ],
-      "id": "carousel_1788942476132_75fnt",
-      "createdAt": "2026-09-09T08:27:56.132Z"
-    },
-    {
-      "title": "Karussell: Depression und Motivation: warum der erste Schritt nicht auf ein Gefuehl warten muss",
-      "topic": "Depression und Motivation: warum der erste Schritt nicht auf ein Gefuehl warten muss",
-      "audience": "Menschen mit depressiven Phasen, Angehoerige, alle die feststecken",
-      "slides": [
-        {
-          "slideNumber": 1,
-          "role": "hook",
-          "headline": "Motivation kommt nicht vor dem ersten Schritt. Sie kommt danach.",
-          "subtext": "Du wartest auf ein Gefuehl, das erst durch Handeln entsteht.",
-          "visualPrompt": "photorealistic editorial portrait, person sitting on the edge of a bed at dawn, feet almost touching the floor, soft cold window light, muted desaturated tones, deep shadows, cinematic 4:5 vertical, large empty dark area at top for text overlay, 8k, shot on 35mm"
-        },
-        {
-          "slideNumber": 2,
-          "role": "pain_point",
-          "headline": "Der Denkfehler bei Depression",
-          "subtext": "Erst will ich mich besser fuehlen, dann mache ich. So bleibst du stehen.",
-          "visualPrompt": "photorealistic still life, a single unworn shoe next to a made bed in a dim room, dust particles in a thin light beam, melancholic muted palette, cinematic 4:5 vertical, negative space on the right for typography, 8k"
-        },
-        {
-          "slideNumber": 3,
-          "role": "concept",
-          "headline": "Handlung zuerst, Gefuehl danach",
-          "subtext": "Dein Kopf folgt deinem Koerper. Nicht umgekehrt.",
-          "visualPrompt": "photorealistic close up of a hand opening a curtain, morning light breaking into a dark room, warm glow meeting cool shadow, hopeful but restrained mood, cinematic 4:5 vertical, room for text at bottom, 8k"
-        },
-        {
-          "slideNumber": 4,
-          "role": "expansion",
-          "headline": "Mach den Schritt so klein, dass er fast laecherlich wirkt",
-          "subtext": "Schuhe an. Ein Glas Wasser. Zwei Minuten vor die Tuer. Das reicht.",
-          "visualPrompt": "photorealistic overhead shot, a glass of water and a pair of sneakers on a wooden floor by a front door, soft natural light, calm minimal composition, muted warm tones, cinematic 4:5 vertical, clean space above for text, 8k"
-        },
-        {
-          "slideNumber": 5,
-          "role": "proof",
-          "headline": "Nach dem ersten Schritt kippt etwas",
-          "subtext": "Der Widerstand sinkt, sobald du in Bewegung bist. Jedes Mal.",
-          "visualPrompt": "photorealistic wide shot from behind, a person walking out of a shadowed hallway into bright outdoor daylight, motion blur in the step, contrast between dark interior and luminous exterior, cinematic 4:5 vertical, 8k"
-        },
-        {
-          "slideNumber": 6,
-          "role": "closing",
-          "headline": "Warte nicht auf den perfekten Moment",
-          "subtext": "Fang klein an, heute. Folge fuer mehr.",
-          "visualPrompt": "photorealistic sunrise over a quiet street, a lone figure small in the frame taking a first step, warm golden light flooding the scene, uplifting calm mood, cinematic 4:5 vertical, large clean sky area for text and CTA, 8k"
-        }
-      ],
-      "profileId": "profile-default",
-      "id": "carousel_1788944695185_3krd7",
-      "createdAt": "2026-09-09T09:04:55.185Z"
-    }
-  ],
+  "carousels": [],
   "seriesQueue": [
     {
       "id": "series-job-1788942394295-1-3a3t",
@@ -246,5 +196,5 @@
       "createdAt": "2026-09-09T08:26:34.295Z"
     }
   ],
-  "updatedAt": "2026-09-09T09:14:56.928Z"
+  "updatedAt": "2026-09-09T09:27:59.037Z"
 }

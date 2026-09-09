@@ -19,8 +19,12 @@ import {
   syncStoreWithClient,
   addScheduledPost,
   getScheduledPosts,
+  deleteScheduledPost,
   getBrandProfiles,
   getSocialChannels,
+  getSeriesQueue,
+  deleteSeriesJob,
+  clearSeriesQueue,
 } from "../mcp/store";
 import fs from "node:fs";
 import path from "node:path";
@@ -79,7 +83,7 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
       }
     }
 
-    if (subRoute === "posts") {
+    if (subRoute === "posts" || subRoute.startsWith("posts/")) {
       if (request.method === "GET") {
         return jsonResponse({ success: true, posts: getScheduledPosts() });
       }
@@ -91,6 +95,33 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
         } catch (err: any) {
           return jsonResponse({ success: false, error: err.message }, 400);
         }
+      }
+      if (request.method === "DELETE") {
+        const id = subRoute.replace(/^posts\/?/, "") || new URL(request.url).searchParams.get("id");
+        if (id) {
+          const ok = deleteScheduledPost(id);
+          return jsonResponse({ success: ok, deleted: id });
+        }
+        return jsonResponse({ error: "Missing post id" }, 400);
+      }
+    }
+
+    if (subRoute === "series" || subRoute.startsWith("series/")) {
+      if (request.method === "GET") {
+        return jsonResponse({ success: true, seriesQueue: getSeriesQueue() });
+      }
+      if (request.method === "DELETE") {
+        const id = subRoute.replace(/^series\/?/, "") || new URL(request.url).searchParams.get("id");
+        const clearAll = new URL(request.url).searchParams.get("all") === "true";
+        if (clearAll) {
+          clearSeriesQueue();
+          return jsonResponse({ success: true, cleared: true });
+        }
+        if (id) {
+          const ok = deleteSeriesJob(id);
+          return jsonResponse({ success: ok, deleted: id });
+        }
+        return jsonResponse({ error: "Missing series id" }, 400);
       }
     }
 

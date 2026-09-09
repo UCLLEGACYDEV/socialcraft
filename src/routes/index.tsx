@@ -1405,7 +1405,14 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
                 onAddJobs={addJobs}
                 onRunQueue={() => void runQueue()}
                 onStopQueue={cancelAllQueue}
-                onDeleteJob={(id) => setQueue((prev) => prev.filter((j) => j.id !== id))}
+                onDeleteJob={(id) => {
+                  setQueue((prev) => prev.filter((j) => j.id !== id));
+                  fetch(`/api/mcp/series/${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {});
+                }}
+                onClearQueue={() => {
+                  setQueue([]);
+                  fetch("/api/mcp/series?all=true", { method: "DELETE" }).catch(() => {});
+                }}
                 onRenameJob={(id, value) => updateJob(id, { topic: value })}
                 onEditSlide={(jobId, slideId) => setEditing({ jobId, slideId })}
                 onRerollSlide={(jobId, slideId) => void runSingleJobSlide(jobId, slideId)}

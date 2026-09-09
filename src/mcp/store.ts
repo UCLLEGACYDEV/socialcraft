@@ -80,9 +80,7 @@ export function writeStore(data: SocialCraftStoreData): void {
       ...data,
       updatedAt: new Date().toISOString(),
     };
-    const tmpFile = `${STORE_FILE}.tmp.${Date.now()}`;
-    fs.writeFileSync(tmpFile, JSON.stringify(updated, null, 2), "utf-8");
-    fs.renameSync(tmpFile, STORE_FILE);
+    fs.writeFileSync(STORE_FILE, JSON.stringify(updated, null, 2), "utf-8");
   } catch (err) {
     console.error("[SocialCraft Store] Write error:", err);
   }
@@ -219,6 +217,23 @@ export function batchAddSeriesJobs(jobs: SeriesJob[]): SeriesJob[] {
   return jobs;
 }
 
+export function deleteSeriesJob(id: string): boolean {
+  const store = readStore();
+  const initialLength = store.seriesQueue.length;
+  store.seriesQueue = store.seriesQueue.filter((s) => s.id !== id);
+  if (store.seriesQueue.length !== initialLength) {
+    writeStore(store);
+    return true;
+  }
+  return false;
+}
+
+export function clearSeriesQueue(): void {
+  const store = readStore();
+  store.seriesQueue = [];
+  writeStore(store);
+}
+
 export function getPostingSlotsConfig(): PostingSlotConfig {
   return readStore().postingSlots;
 }
@@ -231,31 +246,40 @@ export function syncStoreWithClient(data: {
   socialChannels?: SocialChannel[];
   postingSlots?: PostingSlotConfig;
   seriesQueue?: SeriesJob[];
+  deletedSeriesIds?: string[];
+  deletedPostIds?: string[];
 }): SocialCraftStoreData {
   const current = readStore();
 
-  let mergedPosts = [...current.scheduledPosts];
-  if (data.scheduledPosts && Array.isArray(data.scheduledPosts)) {
-    const postMap = new Map<string, ScheduledPost>();
-    for (const p of current.scheduledPosts) {
-      postMap.set(p.id, p);
-    }
-    for (const p of data.scheduledPosts) {
-      postMap.set(p.id, p);
-    }
-    mergedPosts = Array.from(postMap.values());
+  if (data.deletedSeriesIds && Array.isArray(data.deletedSeriesIds)) {
+    current.seriesQueue = current.seriesQueue.filter((s) => !data.deletedSeriesIds!.includes(s.id));
+  }
+  if (data.deletedPostIds && Array.isArray(data.deletedPostIds)) {
+    current.scheduledPosts = current.scheduledPosts.filter((p) => !data.deletedPostIds!.includes(p.id));
   }
 
-  let mergedSeries = [...current.seriesQueue];
+  let mergedPosts = current.scheduledPosts;
+  if (data.scheduledPosts && Array.isArray(data.scheduledPosts)) {
+    const clientPostIds = new Set(data.scheduledPosts.map((p) => p.id));
+    const now = Date.now();
+    const externalNewPosts = current.scheduledPosts.filter((p) => {
+      if (clientPostIds.has(p.id)) return false;
+      const createdMs = p.createdAt ? new Date(p.createdAt).getTime() : 0;
+      return now - createdMs < 60_000;
+    });
+    mergedPosts = [...data.scheduledPosts, ...externalNewPosts];
+  }
+
+  let mergedSeries = current.seriesQueue;
   if (data.seriesQueue && Array.isArray(data.seriesQueue)) {
-    const seriesMap = new Map<string, SeriesJob>();
-    for (const s of current.seriesQueue) {
-      seriesMap.set(s.id, s);
-    }
-    for (const s of data.seriesQueue) {
-      seriesMap.set(s.id, s);
-    }
-    mergedSeries = Array.from(seriesMap.values());
+    const clientSeriesIds = new Set(data.seriesQueue.map((s) => s.id));
+    const now = Date.now();
+    const externalNewSeries = current.seriesQueue.filter((s) => {
+      if (clientSeriesIds.has(s.id)) return false;
+      const createdMs = s.createdAt ? new Date(s.createdAt).getTime() : 0;
+      return now - createdMs < 60_000;
+    });
+    mergedSeries = [...data.seriesQueue, ...externalNewSeries];
   }
 
   const updated: SocialCraftStoreData = {

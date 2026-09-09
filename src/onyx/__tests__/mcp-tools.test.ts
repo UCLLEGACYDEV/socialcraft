@@ -10,6 +10,11 @@ import {
   deleteScheduledPost,
   updateScheduledPost,
   addCarouselDraft,
+  addSeriesJob,
+  getSeriesQueue,
+  deleteSeriesJob,
+  clearSeriesQueue,
+  syncStoreWithClient,
 } from "../../mcp/store";
 import { computeNextSlots, DEFAULT_POSTING_SLOTS } from "../scheduling";
 import { sanitizeNoGedankenstriche } from "../caption-generator";
@@ -20,6 +25,7 @@ describe("SocialCraft MCP Tools & Store", () => {
     const store = readStore();
     store.scheduledPosts = [];
     store.carousels = [];
+    store.seriesQueue = [];
     writeStore(store);
   });
 
@@ -133,5 +139,29 @@ describe("SocialCraft MCP Tools & Store", () => {
 
     expect(draft.id).toBeDefined();
     expect(draft.slides.length).toBe(2);
+  });
+
+  it("adds and deletes series jobs and does not revive deleted jobs on sync", () => {
+    const job = addSeriesJob({
+      id: "test-series-1",
+      topic: "Test Series Topic",
+      audience: "Everyone",
+      status: "queued",
+      slidesTotal: 1,
+      slidesDone: 0,
+      slides: [],
+      createdAt: new Date(Date.now() - 120_000).toISOString(),
+    });
+
+    expect(getSeriesQueue().some((j: any) => j.id === "test-series-1")).toBe(true);
+
+    // Explicit delete
+    const deleted = deleteSeriesJob("test-series-1");
+    expect(deleted).toBe(true);
+    expect(getSeriesQueue().some((j: any) => j.id === "test-series-1")).toBe(false);
+
+    // Sync with empty queue does not revive the old job
+    const updated = syncStoreWithClient({ seriesQueue: [] });
+    expect(updated.seriesQueue.some((j: any) => j.id === "test-series-1")).toBe(false);
   });
 });

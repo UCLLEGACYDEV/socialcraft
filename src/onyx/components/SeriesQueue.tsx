@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, ChevronRight, CloudUpload, Cpu, FileSpreadsheet, FileText, Loader2, Play, Sparkles, Upload, X } from "lucide-react";
+import { ChevronDown, ChevronRight, CloudUpload, Cpu, FileSpreadsheet, FileText, Loader2, Play, Sparkles, Trash2, Upload, X } from "lucide-react";
 import { parseBlock } from "../parse-prompt-block";
 import { parseUniversalPromptFile } from "../csv-prompt-parser";
 import { mockNameTopic } from "../mock-api";
@@ -34,6 +34,7 @@ interface SeriesQueueProps {
   onRunQueue: () => void;
   onStopQueue: () => void;
   onDeleteJob: (id: string) => void;
+  onClearQueue?: (() => void) | undefined;
   onRenameJob: (id: string, topic: string) => void;
   onEditSlide: (jobId: string, slideId: string) => void;
   onRerollSlide: (jobId: string, slideId: string) => void;
@@ -55,6 +56,7 @@ export function SeriesQueue({
   onRunQueue,
   onStopQueue,
   onDeleteJob,
+  onClearQueue,
   onRenameJob,
   onEditSlide,
   onRerollSlide,
@@ -202,6 +204,17 @@ export function SeriesQueue({
               >
                 <Sparkles className="h-3.5 w-3.5 text-orange-400 animate-pulse" />
                 <span>30-Tage Monats-Batch</span>
+              </button>
+            )}
+            {queue.length > 0 && onClearQueue && !isRunning && (
+              <button
+                type="button"
+                onClick={onClearQueue}
+                className="flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 px-3.5 py-2 text-xs font-semibold text-red-400 hover:text-red-300 transition-all cursor-pointer"
+                title="Warteschlange vollständig leeren"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                <span>Warteschlange leeren</span>
               </button>
             )}
             {isRunning ? (
