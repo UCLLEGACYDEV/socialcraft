@@ -1,14 +1,20 @@
 import http from "node:http";
 import { SSEServerTransport } from "@modelcontextprotocol/sdk/server/sse.js";
 import { createSocialcraftMcpServer } from "./server";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+
+interface ClientSession {
+  transport: SSEServerTransport;
+  server: McpServer;
+}
 
 export function startMcpHttpServer(port = 3005): Promise<{ server: http.Server; port: number }> {
   return new Promise((resolve) => {
-    const mcpServer = createSocialcraftMcpServer();
-    const transports = new Map<string, SSEServerTransport>();
+    // Multi-client / session tracking: Each client connection gets its own McpServer instance
+    const sessions = new Map<string, ClientSession>();
 
     const server = http.createServer(async (req, res) => {
-      // Full CORS
+      // Full CORS headers
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
       res.setHeader("Access-Control-Allow-Headers", "*");
@@ -43,7 +49,7 @@ export function startMcpHttpServer(port = 3005): Promise<{ server: http.Server; 
         return;
       }
 
-      // 2. SSE Connection (Accept text/event-stream OR path /sse OR /mcp OR root GET with SSE accept)
+      // 2. SSE Connection (Accept text/event-stream OR path /sse OR /mcp OR /)
       const wantsSse =
         accept.includes("text/event-stream") ||
         pathname === "/sse" ||
@@ -51,18 +57,28 @@ export function startMcpHttpServer(port = 3005): Promise<{ server: http.Server; 
         pathname === "/mcp";
 
       if (req.method === "GET" && wantsSse) {
-        console.log(`[SocialCraft MCP] Establishing new SSE connection for client...`);
-        const messagesEndpoint = `/messages`;
-        const transport = new SSEServerTransport(messagesEndpoint, res);
-        transports.set(transport.sessionId, transport);
+        console.log(`[SocialCraft MCP] Establishing new isolated SSE session for client...`);
+        const clientServer = createSocialcraftMcpServer();
+        const transport = new SSEServerTransport("/messages", res);
+        
+        sessions.set(transport.sessionId, { transport, server: clientServer });
 
-        transport.onclose = () => {
-          console.log(`[SocialCraft MCP] SSE connection closed for session: ${transport.sessionId}`);
-          transports.delete(transport.sessionId);
+        transport.onclose = async () => {
+          console.log(`[SocialCraft MCP] Closing session ${transport.sessionId}`);
+          try {
+            await clientServer.close();
+          } catch {
+            /* ignore */
+          }
+          sessions.delete(transport.sessionId);
         };
 
-        await mcpServer.connect(transport);
-        console.log(`[SocialCraft MCP] SSE connected successfully (Session: ${transport.sessionId})`);
+        try {
+          await clientServer.connect(transport);
+          console.log(`[SocialCraft MCP] Connected session: ${transport.sessionId} (Total active: ${sessions.size})`);
+        } catch (err) {
+          console.error(`[SocialCraft MCP] Error connecting session:`, err);
+        }
         return;
       }
 
@@ -72,26 +88,34 @@ export function startMcpHttpServer(port = 3005): Promise<{ server: http.Server; 
         (pathname === "/messages" || pathname === "/sse" || pathname === "/mcp" || pathname === "/")
       ) {
         const sessionId = url.searchParams.get("sessionId");
-        let transport = sessionId ? transports.get(sessionId) : undefined;
+        let session = sessionId ? sessions.get(sessionId) : undefined;
 
-        // If no sessionId in query, fallback to the latest active transport
-        if (!transport && transports.size > 0) {
-          const all = Array.from(transports.values());
-          transport = all[all.length - 1];
+        // If no sessionId given, use the most recent active session
+        if (!session && sessions.size > 0) {
+          const all = Array.from(sessions.values());
+          session = all[all.length - 1];
         }
 
-        if (!transport) {
-          console.warn(`[SocialCraft MCP] POST message received but no active SSE session found.`);
+        if (!session) {
+          console.warn(`[SocialCraft MCP] POST message received but no active session found.`);
           res.writeHead(404, { "Content-Type": "application/json" });
-          res.end(JSON.stringify({ error: "Session not found. Connect to /sse first." }));
+          res.end(JSON.stringify({ error: "No active SSE session found. Connect to /sse first." }));
           return;
         }
 
-        await transport.handlePostMessage(req, res);
+        try {
+          await session.transport.handlePostMessage(req, res);
+        } catch (err: any) {
+          console.error(`[SocialCraft MCP] Error handling post message:`, err);
+          if (!res.headersSent) {
+            res.writeHead(500, { "Content-Type": "application/json" });
+            res.end(JSON.stringify({ error: err.message || "Internal error" }));
+          }
+        }
         return;
       }
 
-      // 4. Default JSON info for browser / health check
+      // 4. Default JSON info / Health check
       if (req.method === "GET") {
         res.writeHead(200, { "Content-Type": "application/json" });
         res.end(
@@ -103,8 +127,8 @@ export function startMcpHttpServer(port = 3005): Promise<{ server: http.Server; 
               transport: "sse",
               sseEndpoint: `https://${host}/sse`,
               messagesEndpoint: `https://${host}/messages`,
+              activeSessions: sessions.size,
               toolsCount: 12,
-              instructions: "Verwende /sse als SSE-Endpunkt und /messages als Nachrichten-Endpunkt in Claude.",
             },
             null,
             2
