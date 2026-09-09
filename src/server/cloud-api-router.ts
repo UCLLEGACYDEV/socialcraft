@@ -14,6 +14,14 @@ import {
   isTrustedAdmin,
   resolveListPrefix,
 } from "./cloud-identity";
+import {
+  readStore,
+  syncStoreWithClient,
+  addScheduledPost,
+  getScheduledPosts,
+  getBrandProfiles,
+  getSocialChannels,
+} from "../mcp/store";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -39,14 +47,60 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
 
   const isCloudRoute = pathname.startsWith("/api/cloud/");
   const isWebhookRoute = pathname.startsWith("/api/webhook") || pathname.startsWith("/api/webhooks");
+  const isMcpRoute = pathname.startsWith("/api/mcp");
 
-  if (!isCloudRoute && !isWebhookRoute) {
+  if (!isCloudRoute && !isWebhookRoute && !isMcpRoute) {
     return null;
   }
 
   // Preflight
   if (request.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
+  }
+
+  // Handle MCP Bridge routes
+  if (isMcpRoute) {
+    const subRoute = pathname.replace(/^\/api\/mcp\/?/, "").replace(/\/+$/, "");
+
+    if (subRoute === "sync" || subRoute === "") {
+      if (request.method === "GET") {
+        return jsonResponse(readStore());
+      }
+      if (request.method === "POST") {
+        try {
+          const body = await request.json();
+          const updated = syncStoreWithClient(body);
+          return jsonResponse({ success: true, store: updated });
+        } catch (err: any) {
+          return jsonResponse({ success: false, error: err.message }, 400);
+        }
+      }
+    }
+
+    if (subRoute === "posts") {
+      if (request.method === "GET") {
+        return jsonResponse({ success: true, posts: getScheduledPosts() });
+      }
+      if (request.method === "POST") {
+        try {
+          const body = await request.json();
+          const created = addScheduledPost(body);
+          return jsonResponse({ success: true, post: created });
+        } catch (err: any) {
+          return jsonResponse({ success: false, error: err.message }, 400);
+        }
+      }
+    }
+
+    if (subRoute === "profiles") {
+      return jsonResponse({ success: true, profiles: getBrandProfiles() });
+    }
+
+    if (subRoute === "channels") {
+      return jsonResponse({ success: true, channels: getSocialChannels() });
+    }
+
+    return jsonResponse({ error: `Unknown MCP endpoint /api/mcp/${subRoute}` }, 404);
   }
 
   const endpoint = pathname.replace(/^\/api\/(cloud|webhooks?)\/?/, "").replace(/\/+$/, "");

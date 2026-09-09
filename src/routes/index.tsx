@@ -332,6 +332,56 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
   } | null>(null);
   const [schedulerSubTab, setSchedulerSubTab] = useState<"queue" | "composer" | "channels">("queue");
 
+  // Sync with SocialCraft MCP store (bidirectional sync between Claude MCP and Browser Planer)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let cancelled = false;
+
+    const syncWithMcpStore = async () => {
+      try {
+        const res = await fetch("/api/mcp/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            scheduledPosts,
+            brandProfiles,
+            socialChannels,
+            seriesQueue: queue,
+          }),
+        });
+        if (!cancelled && res.ok) {
+          const data = await res.json();
+          if (data?.store?.scheduledPosts && Array.isArray(data.store.scheduledPosts)) {
+            const serverPosts: ScheduledPost[] = data.store.scheduledPosts;
+            if (
+              serverPosts.length !== scheduledPosts.length ||
+              serverPosts.some((sp) => !scheduledPosts.some((lp) => lp.id === sp.id))
+            ) {
+              setScheduledPosts(serverPosts);
+            }
+          }
+          if (data?.store?.seriesQueue && Array.isArray(data.store.seriesQueue)) {
+            const serverSeries: SeriesJob[] = data.store.seriesQueue;
+            if (
+              serverSeries.length !== queue.length ||
+              serverSeries.some((sj) => !queue.some((qj) => qj.id === sj.id))
+            ) {
+              setQueue(serverSeries);
+            }
+          }
+        }
+      } catch {
+        // Local network / offline fallback
+      }
+    };
+
+    const timer = setTimeout(syncWithMcpStore, 1200);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [activeTab, scheduledPosts.length]);
+
   // Ensure Post for Me is active as the dedicated publishing service
   useEffect(() => {
     if (!settings.postForMeApiKey) {
@@ -432,6 +482,59 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [history, currentUser, settings.s4AutoSave]);
+
+  // Bidirectional sync with SocialCraft MCP Server Store
+  useEffect(() => {
+    let cancelled = false;
+
+    async function syncWithMcp() {
+      try {
+        const resp = await fetch("/api/mcp/sync");
+        if (!resp.ok) return;
+        const serverStore = await resp.json();
+        if (cancelled || !serverStore) return;
+
+        if (Array.isArray(serverStore.scheduledPosts) && serverStore.scheduledPosts.length > 0) {
+          setScheduledPosts((prev) => {
+            const map = new Map<string, ScheduledPost>();
+            for (const p of prev) map.set(p.id, p);
+            let added = false;
+            for (const sp of serverStore.scheduledPosts) {
+              if (!map.has(sp.id)) {
+                map.set(sp.id, sp);
+                added = true;
+              }
+            }
+            return added ? Array.from(map.values()) : prev;
+          });
+        }
+      } catch {
+        /* non-blocking */
+      }
+    }
+
+    void syncWithMcp();
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab, setScheduledPosts]);
+
+  // Sync back browser scheduled posts to MCP server store (debounced)
+  useEffect(() => {
+    if (scheduledPosts.length === 0) return;
+    const timer = setTimeout(() => {
+      fetch("/api/mcp/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          scheduledPosts,
+          brandProfiles,
+          socialChannels,
+        }),
+      }).catch(() => {});
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [scheduledPosts, brandProfiles, socialChannels]);
 
   const activeClone = useMemo(() => {
     return cloneProfiles.find((p) => p.id === activeCloneId) ?? cloneProfiles[0];

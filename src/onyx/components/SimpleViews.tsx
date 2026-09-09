@@ -71,24 +71,165 @@ export function HistoryView({
   );
 }
 
+import { useState, useEffect } from "react";
+import { Check, Copy, RefreshCw, Sparkles, Terminal, Cpu } from "lucide-react";
+import { toast } from "sonner";
+
 export function McpModalContent() {
-  return (
-    <div className="space-y-3.5 text-xs text-zinc-400">
-      <p>
-        ONYX kann Prompts direkt aus Claude Desktop empfangen. Trage den lokalen Server in deine
-        Claude-Konfiguration ein:
-      </p>
-      <pre className="overflow-x-auto rounded-2xl border border-white/[0.08] bg-black/50 p-4 font-mono text-xs text-zinc-200">
-{`{
-  "mcpServers": {
-    "onyx-studio": {
-      "command": "npx",
-      "args": ["onyx-studio-mcp"]
+  const [copied, setCopied] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<{
+    loading: boolean;
+    active: boolean;
+    postCount: number;
+    profileCount: number;
+    channelCount: number;
+  }>({
+    loading: true,
+    active: false,
+    postCount: 0,
+    profileCount: 0,
+    channelCount: 0,
+  });
+
+  const checkStatus = async () => {
+    setSyncStatus((s) => ({ ...s, loading: true }));
+    try {
+      const res = await fetch("/api/mcp/sync");
+      if (res.ok) {
+        const data = await res.json();
+        setSyncStatus({
+          loading: false,
+          active: true,
+          postCount: data.scheduledPosts?.length || 0,
+          profileCount: data.brandProfiles?.length || 0,
+          channelCount: data.socialChannels?.length || 0,
+        });
+      } else {
+        setSyncStatus({ loading: false, active: false, postCount: 0, profileCount: 0, channelCount: 0 });
+      }
+    } catch {
+      setSyncStatus({ loading: false, active: false, postCount: 0, profileCount: 0, channelCount: 0 });
     }
-  }
-}`}
-      </pre>
-      <p className="text-[11px] text-zinc-500">In dieser Browser-Version ist die Verbindung noch nicht aktiv.</p>
+  };
+
+  useEffect(() => {
+    void checkStatus();
+  }, []);
+
+  const configSnippet = JSON.stringify(
+    {
+      mcpServers: {
+        socialcraft: {
+          command: "npx",
+          args: ["-y", "tsx", "src/mcp/index.ts"],
+          cwd: typeof window !== "undefined" ? "g:\\websites\\SOCIALCRAFT\\socialcraft" : "",
+        },
+      },
+    },
+    null,
+    2
+  );
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(configSnippet);
+    setCopied(true);
+    toast.success("Claude Desktop Konfiguration kopiert! 📋");
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="space-y-4 text-xs text-zinc-300">
+      {/* Live Status Bar */}
+      <div className="flex items-center justify-between rounded-xl border border-white/[0.08] bg-zinc-900/80 p-3">
+        <div className="flex items-center gap-2.5">
+          <div className="relative flex h-2.5 w-2.5">
+            {syncStatus.active && (
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75"></span>
+            )}
+            <span
+              className={`relative inline-flex h-2.5 w-2.5 rounded-full ${
+                syncStatus.active ? "bg-emerald-500" : "bg-amber-500"
+              }`}
+            ></span>
+          </div>
+          <div>
+            <div className="font-semibold text-white">
+              {syncStatus.active ? "SocialCraft MCP Server Bridge aktiv" : "MCP Bridge bereit"}
+            </div>
+            <div className="text-[11px] text-zinc-400">
+              {syncStatus.postCount} Posts · {syncStatus.profileCount} Marken · {syncStatus.channelCount} Kanäle
+              im Store
+            </div>
+          </div>
+        </div>
+
+        <button
+          onClick={() => {
+            void checkStatus();
+            toast.info("MCP-Store synchronisiert");
+          }}
+          disabled={syncStatus.loading}
+          className="flex items-center gap-1.5 rounded-lg border border-white/[0.08] bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-zinc-300 transition hover:bg-white/[0.08]"
+        >
+          <RefreshCw className={`h-3 w-3 ${syncStatus.loading ? "animate-spin" : ""}`} />
+          Sync
+        </button>
+      </div>
+
+      <p className="text-zinc-400 leading-relaxed">
+        Verbinde <strong>Claude Desktop</strong> oder <strong>Claude Code</strong> direkt mit SocialCraft. Claude
+        kann dadurch selbstständig Prompts generieren, optimale Posting-Zeitslots ermitteln und fertige
+        Beiträge automatisch in deine Warteschlange vorplanen.
+      </p>
+
+      {/* Claude Desktop Config */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-1.5 font-semibold text-white">
+            <Cpu className="h-3.5 w-3.5 text-orange-400" />
+            Claude Desktop Konfiguration (%APPDATA%\Claude\claude_desktop_config.json)
+          </span>
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-1 rounded-md bg-orange-500/10 px-2 py-0.5 text-[11px] font-medium text-orange-400 hover:bg-orange-500/20"
+          >
+            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+            {copied ? "Kopiert" : "Kopieren"}
+          </button>
+        </div>
+
+        <pre className="overflow-x-auto rounded-xl border border-white/[0.08] bg-black/60 p-3.5 font-mono text-[11px] text-zinc-300">
+          {configSnippet}
+        </pre>
+      </div>
+
+      {/* Claude Tools Overview */}
+      <div className="space-y-1.5 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3">
+        <div className="font-semibold text-white flex items-center gap-1.5">
+          <Terminal className="h-3.5 w-3.5 text-orange-400" />
+          Verfügbare MCP Tools für Claude:
+        </div>
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px] text-zinc-400 pt-1">
+          <li>• <strong className="text-zinc-200">batch_preplan_posts:</strong> Mehr-Tage-Pläne automatisch einplanen</li>
+          <li>• <strong className="text-zinc-200">get_posting_slots:</strong> Kollisionsfreie Postingzeiten ermitteln</li>
+          <li>• <strong className="text-zinc-200">create_scheduled_post:</strong> Einzelne Posts vorplanen</li>
+          <li>• <strong className="text-zinc-200">create_carousel_draft:</strong> Multi-Slide-Karussells generieren</li>
+          <li>• <strong className="text-zinc-200">get_prompt_frameworks:</strong> Hook- & Bild-Prompt-Vorlagen</li>
+          <li>• <strong className="text-zinc-200">get_brand_profiles:</strong> Markenidentitäten & Farben abfragen</li>
+        </ul>
+      </div>
+
+      {/* Example Claude Prompt */}
+      <div className="rounded-xl border border-orange-500/20 bg-orange-500/[0.03] p-3 text-[11px]">
+        <div className="flex items-center gap-1.5 font-semibold text-orange-400 mb-1">
+          <Sparkles className="h-3 w-3" />
+          Beispiel-Prompt für Claude:
+        </div>
+        <p className="italic text-zinc-300">
+          &quot;Nutze die SocialCraft MCP Tools. Plane mir für die nächste Woche 7 Beiträge zum Thema &apos;KI-Automatisierung für Agenturen&apos; für Instagram vor. Erstelle für jeden Post einen viralen Hook, eine hochwertige Caption ohne Gedankenstriche, 4 Hashtags und einen fotorealistischen Bildprompt. Weise die besten freien Zeitslots automatisch zu.&quot;
+        </p>
+      </div>
     </div>
   );
 }
+

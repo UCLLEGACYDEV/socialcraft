@@ -1,0 +1,176 @@
+{
+  "brandProfiles": [
+    {
+      "id": "profile-default",
+      "slug": "main",
+      "name": "Haupt-Brand (Socialcraft)",
+      "description": "Standard-Profil für offizielle Unternehmens-Kanäle",
+      "avatarUrl": "/images/socialcraft-logo.png",
+      "color": "#F04A20",
+      "createdAt": "2025-01-01T00:00:00Z",
+      "isDefault": true
+    },
+    {
+      "id": "profile-zitate-tiger",
+      "slug": "zitate_tiger",
+      "name": "Zitate Tiger",
+      "description": "Daily Quotes, Mindset & Motivation Marke",
+      "avatarUrl": "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=150&h=150&fit=crop&crop=face",
+      "color": "#EAB308",
+      "createdAt": "2026-02-15T00:00:00Z",
+      "isDefault": false
+    }
+  ],
+  "socialChannels": [
+    {
+      "id": "fb-main-page",
+      "platform": "facebook",
+      "name": "Facebook Unternehmensseite",
+      "channelId": "337570872768998",
+      "businessId": "25861095310170488",
+      "handle": "@facebook.page",
+      "avatarUrl": "/images/socialcraft-logo.png",
+      "isDefault": true,
+      "profileId": "profile-default"
+    },
+    {
+      "id": "ig-main-account",
+      "platform": "instagram",
+      "name": "Instagram Business Profil",
+      "channelId": "ig-socialcraft-pro",
+      "handle": "@socialcraft.ai",
+      "avatarUrl": "/images/socialcraft-logo.png",
+      "isDefault": false,
+      "profileId": "profile-default"
+    },
+    {
+      "id": "tiktok-main",
+      "platform": "tiktok",
+      "name": "TikTok Creator",
+      "channelId": "tt-socialcraft",
+      "handle": "@socialcraft",
+      "avatarUrl": "/images/socialcraft-logo.png",
+      "isDefault": false,
+      "profileId": "profile-default"
+    },
+    {
+      "id": "yt-main-channel",
+      "platform": "youtube",
+      "name": "YouTube Channel",
+      "channelId": "UC_socialcraft_official",
+      "handle": "@socialcraft",
+      "avatarUrl": "/images/socialcraft-logo.png",
+      "isDefault": false,
+      "profileId": "profile-default"
+    }
+  ],
+  "scheduledPosts": [],
+  "postingSlots": {
+    "days": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "times": [
+      "09:00",
+      "13:00",
+      "18:00"
+    ]
+  },
+  "carousels": [
+    {
+      "title": "5 Hebel für mehr Reichweite",
+      "topic": "Social Media Growth",
+      "audience": "Creator & Brands",
+      "slides": [
+        {
+          "slideNumber": 1,
+          "role": "hook",
+          "headline": "Hör auf täglich zu posten",
+          "subtext": "Mach stattdessen diese 3 Dinge.",
+          "visualPrompt": "Dramatic contrast, dark luxury studio lighting --ar 4:5"
+        },
+        {
+          "slideNumber": 2,
+          "role": "closing",
+          "headline": "Speichere dir diesen Post",
+          "subtext": "Folge @socialcraft für tägliche Strategien.",
+          "visualPrompt": "Clean minimal aesthetic with vibrant glow --ar 4:5"
+        }
+      ],
+      "id": "carousel_1788942476132_75fnt",
+      "createdAt": "2026-09-09T08:27:56.132Z"
+    }
+  ],
+  "seriesQueue": [
+    {
+      "id": "series-job-1788942394295-1-3a3t",
+      "topic": "[3-Tage Creator Masterclass · Teil 1/2] Das 10.000 Follower Fundament",
+      "audience": "Creator & Entrepreneure",
+      "status": "queued",
+      "slidesTotal": 2,
+      "slidesDone": 0,
+      "slides": [
+        {
+          "id": "slide-1788942394295-0-88b",
+          "slideNumber": 1,
+          "role": "hook",
+          "roleLabel": "HOOK",
+          "headline": "Vergiss Reichweite",
+          "subtext": "Konzentriere dich auf Konvertierung.",
+          "coreMetaphor": "Fundament & Positionierung",
+          "primaryProps": [],
+          "visualPrompt": "dark studio, golden spotlight on vintage microphone, 8k"
+        },
+        {
+          "id": "slide-1788942394295-1-4xw",
+          "slideNumber": 2,
+          "role": "closing",
+          "roleLabel": "CLOSING",
+          "headline": "Morgen geht es weiter",
+          "subtext": "Teil 2 erscheint morgen um 09:00 Uhr.",
+          "coreMetaphor": "Fundament & Positionierung",
+          "primaryProps": [],
+          "visualPrompt": "modern workspace aesthetic"
+        }
+      ],
+      "createdAt": "2026-09-09T08:26:34.295Z"
+    },
+    {
+      "id": "series-job-1788942394295-2-dqaq",
+      "topic": "[3-Tage Creator Masterclass · Teil 2/2] Der unbesiegbare Bogen",
+      "audience": "Creator & Entrepreneure",
+      "status": "queued",
+      "slidesTotal": 2,
+      "slidesDone": 0,
+      "slides": [
+        {
+          "id": "slide-1788942394295-0-ek3",
+          "slideNumber": 1,
+          "role": "hook",
+          "roleLabel": "HOOK",
+          "headline": "Die 3-Sekunden Formel",
+          "subtext": "So hältst du die Leute im Swipe.",
+          "coreMetaphor": "Retention & Hook-Technik",
+          "primaryProps": [],
+          "visualPrompt": "neon orange lines intersecting on obsidian background"
+        },
+        {
+          "id": "slide-1788942394295-1-ntz",
+          "slideNumber": 2,
+          "role": "closing",
+          "roleLabel": "CLOSING",
+          "headline": "Morgen: Das Finale",
+          "subtext": "Teil 3 schließt den Kreis ab.",
+          "coreMetaphor": "Retention & Hook-Technik",
+          "primaryProps": [],
+          "visualPrompt": "sleek minimal typography aesthetic"
+        }
+      ],
+      "createdAt": "2026-09-09T08:26:34.295Z"
+    }
+  ],
+  "updatedAt": "2026-09-09T08:27:56.132Z"
+}

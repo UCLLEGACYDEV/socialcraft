@@ -10,7 +10,12 @@ export function viteCloudStoragePlugin(): Plugin {
     name: "vite-cloud-storage-plugin",
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
-        if (req.url && (req.url.startsWith("/api/cloud/") || req.url.startsWith("/api/webhook"))) {
+        if (
+          req.url &&
+          (req.url.startsWith("/api/cloud/") ||
+            req.url.startsWith("/api/webhook") ||
+            req.url.startsWith("/api/mcp"))
+        ) {
           try {
             const host = req.headers.host || "localhost:8080";
             const fullUrl = `http://${host}${req.url}`;

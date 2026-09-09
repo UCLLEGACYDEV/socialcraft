@@ -233,7 +233,7 @@ export function ThirtyDayBatchModal({
     setBatchProgress({ done: 0, total });
 
     const topicSeed = customTopic.trim();
-    const audienceSeed = customAudience.trim() || selectedPreset.targetAudience;
+    const audienceSeed = customAudience.trim() || selectedPreset?.targetAudience || "Allgemein";
     const results: ScheduledPost[] = [];
     let done = 0;
 
@@ -280,7 +280,7 @@ export function ThirtyDayBatchModal({
           // Usable Visual representation
           const card = renderQuoteCard(headline, {
             kicker: `${template.pillarLabel} • ${template.formatLabel}`,
-            handle: channel.handle || selectedPreset.name.replace(/^\S+\s/, ""),
+            handle: channel.handle || selectedPreset?.name?.replace(/^\S+\s/, "") || "socialcraft",
           });
           let mediaUrls: string[] = [];
           if (card && client) {
@@ -744,7 +744,7 @@ export function ThirtyDayBatchModal({
                       30 Tage Content fertig generiert
                     </h5>
                     <p className="text-[11px] text-zinc-400">
-                      Thema: <strong className="text-zinc-200">{customTopic || selectedPreset.name}</strong> · Zielgruppe: <strong className="text-zinc-200">{customAudience || selectedPreset.targetAudience}</strong>
+                      Thema: <strong className="text-zinc-200">{customTopic || selectedPreset?.name || "Allgemein"}</strong> · Zielgruppe: <strong className="text-zinc-200">{customAudience || selectedPreset?.targetAudience || "Allgemein"}</strong>
                     </p>
                   </div>
                 </div>
