@@ -1610,7 +1610,7 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
         existingPosts={scheduledPosts}
       />
       {showMcp && (
-        <ModalShell title="Claude Desktop MCP" onClose={() => setShowMcp(false)} maxHeight="70vh">
+        <ModalShell title="Claude MCP Verbindung" onClose={() => setShowMcp(false)} maxHeight="70vh">
           <McpModalContent />
         </ModalShell>
       )}

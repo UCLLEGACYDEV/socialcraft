@@ -22,6 +22,8 @@ import {
   getBrandProfiles,
   getSocialChannels,
 } from "../mcp/store";
+import fs from "node:fs";
+import path from "node:path";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -89,6 +91,41 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
         } catch (err: any) {
           return jsonResponse({ success: false, error: err.message }, 400);
         }
+      }
+    }
+
+    // Live Remote-MCP-URL (vom Cloudflare-Tunnel-Runner geschrieben) für Self-Service-Onboarding
+    if (subRoute === "remote-url") {
+      try {
+        const file = path.resolve(process.cwd(), "src/server/data/mcp-remote-url.json");
+        if (!fs.existsSync(file)) {
+          return jsonResponse(
+            {
+              online: false,
+              hint: "Starte den Remote-Server mit: npm run mcp:tunnel",
+            },
+            200
+          );
+        }
+        const info = JSON.parse(fs.readFileSync(file, "utf-8")) as {
+          baseUrl?: string;
+          sseUrl?: string;
+          messagesUrl?: string;
+          updatedAt?: string;
+        };
+        const ageMs = info.updatedAt ? Date.now() - new Date(info.updatedAt).getTime() : Infinity;
+        return jsonResponse({
+          online: Number.isFinite(ageMs) && ageMs < 24 * 60 * 60 * 1000,
+          baseUrl: info.baseUrl || null,
+          sseUrl: info.sseUrl || null,
+          messagesUrl: info.messagesUrl || null,
+          updatedAt: info.updatedAt || null,
+          claudeCodeCommand: info.sseUrl
+            ? `claude mcp add --transport sse socialcraft ${info.sseUrl}`
+            : null,
+        });
+      } catch (err: any) {
+        return jsonResponse({ online: false, error: err?.message || "read failed" }, 200);
       }
     }
 

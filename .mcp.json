@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "socialcraft": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "tsx",
+        "src/mcp/index.ts"
+      ],
+      "env": {}
+    }
+  }
+}

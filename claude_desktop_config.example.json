@@ -2,12 +2,8 @@
   "mcpServers": {
     "socialcraft": {
       "command": "npx",
-      "args": [
-        "-y",
-        "tsx",
-        "G:\\websites\\SOCIALCRAFT\\socialcraft\\src\\mcp\\index.ts"
-      ],
-      "cwd": "G:\\websites\\SOCIALCRAFT\\socialcraft"
+      "args": ["-y", "tsx", "src/mcp/index.ts"],
+      "cwd": "ABSOLUTER/PFAD/ZU/socialcraft"
     }
   }
 }
