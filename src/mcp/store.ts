@@ -29,6 +29,7 @@ export interface SocialCraftStoreData {
   postingSlots: PostingSlotConfig;
   carousels: CarouselDraft[];
   seriesQueue: SeriesJob[];
+  deletedPostIds?: string[];
   updatedAt: string;
 }
 
@@ -64,6 +65,7 @@ function getInitialStore(): SocialCraftStoreData {
     postingSlots: { ...DEFAULT_POSTING_SLOTS },
     carousels: [],
     seriesQueue: [],
+    deletedPostIds: [],
     updatedAt: new Date().toISOString(),
   };
 }
@@ -84,6 +86,7 @@ export function readStore(): SocialCraftStoreData {
       postingSlots: parsed.postingSlots || { ...DEFAULT_POSTING_SLOTS },
       carousels: parsed.carousels || [],
       seriesQueue: parsed.seriesQueue || [],
+      deletedPostIds: parsed.deletedPostIds || [],
       updatedAt: parsed.updatedAt || new Date().toISOString(),
     };
   } catch (err) {
@@ -180,7 +183,9 @@ export function updateScheduledPost(
   patch: Partial<Omit<ScheduledPost, "id" | "createdAt">>
 ): ScheduledPost | null {
   const store = readStore();
-  const idx = store.scheduledPosts.findIndex((p) => p.id === id);
+  const idx = store.scheduledPosts.findIndex(
+    (p) => p.id === id || p.id.endsWith(`_${id}`) || p.id.endsWith(id)
+  );
   if (idx === -1) return null;
 
   store.scheduledPosts[idx] = {
@@ -193,13 +198,27 @@ export function updateScheduledPost(
 
 export function deleteScheduledPost(id: string): boolean {
   const store = readStore();
-  const initialLength = store.scheduledPosts.length;
-  store.scheduledPosts = store.scheduledPosts.filter((p) => p.id !== id);
-  if (store.scheduledPosts.length !== initialLength) {
-    writeStore(store);
-    return true;
+  const toDelete = store.scheduledPosts.filter(
+    (p) => p.id === id || p.id.endsWith(`_${id}`) || p.id.endsWith(id)
+  );
+  if (toDelete.length === 0) return false;
+
+  const deleteIds = new Set(toDelete.map((p) => p.id));
+  store.scheduledPosts = store.scheduledPosts.filter((p) => !deleteIds.has(p.id));
+
+  if (!store.deletedPostIds) store.deletedPostIds = [];
+  deleteIds.forEach((delId) => {
+    if (!store.deletedPostIds!.includes(delId)) {
+      store.deletedPostIds!.push(delId);
+    }
+  });
+
+  if (store.deletedPostIds.length > 500) {
+    store.deletedPostIds = store.deletedPostIds.slice(-500);
   }
-  return false;
+
+  writeStore(store);
+  return true;
 }
 
 export function addCarouselDraft(carousel: Omit<CarouselDraft, "id" | "createdAt"> & { id?: string }): CarouselDraft {
@@ -272,23 +291,52 @@ export function syncStoreWithClient(data: {
 }): SocialCraftStoreData {
   const current = readStore();
 
+  const deletedIds = new Set<string>([...(current.deletedPostIds || [])]);
+  if (data.deletedPostIds && Array.isArray(data.deletedPostIds)) {
+    data.deletedPostIds.forEach((id) => deletedIds.add(id));
+  }
+
   if (data.deletedSeriesIds && Array.isArray(data.deletedSeriesIds)) {
     current.seriesQueue = current.seriesQueue.filter((s) => !data.deletedSeriesIds!.includes(s.id));
   }
-  if (data.deletedPostIds && Array.isArray(data.deletedPostIds)) {
-    current.scheduledPosts = current.scheduledPosts.filter((p) => !data.deletedPostIds!.includes(p.id));
-  }
+
+  // Filter out any explicitly deleted posts from current server state
+  current.scheduledPosts = current.scheduledPosts.filter((p) => !deletedIds.has(p.id));
 
   let mergedPosts = current.scheduledPosts;
   if (data.scheduledPosts && Array.isArray(data.scheduledPosts)) {
-    const clientPostIds = new Set(data.scheduledPosts.map((p) => p.id));
-    const now = Date.now();
-    const externalNewPosts = current.scheduledPosts.filter((p) => {
-      if (clientPostIds.has(p.id)) return false;
-      const createdMs = p.createdAt ? new Date(p.createdAt).getTime() : 0;
-      return now - createdMs < 60_000;
+    // Only accept client posts that have NOT been deleted!
+    const validClientPosts = data.scheduledPosts.filter((p) => !deletedIds.has(p.id));
+    const postMap = new Map<string, ScheduledPost>();
+    // Client posts first
+    validClientPosts.forEach((p) => postMap.set(p.id, p));
+    // Server posts take precedence (preserves channelId and server updates)
+    current.scheduledPosts.forEach((p) => postMap.set(p.id, p));
+    mergedPosts = Array.from(postMap.values());
+  }
+
+  // Merge channels: union by id with server priority to NEVER lose system/server channels
+  const channelMap = new Map<string, SocialChannel>();
+  DEFAULT_SOCIAL_CHANNELS.forEach((c) => channelMap.set(c.id, c));
+  current.socialChannels.forEach((c) => channelMap.set(c.id, { ...channelMap.get(c.id), ...c }));
+  if (data.socialChannels && Array.isArray(data.socialChannels)) {
+    data.socialChannels.forEach((c) => {
+      if (c && c.id) {
+        channelMap.set(c.id, { ...channelMap.get(c.id), ...c });
+      }
     });
-    mergedPosts = [...data.scheduledPosts, ...externalNewPosts];
+  }
+
+  // Merge brand profiles: union by id with server priority
+  const profileMap = new Map<string, BrandProfile>();
+  DEFAULT_BRAND_PROFILES.forEach((p) => profileMap.set(p.id, p));
+  current.brandProfiles.forEach((p) => profileMap.set(p.id, { ...profileMap.get(p.id), ...p }));
+  if (data.brandProfiles && Array.isArray(data.brandProfiles)) {
+    data.brandProfiles.forEach((p) => {
+      if (p && p.id) {
+        profileMap.set(p.id, { ...profileMap.get(p.id), ...p });
+      }
+    });
   }
 
   let mergedSeries = current.seriesQueue;
@@ -298,18 +346,19 @@ export function syncStoreWithClient(data: {
     const externalNewSeries = current.seriesQueue.filter((s) => {
       if (clientSeriesIds.has(s.id)) return false;
       const createdMs = s.createdAt ? new Date(s.createdAt).getTime() : 0;
-      return now - createdMs < 60_000;
+      return now - createdMs < 120_000;
     });
     mergedSeries = [...data.seriesQueue, ...externalNewSeries];
   }
 
   const updated: SocialCraftStoreData = {
-    brandProfiles: data.brandProfiles?.length ? data.brandProfiles : current.brandProfiles,
-    socialChannels: data.socialChannels?.length ? data.socialChannels : current.socialChannels,
+    brandProfiles: Array.from(profileMap.values()),
+    socialChannels: Array.from(channelMap.values()),
     scheduledPosts: mergedPosts,
     postingSlots: data.postingSlots || current.postingSlots,
     carousels: current.carousels,
     seriesQueue: mergedSeries,
+    deletedPostIds: Array.from(deletedIds),
     updatedAt: new Date().toISOString(),
   };
 

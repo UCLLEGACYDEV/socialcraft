@@ -62,6 +62,16 @@
       "avatarUrl": "/images/socialcraft-logo.png",
       "isDefault": false,
       "profileId": "profile-default"
+    },
+    {
+      "id": "ig-loyaltytiger",
+      "platform": "instagram",
+      "name": "Loyalty Tiger (@loyaltytiger)",
+      "channelId": "spc_yssDizpOVU5EXP8ANp",
+      "handle": "@loyaltytiger",
+      "avatarUrl": "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=150&h=150&fit=crop&crop=face",
+      "isDefault": true,
+      "profileId": "profile-zitate-tiger"
     }
   ],
   "scheduledPosts": [
@@ -111,72 +121,6 @@
       "musicTitle": "Prompt: Ultra-detailed cinematic 3D render, vertical 4:5, ...",
       "id": "post_1788945421634_3g777",
       "createdAt": "2026-09-09T09:17:01.634Z"
-    },
-    {
-      "title": "Zitate über innere Stärke und Loyalität (Tiger-Karussell)",
-      "caption": "Manche Worte tragen dich durch einen ganzen Tag.\n\nWelches der 4 Zitate brauchst du gerade am meisten? Schreib die Nummer in die Kommentare.",
-      "hashtags": [
-        "#zitate",
-        "#innerestärke",
-        "#motivation",
-        "#selbstliebe",
-        "#achtsamkeit",
-        "#zumnachdenken"
-      ],
-      "mediaType": "carousel",
-      "mediaUrls": [],
-      "channelId": "spc_yssDizpOVU5EXP8ANp",
-      "platform": "instagram",
-      "scheduledFor": "2026-09-09T12:25:00+02:00",
-      "status": "scheduled",
-      "profileId": "profile-default",
-      "musicTitle": "Prompt: SLIDE 1 (Hook): Ultra-detailed cinematic 3D render...",
-      "id": "post_1788949777918_u836p",
-      "createdAt": "2026-09-09T10:29:37.918Z"
-    },
-    {
-      "title": "Diese Gedanken geben Halt (Tiger-Karussell)",
-      "caption": "Manche Gedanken geben genau dann Halt, wenn man sie am meisten braucht.\n\nWelches der 4 Zitate trifft dich heute am meisten? Schreib die Nummer in die Kommentare.",
-      "hashtags": [
-        "#zitate",
-        "#innerestärke",
-        "#motivation",
-        "#selbstliebe",
-        "#achtsamkeit",
-        "#zumnachdenken"
-      ],
-      "mediaType": "carousel",
-      "mediaUrls": [],
-      "channelId": "spc_yssDizpOVU5EXP8ANp",
-      "platform": "instagram",
-      "scheduledFor": "2026-09-09T13:00:00+02:00",
-      "status": "scheduled",
-      "profileId": "profile-default",
-      "musicTitle": "Prompt: SLIDE 1 (Hook): Ultra-detailed cinematic 3D render...",
-      "id": "post_1788949897813_psyn8",
-      "createdAt": "2026-09-09T10:31:37.813Z"
-    },
-    {
-      "title": "Karussell: Zitate zum Nachdenken: Diese Gedanken geben Halt (Tiger-Motiv für @loyaltytiger)",
-      "caption": "Manche Gedanken geben genau dann Halt, wenn man sie am meisten braucht.\n\nWelches der 4 Zitate trifft dich heute am meisten? Schreib die Nummer in die Kommentare.",
-      "hashtags": [
-        "#zitate",
-        "#innerestärke",
-        "#motivation",
-        "#selbstliebe",
-        "#achtsamkeit",
-        "#zumnachdenken"
-      ],
-      "mediaType": "carousel",
-      "mediaUrls": [],
-      "channelId": "default-channel",
-      "platform": "instagram",
-      "scheduledFor": "2026-09-09T13:00:00+02:00",
-      "status": "scheduled",
-      "profileId": "profile-zitate-tiger",
-      "musicTitle": "Karussell (6 Slides)",
-      "id": "post_1788950371213_uollk",
-      "createdAt": "2026-09-09T10:39:31.213Z"
     }
   ],
   "postingSlots": {
@@ -262,5 +206,13 @@
       "createdAt": "2026-09-09T08:26:34.295Z"
     }
   ],
-  "updatedAt": "2026-09-09T10:42:19.356Z"
+  "deletedPostIds": [
+    "post_1788949777918_u836p",
+    "post_1788949897813_psyn8",
+    "post_1788950371213_uollk",
+    "u836p",
+    "psyn8",
+    "uollk"
+  ],
+  "updatedAt": "2026-09-09T10:49:15.889Z"
 }

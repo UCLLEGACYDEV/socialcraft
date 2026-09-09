@@ -369,6 +369,24 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
               setQueue(serverSeries);
             }
           }
+          if (data?.store?.socialChannels && Array.isArray(data.store.socialChannels)) {
+            const serverChannels: SocialChannel[] = data.store.socialChannels;
+            if (
+              serverChannels.length !== socialChannels.length ||
+              serverChannels.some((sc) => !socialChannels.some((lc) => lc.id === sc.id))
+            ) {
+              setSocialChannels(serverChannels);
+            }
+          }
+          if (data?.store?.brandProfiles && Array.isArray(data.store.brandProfiles)) {
+            const serverProfiles: BrandProfile[] = data.store.brandProfiles;
+            if (
+              serverProfiles.length !== brandProfiles.length ||
+              serverProfiles.some((sp) => !brandProfiles.some((lp) => lp.id === sp.id))
+            ) {
+              setBrandProfiles(serverProfiles);
+            }
+          }
         }
       } catch {
         // Local network / offline fallback
