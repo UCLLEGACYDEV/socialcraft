@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>SOCIALCRAFT — Technisches Konzept &amp; Implementierungs-Spezifikation</title>
+<style>
+  @page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+  @page :first { margin: 0; }
+  :root{
+    --ink:#141017; --muted:#55505c; --line:#e3dfe6; --accent:#FF4D17;
+    --accent-soft:#FFF1EB; --bg-dark:#0C0A12; --ok:#0f7b4a; --warn:#b26a00; --gap:#a4243b;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{ font-family:"Plus Jakarta Sans","Segoe UI",system-ui,sans-serif; color:var(--ink);
+    font-size:10pt; line-height:1.5; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  h1,h2,h3,h4{ font-weight:800; line-height:1.2; margin:0 0 .4em; letter-spacing:-.01em; }
+  h2{ font-size:16pt; margin-top:0; padding-bottom:.2em; border-bottom:2px solid var(--accent); }
+  h3{ font-size:11.5pt; margin-top:1.3em; color:#241c2b; }
+  h4{ font-size:9.5pt; margin-top:1em; text-transform:uppercase; letter-spacing:.05em; color:var(--accent); }
+  p{ margin:0 0 .6em; }
+  ul,ol{ margin:0 0 .7em; padding-left:1.1em; }
+  li{ margin-bottom:.25em; }
+  strong{ color:#0c0810; }
+  code,.mono{ font-family:"JetBrains Mono",ui-monospace,Menlo,monospace; font-size:8.5pt; background:#f3f0f5; padding:0 3px; border-radius:3px; }
+  .muted{ color:var(--muted); } .small{ font-size:8.5pt; }
+
+  .cover{ height:297mm; background:radial-gradient(1100px 640px at 12% 12%, rgba(255,77,23,.26), transparent 60%), var(--bg-dark);
+    color:#F7F4F2; padding:32mm 24mm; display:flex; flex-direction:column; justify-content:space-between; page-break-after:always; }
+  .cover .kicker{ font-family:"JetBrains Mono",monospace; letter-spacing:.3em; text-transform:uppercase; font-size:8.5pt; color:#FFA043; }
+  .cover h1{ font-size:32pt; margin:.5em 0 .3em; letter-spacing:-.02em; }
+  .cover .sub{ font-size:12pt; color:#c9c3d1; max-width:150mm; font-weight:500; }
+  .cover .rule{ width:60px; height:6px; background:var(--accent); margin:9mm 0; border-radius:3px; }
+  .cover .meta{ font-size:9pt; color:#9b93a7; line-height:1.9; } .cover .meta b{ color:#e7e2ee; }
+
+  section{ page-break-before:always; } section:first-of-type{ page-break-before:avoid; }
+  .lead{ font-size:10.5pt; color:#2f2836; font-weight:500; }
+
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:5mm; }
+  .card{ border:1px solid var(--line); border-radius:9px; padding:4mm 4.5mm; background:#fbfafc; break-inside:avoid; }
+  .card h4{ margin-top:0; }
+  .card.accent{ background:var(--accent-soft); border-color:#ffd2bf; }
+
+  table{ width:100%; border-collapse:collapse; margin:.3em 0 1em; font-size:8.8pt; }
+  th,td{ text-align:left; padding:5px 7px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th{ background:#f3f0f5; font-size:8pt; text-transform:uppercase; letter-spacing:.04em; }
+  tr{ break-inside:avoid; }
+  td.mono, th.mono{ font-family:"JetBrains Mono",monospace; }
+
+  .pill{ display:inline-block; padding:1px 7px; border-radius:999px; font-size:7.5pt; font-weight:700; letter-spacing:.03em; }
+  .pill.ok{ background:#e2f3ea; color:var(--ok); }
+  .pill.partial{ background:#fdefdb; color:var(--warn); }
+  .pill.gap{ background:#f7e0e4; color:var(--gap); }
+
+  pre.code{ font-family:"JetBrains Mono",monospace; font-size:8pt; background:var(--bg-dark); color:#d8d2e0;
+    border-radius:9px; padding:5mm; overflow:hidden; white-space:pre-wrap; line-height:1.45; break-inside:avoid; }
+  pre.code .c{ color:#8b8397; } pre.code .k{ color:#FFA043; } pre.code .s{ color:#8fd694; }
+
+  .flow{ font-family:"JetBrains Mono",monospace; font-size:8pt; background:var(--bg-dark); color:#d8d2e0;
+    border-radius:9px; padding:5mm; white-space:pre; overflow:hidden; line-height:1.45; break-inside:avoid; }
+  .flow .hl{ color:#FFA043; }
+
+  .toc ol{ list-style:none; padding:0; counter-reset:t; }
+  .toc li{ counter-increment:t; padding:2.4mm 0; border-bottom:1px solid var(--line); font-weight:600; font-size:9.5pt; }
+  .toc li::before{ content:counter(t) "  "; color:var(--accent); font-family:"JetBrains Mono",monospace; }
+  .toc span{ float:right; color:var(--muted); font-weight:400; }
+
+  .tick{ border-left:3px solid var(--accent); padding:1mm 0 1mm 5mm; margin-bottom:3.5mm; break-inside:avoid; }
+  .tick .id{ font-family:"JetBrains Mono",monospace; font-size:8pt; color:var(--accent); font-weight:700; }
+  .tick h4{ margin:.1em 0 .2em; color:#241c2b; text-transform:none; letter-spacing:0; font-size:10pt; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div>
+    <div class="kicker">Technisches Konzept &nbsp;·&nbsp; Implementierungs-Spezifikation</div>
+    <h1>SOCIALCRAFT<br>Build Spec</h1>
+    <div class="sub">One-Click Content Engine — was existiert, was gebaut wird, und die vollständige Spezifikation der Flow-C-Automatisierungspipeline (Claude-Skill → MCP → Render → Publish).</div>
+    <div class="rule"></div>
+    <div class="mono" style="font-size:8pt;color:#FFA043">FÜR ENTWICKLER · REPO: UCLLEGACYDEV/socialcraft</div>
+  </div>
+  <div class="meta">
+    <b>Stack:</b> TanStack Start · React 19 · TypeScript 5.8 (strict) · Tailwind v4 · Nitro/Vite Server · Vitest<br>
+    <b>MCP:</b> @modelcontextprotocol/sdk · stdio + SSE + Streamable HTTP (Port 3005)<br>
+    <b>Extern:</b> KIE.AI (Nano-Banana) · Post for Me (api.postforme.dev) · Mega S4 (S3) · Google Gemini<br>
+    <b>Betreiber:</b> UCL Legacy · <b>Stand:</b> September 2026 · Version 1.0
+  </div>
+</div>
+
+<!-- TOC -->
+<section>
+  <h2>Inhalt</h2>
+  <div class="toc"><ol>
+    <li>Zweck &amp; Umfang <span>03</span></li>
+    <li>Ist-Zustand: Modul-Inventar &amp; Reifegrad <span>04</span></li>
+    <li>Soll-Architektur &amp; neue Komponenten <span>06</span></li>
+    <li>Datenmodell &amp; Persistenz <span>07</span></li>
+    <li>MCP-Tool-Verträge (bestehend + neu) <span>09</span></li>
+    <li>Flow A — 1-Klick Erstellung &amp; Vorplanung <span>11</span></li>
+    <li>Flow B — 30-Tage-Batch <span>12</span></li>
+    <li>Flow C — Agentic Pipeline (Kernspezifikation) <span>13</span></li>
+    <li>Externe Dienste, Endpunkte &amp; Proxy <span>16</span></li>
+    <li>Sync-Protokoll <span>17</span></li>
+    <li>Konfiguration (.env) <span>18</span></li>
+    <li>Sicherheit &amp; Mandantentrennung <span>18</span></li>
+    <li>Build, Tests &amp; Qualitäts-Gates <span>19</span></li>
+    <li>Arbeitspakete / Backlog <span>19</span></li>
+    <li>Risiken &amp; offene Entscheidungen <span>21</span></li>
+  </ol></div>
+</section>
+
+<!-- 1 -->
+<section>
+  <h2>1 · Zweck &amp; Umfang</h2>
+  <p class="lead">Dieses Dokument ist die Bauanleitung für die drei Content-Flows. Es benennt konkret, welche Bausteine bereits stehen, welche fehlen, und wie die fehlenden zu bauen sind — mit Datei-Pfaden, Typ-Verträgen und Akzeptanzkriterien.</p>
+
+  <h3>Die drei Flows (Zielbild)</h3>
+  <table>
+    <tr><th>Flow</th><th>Auslöser</th><th>Ergebnis</th><th>Reifegrad</th></tr>
+    <tr><td><strong>A · Einzelstück</strong></td><td>Studio-UI: Thema + „Wann veröffentlichen?“</td><td>1 markenkonsistenter Post, gerendert, terminiert, publiziert</td><td><span class="pill partial">teilweise</span></td></tr>
+    <tr><td><strong>B · Masse</strong></td><td>Studio-UI: 30-Tage-Batch-Modal, 1 Button</td><td>bis zu 30·N Posts über Formate/Kanäle, terminiert, publiziert</td><td><span class="pill partial">teilweise</span></td></tr>
+    <tr><td><strong>C · Agentic</strong></td><td>Ein-Satz-Briefing an Claude (eigener Design-Prompt-Skill) → MCP</td><td>Story + Karussell + Einzelbilder, serverseitig gerendert, terminiert, publiziert — ohne UI</td><td><span class="pill gap">Lücke</span></td></tr>
+  </table>
+
+  <h3>Kern-Lücke (Priorität 1)</h3>
+  <p>Die MCP-Tools erzeugen heute nur <strong>Metadaten</strong> (Carousel-Drafts, ScheduledPosts mit <span class="mono">mediaUrls: []</span>). Es gibt <strong>keinen serverseitigen Renderer</strong> und <strong>keine serverseitige Story-Generierung</strong> (<span class="mono">mockGenerateCarousel</span> ist ein Mock). Flow C ist damit nur „Planung ohne Bilder“. Zu bauen: <strong>Story-Service</strong> + <strong>Render-Worker</strong> + <strong>Publish-Worker</strong>, alle vom MCP-Server anstoßbar und idempotent.</p>
+
+  <h3>Nicht im Umfang</h3>
+  <ul>
+    <li>Video-/Reel-Rendering (9:16) — Roadmap Q1 2027, hier nur Schnittstelle vorsehen.</li>
+    <li>Analytics-Rückkanal (Post-for-Me-Feeds) — separate Spezifikation.</li>
+    <li>Billing/Credits-Abrechnung — vorhanden als UI-Modal, Server-Enforcement später.</li>
+  </ul>
+</section>
+
+<!-- 2 -->
+<section>
+  <h2>2 · Ist-Zustand: Modul-Inventar &amp; Reifegrad</h2>
+  <p class="muted"><span class="pill ok">fertig</span> produktiv nutzbar &nbsp; <span class="pill partial">teilweise</span> vorhanden, Lücken &nbsp; <span class="pill gap">Lücke</span> muss gebaut werden</p>
+
+  <table>
+    <tr><th>Bereich</th><th>Datei(en)</th><th>Status</th><th>Anmerkung</th></tr>
+    <tr><td>Carousel-UI &amp; Slide-Editor</td><td class="mono">onyx/components/StudioCarouselWorkspace.tsx · CarouselViewer.tsx · SlideEditModal.tsx</td><td><span class="pill ok">fertig</span></td><td>2–10 Slides, Reroll, Live-Vorschau</td></tr>
+    <tr><td>Story-/Slide-Generierung (Text)</td><td class="mono">onyx/mock-api.ts → mockGenerateCarousel()</td><td><span class="pill gap">Lücke</span></td><td>reiner Mock. <span class="mono">CarouselLlmProvider</span> (gemini/openai/anthropic) ist typisiert, aber nicht implementiert</td></tr>
+    <tr><td>Bild-Rendering (Einzelbild/Slide)</td><td class="mono">onyx/kie-api.ts · onyx/mock-api.ts → generateImageUnified()</td><td><span class="pill ok">fertig</span></td><td>KIE.AI Nano-Banana 2/Pro + gpt-image-2; Proxy → Direct-Fallback; Poll bis 100 s</td></tr>
+    <tr><td>Caption + Hashtags</td><td class="mono">onyx/caption-generator.ts → generateViralCaption()</td><td><span class="pill ok">fertig</span></td><td>Gemini REST + algorithmischer Fallback; <span class="mono">sanitizeNoGedankenstriche()</span></td></tr>
+    <tr><td>KI-Persona / Klon</td><td class="mono">onyx/components/AiCloneView.tsx · defaults.ts → assembleClonePrompt() · persona-analyzer.ts</td><td><span class="pill partial">teilweise</span></td><td>Prompt-Assembly nur clientseitig; MCP-Tools hängen keinen Klon-Prefix an</td></tr>
+    <tr><td>Scheduler-UI &amp; Kalender</td><td class="mono">onyx/components/PostSchedulerView.tsx (+ scheduler/*)</td><td><span class="pill ok">fertig</span></td><td>Monats-/Wochenansicht, „Sofort/Zeitplan“, Auto-Einplanen</td></tr>
+    <tr><td>Slot-Berechnung</td><td class="mono">onyx/scheduling.ts → computeNextSlots() · mcp/tools.ts → calculateNextSlots()</td><td><span class="pill ok">fertig</span></td><td>2 Implementierungen, gleiche Logik — <em>vereinheitlichen</em></td></tr>
+    <tr><td>30-Tage-Batch</td><td class="mono">onyx/components/ThirtyDayBatchModal.tsx · data/batch-niche-presets.ts</td><td><span class="pill partial">teilweise</span></td><td>rendert nur <span class="mono">renderQuoteCard()</span>-Fallback-Grafik, keinen KI-Render; clientseitig</td></tr>
+    <tr><td>Publishing-Bridge</td><td class="mono">onyx/postforme/client.ts · server/cloud-api-router.ts</td><td><span class="pill ok">fertig</span></td><td>createPost / uploadMedia (Signed URLs) / TikTok creator-info; Proxy <span class="mono">/api/cloud/postforme/proxy</span></td></tr>
+    <tr><td>S4 Cloud-Archiv</td><td class="mono">onyx/s4-storage.ts · server/cloud-storage.ts · server/cloud-identity.ts</td><td><span class="pill ok">fertig</span></td><td>S3-kompatibel; Multi-Tenant-Scope über Cookie-Identity</td></tr>
+    <tr><td>MCP-Server + Tools</td><td class="mono">mcp/server.ts · tools.ts · prompts.ts · http-server.ts · store.ts</td><td><span class="pill partial">teilweise</span></td><td>12 Tools, nur Metadaten; kein Render-Trigger; Store = <em>eine</em> JSON-Datei</td></tr>
+    <tr><td>Batch Studio Queue (Render)</td><td class="mono">onyx/components/SeriesQueue.tsx · routes/serie.tsx</td><td><span class="pill partial">teilweise</span></td><td>Rendert Serien-Jobs — clientseitig, Tab muss offen sein</td></tr>
+    <tr><td>Bidirektionaler Sync</td><td class="mono">onyx/hooks/useMcpSync.ts · store.ts → syncStoreWithClient()</td><td><span class="pill ok">fertig</span></td><td>Reconciliation-Map, <span class="mono">deletedPostIds/deletedSeriesIds</span> Tombstones</td></tr>
+    <tr><td>Externer ONYX Render Node</td><td class="mono">MCP: onyx_render_slide / onyx_render_all / onyx_push_carousel</td><td><span class="pill partial">teilweise</span></td><td>separater lokaler MCP-Renderer; nicht Teil dieses Repos, aber Flow-C-Option</td></tr>
+  </table>
+
+  <h3>Bewertung</h3>
+  <p>Rendering (Bild) und Distribution (Post for Me) sind belastbar. Was fehlt, ist die <strong>serverseitige Verkettung</strong>: Story erzeugen → alle Bilder rendern → hochladen → einplanen → publizieren, angestoßen aus dem MCP-Server, ohne offenen Browser-Tab.</p>
+</section>
+
+<!-- 3 -->
+<section>
+  <h2>3 · Soll-Architektur &amp; neue Komponenten</h2>
+
+  <div class="flow">┌──────────────────────────────────────────────────────────────────────┐
+│  Clients                                                              │
+│  Studio-UI (React 19)        Claude Desktop / Code + Design-Skill     │
+└───────┬──────────────────────────────┬───────────────────────────────┘
+        │ /api/mcp/sync                │ stdio · SSE · Streamable HTTP (:3005)
+        ▼                              ▼
+┌───────────────────────────┐   ┌─────────────────────────────────────┐
+│  MCP Server               │   │  <span class="hl">NEU: Job-Orchestrator</span>              │
+│  mcp/tools.ts (12 + 3 neu)│──►│  enqueue(render|publish|story)       │
+└───────────┬───────────────┘   │  Idempotenz-Key · Retry · Status     │
+            │                   └───────────────┬─────────────────────┘
+            ▼                                   ▼
+┌───────────────────────────┐   ┌───────────────────────────────────────┐
+│  Store  (Persistenz)      │   │  <span class="hl">NEU: Worker-Pool</span>                     │
+│  heute: 1 JSON-Datei      │   │  • StoryService  → Gemini/Claude/OpenAI│
+│  Ziel: pro-Tenant + DB    │   │  • RenderWorker   → kie-api.ts         │
+└───────────────────────────┘   │  • PublishWorker  → postforme/client  │
+                                │  • ArchiveWorker  → s4-storage        │
+                                └───────────────────────────────────────┘</div>
+
+  <h3>Neue Bausteine (dieses Repo)</h3>
+  <table>
+    <tr><th>Modul</th><th>Pfad (Vorschlag)</th><th>Verantwortung</th></tr>
+    <tr><td class="mono">StoryService</td><td class="mono">src/server/story/story-service.ts</td><td>Aus Brief (Thema, Inhalt, Slide-Zahl, Zielgruppe, Stil, Persona) → strukturiertes <span class="mono">StoryboardResult</span> (Slides + Einzelbilder + Caption + Hashtags). Provider-abstrahiert (Gemini default, Claude/OpenAI optional). Erzwingt Bogen-Framework &amp; „keine Gedankenstriche“.</td></tr>
+    <tr><td class="mono">Job-Orchestrator</td><td class="mono">src/server/jobs/orchestrator.ts</td><td>Persistente Job-Queue (Typen: <span class="mono">story · render · publish · archive</span>). Idempotenz über <span class="mono">idempotencyKey</span>. Exponentielles Retry, DLQ, Status-Feld an <span class="mono">SeriesJob</span>/<span class="mono">ScheduledPost</span>.</td></tr>
+    <tr><td class="mono">RenderWorker</td><td class="mono">src/server/jobs/render-worker.ts</td><td>Node-seitiger Aufruf von <span class="mono">generateNanoBananaImage()</span> pro Slide/Bild. Hängt Klon-Prefix (<span class="mono">assembleClonePrompt</span>) und Brand-Kit-Hinweise an. Schreibt <span class="mono">imageUrl</span> zurück.</td></tr>
+    <tr><td class="mono">PublishWorker</td><td class="mono">src/server/jobs/publish-worker.ts</td><td><span class="mono">PostForMeApiClient.uploadMedia()</span> je Asset → <span class="mono">createPost({ scheduled_at, social_accounts, media })</span>. Setzt <span class="mono">postForMePostId/Status</span>. TikTok: <span class="mono">platform_configurations.tiktok.is_draft=true</span> bis Audit.</td></tr>
+    <tr><td class="mono">ArchiveWorker</td><td class="mono">src/server/jobs/archive-worker.ts</td><td>Kopiert Renders nach S4 (<span class="mono">carousels/&lt;slug&gt;/slide_NN.jpg</span>, <span class="mono">singles/&lt;slug&gt;/img_NN.jpg</span>) im Tenant-Scope.</td></tr>
+    <tr><td class="mono">Unified scheduling</td><td class="mono">src/onyx/scheduling.ts</td><td><span class="mono">calculateNextSlots()</span> aus <span class="mono">mcp/tools.ts</span> entfernen, <span class="mono">computeNextSlots()</span> importieren (eine Quelle der Wahrheit).</td></tr>
+  </table>
+
+  <h3>Ausführungsumgebung</h3>
+  <p>Der MCP-Server läuft heute als eigener Prozess (<span class="mono">dist/mcp/index.js</span>, Port 3005) und teilt sich die Store-Datei mit dem Web-Server über das Dateisystem. Worker laufen im selben Prozess wie der MCP-Server (kein zusätzlicher Dienst nötig für v1). Für die Lovable-Deployment-Umgebung: Worker als Teil des Nitro-Servers registrieren, Queue in der Store-Datei bzw. später in einer DB.</p>
+</section>
+
+<!-- 4 -->
+<section>
+  <h2>4 · Datenmodell &amp; Persistenz</h2>
+
+  <h3>Store-Datei</h3>
+  <p class="mono small">src/server/data/socialcraft-store.json &nbsp;— gelesen/geschrieben von <span class="mono">mcp/store.ts</span> (<span class="mono">readStore/writeStore</span>). Auflösung über Verzeichnis-Walk nach <span class="mono">src/server/data</span>.</p>
+  <pre class="code"><span class="k">interface</span> SocialCraftStoreData {
+  brandProfiles:  BrandProfile[]
+  socialChannels: SocialChannel[]
+  scheduledPosts: ScheduledPost[]
+  postingSlots:   PostingSlotConfig        <span class="c">// { days:number[0-6], times:"HH:MM"[] }</span>
+  carousels:      CarouselDraft[]
+  seriesQueue:    SeriesJob[]
+  deletedPostIds?:   string[]              <span class="c">// Tombstones für Sync</span>
+  deletedSeriesIds?: string[]
+  updatedAt: string
+}</pre>
+
+  <h3>Kern-Entitäten (<span class="mono">src/onyx/types.ts</span>)</h3>
+  <pre class="code"><span class="k">interface</span> ScheduledPost {
+  id: string                               <span class="c">// post_&lt;ts&gt;_&lt;rand&gt;</span>
+  title: string; caption: string; hashtags: string[]
+  mediaUrls: string[]; mediaType: <span class="s">"carousel"|"image"|"video"</span>
+  channelId: string; platform: SocialPlatform     <span class="c">// 12 Plattformen</span>
+  scheduledFor: string <span class="c">/* ISO */</span>; status: ScheduledPostStatus
+  createdAt: string; publishedAt?: string; externalPostUrl?: string
+  postForMePostId?: string; postForMeStatus?: string
+  errorMessage?: string; profileId?: string; musicTitle?: string
+}
+<span class="c">// status: "scheduled"|"queued"|"published"|"draft"|"failed"|"cancelled"</span>
+
+<span class="k">interface</span> SlideContent {
+  id; slideNumber; role: SlideRole; roleLabel; headline; subtext
+  coreMetaphor; primaryProps: string[]; visualPrompt
+  imageUrl?; renderStatus?: <span class="s">"idle"|"rendering"|"done"|"error"|"cancelled"</span>; renderProgress?
+}
+<span class="c">// SlideRole: hook|concept|pain_point|authority|expansion|usp|proof|urgency|closing</span>
+
+<span class="k">interface</span> CarouselDraft { id; title; topic?; audience?; slides:{slideNumber;role;headline;subtext;visualPrompt;imageUrl?}[]; profileId?; createdAt }
+
+<span class="k">interface</span> SeriesJob { id; topic; audience; status: JobStatus; slidesTotal; slidesDone; slides?: SlideContent[]; errorMsg?; createdAt }
+<span class="c">// JobStatus: queued|prompts|rendering|done|error|cancelled</span>
+
+<span class="k">interface</span> BrandProfile { id; slug; name; description?; color?; avatarUrl?; isDefault?; createdAt }
+<span class="k">interface</span> SocialChannel { id; platform; name; channelId; handle?; profileId?; postForMeAccountId?; pinterestBoardId?; isDefault? }
+<span class="k">interface</span> AiCloneProfile { id; name; isActive; referenceImages[]; genderAge; hairFace; wardrobe; lightingLook; framingCamera; negativePrompt; customPrefix; placement }
+<span class="c">// ClonePlacement: hook_closing | all_slides | even_slides | custom</span></pre>
+
+  <h3>Neue Typen (zu ergänzen)</h3>
+  <pre class="code"><span class="k">interface</span> StoryBrief {
+  topic: string; content: string            <span class="c">// Freitext-Argumente/Inhalt vom Nutzer</span>
+  slideCount: number                        <span class="c">// 2..10</span>
+  singleImageCount?: number                 <span class="c">// zusätzliche "normale" Feed-Bilder</span>
+  audience?: string; platforms: SocialPlatform[]
+  styleId?: string                          <span class="c">// Design Library / Prompt Hub Style</span>
+  personaId?: string; clonePlacement?: ClonePlacement
+  profileId?: string; llmProvider?: <span class="s">"gemini"|"openai"|"anthropic"</span>
+  scheduleStartFrom?: string                <span class="c">// ISO; sonst nächster freier Slot</span>
+  idempotencyKey: string                    <span class="c">// vom Aufrufer gesetzt, dedupe</span>
+}
+
+<span class="k">interface</span> StoryboardResult {
+  carousel: { title; caption; hashtags: string[]; slides: SlideContent[] }
+  singles:  { caption; hashtags: string[]; visualPrompt: string }[]
+  warnings?: string[]
+}
+
+<span class="k">interface</span> Job {
+  id; type: <span class="s">"story"|"render"|"publish"|"archive"</span>; refId: string   <span class="c">// SeriesJob/Post/Draft id</span>
+  status: <span class="s">"queued"|"running"|"done"|"error"|"dead"</span>
+  attempts: number; maxAttempts: number; idempotencyKey: string
+  payload: unknown; lastError?: string; createdAt; updatedAt
+}</pre>
+</section>
+
+<!-- 5 -->
+<section>
+  <h2>5 · MCP-Tool-Verträge</h2>
+  <p class="muted">Registriert in <span class="mono">src/mcp/tools.ts</span> via <span class="mono">server.tool(name, desc, zodShape, handler)</span>. Alle Captions serverseitig durch <span class="mono">sanitizeNoGedankenstriche()</span>.</p>
+
+  <h3>Bestehend (12)</h3>
+  <table>
+    <tr><th>Tool</th><th>Wichtige Eingaben</th><th>Wirkung</th></tr>
+    <tr><td class="mono">get_brand_profiles</td><td>—</td><td>Liste <span class="mono">BrandProfile</span></td></tr>
+    <tr><td class="mono">get_social_channels</td><td>profileId?</td><td>Liste <span class="mono">SocialChannel</span></td></tr>
+    <tr><td class="mono">get_posting_slots</td><td>count, startFrom?, minGapMinutes=180</td><td>nächste freie ISO-Slots (kollisionsfrei ±5 min)</td></tr>
+    <tr><td class="mono">get_scheduled_posts</td><td>status?/platform?/profileId?/from/to</td><td>gefilterte Posts</td></tr>
+    <tr><td class="mono">create_scheduled_post</td><td>title, caption, hashtags[], platform, mediaType, <b>mediaUrls[]</b>, <b>visualPrompt?</b>, scheduledFor?</td><td>1 Post. <span class="pill gap">Lücke:</span> <span class="mono">visualPrompt</span> wird NICHT gerendert; ohne <span class="mono">mediaUrls</span> kein Bild</td></tr>
+    <tr><td class="mono">batch_preplan_posts</td><td>posts[1..50], startFrom?</td><td>verteilt über Slots (4 h Gap). Kein Render.</td></tr>
+    <tr><td class="mono">create_carousel_draft</td><td>topic, slides[2..15]{slideNumber,role,headline,subtext,visualPrompt}, caption, hashtags[], platform</td><td>Draft + 1 ScheduledPost (<span class="mono">mediaType:"carousel"</span>, <span class="mono">mediaUrls:[]</span>). Kein Render.</td></tr>
+    <tr><td class="mono">plan_and_schedule_carousels</td><td>carousels[]{day?,topic,platforms[],slides[],caption,hashtags}</td><td>je Tag Draft + Posts pro Plattform (12 h Gap). Kein Render.</td></tr>
+    <tr><td class="mono">create_content_series</td><td>seriesTitle, parts[2..]{partNumber,slides[],caption}, addToSeriesQueue, scheduleInCalendar</td><td>SeriesJobs in Queue + Kalender-Posts. Render nur, wenn Batch-Studio-Tab offen.</td></tr>
+    <tr><td class="mono">get_series_queue</td><td>—</td><td>Jobs der Serien-Queue</td></tr>
+    <tr><td class="mono">update_scheduled_post / delete_scheduled_post</td><td>id (+ patch)</td><td>ändern / Tombstone</td></tr>
+    <tr><td class="mono">get_prompt_frameworks</td><td>category</td><td>Hook-/Karussell-/Bildprompt-Vorlagen</td></tr>
+  </table>
+
+  <h3>Neu zu registrieren (3)</h3>
+  <table>
+    <tr><th>Tool</th><th>Eingabe</th><th>Ausgabe / Wirkung</th></tr>
+    <tr><td class="mono">generate_storyboard</td><td class="mono">StoryBrief</td><td>ruft <span class="mono">StoryService</span>; gibt <span class="mono">StoryboardResult</span> zurück (Claude kann prüfen/nachbessern). Kein Schreiben in Store.</td></tr>
+    <tr><td class="mono">produce_and_schedule</td><td class="mono">{ storyboard: StoryboardResult, brief: StoryBrief }</td><td><b>Der Flow-C-Endpunkt.</b> Legt CarouselDraft + SeriesJob + ScheduledPosts an, enqueued <span class="mono">render</span>→<span class="mono">archive</span>→<span class="mono">publish</span>, verteilt Slots. Gibt <span class="mono">{ jobId, postIds[], scheduledFor[] }</span> zurück. Idempotent über <span class="mono">brief.idempotencyKey</span>.</td></tr>
+    <tr><td class="mono">get_job_status</td><td class="mono">{ jobId }</td><td><span class="mono">{ status, slidesDone/Total, postStatuses[], errors[] }</span> — Claude pollt bis <span class="mono">done</span>.</td></tr>
+  </table>
+  <p class="small muted">Optional Komfort-Tool <span class="mono">brief_to_published</span> = <span class="mono">generate_storyboard</span> + <span class="mono">produce_and_schedule</span> in einem Aufruf, wenn kein Review-Schritt gewünscht ist.</p>
+</section>
+
+<!-- 6 -->
+<section>
+  <h2>6 · Flow A — 1-Klick Erstellung &amp; Vorplanung</h2>
+
+  <h3>Ablauf (Studio-UI)</h3>
+  <ol>
+    <li>Brief in <span class="mono">StudioCarouselWorkspace.tsx</span> → <span class="mono">mockGenerateCarousel()</span> <span class="pill gap">ersetzen durch StoryService-Call</span>.</li>
+    <li>Renders je Slide über <span class="mono">generateImageUnified()</span> (existiert). Bei aktivem Klon: <span class="mono">assembleClonePrompt()</span> als Prefix je nach <span class="mono">placement</span>.</li>
+    <li>Caption über <span class="mono">generateViralCaption()</span> (existiert).</li>
+    <li>Scheduler: „Wann veröffentlichen?“ → <span class="mono">Sofort</span> / <span class="mono">Zeitplan</span>. Zeitplan ⇒ <span class="mono">computeNextSlots(config, 1, taken)</span>.</li>
+    <li>Publish: <span class="mono">PostForMeApiClient.uploadMedia()</span> je Slide (Reihenfolge nach <span class="mono">slideNumber</span>!) → <span class="mono">createPost()</span>. S4-Archiv im Hintergrund.</li>
+  </ol>
+
+  <h3>Offene Tasks Flow A</h3>
+  <table>
+    <tr><th>#</th><th>Task</th><th>Datei</th><th>Größe</th></tr>
+    <tr><td>A1</td><td>StoryService implementieren, <span class="mono">mockGenerateCarousel</span> ersetzen (Fallback behalten)</td><td class="mono">server/story/* · onyx/mock-api.ts</td><td>L</td></tr>
+    <tr><td>A2</td><td>Klon-Prefix zentral in Render-Pfad ziehen (UI + Worker teilen Logik)</td><td class="mono">onyx/defaults.ts → shared helper</td><td>M</td></tr>
+    <tr><td>A3</td><td>Slide-Reihenfolge vor Media-Array erzwingen (<span class="mono">slidesToOrderedUrls</span>) — Regressionstest</td><td class="mono">onyx/components/PostSchedulerView.tsx</td><td>S</td></tr>
+    <tr><td>A4</td><td>Ein-Button-Prinzip absichern: keine parallelen Publish-Aktionen wieder einführen</td><td class="mono">PostSchedulerView.tsx</td><td>S</td></tr>
+  </table>
+</section>
+
+<!-- 7 -->
+<section>
+  <h2>7 · Flow B — 30-Tage-Batch</h2>
+
+  <h3>Ist</h3>
+  <p><span class="mono">ThirtyDayBatchModal.tsx</span>: 3 Schritte (Thema/Zielgruppe · Formate+feste Uhrzeiten · Kalender+Auto-Schedule). <span class="mono">handleScheduleAll30Days()</span> baut je Tag×Kanal einen Job, generiert Caption (Gemini), rendert aber nur <span class="mono">renderQuoteCard()</span> (Canvas-Fallback), lädt hoch, <span class="mono">createPost()</span>. Batching: 4 parallel.</p>
+
+  <h3>Soll</h3>
+  <table>
+    <tr><th>#</th><th>Task</th><th>Detail</th><th>Größe</th></tr>
+    <tr><td>B1</td><td>KI-Render statt Quote-Card</td><td>pro Tag echten Slide-/Bild-Render über RenderWorker; Quote-Card nur als Fallback bei Render-Fehler/kein Credit</td><td>M</td></tr>
+    <tr><td>B2</td><td>Batch serverseitig ausführbar</td><td>Modal ruft <span class="mono">produce_and_schedule</span>-Äquivalent → läuft weiter, auch wenn Tab schließt</td><td>L</td></tr>
+    <tr><td>B3</td><td>Slot-Logik vereinheitlichen</td><td>feste Format-Uhrzeiten ODER <span class="mono">computeNextSlots()</span> — konsistent, dokumentiert</td><td>S</td></tr>
+    <tr><td>B4</td><td>Idempotenz</td><td><span class="mono">idempotencyKey</span> je Batch; erneuter Klick dupliziert nicht</td><td>M</td></tr>
+    <tr><td>B5</td><td>Fortschritt persistent</td><td><span class="mono">batchProgress</span> aus Job-Status statt lokalem State</td><td>S</td></tr>
+  </table>
+  <p class="small muted">Presets: <span class="mono">data/batch-niche-presets.ts</span> — 6 Nischen × 30 Tage, je 5 Content-Säulen (tips/mindset/case_study/viral/framework). Diese Struktur bleibt Input für den StoryService.</p>
+</section>
+
+<!-- 8 -->
+<section>
+  <h2>8 · Flow C — Agentic Pipeline (Kernspezifikation)</h2>
+  <p class="lead">Ziel: „Claude, erstelle eine starke Verkaufsstory zu X, Inhalt Y, 8 Slides + 3 Bilder, dann rendern und einplanen“ → publizierter Content, ohne Studio-UI.</p>
+
+  <h3>8.1 Skill-Vertrag (Claude-seitig)</h3>
+  <p>Der nutzereigene Design-Prompt-Skill produziert <strong>genau ein JSON</strong> nach <span class="mono">StoryboardResult</span> und ruft dann <span class="mono">produce_and_schedule</span>. Skill-Anweisung (Auszug, gehört in die Skill-Datei des Nutzers):</p>
+  <pre class="code"><span class="c"># Rolle: SOCIALCRAFT Verkaufsstory- &amp; Design-Prompt-Architekt</span>
+Input vom Nutzer: Thema, Inhalt/Argumente, slideCount, optional singleImageCount,
+                  Zielgruppe, Plattformen, Stil, Persona.
+
+Schritt 1  Story-Bogen nach Framework:
+  hook → pain_point → concept → expansion(1..n) → proof → closing
+Schritt 2  Pro Slide: headline (max 8 Wörter), subtext (1–2 Sätze),
+           coreMetaphor, visualPrompt (detailliert, Platz für Text-Overlay
+           oben/unten, 4:5, kein eingebauter Text außer Kernwort).
+Schritt 3  singleImageCount eigenständige Feed-Bilder: je caption +
+           hashtags + visualPrompt (kein Karussell-Kontext).
+Schritt 4  Caption HSO-Struktur, KEINE Gedankenstriche (– — -). 3–5 Hashtags.
+Schritt 5  Rufe MCP <span class="k">generate_storyboard</span> NICHT nötig, wenn du selbst baust →
+           direkt MCP <span class="k">produce_and_schedule</span> mit { storyboard, brief } aufrufen.
+Schritt 6  Polle <span class="k">get_job_status</span> bis status=done; zeige Termine + Fehler.
+
+Ausgabe: NUR valides JSON gemäß StoryboardResult-Schema.</pre>
+
+  <h3>8.2 Sequenz (Server-seitig)</h3>
+  <div class="flow"><span class="hl">Claude</span> ──produce_and_schedule({storyboard, brief})──► <span class="hl">MCP tools.ts</span>
+   │ 1. dedupe(brief.idempotencyKey) → wenn bekannt: bestehende jobId zurück
+   │ 2. resolveChannelForPlatform(profileId, platform)  (store.ts)
+   │ 3. addCarouselDraft(...)  +  batchAddSeriesJobs([job])
+   │ 4. computeNextSlots(cfg, 1 + singles.length, taken, {minGapMinutes})
+   │ 5. addScheduledPostsBatch([...carouselPost, ...singlePosts])  status:"queued"
+   │ 6. orchestrator.enqueue: render(job) → archive(job) → publish(posts)
+   ▼
+<span class="hl">RenderWorker</span>  je Slide/Bild: prompt = stylePrefix + clonePrefix + visualPrompt
+   generateNanoBananaImage({model, apiKey, prompt, aspectRatio:"4:5", resolution})
+   → slide.imageUrl ; SeriesJob.slidesDone++ ; renderStatus
+   ▼
+<span class="hl">ArchiveWorker</span>  put S4: carousels/&lt;slug&gt;/slide_NN.jpg · singles/&lt;slug&gt;/img_NN.jpg
+   ▼
+<span class="hl">PublishWorker</span>  orderBy(slideNumber) → uploadMedia() je Asset
+   createPost({ caption, scheduled_at, social_accounts:[acct], media:[{url}],
+               platform_configurations: { tiktok:{ is_draft:true } } })
+   → post.postForMePostId ; status:"scheduled"
+   ▼
+<span class="hl">get_job_status</span> → done  (Claude zeigt Zusammenfassung)</div>
+
+  <h3>8.3 Idempotenz &amp; Fehler</h3>
+  <ul>
+    <li><strong>Dedupe:</strong> <span class="mono">idempotencyKey</span> (z. B. Hash aus topic+content+slideCount+day) in einer <span class="mono">producedKeys</span>-Map im Store; zweiter Aufruf gibt dieselbe <span class="mono">jobId</span> zurück, legt nichts neu an.</li>
+    <li><strong>Retry:</strong> Render/Publish je Asset bis <span class="mono">maxAttempts=3</span>, exponentiell (2 s, 8 s, 30 s). Danach Job <span class="mono">status:"error"</span>, Slide <span class="mono">renderStatus:"error"</span>, Post bleibt <span class="mono">queued</span> mit <span class="mono">errorMessage</span>.</li>
+    <li><strong>Teil-Erfolg:</strong> Karussell wird nur publiziert, wenn <em>alle</em> Slides <span class="mono">done</span> sind; Einzelbilder publizieren unabhängig.</li>
+    <li><strong>Credits:</strong> <span class="mono">fetchKieCredits()</span> vor Batch prüfen; bei 402 Job <span class="mono">error</span> mit klarer Meldung, nichts publizieren.</li>
+    <li><strong>TikTok:</strong> immer <span class="mono">is_draft:true</span> bis App-Audit bestanden (Whitelabel-Key <span class="mono">pfm_live_…</span>).</li>
+  </ul>
+
+  <h3>8.4 Akzeptanzkriterien Flow C</h3>
+  <ol>
+    <li>Ein einziger <span class="mono">produce_and_schedule</span>-Aufruf erzeugt ohne offenen Browser: 1 Karussell (N gerenderte Slides) + M gerenderte Einzelbilder, alle in S4 archiviert, alle als <span class="mono">ScheduledPost</span> mit gefüllten <span class="mono">mediaUrls</span> und <span class="mono">postForMePostId</span>.</li>
+    <li>Termine liegen auf den konfigurierten Redaktionszeiten, kollisionsfrei zu bestehenden Posts.</li>
+    <li>Wiederholter Aufruf mit gleichem <span class="mono">idempotencyKey</span> erzeugt keine Duplikate.</li>
+    <li>Der Web-Kalender zeigt die Posts nach dem nächsten <span class="mono">/api/mcp/sync</span> (≤ Poll-Intervall).</li>
+    <li><span class="mono">get_job_status</span> liefert konsistenten Fortschritt und benennt jeden Fehler pro Asset.</li>
+  </ol>
+</section>
+
+<!-- 9 -->
+<section>
+  <h2>9 · Externe Dienste, Endpunkte &amp; Proxy</h2>
+  <table>
+    <tr><th>Dienst</th><th>Basis-URL</th><th>Auth</th><th>Server-Proxy</th><th>Fallback</th></tr>
+    <tr><td>KIE.AI (Nano-Banana)</td><td class="mono">api.kie.ai/api/v1</td><td class="mono">Bearer &lt;KIE key&gt;</td><td class="mono">/api/cloud/ai/*</td><td>Direct-Fetch bei 404/502/503; Poll <span class="mono">jobs/recordInfo</span> 50×/2 s</td></tr>
+    <tr><td>Post for Me</td><td class="mono">api.postforme.dev/v1</td><td class="mono">Bearer pfm_live_… / shared</td><td class="mono">/api/cloud/postforme/proxy</td><td>Direct bei „Failed to fetch“</td></tr>
+    <tr><td>TikTok Creator-Info</td><td class="mono">(über Server)</td><td>PFM-Token serverseitig</td><td class="mono">/api/cloud/tiktok/creator-info</td><td>—</td></tr>
+    <tr><td>Mega S4</td><td class="mono">socialgrow.s3.g.megas4.com</td><td>S3 Access/Secret</td><td class="mono">server/cloud-storage.ts (AWS SDK)</td><td>—</td></tr>
+    <tr><td>Google Gemini</td><td class="mono">generativelanguage.googleapis.com/v1beta</td><td class="mono">?key=&lt;gemini&gt;</td><td>—</td><td>Modelle: 1.5-flash → 2.0-flash → 1.5-pro; algorithmischer Fallback</td></tr>
+  </table>
+
+  <h3>Post for Me — createPost (Vertrag)</h3>
+  <pre class="code">POST /v1/social-posts
+{
+  caption: string,
+  scheduled_at: <span class="s">"2026-09-14T09:00:00.000Z"</span>,      <span class="c">// ISO; weglassen = sofort</span>
+  social_accounts: [<span class="s">"&lt;postForMeAccountId | channelId&gt;"</span>],
+  media: [{ url: <span class="s">"&lt;media_url aus uploadMedia()&gt;"</span> }],  <span class="c">// Reihenfolge = Slide-Reihenfolge</span>
+  platform_configurations?: { tiktok: { is_draft: true } }
+}
+<span class="c">// Media-Upload: POST /v1/media/create-upload-url → PUT upload_url (Blob) → media_url</span></pre>
+
+  <h3>KIE.AI — Render (Vertrag)</h3>
+  <pre class="code">POST /jobs/createTask { model, input:{ prompt, aspect_ratio:"4:5", resolution:"1K", output_format:"jpg" } } → taskId
+GET  /jobs/recordInfo?taskId=…  bis state="success" → resultJson.resultUrls[0]
+<span class="c">// Modelle: nano-banana-2 | nano-banana-2-lite | nano-banana-pro | gpt-image-2-text-to-image</span></pre>
+</section>
+
+<!-- 10 -->
+<section>
+  <h2>10 · Sync-Protokoll</h2>
+  <p><span class="mono">POST /api/mcp/sync</span> → <span class="mono">syncStoreWithClient(data)</span> in <span class="mono">mcp/store.ts</span>. Client-Hook: <span class="mono">onyx/hooks/useMcpSync.ts</span> (periodisches Polling + optimistische Updates).</p>
+  <h3>Merge-Regeln</h3>
+  <ul>
+    <li><strong>Posts:</strong> Union per <span class="mono">id</span> in <span class="mono">Map</span>; Client-Version überschreibt Server-Version; <span class="mono">deletedPostIds</span> (Tombstones, max 500) filtern immer zuletzt.</li>
+    <li><strong>Channels / Brand-Profiles:</strong> Union per <span class="mono">id</span>, <em>Server-Priorität</em> — System-Kanäle gehen nie verloren; <span class="mono">DEFAULT_*</span> immer als Basis gemerged.</li>
+    <li><strong>Series-Queue:</strong> Union per <span class="mono">id</span>, kein Timeout-Purge; nur Tombstones entfernen.</li>
+    <li><strong>postingSlots:</strong> Client gewinnt, wenn gesendet.</li>
+  </ul>
+  <p class="small muted">Wichtig für Worker: Worker schreiben direkt via <span class="mono">store.ts</span>-Funktionen (<span class="mono">updateScheduledPost</span> etc.). Kein Sync-Bypass nötig — der nächste Client-Poll zieht die gefüllten <span class="mono">mediaUrls</span>/Status.</p>
+</section>
+
+<!-- 11 + 12 -->
+<section>
+  <h2>11 · Konfiguration (.env)</h2>
+  <p class="mono small">Zugriff nur über <span class="mono">src/lib/config.ts</span> (trennt <span class="mono">import.meta.env.VITE_*</span> client / <span class="mono">process.env.*</span> server). <span class="mono">.env</span> ist gitignored; Vorlage in <span class="mono">.env.example</span>.</p>
+  <table>
+    <tr><th>Variable</th><th>Zweck</th><th>Nutzung Flow C</th></tr>
+    <tr><td class="mono">VITE_KIE_API_KEY</td><td>KIE.AI Render-Key (Anchored Fallback)</td><td>RenderWorker</td></tr>
+    <tr><td class="mono">VITE_POSTFORME_API_KEY</td><td>Post for Me (shared); pro Tenant via UI überschreibbar mit <span class="mono">pfm_live_…</span></td><td>PublishWorker</td></tr>
+    <tr><td class="mono">VITE_S4_ACCESS_KEY / _SECRET_KEY / _ENDPOINT / _BUCKET / _REGION</td><td>Mega S4</td><td>ArchiveWorker</td></tr>
+    <tr><td class="mono">GEMINI_API_KEY (bzw. Settings.geminiApiKey)</td><td>Caption + Story (Gemini)</td><td>StoryService</td></tr>
+    <tr><td class="mono">PORT</td><td>MCP HTTP-Server (Default 3005)</td><td>MCP</td></tr>
+  </table>
+  <p class="small muted">Anchored-Konstanten: <span class="mono">ANCHORED_KIE_API_KEY</span>, <span class="mono">ANCHORED_POSTFORME_API_KEY</span>, <span class="mono">ANCHORED_S4_*</span> in <span class="mono">src/onyx/defaults.ts</span>.</p>
+
+  <h2 style="margin-top:10mm">12 · Sicherheit &amp; Mandantentrennung</h2>
+  <ul>
+    <li><strong>Zero Hardcoded Secrets</strong> im Quellcode. Drittanbieter nur über <span class="mono">server/cloud-api-router.ts</span>; Browser sieht keine Upstream-Keys.</li>
+    <li><strong>S4 Multi-Tenant:</strong> <span class="mono">server/cloud-identity.ts</span> scoped jeden Nutzer (auch Gäste) kryptografisch. Worker müssen den Tenant-Scope aus dem Job-Payload übernehmen, nicht raten.</li>
+    <li><strong>MCP-Store-Grenze (Entscheidung nötig):</strong> heute <em>eine</em> JSON-Datei → für SaaS pro-Tenant-Datei (<span class="mono">data/tenants/&lt;id&gt;/store.json</span>) oder DB. Bis dahin ist der MCP-Server ein Single-Tenant-Werkzeug (lokal beim Nutzer).</li>
+    <li><strong>TikTok:</strong> Draft-Modus verpflichtend bis Content-Posting-API-Audit.</li>
+    <li><strong>Lovable:</strong> kein <span class="mono">force-push</span> / <span class="mono">rebase</span> auf <span class="mono">main</span>.</li>
+  </ul>
+</section>
+
+<!-- 13 + 14 -->
+<section>
+  <h2>13 · Build, Tests &amp; Qualitäts-Gates</h2>
+  <pre class="code">npm test            <span class="c"># Vitest — u.a. onyx/__tests__/scheduling.test.ts, mcp-tools.test.ts</span>
+npx tsc --noEmit    <span class="c"># strict; noPropertyAccessFromIndexSignature; kein any</span>
+npx eslint . --quiet
+npm run build
+npm run mcp:build   <span class="c"># dist/mcp/index.js  ·  node dist/mcp/index.js --test</span></pre>
+  <p>Neue Tests: <span class="mono">story-service.test.ts</span> (Framework-Struktur, keine Gedankenstriche), <span class="mono">orchestrator.test.ts</span> (Idempotenz, Retry, Teil-Erfolg), <span class="mono">render-worker.test.ts</span> (Prompt-Assembly mit Klon/Style), <span class="mono">produce-and-schedule.test.ts</span> (End-to-End mit gemockten Externals).</p>
+
+  <h2 style="margin-top:9mm">14 · Arbeitspakete / Backlog</h2>
+  <p class="muted">Reihenfolge = Abhängigkeit. Größe: S ≈ ½ Tag, M ≈ 1–2 Tage, L ≈ 3–5 Tage.</p>
+
+  <div class="tick"><div class="id">P1 · L</div><h4>StoryService (server/story/)</h4>
+    <p>Provider-abstrahiert (Gemini default). Input <span class="mono">StoryBrief</span> → <span class="mono">StoryboardResult</span>. Bogen-Framework erzwingen, <span class="mono">sanitizeNoGedankenstriche</span>, Einzelbild-Prompts. Fallback = deterministische Vorlage (heutiges <span class="mono">mockGenerateCarousel</span>-Verhalten). <em>Akzeptanz:</em> gültiges Schema, N Slides, M Singles, Test grün.</p></div>
+
+  <div class="tick"><div class="id">P2 · M</div><h4>Job-Orchestrator + Store-Erweiterung</h4>
+    <p><span class="mono">jobs[]</span> und <span class="mono">producedKeys</span> in <span class="mono">SocialCraftStoreData</span>. <span class="mono">enqueue/tick/retry/dead</span>. Läuft im MCP-Prozess per Intervall. <em>Akzeptanz:</em> Idempotenz- und Retry-Test grün.</p></div>
+
+  <div class="tick"><div class="id">P3 · M</div><h4>RenderWorker (Node-Pfad zu kie-api)</h4>
+    <p><span class="mono">generateNanoBananaImage</span> serverseitig; Prompt = <span class="mono">stylePrefix + clonePrefix + visualPrompt</span>. Schreibt <span class="mono">imageUrl</span> + <span class="mono">SeriesJob.slidesDone</span>. Credit-Check vorab. <em>Akzeptanz:</em> Slides erhalten URLs, Fehler landen pro Slide.</p></div>
+
+  <div class="tick"><div class="id">P4 · S</div><h4>ArchiveWorker</h4>
+    <p>Renders → S4 im Tenant-Scope, feste Pfadstruktur. <em>Akzeptanz:</em> Objekte liegen unter <span class="mono">carousels/</span> bzw. <span class="mono">singles/</span>.</p></div>
+
+  <div class="tick"><div class="id">P5 · M</div><h4>PublishWorker</h4>
+    <p><span class="mono">uploadMedia</span> je Asset in <span class="mono">slideNumber</span>-Reihenfolge → <span class="mono">createPost</span>. TikTok <span class="mono">is_draft</span>. Setzt <span class="mono">postForMePostId/Status</span>, <span class="mono">status:"scheduled"</span>. <em>Akzeptanz:</em> Karussell nur bei Voll-Render publiziert; Singles unabhängig.</p></div>
+
+  <div class="tick"><div class="id">P6 · M</div><h4>MCP-Tools: generate_storyboard · produce_and_schedule · get_job_status</h4>
+    <p>Registrieren in <span class="mono">mcp/tools.ts</span>, Zod-Schemas aus §4. <span class="mono">produce_and_schedule</span> verkettet Store-Writes + <span class="mono">orchestrator.enqueue</span>. <em>Akzeptanz:</em> End-to-End-Test mit gemockten Externals.</p></div>
+
+  <div class="tick"><div class="id">P7 · S</div><h4>Scheduling vereinheitlichen</h4>
+    <p><span class="mono">calculateNextSlots</span> aus <span class="mono">mcp/tools.ts</span> entfernen → <span class="mono">computeNextSlots</span> importieren. <em>Akzeptanz:</em> ein Test deckt beide alten Aufrufstellen.</p></div>
+
+  <div class="tick"><div class="id">P8 · L</div><h4>Flow B serverseitig</h4>
+    <p><span class="mono">ThirtyDayBatchModal</span> ruft <span class="mono">produce_and_schedule</span> pro Tag statt clientseitigem Loop; echter KI-Render (P3). <em>Akzeptanz:</em> Batch läuft nach Schließen des Tabs weiter; kein Duplikat bei Doppelklick.</p></div>
+
+  <div class="tick"><div class="id">P9 · M</div><h4>Flow A: mockGenerateCarousel ersetzen</h4>
+    <p><span class="mono">StudioCarouselWorkspace</span> nutzt StoryService (P1). Klon-Prefix zentralisieren. <em>Akzeptanz:</em> keine Mock-Texte mehr im echten Modus.</p></div>
+
+  <div class="tick"><div class="id">P10 · S</div><h4>Design-Prompt-Skill-Vorlage</h4>
+    <p><span class="mono">docs/skills/socialcraft-design-prompts.md</span> — offizieller Skill-Text (§8.1) + Beispiel-Briefings, damit Nutzer ihn 1:1 übernehmen können.</p></div>
+
+  <div class="tick"><div class="id">P11 · L</div><h4>Pro-Tenant-Store (Entscheidung + Umsetzung)</h4>
+    <p>Single-JSON → pro-Tenant oder DB (siehe §15). Erst nötig, wenn der MCP-Server zentral (nicht lokal) betrieben wird.</p></div>
+</section>
+
+<!-- 15 -->
+<section>
+  <h2>15 · Risiken &amp; offene Entscheidungen</h2>
+  <table>
+    <tr><th>Thema</th><th>Risiko / Frage</th><th>Empfehlung</th></tr>
+    <tr><td>MCP-Store</td><td>Eine JSON-Datei ist nicht mandantenfähig und nicht nebenläufig sicher bei zentralem Betrieb</td><td>v1: MCP bleibt lokal beim Nutzer (Single-Tenant). v2: SQLite/Postgres pro Betreiber-Instanz, Store-Interface unverändert lassen</td></tr>
+    <tr><td>Story-LLM</td><td>Gemini-Qualität für Verkaufsstory schwankt; Anthropic/OpenAI nicht verdrahtet</td><td>Provider-Interface bauen, Claude (via <span class="mono">anthropicApiKey</span>) als Premium-Option; deterministischer Fallback bleibt</td></tr>
+    <tr><td>Render-Kosten</td><td>30 Tage × N Kanäle × Slides = viele Credits pro Klick</td><td>Credit-Vorabprüfung + Obergrenze pro Batch + BYOK-Pfad; Quote-Card-Fallback</td></tr>
+    <tr><td>Render-Dauer</td><td>KIE.AI Poll bis 100 s/Bild; großer Batch dauert</td><td>Worker-Pool mit Parallelität 4–6, Job asynchron, Claude pollt <span class="mono">get_job_status</span></td></tr>
+    <tr><td>Idempotenz-Key</td><td>Wer bildet ihn — Skill oder Server?</td><td>Skill setzt ihn (Hash aus Brief); Server dedupt. Dokumentiert in §8.3</td></tr>
+    <tr><td>Slide-Reihenfolge</td><td>Bekannter Bug: unsortierte Media publizieren Karussell verdreht</td><td><span class="mono">orderBy(slideNumber)</span> im PublishWorker + Regressionstest (P5)</td></tr>
+    <tr><td>TikTok</td><td>Direct-Post erst nach Audit</td><td>bis dahin <span class="mono">is_draft:true</span> hart erzwingen (nicht optional)</td></tr>
+    <tr><td>Reels/Video</td><td>Flow C soll später auch 9:16-Video</td><td><span class="mono">mediaType:"video"</span> im Job-Payload vorsehen, Worker-Zweig als TODO</td></tr>
+  </table>
+
+  <p class="small muted" style="margin-top:8mm; border-top:1px solid var(--line); padding-top:3mm;">
+  SOCIALCRAFT · ONYX Studio — UCL Legacy. Technisches Implementierungskonzept, Stand September 2026. Datei-Pfade und Typ-Verträge auf Basis des Repos <span class="mono">UCLLEGACYDEV/socialcraft</span> (main). Aufwandsangaben sind Schätzungen.</p>
+</section>
+
+</body>
+</html>

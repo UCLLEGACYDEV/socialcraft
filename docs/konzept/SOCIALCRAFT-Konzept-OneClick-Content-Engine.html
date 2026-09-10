@@ -134,11 +134,12 @@
       <li>Die Produktvision &amp; das Kernversprechen <span>05</span></li>
       <li>Flagship-Flow A — 1-Klick Content-Erstellung &amp; Vorplanung <span>06</span></li>
       <li>Flagship-Flow B — 1-Klick Content in Masse (30-Tage-Batch) <span>08</span></li>
-      <li>Systemarchitektur: Worauf die 1-Klick-Magie aufsetzt <span>10</span></li>
-      <li>Zielgruppen &amp; Anwendungsfälle <span>12</span></li>
-      <li>Geschäftsmodell &amp; Monetarisierung <span>13</span></li>
-      <li>Go-to-Market <span>14</span></li>
-      <li>Roadmap &amp; KPIs <span>15</span></li>
+      <li>Flagship-Flow C — Agentic Pipeline: Claude-Skill für Design-Prompts <span>10</span></li>
+      <li>Systemarchitektur: Worauf die 1-Klick-Magie aufsetzt <span>12</span></li>
+      <li>Zielgruppen &amp; Anwendungsfälle <span>14</span></li>
+      <li>Geschäftsmodell &amp; Monetarisierung <span>15</span></li>
+      <li>Go-to-Market <span>16</span></li>
+      <li>Roadmap &amp; KPIs <span>17</span></li>
     </ol>
   </div>
 </section>
@@ -150,7 +151,7 @@
 
   <p>Heute besteht Social-Media-Content aus einer Kette von 5–7 Werkzeugen: Ideenfindung in ChatGPT, Bildprompts in Midjourney, Layout in Canva, Konsistenz-Fixing, manueller Export, Befüllen von Buffer/Hootsuite, separates TikTok-Posting. Pro Karussell-Post gehen so <strong>45–90 Minuten</strong> und 4–6 Abos drauf — und das Ergebnis ist visuell inkonsistent.</p>
 
-  <p>Socialcraft bricht diese Kette auf <strong>zwei Knöpfe</strong> herunter:</p>
+  <p>Socialcraft bricht diese Kette auf <strong>einen Knopf</strong> herunter — oder auf <strong>einen Satz an Claude</strong>:</p>
 
   <div class="grid2">
     <div class="card accent">
@@ -165,11 +166,16 @@
     </div>
   </div>
 
+  <div class="card accent" style="margin-top:5mm">
+    <h4>Flow C — Agentic (Claude-Skill für Design-Prompts)</h4>
+    <p><strong>„Claude, erstelle eine starke Verkaufsstory zum Thema X, Inhalt Y, in 8 Slides“</strong> → ein selbst gebauter Claude-Skill schreibt Story-Bogen, Headlines, Subtexte und pro Slide einen Design-/Bildprompt. Über die Socialcraft-MCP-Tools werden daraus automatisch das Karussell <em>und</em> einzelne Bilder gerendert, ins Batch Studio gelegt und in den Kalender vorgeplant. Kein UI-Klick nötig.</p>
+  </div>
+
   <h3>Warum das jetzt funktioniert</h3>
   <ul>
     <li><strong>Konsistenz gelöst:</strong> Der strukturierte KI-Persona-/Klon-Builder verankert dieselbe Identität über alle Slides — kein Face-Drifting mehr.</li>
     <li><strong>Local-First:</strong> Entwürfe, Keys und Queue leben im Browser — sofortige Reaktionszeit, Offline-Bearbeitung, Datensouveränität.</li>
-    <li><strong>Agentic-ready:</strong> Über das Model Context Protocol (MCP) planen KI-Agenten (Claude Desktop, Cursor) direkt in den Kalender — Socialcraft ist Werkzeug <em>und</em> Automatisierungs-Knoten.</li>
+    <li><strong>Agentic-ready:</strong> Über das Model Context Protocol (MCP) erzeugen KI-Agenten (Claude Desktop, Cursor) aus einem Briefing-Satz Story, Slide-Prompts und Einzelbilder, rendern und planen direkt in den Kalender — Socialcraft ist Werkzeug <em>und</em> Automatisierungs-Knoten.</li>
     <li><strong>Whitelabel-Publishing:</strong> Distribution auf 10+ Plattformen läuft über eine einzige API-Bridge (Post for Me).</li>
   </ul>
 
@@ -340,9 +346,71 @@ Scheduling-Tools befüllen (Buffer, Hootsuite, TikTok Desktop)</div>
   </div>
 </section>
 
-<!-- ===================== 6 ===================== -->
+<!-- ===================== 6 · FLOW C ===================== -->
 <section>
-  <h2>6 · Systemarchitektur</h2>
+  <h2>6 · Flagship-Flow C — Agentic Pipeline: Claude-Skill für Design-Prompts</h2>
+  <p class="muted">Content-Produktion als Gespräch. Der Nutzer beschreibt, Claude konzipiert, Socialcraft rendert und plant — vollautomatisch.</p>
+
+  <h3>Die Idee</h3>
+  <p>Der Nutzer baut sich in Claude einen eigenen <strong>Skill für Design-Prompts</strong> (ein wiederverwendbares Anweisungspaket). Statt im Studio zu klicken, sagt er im Chat:</p>
+  <div class="card accent">
+    <p style="margin:0"><em>„Erstelle eine starke Verkaufsstory. Thema: [X]. Inhalt/Argumente: [so und so]. Format: Karussell mit 8 Slides plus 3 einzelne Feed-Bilder. Zielgruppe: [Y]. Stil: Ember Ignite, Persona Founder Dark Ember. Danach automatisch rendern und für die nächsten freien Slots einplanen.“</em></p>
+  </div>
+
+  <h3>Was der Skill liefert</h3>
+  <ul>
+    <li><strong>Story-Architektur:</strong> Hook → Pain Point → Concept → Deep Dive → Proof → Closing/CTA (Socialcraft-Bogen-Framework), zugeschnitten auf die genannten Argumente.</li>
+    <li><strong>Pro Slide:</strong> große Headline (6–8 Wörter), Subtext (1–2 Sätze), Kernmetapher und ein <strong>detaillierter Design-/Bildprompt</strong> mit Platz für Typografie-Overlay.</li>
+    <li><strong>Einzelbilder („normale Bilder“):</strong> eigenständige Feed-Grafiken, Zitatkarten oder Produkt-Visuals mit eigenem Prompt — nicht nur Karussells.</li>
+    <li><strong>Caption</strong> (HSO, ohne Gedankenstriche) + 3–5 SEO-Hashtags, plattformspezifisch.</li>
+  </ul>
+
+  <h3>Die automatisierte Kette</h3>
+  <div class="flow"><span class="hl">CLAUDE + SKILL</span>   Verkaufsstory + N Slide-Prompts + M Einzelbild-Prompts + Caption/Hashtags
+   <span class="hl">│</span>  MCP
+   ▼
+<span class="hl">SOCIALCRAFT MCP</span>   create_carousel_draft · create_scheduled_post · batch_preplan_posts
+                  → Brand-Profil &amp; Kanal auflösen · Persona-/Stil-Vektoren anhängen
+   <span class="hl">│</span>
+   ▼
+<span class="hl">RENDER</span>          Batch Studio Queue → Nano-Banana 2 / Flux Pro rendert alle Slides + Einzelbilder parallel
+                  → S4-Archiv (carousels/… , singles/…)
+   <span class="hl">│</span>
+   ▼
+<span class="hl">VORPLANUNG</span>      calculateNextSlots() verteilt kollisionsfrei auf die Redaktionszeiten
+   <span class="hl">│</span>
+   ▼
+<span class="hl">PUBLISH</span>         Post for Me → Instagram · LinkedIn · TikTok (Draft) · …  → Kalender-Status „Geplant“</div>
+
+  <h3>Verfügbare MCP-Bausteine (bereits im System)</h3>
+  <table>
+    <tr><th>Tool</th><th>Zweck in Flow C</th></tr>
+    <tr><td><span class="mono">get_brand_profiles</span> / <span class="mono">get_social_channels</span></td><td>Marke, Persona-Set und Zielkanäle bestimmen</td></tr>
+    <tr><td><span class="mono">get_posting_slots</span></td><td>Nächste freie, kollisionsfreie Termine holen</td></tr>
+    <tr><td><span class="mono">create_carousel_draft</span></td><td>Kompletten Slide-Satz mit Rollen, Headlines, Subtexten, Visual-Prompts anlegen</td></tr>
+    <tr><td><span class="mono">create_scheduled_post</span></td><td>Einzelbild-Post mit <span class="mono">visualPrompt</span> erstellen und terminieren</td></tr>
+    <tr><td><span class="mono">batch_preplan_posts</span> / <span class="mono">plan_and_schedule_carousels</span> / <span class="mono">create_content_series</span></td><td>Ganze Serien / Mehr-Tage-Kampagnen auf einmal rendern und vorplanen</td></tr>
+    <tr><td><span class="mono">get_prompt_frameworks</span></td><td>Bewährte Hook-, Karussell- und Bildprompt-Vorlagen für den Skill</td></tr>
+  </table>
+  <p class="small muted">Die serverseitigen MCP-Prompts (<span class="mono">craft_carousel_prompts</span>, <span class="mono">plan_days_carousels</span>, <span class="mono">batch_studio_mass_content</span>) sind die vorinstallierte Basis, auf der ein nutzereigener Design-Prompt-Skill aufsetzen kann.</p>
+
+  <h3>Warum Flow C strategisch zählt</h3>
+  <ul>
+    <li><strong>Kein Interface-Limit:</strong> Der Nutzer arbeitet in seiner gewohnten Claude-Umgebung; Socialcraft ist die ausführende Maschine.</li>
+    <li><strong>Wiederholbar &amp; teilbar:</strong> Ein einmal gebauter Skill produziert jede Woche denselben Qualitäts-Output — und lässt sich im Team oder an Agentur-Kunden weitergeben.</li>
+    <li><strong>Karussell + Einzelbild in einem Lauf:</strong> deckt den kompletten Feed-Mix ab, nicht nur Multi-Slide.</li>
+    <li><strong>Skalierung nach oben:</strong> „Mach das für 4 Themen“ = 4 Karussells + 12 Bilder, gerendert und für den Monat verplant, ohne einen Klick im Studio.</li>
+  </ul>
+
+  <div class="card accent">
+    <h4>Kernnutzen Flow C</h4>
+    <p>Die Content-Erstellung wird zu einem Briefing-Satz. Konzeption bleibt beim Menschen (bzw. seinem Skill), Produktion und Distribution übernimmt Socialcraft — reproduzierbar, markenkonsistent, über alle Kanäle.</p>
+  </div>
+</section>
+
+<!-- ===================== 7 ===================== -->
+<section>
+  <h2>7 · Systemarchitektur</h2>
   <p class="muted">Worauf die 1-Klick-Magie technisch aufsetzt — verdichtet.</p>
 
   <div class="flow">┌────────────────────────────────────────────────────────────┐
@@ -378,7 +446,7 @@ Scheduling-Tools befüllen (Buffer, Hootsuite, TikTok Desktop)</div>
 
 <!-- ===================== 7 ===================== -->
 <section>
-  <h2>7 · Zielgruppen &amp; Anwendungsfälle</h2>
+  <h2>8 · Zielgruppen &amp; Anwendungsfälle</h2>
 
   <table>
     <tr><th>Segment</th><th>Job-to-be-done</th><th>Primärer Flow</th></tr>
@@ -395,7 +463,7 @@ Scheduling-Tools befüllen (Buffer, Hootsuite, TikTok Desktop)</div>
 
 <!-- ===================== 8 ===================== -->
 <section>
-  <h2>8 · Geschäftsmodell &amp; Monetarisierung</h2>
+  <h2>9 · Geschäftsmodell &amp; Monetarisierung</h2>
 
   <h3>Zwei Erlösachsen</h3>
   <div class="grid2">
@@ -423,7 +491,7 @@ Scheduling-Tools befüllen (Buffer, Hootsuite, TikTok Desktop)</div>
 
 <!-- ===================== 9 ===================== -->
 <section>
-  <h2>9 · Go-to-Market</h2>
+  <h2>10 · Go-to-Market</h2>
 
   <h3>Positionierung</h3>
   <p class="lead">„Nicht dein Scheduler. Deine Content-Fabrik. 30 Tage Content in einem Klick.“</p>
@@ -448,13 +516,13 @@ Scheduling-Tools befüllen (Buffer, Hootsuite, TikTok Desktop)</div>
 
 <!-- ===================== 10 ===================== -->
 <section>
-  <h2>10 · Roadmap &amp; KPIs</h2>
+  <h2>11 · Roadmap &amp; KPIs</h2>
 
   <h3>Produkt-Roadmap</h3>
   <table>
     <tr><th>Quartal</th><th>Meilenstein</th></tr>
     <tr><td>Q4 2026</td><td>TikTok-App-Audit → Direct-Post live · Whitelabel-Onboarding (eigener PFM-Key) gehärtet · 1-Klick-Flow A &amp; B stabil in Produktion</td></tr>
-    <tr><td>Q1 2027</td><td>Reel-/Video-Rendering (9:16) im Batch · Analytics-Rückkanal (Reichweite/Saves je Post) · A/B-Hooks</td></tr>
+    <tr><td>Q1 2027</td><td>Reel-/Video-Rendering (9:16) im Batch · Analytics-Rückkanal (Reichweite/Saves je Post) · A/B-Hooks · offizieller Design-Prompt-Skill für Claude (Flow C) mit Ein-Satz-Briefing</td></tr>
     <tr><td>Q2 2027</td><td>Agentur-Cockpit: Freigabe-Workflows, Kunden-Login, Reporting-Export · Team-Sitze</td></tr>
     <tr><td>Q3 2027</td><td>„Selbstlernender Batch“: Performance-Daten steuern Themen- &amp; Uhrzeit-Auswahl automatisch</td></tr>
   </table>
@@ -471,13 +539,14 @@ Scheduling-Tools befüllen (Buffer, Hootsuite, TikTok Desktop)</div>
     <tr><th>KPI</th><th>Definition</th><th>Zielkorridor</th></tr>
     <tr><td>Aktivierung</td><td>Nutzer plant im ersten Session einen echten Post</td><td>&gt; 40 %</td></tr>
     <tr><td>Batch-Adoption</td><td>Nutzt Flow B im ersten Monat</td><td>&gt; 30 %</td></tr>
+    <tr><td>Agentic-Adoption</td><td>Nutzt Flow C (MCP / Claude-Skill) mind. 1× pro Monat</td><td>&gt; 15 %</td></tr>
     <tr><td>Publish-Erfolgsquote</td><td>Post for Me: geplant → veröffentlicht ohne Fehler</td><td>&gt; 97 %</td></tr>
     <tr><td>Monatliche Churn</td><td>Abo-Kündigungen / aktive Abos</td><td>&lt; 5 %</td></tr>
     <tr><td>Credit-Marge</td><td>(Credit-Erlös − Render-Kosten) / Credit-Erlös</td><td>&gt; 55 %</td></tr>
   </table>
 
   <h3>Zusammenfassung des Konzepts</h3>
-  <p>Socialcraft ist kein Werkzeug-Ersatz, sondern eine Kategorie-Verschiebung: von „Content produzieren und dann planen“ zu <strong>„entscheiden, dann läuft es“</strong>. Die beiden 1-Klick-Flows sind das Produkt; Persona-Konsistenz, Local-First-Resilienz und die MCP-Automatisierung sind der Graben, der es verteidigt.</p>
+  <p>Socialcraft ist kein Werkzeug-Ersatz, sondern eine Kategorie-Verschiebung: von „Content produzieren und dann planen“ zu <strong>„entscheiden, dann läuft es“</strong>. Die drei Flows sind das Produkt: der eine Klick (A), der eine Klick für 30 Tage (B) und der eine Satz an Claude (C). Persona-Konsistenz, Local-First-Resilienz und die MCP-Automatisierung sind der Graben, der es verteidigt.</p>
 
   <p class="small muted" style="margin-top:8mm; border-top:1px solid var(--line); padding-top:3mm;">
   SOCIALCRAFT · ONYX Studio — Betreiber: UCL Legacy (ucllegacy.com). Dieses Dokument ist ein internes Strategie- und Produktkonzept, Stand September 2026. Kennzahlen und Preise sind Planungshypothesen, keine Zusagen.</p>
