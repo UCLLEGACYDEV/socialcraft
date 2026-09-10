@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>SOCIALCRAFT — Business-Konzept: One-Click Content Engine</title>
+<style>
+  @page { size: A4; margin: 20mm 18mm 22mm 18mm; }
+  @page :first { margin: 0; }
+
+  :root{
+    --ink:#141017;
+    --muted:#55505c;
+    --line:#e3dfe6;
+    --accent:#FF4D17;
+    --accent-soft:#FFF1EB;
+    --bg-dark:#0C0A12;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:"Plus Jakarta Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    font-size:10.5pt;
+    line-height:1.55;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  h1,h2,h3,h4{ font-weight:800; line-height:1.2; margin:0 0 .4em; letter-spacing:-.01em; }
+  h2{ font-size:17pt; margin-top:0; padding-bottom:.25em; border-bottom:2px solid var(--accent); }
+  h3{ font-size:12.5pt; margin-top:1.4em; color:#241c2b; }
+  h4{ font-size:10.5pt; margin-top:1em; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); }
+  p{ margin:0 0 .7em; }
+  ul,ol{ margin:0 0 .8em; padding-left:1.15em; }
+  li{ margin-bottom:.3em; }
+  strong{ color:#0c0810; }
+  code,.mono{ font-family:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace; font-size:9pt; }
+
+  .muted{ color:var(--muted); }
+  .small{ font-size:9pt; }
+
+  /* ---- Cover ---- */
+  .cover{
+    height:297mm; width:100%;
+    background:radial-gradient(1200px 700px at 15% 12%, rgba(255,77,23,.28), transparent 60%), var(--bg-dark);
+    color:#F7F4F2;
+    padding:34mm 24mm;
+    display:flex; flex-direction:column; justify-content:space-between;
+    page-break-after:always;
+  }
+  .cover .kicker{ font-family:"JetBrains Mono",monospace; letter-spacing:.34em; text-transform:uppercase; font-size:9pt; color:#FFA043; }
+  .cover h1{ font-size:38pt; margin:.5em 0 .3em; letter-spacing:-.02em; }
+  .cover .sub{ font-size:13pt; color:#c9c3d1; max-width:150mm; font-weight:500; }
+  .cover .rule{ width:64px; height:6px; background:var(--accent); margin:10mm 0; border-radius:3px; }
+  .cover .meta{ font-size:9.5pt; color:#9b93a7; line-height:1.9; }
+  .cover .meta b{ color:#e7e2ee; }
+  .cover .badge{
+    display:inline-block; margin-top:4mm; padding:5px 12px; border:1px solid rgba(255,77,23,.45);
+    border-radius:999px; font-family:"JetBrains Mono",monospace; font-size:8pt; color:#FFA043; letter-spacing:.1em;
+  }
+
+  section{ page-break-before:always; }
+  section:first-of-type{ page-break-before:avoid; }
+
+  .lead{ font-size:11.5pt; color:#2f2836; font-weight:500; }
+
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:6mm; }
+  .grid3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:5mm; }
+
+  .card{
+    border:1px solid var(--line); border-radius:10px; padding:5mm 5.5mm;
+    background:#fbfafc; break-inside:avoid;
+  }
+  .card h4{ margin-top:0; }
+  .card.accent{ background:var(--accent-soft); border-color:#ffd2bf; }
+
+  .step{
+    border-left:3px solid var(--accent); padding:1mm 0 1mm 6mm; margin-bottom:4mm; break-inside:avoid;
+  }
+  .step .n{ font-family:"JetBrains Mono",monospace; font-size:8.5pt; color:var(--accent); font-weight:700; }
+  .step h4{ margin:.1em 0 .2em; color:#241c2b; text-transform:none; letter-spacing:0; font-size:11pt; }
+
+  table{ width:100%; border-collapse:collapse; margin:.4em 0 1em; font-size:9.5pt; }
+  th,td{ text-align:left; padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th{ background:#f3f0f5; font-size:8.5pt; text-transform:uppercase; letter-spacing:.05em; }
+  tr{ break-inside:avoid; }
+
+  .flow{
+    font-family:"JetBrains Mono",monospace; font-size:8.5pt; background:var(--bg-dark); color:#d8d2e0;
+    border-radius:10px; padding:6mm; white-space:pre; overflow:hidden; line-height:1.5;
+  }
+  .flow .hl{ color:#FFA043; }
+
+  .kpi{ display:grid; grid-template-columns:repeat(4,1fr); gap:4mm; margin:2mm 0 4mm; }
+  .kpi div{ border:1px solid var(--line); border-radius:9px; padding:4mm; text-align:center; background:#fbfafc; }
+  .kpi .v{ font-size:16pt; font-weight:800; color:var(--accent); display:block; }
+  .kpi .l{ font-size:8pt; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+
+  .tag{ display:inline-block; padding:2px 8px; border-radius:999px; background:#f3f0f5; font-size:8pt; margin:0 3px 3px 0; }
+
+  footer{ position:fixed; bottom:8mm; left:18mm; right:18mm; font-size:7.5pt; color:#9b93a7;
+    display:flex; justify-content:space-between; border-top:1px solid var(--line); padding-top:2mm; }
+
+  .toc ol{ list-style:none; padding:0; counter-reset:t; }
+  .toc li{ counter-increment:t; padding:3mm 0; border-bottom:1px solid var(--line); font-weight:600; }
+  .toc li::before{ content:counter(t) "  "; color:var(--accent); font-family:"JetBrains Mono",monospace; }
+  .toc span{ float:right; color:var(--muted); font-weight:400; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div>
+    <div class="kicker">Business-Konzept &nbsp;·&nbsp; UCL Legacy</div>
+    <h1>SOCIALCRAFT</h1>
+    <div class="sub">Die One-Click Content Engine: Aus einem Gedanken werden 30 Tage publizierter Omnichannel-Content — in einem Klick.</div>
+    <div class="rule"></div>
+    <span class="badge">MASS CONTENT ENGINE · ONYX STUDIO</span>
+  </div>
+  <div class="meta">
+    <b>Produkt:</b> Socialcraft Studio (ONYX) — Local-First Content-OS für Creator, Personal Brands & Agenturen<br>
+    <b>Betreiber:</b> UCL Legacy · ucllegacy.com<br>
+    <b>Dokument:</b> Strategie- &amp; Produktkonzept „1-Klick Content in Masse &amp; 1-Klick Erstellung + Vorplanung“<br>
+    <b>Stand:</b> September 2026 · Version 1.0
+  </div>
+</div>
+
+<!-- ===================== TOC ===================== -->
+<section>
+  <h2>Inhalt</h2>
+  <div class="toc">
+    <ol>
+      <li>Executive Summary <span>03</span></li>
+      <li>Das Marktproblem <span>04</span></li>
+      <li>Die Produktvision &amp; das Kernversprechen <span>05</span></li>
+      <li>Flagship-Flow A — 1-Klick Content-Erstellung &amp; Vorplanung <span>06</span></li>
+      <li>Flagship-Flow B — 1-Klick Content in Masse (30-Tage-Batch) <span>08</span></li>
+      <li>Systemarchitektur: Worauf die 1-Klick-Magie aufsetzt <span>10</span></li>
+      <li>Zielgruppen &amp; Anwendungsfälle <span>12</span></li>
+      <li>Geschäftsmodell &amp; Monetarisierung <span>13</span></li>
+      <li>Go-to-Market <span>14</span></li>
+      <li>Roadmap &amp; KPIs <span>15</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ===================== 1 ===================== -->
+<section>
+  <h2>1 · Executive Summary</h2>
+  <p class="lead">Socialcraft verkauft nicht „ein weiteres Scheduling-Tool“. Socialcraft verkauft <strong>fertig publizierten Content ohne Produktionsaufwand</strong>.</p>
+
+  <p>Heute besteht Social-Media-Content aus einer Kette von 5–7 Werkzeugen: Ideenfindung in ChatGPT, Bildprompts in Midjourney, Layout in Canva, Konsistenz-Fixing, manueller Export, Befüllen von Buffer/Hootsuite, separates TikTok-Posting. Pro Karussell-Post gehen so <strong>45–90 Minuten</strong> und 4–6 Abos drauf — und das Ergebnis ist visuell inkonsistent.</p>
+
+  <p>Socialcraft bricht diese Kette auf <strong>zwei Knöpfe</strong> herunter:</p>
+
+  <div class="grid2">
+    <div class="card accent">
+      <h4>Flow A — Einzelstück</h4>
+      <p><strong>„1-Klick Content-Erstellung &amp; Vorplanung“</strong><br>
+      Thema eintippen → Studio erzeugt Story, Slides, Visual-Prompts, Bilder, Caption &amp; Hashtags → landet automatisch im nächsten freien, kollisionsfreien Posting-Slot und wird über Post&nbsp;for&nbsp;Me live veröffentlicht.</p>
+    </div>
+    <div class="card accent">
+      <h4>Flow B — Masse</h4>
+      <p><strong>„1-Klick Content in Masse“</strong><br>
+      Nische + Zielgruppe wählen → <strong>30 Tage</strong> Content über mehrere Formate (Karussell, Reel, Story, Einzelbild) und Kanäle werden generiert, mit festen Uhrzeiten verplant und scharf geschaltet — ein Klick.</p>
+    </div>
+  </div>
+
+  <h3>Warum das jetzt funktioniert</h3>
+  <ul>
+    <li><strong>Konsistenz gelöst:</strong> Der strukturierte KI-Persona-/Klon-Builder verankert dieselbe Identität über alle Slides — kein Face-Drifting mehr.</li>
+    <li><strong>Local-First:</strong> Entwürfe, Keys und Queue leben im Browser — sofortige Reaktionszeit, Offline-Bearbeitung, Datensouveränität.</li>
+    <li><strong>Agentic-ready:</strong> Über das Model Context Protocol (MCP) planen KI-Agenten (Claude Desktop, Cursor) direkt in den Kalender — Socialcraft ist Werkzeug <em>und</em> Automatisierungs-Knoten.</li>
+    <li><strong>Whitelabel-Publishing:</strong> Distribution auf 10+ Plattformen läuft über eine einzige API-Bridge (Post for Me).</li>
+  </ul>
+
+  <div class="kpi">
+    <div><span class="v">&lt; 3 min</span><span class="l">Idee → geplanter Post</span></div>
+    <div><span class="v">1 Klick</span><span class="l">30 Tage Content</span></div>
+    <div><span class="v">10+</span><span class="l">Plattformen</span></div>
+    <div><span class="v">0</span><span class="l">Tool-Wechsel</span></div>
+  </div>
+</section>
+
+<!-- ===================== 2 ===================== -->
+<section>
+  <h2>2 · Das Marktproblem</h2>
+
+  <h3>Der Workflow-Bruch</h3>
+  <div class="flow">Ideenfindung (ChatGPT)
+      <span class="hl">│</span>
+      ▼
+Bildprompts schreiben &amp; testen (Midjourney / Flux)
+      <span class="hl">│</span>
+      ▼
+Design &amp; Typografie (Canva / Figma)
+      <span class="hl">│</span>
+      ▼
+Visuelle Inkonsistenz korrigieren (Gesichter driften)
+      <span class="hl">│</span>
+      ▼
+Manueller Bild-Export &amp; Download
+      <span class="hl">│</span>
+      ▼
+Scheduling-Tools befüllen (Buffer, Hootsuite, TikTok Desktop)</div>
+
+  <h3>Die konkreten Schmerzpunkte</h3>
+  <table>
+    <tr><th>Schmerz</th><th>Heutige Realität</th><th>Kosten</th></tr>
+    <tr><td>Tool-Fragmentierung</td><td>4–6 Abos, ständiger Kontextwechsel</td><td>60–200 €/Monat + mentale Last</td></tr>
+    <tr><td>Zeit pro Post</td><td>45–90 min für ein Karussell</td><td>Content wird nicht regelmäßig produziert</td></tr>
+    <tr><td>Visuelle Konsistenz</td><td>KI-Personen sehen auf jeder Slide anders aus</td><td>Marke wirkt unprofessionell</td></tr>
+    <tr><td>Durchhalten</td><td>„30 Tage posten“ scheitert an Woche 2</td><td>Kein Algorithmus-Momentum</td></tr>
+    <tr><td>Multi-Plattform</td><td>Jede Plattform manuell, TikTok besonders sperrig</td><td>Reichweite bleibt liegen</td></tr>
+  </table>
+
+  <h3>Marktlücke</h3>
+  <p>Bestehende Tools optimieren einzelne Kettenglieder: <strong>Canva</strong> (Design), <strong>Buffer/Hootsuite/Later</strong> (Scheduling), <strong>ChatGPT</strong> (Text), <strong>Ocoya/Predis</strong> (KI-Text + Templates). Keines liefert <strong>Ende-zu-Ende von der Themen-Zeile bis zum publizierten, visuell konsistenten Omnichannel-Post</strong> — und keines mit einem echten „30 Tage in einem Klick“-Batch samt fester Redaktionsuhrzeiten.</p>
+</section>
+
+<!-- ===================== 3 ===================== -->
+<section>
+  <h2>3 · Produktvision &amp; Kernversprechen</h2>
+
+  <p class="lead">„Von der Idee zur publizierten Omnichannel-Kampagne in unter 3 Minuten.“</p>
+
+  <p>Socialcraft ist ein <strong>Creator-Betriebssystem</strong>: eine einzige Studio-Oberfläche, in der Konzeption, Generierung, Design, Konsistenz, Export und Distribution nahtlos ineinandergreifen. Der Nutzer trifft nur noch <strong>kreative Entscheidungen</strong> (Thema, Nische, Stil, Persona) — die Produktion ist unsichtbar.</p>
+
+  <h3>Die drei Design-Prinzipien</h3>
+  <div class="grid3">
+    <div class="card"><h4>Eine offensichtliche Aktion</h4><p>Kein Wirrwarr aus „Vormerken / Terminieren / Vorschau / Jetzt live“. Ein primärer Button, ein <span class="mono">Sofort / Zeitplan</span>-Umschalter. Fertig.</p></div>
+    <div class="card"><h4>Content einmal machen, dann läuft es</h4><p>Voreingestellte Redaktionszeiten (Wochentage + Uhrzeiten). Jeder erzeugte Post fällt automatisch in den nächsten freien Slot.</p></div>
+    <div class="card"><h4>Jede Aktion erreicht die Plattform</h4><p>Keine „nur lokal“-Scheindrafts. Planen, Umplanen und Auto-Schedule gehen immer echt an Post&nbsp;for&nbsp;Me.</p></div>
+  </div>
+
+  <h3>Die 6 Produktsäulen</h3>
+  <table>
+    <tr><th>#</th><th>Säule</th><th>Funktion im 1-Klick-Versprechen</th></tr>
+    <tr><td>1</td><td>Carousel Engine &amp; narrative Dramaturgie</td><td>2–10 Slides mit Hook → Value → CTA-Bogen, Brand-Kit-Overlay</td></tr>
+    <tr><td>2</td><td>KI-Persona- &amp; Klon-Studio</td><td>Verankerte Identität über alle Slides — löst visuelle Konsistenz</td></tr>
+    <tr><td>3</td><td>Smart Prompt Parser &amp; Prompt Hub</td><td>ChatGPT/Claude-Text-Dumps &amp; 220+ Visual-Styles per Klick übernehmen</td></tr>
+    <tr><td>4</td><td>Omnichannel-Scheduler &amp; TikTok Posting API</td><td>Kollisionsfreie Slot-Verteilung, Auto-Publish auf 10+ Plattformen</td></tr>
+    <tr><td>5</td><td>Local-First + S4 Cloud-Archiv</td><td>Sofort-Reaktion, Offline, privates S3-Backup pro Nutzer</td></tr>
+    <tr><td>6</td><td>MCP Agentic Node</td><td>KI-Agenten planen &amp; veröffentlichen im Auftrag des Nutzers</td></tr>
+  </table>
+</section>
+
+<!-- ===================== 4 ===================== -->
+<section>
+  <h2>4 · Flagship-Flow A — 1-Klick Erstellung &amp; Vorplanung</h2>
+  <p class="muted">Ein einzelnes, hochwertiges Content-Stück, das sich selbst einplant und veröffentlicht.</p>
+
+  <div class="flow"><span class="hl">EINGABE</span>   "Warum 99% beim Kaltstart scheitern"  +  [Persona: Founder Dark Ember]  +  [Stil: Ember Ignite]
+   <span class="hl">│</span>
+   ▼
+<span class="hl">GENERIERUNG</span>   Storyboard (6 Slides)  →  Visual-Prompts  →  Nano-Banana Render  →  Caption (HSO) + Hashtags
+   <span class="hl">│</span>
+   ▼
+<span class="hl">VORPLANUNG</span>   nächster freier Slot (Mo/Mi/Fr · 09:00 / 13:00 / 18:00, +3 h Mindestabstand)
+   <span class="hl">│</span>
+   ▼
+<span class="hl">DISTRIBUTION</span>   Post for Me  →  Instagram · LinkedIn · TikTok (Draft bis Audit)  →  Kalender-Badge "Geplant"</div>
+
+  <h3>Schritt für Schritt</h3>
+
+  <div class="step">
+    <div class="n">SCHRITT 1</div>
+    <h4>Thema &amp; Kontext</h4>
+    <p>Multi-Line Chat-Input (<span class="mono">Strg+Enter</span>). Optional: Zielgruppe, Slide-Anzahl (Chips 4/6/7/10), Persona aktivieren, Visual-Stil aus der Design Library oder dem Prompt Hub wählen. Alternativ: kompletten ChatGPT/Claude-Textblock einfügen — der Smart Parser zerlegt ihn in Headline, Subtext, Kernmetapher und Bild-Prompt.</p>
+  </div>
+  <div class="step">
+    <div class="n">SCHRITT 2</div>
+    <h4>Generierung (unsichtbar)</h4>
+    <p>Multi-Model-Orchestrierung: Text/Storyboard über Gemini/Claude, Bilder über Nano-Banana&nbsp;2 (schnell, starke In-Image-Typografie) bzw. Flux Pro (High-End-Porträt). Klon-Prompt-Assembly hält die Persona-Vektoren konstant. Live-Vorschau; einzelne Slides per „Reroll“ neu würfeln.</p>
+  </div>
+  <div class="step">
+    <div class="n">SCHRITT 3</div>
+    <h4>Ein Button: „Wann veröffentlichen?“</h4>
+    <p>Umschalter <span class="mono">Sofort</span> / <span class="mono">Zeitplan</span>. Bei „Zeitplan“ berechnet <span class="mono">computeNextSlots()</span> den nächsten freien Termin aus den gespeicherten Redaktionszeiten, kollisionsfrei (±5 min) zu bereits geplanten Posts. Kein manuelles Datumssuchen.</p>
+  </div>
+  <div class="step">
+    <div class="n">SCHRITT 4</div>
+    <h4>Auto-Publish &amp; Archiv</h4>
+    <p>Post for Me übernimmt Media-Upload, geplante Veröffentlichung und Status-Rückmeldung. Parallel: Bilder + Projekt-JSON wandern ins private S4-Bucket (<span class="mono">carousels/&lt;Thema&gt;/slide_01.jpg</span>). TikTok bis zum App-Audit automatisch im Draft-Modus.</p>
+  </div>
+
+  <h3>Was der Nutzer NICHT tut</h3>
+  <p>Bildprompts testen · Canva öffnen · Slides exportieren · ZIP herunterladen · in ein Scheduling-Tool hochladen · Uhrzeit suchen · pro Plattform wiederholen · TikTok separat posten.</p>
+
+  <div class="card accent">
+    <h4>Kernnutzen Flow A</h4>
+    <p>Der „ich hab da grad einen Gedanken“-Moment wird ohne Reibung zu einem terminierten, markenkonsistenten Post auf allen Kanälen. Zeit: <strong>unter 3 Minuten</strong>, davon &lt; 30 Sekunden Nutzerinteraktion.</p>
+  </div>
+</section>
+
+<!-- ===================== 5 ===================== -->
+<section>
+  <h2>5 · Flagship-Flow B — 1-Klick Content in Masse</h2>
+  <p class="muted">30 Tage Redaktionsplan über mehrere Formate und Kanäle — generiert, verplant, scharfgeschaltet in einem Klick.</p>
+
+  <h3>Der 3-Schritt-Assistent</h3>
+  <div class="grid3">
+    <div class="card">
+      <h4>1 · Thema &amp; Zielgruppe</h4>
+      <p>Freitext-Thema <em>oder</em> Branchen-Vorlage per Klick: B2B/Coaching, Fitness/Health, Finanzen/Krypto, Mindset/Produktivität, KI/Tech, E-Commerce/D2C. Jede Vorlage liefert 30 vorstrukturierte Tage mit Content-Säulen (Tipp / Mindset / Case Study / Viral Hook / Framework).</p>
+    </div>
+    <div class="card">
+      <h4>2 · Formate &amp; feste Uhrzeiten</h4>
+      <p>Karussell (12:00), Reel (20:00), Story (09:30), Einzelbild (16:00) — an/aus schaltbar, Uhrzeiten frei editierbar. Start-Datum &amp; Ziel-Kanäle (Mehrfachauswahl) festlegen.</p>
+    </div>
+    <div class="card">
+      <h4>3 · Kalender &amp; Auto-Schedule</h4>
+      <p>30-Tage-Vorschau nach Wochen gefiltert. Ein Button: <strong>„30 Tage komplett vorplanen &amp; aktivieren“</strong>. Fortschrittsanzeige <span class="mono">done/total</span>.</p>
+    </div>
+  </div>
+
+  <h3>Was hinter dem einen Klick passiert</h3>
+  <div class="flow"><span class="hl">for</span> Tag 1..30:
+    Format rotiert (Karussell → Reel → Story → Einzelbild)
+    Datum = Start + Tag-Offset  ·  Uhrzeit = feste Format-Uhrzeit
+    <span class="hl">for</span> jeder gewählte Kanal:
+        Caption via generateViralCaption() (plattformspezifisch, ohne Gedankenstriche)
+        Visual = renderQuoteCard() Fallback oder KI-Render
+        Media-Upload → Post for Me → createPost(scheduled_at)
+        Ergebnis in lokale Queue + Kalender (Status "Geplant")
+    Batching: 4 Jobs parallel</div>
+
+  <h3>Skalierungs-Logik</h3>
+  <table>
+    <tr><th>Parameter</th><th>Verhalten</th></tr>
+    <tr><td>Menge</td><td>30 Tage × N Kanäle = bis zu 30·N geplante Beiträge pro Klick</td></tr>
+    <tr><td>Slot-Verteilung (MCP-Pfad)</td><td><span class="mono">calculateNextSlots()</span> mit 4 h Mindestabstand (Batch) bzw. 12 h (Karussell-Tage)</td></tr>
+    <tr><td>Anti-Repetition</td><td>Themen-Rotation über 5 Content-Säulen, Motiv-Varianz in Visual-Prompts</td></tr>
+    <tr><td>Konsistenz</td><td>Brand-Kit (Farben, Schrift, Handle) + optional Persona auf jeder Grafik</td></tr>
+    <tr><td>Agentic-Variante</td><td>MCP-Tools <span class="mono">create_content_series</span> / <span class="mono">plan_and_schedule_carousels</span> / <span class="mono">batch_preplan_posts</span> — ein KI-Agent baut den 30-Tage-Batch aus einem Satz</td></tr>
+  </table>
+
+  <div class="card accent">
+    <h4>Kernnutzen Flow B</h4>
+    <p>Das „ich müsste eigentlich konsequent posten“-Problem ist gelöst, bevor der Monat beginnt. Ein Nachmittag Entscheidung → ein Monat Präsenz auf allen Kanälen, mit festen Redaktionszeiten wie eine echte Redaktion.</p>
+  </div>
+</section>
+
+<!-- ===================== 6 ===================== -->
+<section>
+  <h2>6 · Systemarchitektur</h2>
+  <p class="muted">Worauf die 1-Klick-Magie technisch aufsetzt — verdichtet.</p>
+
+  <div class="flow">┌────────────────────────────────────────────────────────────┐
+│  Presentation (React 19 / TanStack Start / Tailwind v4)     │
+│  Studio Workspace · Scheduler · Clone Studio · Batch Modal  │
+└───────────────┬────────────────────────────────────────────┘
+                │  Domain Hooks: useStudioNavigation · useStudioModals · useMcpSync
+┌───────────────▼────────────────┐   ┌──────────────────────────┐
+│  Local-First State (localStorage) │──│  MCP Store  (/api/mcp/sync) │
+│  usePersistentState · Queues      │   │  bidirektional · SSE       │
+└───────────────┬────────────────┘   └──────────────────────────┘
+                │
+┌───────────────▼────────────────────────────────────────────┐
+│  Server Proxy  (Nitro / Vite middleware)                    │
+│  KIE.AI Proxy  ·  Post for Me Proxy  ·  Mega S4 (S3) Proxy   │
+│  Dual-Fallback: Proxy → direkter Call bei 404/502/503       │
+└────────────────────────────────────────────────────────────┘</div>
+
+  <h3>Tragende Muster</h3>
+  <div class="grid2">
+    <div class="card"><h4>Dual-Fallback-Proxy</h4><p>Jeder externe Call geht zuerst über den Server-Proxy (Key bleibt geschützt, CORS umgangen). Bei Proxy-Ausfall automatischer Direkt-Fetch — das Studio bleibt auch als reine Client-App lauffähig.</p></div>
+    <div class="card"><h4>Local-First + Optimistic Sync</h4><p>Nutzeraktion wirkt sofort lokal; S4-Archiv &amp; MCP-Sync laufen im Hintergrund mit Reconciliation-Maps gegen Race Conditions.</p></div>
+    <div class="card"><h4>Multi-Model-Orchestrierung</h4><p>Nano-Banana&nbsp;2 (Speed + In-Image-Text), Flux Pro (Fotorealismus), Gemini/Claude/OpenAI (Text, Storyboard, Klon-Prompt).</p></div>
+    <div class="card"><h4>Multi-Tenant-Isolierung</h4><p>Jeder Nutzer (auch Gäste) erhält einen kryptografisch getrennten S4-Scope; Agenturen schalten Brand-Profile per Klick um.</p></div>
+  </div>
+
+  <h3>Publishing-Bridge</h3>
+  <p>Sämtliche Distribution läuft über <strong>Post for Me</strong> (<span class="mono">api.postforme.dev</span>). Der Whitelabel-Weg: dediziertes Projekt mit eigenen Plattform-App-Credentials (v. a. TikTok), <span class="mono">pfm_live_…</span>-Key im Setup-Modal, überschreibt den geteilten Fallback global. TikTok-Direct-Post bis zum bestandenen App-Audit im Draft-Modus.</p>
+
+  <h3>Qualitäts-Gates</h3>
+  <p class="small mono">npm test  ·  npx tsc --noEmit  ·  npx eslint . --quiet  ·  npm run build &nbsp;— vor jedem Commit. Kein force-push / rebase auf <span class="mono">main</span> (Lovable-Sync).</p>
+</section>
+
+<!-- ===================== 7 ===================== -->
+<section>
+  <h2>7 · Zielgruppen &amp; Anwendungsfälle</h2>
+
+  <table>
+    <tr><th>Segment</th><th>Job-to-be-done</th><th>Primärer Flow</th></tr>
+    <tr><td><strong>Solo-Creator / Personal Brand</strong></td><td>Regelmäßig posten ohne 2 h/Tag Produktion</td><td>Flow B monatlich + Flow A für Reaktion auf Trends</td></tr>
+    <tr><td><strong>Gründer / Coach (High-Ticket)</strong></td><td>Autorität aufbauen, Pipeline füllen</td><td>Flow B mit B2B-Vorlage + Persona auf jeder Slide</td></tr>
+    <tr><td><strong>Social-Media-Agentur</strong></td><td>10–50 Kunden bespielen, Marge halten</td><td>Multi-Brand-Profile + Flow B pro Mandant, MCP-Automatisierung</td></tr>
+    <tr><td><strong>D2C / E-Commerce</strong></td><td>Produkt-Content in Serie, Launch-Kalender</td><td>Flow B (E-Com-Vorlage) + Brand-Kit-Overlay</td></tr>
+    <tr><td><strong>KI-Power-User</strong></td><td>Content-Ops vollständig automatisieren</td><td>MCP: „Analysiere meine Posts, plane 30 Tage“ aus Claude Desktop</td></tr>
+  </table>
+
+  <h3>Der Agentur-Hebel</h3>
+  <p>Jedes Brand-Profil kapselt eigenes Brand-Kit, verknüpfte Social-Kanäle und Klon-Personas. Eine Agentur liefert mit Flow B pro Kunde einen fertigen Monatsplan in Minuten statt Tagen — das ist das margen­stärkste Verkaufsargument und rechtfertigt Seat-/Mandanten-Preise.</p>
+</section>
+
+<!-- ===================== 8 ===================== -->
+<section>
+  <h2>8 · Geschäftsmodell &amp; Monetarisierung</h2>
+
+  <h3>Zwei Erlösachsen</h3>
+  <div class="grid2">
+    <div class="card"><h4>A · Abo (Zugang &amp; Sitze)</h4><p>Monatliche Pläne nach verbundenen Kanälen, Brand-Profilen und Batch-Kontingent. Agentur-Tarif mit Mandanten-Staffelung.</p></div>
+    <div class="card"><h4>B · Credit-Ökonomie (Verbrauch)</h4><p>Renders kosten Credits (z. B. ~10 Nano-Banana&nbsp;2, ~20 Flux Pro). Onboarding mit 500 Test-Credits. Nachkauf über Stripe oder <strong>BYOK</strong> (eigener API-Key) für Power-User.</p></div>
+  </div>
+
+  <h3>Beispielhafte Tarifierung</h3>
+  <table>
+    <tr><th>Plan</th><th>Zielkunde</th><th>Enthalten</th><th>Preis-Idee</th></tr>
+    <tr><td>Starter</td><td>Solo-Creator</td><td>1 Brand, 3 Kanäle, 1× 30-Tage-Batch/Monat, 500 Credits</td><td>19–29 €/Mon</td></tr>
+    <tr><td>Pro</td><td>Gründer / Personal Brand</td><td>3 Brands, 10 Kanäle, unbegr. Batches, Persona-Studio, 2.500 Credits</td><td>59–79 €/Mon</td></tr>
+    <tr><td>Agency</td><td>Agenturen</td><td>25+ Brand-Profile, MCP-Automatisierung, Team-Sitze, Priority-Render</td><td>199–399 €/Mon</td></tr>
+    <tr><td>BYOK</td><td>Technische Power-User</td><td>Eigener KIE/PFM-Key, nur Plattformgebühr</td><td>ab 15 €/Mon</td></tr>
+  </table>
+  <p class="small muted">Preise als Positionierungs-Hypothese — im Markt zwischen Buffer (~6–12 €/Kanal) und Predis/Ocoya (~30–100 €). Socialcraft rechtfertigt das obere Band über die eingesparte Produktionszeit (Ende-zu-Ende statt nur Scheduling).</p>
+
+  <h3>Unit-Economics-Logik</h3>
+  <ul>
+    <li><strong>Variable Kosten</strong> = Render-Credits (KIE.AI) + Post-for-Me-Volumen + S4-Speicher. Über Credit-Preis &gt; Einkaufspreis gedeckt.</li>
+    <li><strong>BYOK</strong> verschiebt variable Kosten zum Nutzer → hohe Marge auf reinem Software-Zugang.</li>
+    <li><strong>Retention-Treiber</strong>: Der 30-Tage-Batch macht Socialcraft zum monatlichen Ritual; das S4-Archiv erhöht Wechselkosten.</li>
+  </ul>
+</section>
+
+<!-- ===================== 9 ===================== -->
+<section>
+  <h2>9 · Go-to-Market</h2>
+
+  <h3>Positionierung</h3>
+  <p class="lead">„Nicht dein Scheduler. Deine Content-Fabrik. 30 Tage Content in einem Klick.“</p>
+
+  <h3>Kanäle (Dogfooding)</h3>
+  <ul>
+    <li><strong>Socialcraft baut Socialcraft-Content mit Socialcraft</strong> — jeder Post ist ein Live-Beweis. Reichweite = Marketing-Budget.</li>
+    <li><strong>Founder-led auf LinkedIn/Instagram/TikTok</strong>: Build-in-Public, Vorher/Nachher-Zeitvergleiche (90 min → 3 min).</li>
+    <li><strong>Nischen-Vorlagen als Lead-Magnet</strong>: „Kostenloser 7-Tage-Batch für [Nische]“ → Konversion zu Pro.</li>
+    <li><strong>Agentur-Partnerprogramm</strong>: Whitelabel/Reseller, Umsatzbeteiligung.</li>
+    <li><strong>MCP-Community</strong>: Distribution über Claude-Desktop-/Cursor-Nutzer, die „Content-Planung“ automatisieren wollen.</li>
+  </ul>
+
+  <h3>Wachstumssequenz</h3>
+  <table>
+    <tr><th>Phase</th><th>Fokus</th><th>Ziel</th></tr>
+    <tr><td>0–3 Mon</td><td>Solo-Creator, Free-Batch-Hook, Dogfooding</td><td>Erste 100 zahlende Nutzer, Retention messen</td></tr>
+    <tr><td>3–6 Mon</td><td>Pro-Tier, Persona-Studio als Upsell, TikTok-Audit bestanden</td><td>MRR-Wachstum, &lt; 5 % monatliche Churn</td></tr>
+    <tr><td>6–12 Mon</td><td>Agency-Tier, Multi-Brand, MCP-Automatisierung</td><td>Höhere ARPU, Agentur-Referrals</td></tr>
+  </table>
+</section>
+
+<!-- ===================== 10 ===================== -->
+<section>
+  <h2>10 · Roadmap &amp; KPIs</h2>
+
+  <h3>Produkt-Roadmap</h3>
+  <table>
+    <tr><th>Quartal</th><th>Meilenstein</th></tr>
+    <tr><td>Q4 2026</td><td>TikTok-App-Audit → Direct-Post live · Whitelabel-Onboarding (eigener PFM-Key) gehärtet · 1-Klick-Flow A &amp; B stabil in Produktion</td></tr>
+    <tr><td>Q1 2027</td><td>Reel-/Video-Rendering (9:16) im Batch · Analytics-Rückkanal (Reichweite/Saves je Post) · A/B-Hooks</td></tr>
+    <tr><td>Q2 2027</td><td>Agentur-Cockpit: Freigabe-Workflows, Kunden-Login, Reporting-Export · Team-Sitze</td></tr>
+    <tr><td>Q3 2027</td><td>„Selbstlernender Batch“: Performance-Daten steuern Themen- &amp; Uhrzeit-Auswahl automatisch</td></tr>
+  </table>
+
+  <h3>Nordstern &amp; Leit-KPIs</h3>
+  <div class="kpi">
+    <div><span class="v">TTFP</span><span class="l">Time-to-First-Post &lt; 5 min</span></div>
+    <div><span class="v">Batch-Rate</span><span class="l">% Nutzer mit ≥1 30-Tage-Batch/Monat</span></div>
+    <div><span class="v">Posts/Nutzer</span><span class="l">veröffentlichte Posts pro aktivem Nutzer</span></div>
+    <div><span class="v">NRR</span><span class="l">Net Revenue Retention &gt; 100 %</span></div>
+  </div>
+
+  <table>
+    <tr><th>KPI</th><th>Definition</th><th>Zielkorridor</th></tr>
+    <tr><td>Aktivierung</td><td>Nutzer plant im ersten Session einen echten Post</td><td>&gt; 40 %</td></tr>
+    <tr><td>Batch-Adoption</td><td>Nutzt Flow B im ersten Monat</td><td>&gt; 30 %</td></tr>
+    <tr><td>Publish-Erfolgsquote</td><td>Post for Me: geplant → veröffentlicht ohne Fehler</td><td>&gt; 97 %</td></tr>
+    <tr><td>Monatliche Churn</td><td>Abo-Kündigungen / aktive Abos</td><td>&lt; 5 %</td></tr>
+    <tr><td>Credit-Marge</td><td>(Credit-Erlös − Render-Kosten) / Credit-Erlös</td><td>&gt; 55 %</td></tr>
+  </table>
+
+  <h3>Zusammenfassung des Konzepts</h3>
+  <p>Socialcraft ist kein Werkzeug-Ersatz, sondern eine Kategorie-Verschiebung: von „Content produzieren und dann planen“ zu <strong>„entscheiden, dann läuft es“</strong>. Die beiden 1-Klick-Flows sind das Produkt; Persona-Konsistenz, Local-First-Resilienz und die MCP-Automatisierung sind der Graben, der es verteidigt.</p>
+
+  <p class="small muted" style="margin-top:8mm; border-top:1px solid var(--line); padding-top:3mm;">
+  SOCIALCRAFT · ONYX Studio — Betreiber: UCL Legacy (ucllegacy.com). Dieses Dokument ist ein internes Strategie- und Produktkonzept, Stand September 2026. Kennzahlen und Preise sind Planungshypothesen, keine Zusagen.</p>
+</section>
+
+</body>
+</html>
