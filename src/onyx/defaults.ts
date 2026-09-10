@@ -87,47 +87,22 @@ export const DEFAULT_BRAND_KIT: BrandKit = {
   ctaText: "Speichere dir diesen Post für später ab.",
 };
 
+import { config } from "../lib/config";
+
 // Master-Verankerung des Engine API-Keys (aus .env VITE_KIE_API_KEY)
-export const ANCHORED_KIE_API_KEY =
-  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_KIE_API_KEY']) ||
-  "";
+export const ANCHORED_KIE_API_KEY = config.api.kieApiKey;
 
 // Verankerung des Mega S4 Cloud-Speichers (aus .env VITE_S4_*)
-export const ANCHORED_S4_ACCESS_KEY =
-  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_S4_ACCESS_KEY']) ||
-  "";
+export const ANCHORED_S4_ACCESS_KEY = config.s4.accessKey;
+export const ANCHORED_S4_SECRET_KEY = config.s4.secretKey;
+export const ANCHORED_S4_ENDPOINT = config.s4.endpoint || "socialgrow.s3.g.megas4.com";
+export const ANCHORED_S4_BUCKET = config.s4.bucket || "socialgrow";
+export const ANCHORED_S4_REGION = config.s4.region || "eu-central-1";
 
-export const ANCHORED_S4_SECRET_KEY =
-  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_S4_SECRET_KEY']) ||
-  "";
-
-export const ANCHORED_S4_ENDPOINT =
-  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_S4_ENDPOINT']) ||
-  "socialgrow.s3.g.megas4.com";
-
-export const ANCHORED_S4_BUCKET =
-  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_S4_BUCKET']) ||
-  "socialgrow";
-
-export const ANCHORED_S4_REGION =
-  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_S4_REGION']) ||
-  "eu-central-1";
-
-export const ANCHORED_SUPABASE_URL =
-  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_SUPABASE_URL']) ||
-  "https://tugujzoprvfpmhdhhivj.supabase.co";
-
-export const ANCHORED_SUPABASE_KEY =
-  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_SUPABASE_PUBLISHABLE_KEY']) ||
-  "";
-
-export const ANCHORED_POSTFORME_API_KEY =
-  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_POSTFORME_API_KEY']) ||
-  "";
-
-export const ANCHORED_ZERNIO_WEBHOOK_SECRET =
-  (typeof import.meta !== "undefined" && import.meta.env?.['VITE_ZERNIO_WEBHOOK_SECRET']) ||
-  "";
+export const ANCHORED_SUPABASE_URL = config.supabase.url || "https://tugujzoprvfpmhdhhivj.supabase.co";
+export const ANCHORED_SUPABASE_KEY = config.supabase.publishableKey;
+export const ANCHORED_POSTFORME_API_KEY = config.api.postForMeApiKey;
+export const ANCHORED_ZERNIO_WEBHOOK_SECRET = config.api.zernioWebhookSecret;
 
 export const DEFAULT_API_SETTINGS: ApiSettings = {
   provider: "kie-ai",

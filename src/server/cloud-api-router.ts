@@ -28,6 +28,27 @@ import {
 } from "../mcp/store";
 import fs from "node:fs";
 import path from "node:path";
+import { config, getErrorMessage } from "../lib/config";
+
+interface WebhookPayload {
+  event?: string;
+  type?: string;
+  status?: string;
+  postId?: string;
+  id?: string;
+  _id?: string;
+  data?: {
+    id?: string;
+    _id?: string;
+  };
+}
+
+interface TikTokAccountResponse {
+  access_token?: string;
+  data?: {
+    access_token?: string;
+  };
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -77,8 +98,8 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
           const body = await request.json();
           const updated = syncStoreWithClient(body);
           return jsonResponse({ success: true, store: updated });
-        } catch (err: any) {
-          return jsonResponse({ success: false, error: err.message }, 400);
+        } catch (err: unknown) {
+          return jsonResponse({ success: false, error: getErrorMessage(err) }, 400);
         }
       }
     }
@@ -92,8 +113,8 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
           const body = await request.json();
           const created = addScheduledPost(body);
           return jsonResponse({ success: true, post: created });
-        } catch (err: any) {
-          return jsonResponse({ success: false, error: err.message }, 400);
+        } catch (err: unknown) {
+          return jsonResponse({ success: false, error: getErrorMessage(err) }, 400);
         }
       }
       if (request.method === "DELETE") {
@@ -155,8 +176,8 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
             ? `claude mcp add --transport sse socialcraft ${info.sseUrl}`
             : null,
         });
-      } catch (err: any) {
-        return jsonResponse({ online: false, error: err?.message || "read failed" }, 200);
+      } catch (err: unknown) {
+        return jsonResponse({ online: false, error: getErrorMessage(err, "read failed") }, 200);
       }
     }
 
@@ -180,13 +201,16 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
     endpoint === "webhooks/postforme" ||
     endpoint === "zernio" ||
     endpoint === "webhook/zernio" ||
-    endpoint === "webhooks/zernio" ||
-    (isWebhookRoute && (endpoint === "" || endpoint === "postforme" || endpoint === "zernio"))
+    endpoint === "webhooks/zernio"
   ) {
+    if (request.method === "OPTIONS") {
+      return new Response(null, { status: 204, headers: corsHeaders });
+    }
+
     if (request.method === "GET") {
       return jsonResponse({
+        service: "Socialcraft Webhook Receiver",
         status: "active",
-        service: "Socialcraft Post for Me / Direct Hub Webhook Receiver",
         supportedEvents: [
           "post.scheduled",
           "post.processing",
@@ -201,11 +225,11 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
 
     try {
       const rawText = await request.text();
-      let payload: any = {};
+      let payload: WebhookPayload = {};
       try {
-        payload = JSON.parse(rawText);
+        payload = JSON.parse(rawText) as WebhookPayload;
       } catch {
-        payload = { raw: rawText };
+        payload = { type: "raw_text" };
       }
 
       const signature =
@@ -219,7 +243,12 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
       console.log("[Social Webhook Event Received]", {
         event: payload.event || payload.type || payload.status || "post.event",
         timestamp: new Date().toISOString(),
-        postId: payload.postId || payload.data?.id || payload.data?._id || payload.id || payload._id,
+        postId:
+          payload.postId ||
+          payload.data?.id ||
+          payload.data?._id ||
+          payload.id ||
+          payload._id,
         signaturePresent: !!signature,
       });
 
@@ -236,11 +265,6 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
   }
 
   // 0.05 TikTok Query Creator Info proxy.
-  // The Content Posting API audit requires the "Export to TikTok" screen to render
-  // from a LIVE creator_info/query call (nickname, allowed privacy levels, max
-  // duration, whether duet/stitch/comment are disabled). Post for Me does not expose
-  // this, but its GET /social-accounts/{id} returns the raw TikTok access_token, so
-  // we fetch the token server-side and call TikTok directly (browser is CORS-blocked).
   if (endpoint === "tiktok/creator-info") {
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: corsHeaders });
@@ -252,6 +276,7 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
       };
       const pfmEnv =
         (typeof process !== "undefined" && (process.env?.["POSTFORME_API_KEY"] || process.env?.["VITE_POSTFORME_API_KEY"])) ||
+        config.api.postForMeApiKey ||
         "";
       const pfmKey =
         (body.apiKey && body.apiKey.trim()) ||
@@ -273,15 +298,19 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
         `https://api.postforme.dev/v1/social-accounts/${encodeURIComponent(body.socialAccountId)}`,
         { headers: { Authorization: `Bearer ${pfmKey}` } }
       );
-      const acct = (await acctResp.json().catch(() => ({}))) as any;
-      const token: string | undefined = acct?.access_token || acct?.data?.access_token;
+      const acct = (await acctResp.json().catch(() => ({}))) as TikTokAccountResponse;
+      const token: string | undefined =
+        typeof acct.access_token === "string"
+          ? acct.access_token
+          : typeof acct.data?.access_token === "string"
+            ? acct.data.access_token
+            : undefined;
       if (!token) {
         return jsonResponse(
           { error: "Kein TikTok Access Token verfügbar (Konto neu verbinden?)" },
           424
         );
       }
-
 
       const ttResp = await fetch(
         "https://open.tiktokapis.com/v2/post/publish/creator_info/query/",
@@ -293,13 +322,13 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
           },
         }
       );
-      const ttData = (await ttResp.json().catch(() => ({}))) as any;
+      const ttData = (await ttResp.json().catch(() => ({}))) as unknown;
       return new Response(JSON.stringify(ttData), {
         status: ttResp.status,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
-    } catch (err: any) {
-      return jsonResponse({ error: err?.message || "creator_info fehlgeschlagen" }, 500);
+    } catch (err: unknown) {
+      return jsonResponse({ error: getErrorMessage(err, "creator_info fehlgeschlagen") }, 500);
     }
   }
 
@@ -313,7 +342,7 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
       const reqData = (await request.json().catch(() => ({}))) as {
         endpoint?: string;
         method?: string;
-        body?: any;
+        body?: unknown;
         apiKey?: string;
       };
 
@@ -326,6 +355,7 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
         request.headers.get("x-postforme-key") ||
         (typeof process !== "undefined" && process.env?.["POSTFORME_API_KEY"]) ||
         (typeof process !== "undefined" && process.env?.["VITE_POSTFORME_API_KEY"]) ||
+        config.api.postForMeApiKey ||
         "";
 
       if (!apiKey) {
@@ -353,7 +383,7 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
 
       const upstreamResp = await fetch(targetUrl, fetchInit);
       const upstreamText = await upstreamResp.text();
-      let responseBody: any;
+      let responseBody: unknown;
       try {
         responseBody = JSON.parse(upstreamText);
       } catch {
@@ -367,9 +397,9 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
           ...corsHeaders,
         },
       });
-    } catch (proxyErr: any) {
+    } catch (proxyErr: unknown) {
       console.error("[PostForMe Proxy Error]", proxyErr);
-      return jsonResponse({ error: proxyErr.message || "Proxy communication failure" }, 500);
+      return jsonResponse({ error: getErrorMessage(proxyErr, "Proxy communication failure") }, 500);
     }
   }
 

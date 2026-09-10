@@ -1,3 +1,4 @@
+import { getErrorMessage } from "../../lib/config";
 import type {
   PostForMeSocialAccount,
   PostForMeCreatePostDto,
@@ -14,6 +15,13 @@ import type {
 
 export const POSTFORME_API_BASE_URL = "https://api.postforme.dev/v1";
 
+interface ApiErrorPayload {
+  message?: string;
+  error?: string;
+  detail?: string;
+  errors?: Array<{ message?: string } | string>;
+}
+
 export class PostForMeApiClient {
   private apiKey: string;
   private baseUrl: string;
@@ -24,9 +32,10 @@ export class PostForMeApiClient {
   }
 
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const isBrowser = typeof window !== "undefined";
     const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
 
+    // Prefer server proxy if running in browser to circumvent CORS restrictions & protect keys
+    const isBrowser = typeof window !== "undefined";
     if (isBrowser) {
       try {
         const proxyResp = await fetch("/api/cloud/postforme/proxy", {
@@ -46,24 +55,30 @@ export class PostForMeApiClient {
           }),
         });
 
-        const proxyData = await proxyResp.json().catch(() => ({}));
+        const proxyData = (await proxyResp.json().catch(() => ({}))) as ApiErrorPayload;
 
         if (!proxyResp.ok) {
+          const errorsList = Array.isArray(proxyData.errors)
+            ? proxyData.errors
+                .map((e) => (typeof e === "string" ? e : e.message || String(e)))
+                .join(", ")
+            : null;
           const errorMessage =
             proxyData.message ||
             proxyData.error ||
             proxyData.detail ||
-            (Array.isArray(proxyData.errors) ? proxyData.errors.map((e: any) => e.message || e).join(", ") : null) ||
+            errorsList ||
             `Verbindungsfehler (${proxyResp.status}): ${proxyResp.statusText}`;
           throw new Error(errorMessage);
         }
 
-        return proxyData as T;
-      } catch (proxyError: any) {
-        if (proxyError.message && !proxyError.message.includes("Failed to fetch")) {
+        return proxyData as unknown as T;
+      } catch (proxyError: unknown) {
+        const msg = getErrorMessage(proxyError);
+        if (msg && !msg.includes("Failed to fetch")) {
           throw proxyError;
         }
-        console.warn("[PostForMeClient] Proxy request issue, attempting direct request fallback...", proxyError.message);
+        console.warn("[PostForMeClient] Proxy request issue, attempting direct request fallback...", msg);
       }
     }
 
@@ -83,19 +98,24 @@ export class PostForMeApiClient {
       headers,
     });
 
-    const data = await response.json().catch(() => ({}));
+    const data = (await response.json().catch(() => ({}))) as ApiErrorPayload;
 
     if (!response.ok) {
+      const errorsList = Array.isArray(data.errors)
+        ? data.errors
+            .map((e) => (typeof e === "string" ? e : e.message || String(e)))
+            .join(", ")
+        : null;
       const errorMessage =
         data.message ||
         data.error ||
         data.detail ||
-        (Array.isArray(data.errors) ? data.errors.map((e: any) => e.message || e).join(", ") : null) ||
+        errorsList ||
         `Post for Me API Fehler (${response.status}): ${response.statusText}`;
       throw new Error(errorMessage);
     }
 
-    return data as T;
+    return data as unknown as T;
   }
 
   // --- MEDIA UPLOAD (Signed URLs) ---
@@ -175,7 +195,7 @@ export class PostForMeApiClient {
   async createAuthUrl(
     platform: PostForMePlatform | string,
     redirectUrlOverride?: string,
-    platformDataOverride?: Record<string, any>
+    platformDataOverride?: Record<string, unknown>
   ): Promise<string> {
     const normPlatform = platform.toLowerCase();
     // LinkedIn restricts r_member_postAnalytics on personal member accounts and fails OAuth if requested.
@@ -184,9 +204,9 @@ export class PostForMeApiClient {
     const payload: {
       platform: string;
       permissions: string[];
-      platform_data?: Record<string, any>;
+      platform_data?: Record<string, unknown>;
       redirect_url_override?: string;
-      [key: string]: any;
+      [key: string]: unknown;
     } = {
       platform: normPlatform === "twitter" ? "x" : normPlatform,
       permissions,
@@ -223,7 +243,7 @@ export class PostForMeApiClient {
     }
 
     try {
-      const res = await this.request<any>("/social-accounts/auth-url", {
+      const res = await this.request<{ data?: { url?: string }; url?: string }>("/social-accounts/auth-url", {
         method: "POST",
         body: JSON.stringify(payload),
       });
@@ -233,15 +253,16 @@ export class PostForMeApiClient {
         throw new Error("Konnte keine Authentifizierungs-URL von Post for Me abrufen.");
       }
       return authUrl;
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = getErrorMessage(err);
       // If redirect_url_override is rejected because of quickstart system credentials, retry without override
       if (
         payload.redirect_url_override &&
-        (err.message?.includes("Redirect URL Override is not allowed") ||
-          err.message?.includes("Quickstart"))
+        (msg.includes("Redirect URL Override is not allowed") ||
+          msg.includes("Quickstart"))
       ) {
         delete payload.redirect_url_override;
-        const resRetry = await this.request<any>("/social-accounts/auth-url", {
+        const resRetry = await this.request<{ data?: { url?: string }; url?: string }>("/social-accounts/auth-url", {
           method: "POST",
           body: JSON.stringify(payload),
         });

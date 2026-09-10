@@ -99,125 +99,65 @@ export const Route = createFileRoute("/")({
   component: OnyxStudio,
 });
 
-export const TAB_ROUTE_MAP: Record<TabKey, string> = {
-  carousel: "/studio",
-  bulk: "/serie",
-  "direct-prompt": "/einzelbild",
-  scheduler: "/planer",
-  "ai-clone": "/klon",
-  "prompt-gallery": "/prompts",
-  history: "/galerie",
-};
+export { TAB_ROUTE_MAP, ROUTE_TAB_MAP } from "@/onyx/hooks/useStudioNavigation";
+import {
+  useStudioNavigation,
+  type UseStudioNavigationOptions,
+} from "@/onyx/hooks/useStudioNavigation";
+import { useStudioModals } from "@/onyx/hooks/useStudioModals";
+import { useMcpSync } from "@/onyx/hooks/useMcpSync";
 
-export const ROUTE_TAB_MAP: Record<string, TabKey> = {
-  "/studio": "carousel",
-  "/serie": "bulk",
-  "/einzelbild": "direct-prompt",
-  "/planer": "scheduler",
-  "/klon": "ai-clone",
-  "/prompts": "prompt-gallery",
-  "/galerie": "history",
-};
-
-export interface OnyxStudioProps {
-  routeTab?: TabKey;
-  initialView?: "landing" | "studio" | "admin";
-}
+export type OnyxStudioProps = UseStudioNavigationOptions;
 
 export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
-  const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredCurrentUser());
-  const [currentView, setCurrentView] = usePersistentState<"landing" | "studio" | "admin">(
-    "onyx.currentView",
-    initialView || (currentUser || routeTab ? "studio" : "landing"),
-  );
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showDatenschutz, setShowDatenschutz] = useState(false);
-  const [authModalMode, setAuthModalMode] = useState<"login" | "register">("login");
+  const {
+    currentUser,
+    setCurrentUser,
+    currentView,
+    setCurrentView,
+    activeTab,
+    setActiveTab,
+    handleTabChange,
+    handleLogout,
+    handleAuthSuccess,
+    handleOpenAdmin,
+  } = useStudioNavigation({ routeTab, initialView });
 
-  // SaaS rule: Authenticated users stay in the Studio workspace; never bounced to marketing landing page
-  useEffect(() => {
-    if ((currentUser || routeTab) && currentView === "landing") {
-      setCurrentView("studio");
-    }
-  }, [currentUser, routeTab, currentView, setCurrentView]);
-
-  useEffect(() => {
-    if (initialView) {
-      setCurrentView(initialView);
-    }
-  }, [initialView, setCurrentView]);
-
-  const handleLogout = () => {
-    saveStoredCurrentUser(null);
-    setCurrentUser(null);
-    setCurrentView("landing");
-    if (typeof window !== "undefined" && window.location.pathname !== "/") {
-      window.history.pushState(null, "", "/");
-    }
-    toast.info("Erfolgreich abgemeldet.");
-  };
-
-  const handleAuthSuccess = (user: User) => {
-    setCurrentUser(user);
-    setCurrentView("studio");
-    toast.success(`Willkommen im Studio, ${user.name}! 🚀`, {
-      description: "Deine 500 Erstellungs-Credits sind sofort einsatzbereit.",
-    });
-  };
-
-  const [showCreditUpgrade, setShowCreditUpgrade] = useState(false);
-
-  // 1-Click Universal Admin Switcher
-  const handleOpenAdmin = () => {
-    if (currentUser?.role !== "admin") {
-      const users = getStoredUsers();
-      const adminUser = users.find((u) => u.role === "admin") ?? {
-        id: "usr-admin-01",
-        name: "Daniel (Socialcraft AI Admin)",
-        email: "admin@socialcraft.ai",
-        role: "admin" as const,
-        credits: 99999,
-        createdAt: new Date().toISOString(),
-        avatarUrl: "/images/socialcraft-admin-logo.jpg",
-        status: "active" as const,
-      };
-      saveStoredCurrentUser(adminUser);
-      setCurrentUser(adminUser);
-      toast.success("Als Administrator angemeldet! 🛡️", {
-        description: "Willkommen im Admin Control Center mit 99.999 Credits.",
-      });
-    }
-    setCurrentView("admin");
-    if (typeof window !== "undefined" && window.location.pathname !== "/admin") {
-      window.history.pushState(null, "", "/admin");
-    }
-  };
-
-  // Prevent automatic downward scroll on reload and tab switch
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      if ("scrollRestoration" in window.history) {
-        window.history.scrollRestoration = "manual";
-      }
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      if (window.location.hash) {
-        window.history.replaceState(null, "", window.location.pathname);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    }
-  }, [currentView]);
+  const {
+    showAuthModal,
+    setShowAuthModal,
+    authModalMode,
+    setAuthModalMode,
+    showProfileModal,
+    setShowProfileModal,
+    showDatenschutz,
+    setShowDatenschutz,
+    showCreditUpgrade,
+    setShowCreditUpgrade,
+    showBrandProfileManager,
+    setShowBrandProfileManager,
+    showBrandKit,
+    setShowBrandKit,
+    showSettings,
+    setShowSettings,
+    showPostForMeSetup,
+    setShowPostForMeSetup,
+    show30DayBatch,
+    setShow30DayBatch,
+    showMcp,
+    setShowMcp,
+    editing,
+    setEditing,
+    schedulerInitialItem,
+    setSchedulerInitialItem,
+    schedulerSubTab,
+    setSchedulerSubTab,
+  } = useStudioModals();
 
   // Ensure the cloud storage folder exists in the background (also for guests!)
   useEffect(() => {
     syncCloudIdentityCookie(currentUser);
     void ensureUserS4Folder(currentUser).then((res) => {
-
       if (res.success) {
         console.log(`[CloudStorage] User folder verified/created: ${res.folder}`);
       } else {
@@ -226,62 +166,6 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
     });
   }, [currentUser]);
 
-  const [activeTab, setActiveTab] = usePersistentState<TabKey>(
-    LS.activeTab,
-    routeTab || "carousel",
-  );
-
-  useEffect(() => {
-    if (routeTab) {
-      setActiveTab(routeTab);
-      setCurrentView("studio");
-    }
-  }, [routeTab, setActiveTab, setCurrentView]);
-
-  // Sync initial URL path if opened directly without routeTab
-  useEffect(() => {
-    if (typeof window !== "undefined" && !routeTab) {
-      const path = window.location.pathname;
-      const matched = ROUTE_TAB_MAP[path];
-      if (matched) {
-        setActiveTab(matched);
-        setCurrentView("studio");
-      } else if (path === "/admin") {
-        setCurrentView("admin");
-      }
-    }
-  }, [routeTab, setActiveTab, setCurrentView]);
-
-  // Handle browser back and forward navigation
-  useEffect(() => {
-    const handlePopState = () => {
-      const path = window.location.pathname;
-      const matched = ROUTE_TAB_MAP[path];
-      if (matched) {
-        setActiveTab(matched);
-        setCurrentView("studio");
-      } else if (path === "/admin") {
-        setCurrentView("admin");
-      } else if (path === "/") {
-        if (!currentUser) {
-          setCurrentView("landing");
-        }
-      }
-    };
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [currentUser, setActiveTab, setCurrentView]);
-
-  const handleTabChange = useCallback(
-    (newTab: TabKey) => {
-      setActiveTab(newTab);
-      const targetUrl = TAB_ROUTE_MAP[newTab];
-      if (targetUrl && typeof window !== "undefined" && window.location.pathname !== targetUrl) {
-        window.history.pushState(null, "", targetUrl);
-      }
-    },
-    [setActiveTab],
-  );
   const [collapsed, setCollapsed] = usePersistentState<boolean>(LS.sidebarCollapsed, false);
   const [brandKit, setBrandKit] = usePersistentState<BrandKit>(LS.brandKit, DEFAULT_BRAND_KIT, true);
   const [settings, setSettings] = usePersistentState<ApiSettings>(
@@ -319,7 +203,6 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
     LS.activeBrandProfileId,
     DEFAULT_BRAND_PROFILES[0]?.id ?? "profile-default",
   );
-  const [showBrandProfileManager, setShowBrandProfileManager] = useState(false);
 
   const [scheduledPosts, setScheduledPosts] = usePersistentState<ScheduledPost[]>(
     LS.scheduledPosts,
@@ -333,169 +216,21 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
     LS.deletedSeriesIds,
     [],
   );
-  const [schedulerInitialItem, setSchedulerInitialItem] = useState<{
-    title: string;
-    imageUrls: string[];
-    prompt?: string;
-  } | null>(null);
-  const [schedulerSubTab, setSchedulerSubTab] = useState<"queue" | "composer" | "channels">("queue");
 
-  const handleUpdateScheduledPosts = useCallback(
-    (updater: ScheduledPost[] | ((prev: ScheduledPost[]) => ScheduledPost[])) => {
-      setScheduledPosts((prev) => {
-        const next = typeof updater === "function" ? updater(prev) : updater;
-        const newIds = new Set((Array.isArray(next) ? next : []).map((p) => p.id));
-        const deleted = prev.filter((p) => !newIds.has(p.id)).map((p) => p.id);
-        if (deleted.length > 0) {
-          setDeletedPostIds((old) => Array.from(new Set([...old, ...deleted])));
-          deleted.forEach((id) => {
-            fetch(`/api/mcp/posts/${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {});
-          });
-        }
-        return next;
-      });
-    },
-    [setScheduledPosts, setDeletedPostIds]
-  );
-
-  // Master Live-Sync with SocialCraft MCP store (bidirectional, interval-polled & focus-aware)
-  const syncStateRef = useRef({
+  const { handleUpdateScheduledPosts } = useMcpSync({
     scheduledPosts,
+    setScheduledPosts,
     brandProfiles,
+    setBrandProfiles,
     socialChannels,
+    setSocialChannels,
     queue,
+    setQueue,
     deletedPostIds,
+    setDeletedPostIds,
     deletedSeriesIds,
+    setDeletedSeriesIds,
   });
-  useEffect(() => {
-    syncStateRef.current = {
-      scheduledPosts,
-      brandProfiles,
-      socialChannels,
-      queue,
-      deletedPostIds,
-      deletedSeriesIds,
-    };
-  }, [scheduledPosts, brandProfiles, socialChannels, queue, deletedPostIds, deletedSeriesIds]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    let cancelled = false;
-
-    const syncWithMcpStore = async () => {
-      try {
-        const {
-          scheduledPosts: localPosts,
-          brandProfiles: localProfiles,
-          socialChannels: localChannels,
-          queue: localQueue,
-          deletedPostIds: localDeletedPosts,
-          deletedSeriesIds: localDeletedSeries,
-        } = syncStateRef.current;
-
-        const res = await fetch("/api/mcp/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            scheduledPosts: localPosts,
-            brandProfiles: localProfiles,
-            socialChannels: localChannels,
-            seriesQueue: localQueue,
-            deletedPostIds: localDeletedPosts,
-            deletedSeriesIds: localDeletedSeries,
-          }),
-        });
-
-        if (!cancelled && res.ok) {
-          const data = await res.json();
-          const store = data?.store || data;
-
-          // 1. Scheduled Posts (filter out any deleted IDs)
-          if (store?.scheduledPosts && Array.isArray(store.scheduledPosts)) {
-            const serverPosts: ScheduledPost[] = store.scheduledPosts.filter(
-              (p: ScheduledPost) => !localDeletedPosts.includes(p.id)
-            );
-            setScheduledPosts((prev) => {
-              const currentValid = prev.filter((p) => !localDeletedPosts.includes(p.id));
-              const map = new Map<string, ScheduledPost>(currentValid.map((p) => [p.id, p]));
-              let changed = currentValid.length !== prev.length;
-              for (const sp of serverPosts) {
-                if (!map.has(sp.id)) {
-                  map.set(sp.id, sp);
-                  changed = true;
-                }
-              }
-              return changed ? Array.from(map.values()) : prev;
-            });
-          }
-
-          // 2. Series Queue (filter out any deleted IDs)
-          if (store?.seriesQueue && Array.isArray(store.seriesQueue)) {
-            const serverSeries: SeriesJob[] = store.seriesQueue.filter(
-              (s: SeriesJob) => !localDeletedSeries.includes(s.id)
-            );
-            setQueue((prev) => {
-              const currentValid = prev.filter((s) => !localDeletedSeries.includes(s.id));
-              const map = new Map<string, SeriesJob>(currentValid.map((s) => [s.id, s]));
-              let changed = currentValid.length !== prev.length;
-              for (const ss of serverSeries) {
-                if (!map.has(ss.id)) {
-                  map.set(ss.id, ss);
-                  changed = true;
-                }
-              }
-              return changed ? Array.from(map.values()) : prev;
-            });
-          }
-
-          // 3. Social Channels
-          if (store?.socialChannels && Array.isArray(store.socialChannels)) {
-            const serverChannels: SocialChannel[] = store.socialChannels;
-            if (
-              serverChannels.length !== localChannels.length ||
-              serverChannels.some((sc) => !localChannels.some((lc) => lc.id === sc.id))
-            ) {
-              setSocialChannels(serverChannels);
-            }
-          }
-
-          // 4. Brand Profiles
-          if (store?.brandProfiles && Array.isArray(store.brandProfiles)) {
-            const serverProfiles: BrandProfile[] = store.brandProfiles;
-            if (
-              serverProfiles.length !== localProfiles.length ||
-              serverProfiles.some((sp) => !localProfiles.some((lp) => lp.id === sp.id))
-            ) {
-              setBrandProfiles(serverProfiles);
-            }
-          }
-        }
-      } catch {
-        // Local network / offline fallback
-      }
-    };
-
-    // Initial sync
-    const initialTimer = setTimeout(syncWithMcpStore, 300);
-
-    // Periodic live-sync every 4 seconds
-    const interval = setInterval(syncWithMcpStore, 4000);
-
-    // Sync on window focus or tab visibility change
-    const onFocusOrVisible = () => {
-      void syncWithMcpStore();
-    };
-    window.addEventListener("focus", onFocusOrVisible);
-    document.addEventListener("visibilitychange", onFocusOrVisible);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(initialTimer);
-      clearInterval(interval);
-      window.removeEventListener("focus", onFocusOrVisible);
-      document.removeEventListener("visibilitychange", onFocusOrVisible);
-    };
-  }, []);
 
   // Ensure Post for Me is active as the dedicated publishing service
   useEffect(() => {
@@ -608,12 +343,6 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
   const [isGeneratingImages, setIsGeneratingImages] = useState(false);
   const [isRunningQueue, setIsRunningQueue] = useState(false);
   const [creditStatus, setCreditStatus] = useState<CreditStatus | undefined>(undefined);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showBrandKit, setShowBrandKit] = useState(false);
-  const [showPostForMeSetup, setShowPostForMeSetup] = useState(false);
-  const [show30DayBatch, setShow30DayBatch] = useState(false);
-  const [showMcp, setShowMcp] = useState(false);
-  const [editing, setEditing] = useState<{ jobId?: string; slideId: string } | null>(null);
 
   const abortRef = useRef<AbortController | null>(null);
   const queueAbortRef = useRef(false);

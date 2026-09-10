@@ -44,38 +44,37 @@ export function buildS3Client(cfg: CloudStorageConfig): S3Client {
   });
 }
 
+import { config } from "../lib/config";
+
 export function extractConfigFromRequest(req: Request, bodyCfg?: Partial<CloudStorageConfig>): CloudStorageConfig | null {
-  const env = (typeof process !== "undefined" && process.env) || {};
   const accessKey =
     bodyCfg?.accessKey ||
     req.headers.get("x-cloud-access-key") ||
-    env["S4_ACCESS_KEY"] ||
-    env["MEGA_S4_ACCESS_KEY"] ||
+    config.s4.accessKey ||
     "";
 
   const secretKey =
     bodyCfg?.secretKey ||
     req.headers.get("x-cloud-secret-key") ||
-    env["S4_SECRET_KEY"] ||
-    env["MEGA_S4_SECRET_KEY"] ||
+    config.s4.secretKey ||
     "";
 
   const endpoint =
     bodyCfg?.endpoint ||
     req.headers.get("x-cloud-endpoint") ||
-    env["S4_ENDPOINT"] ||
+    config.s4.endpoint ||
     "socialgrow.s3.g.megas4.com";
 
   const bucket =
     bodyCfg?.bucket ||
     req.headers.get("x-cloud-bucket") ||
-    env["S4_BUCKET"] ||
+    config.s4.bucket ||
     "socialgrow";
 
   const region =
     bodyCfg?.region ||
     req.headers.get("x-cloud-region") ||
-    env["S4_REGION"] ||
+    config.s4.region ||
     "eu-central-1";
 
   if (!accessKey || !secretKey) {
