@@ -24,7 +24,7 @@ import type { ScheduledPost, SocialPlatform, ScheduledPostStatus, SlideRole, Ser
 export function sanitizeNoGedankenstriche(text: string): string {
   if (!text) return "";
   const cleaned = text
-    .replace(/^[\s]*[–—\-]\s+/gm, "• ")
+    .replace(/^[\s]*[-–—]\s+/gm, "• ")
     .replace(/\s+[–—]\s+/g, ": ")
     .replace(/\s+-\s+/g, ": ")
     .replace(/[–—]/g, "");

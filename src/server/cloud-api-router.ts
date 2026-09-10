@@ -256,8 +256,14 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
       const pfmKey =
         (body.apiKey && body.apiKey.trim()) ||
         request.headers.get("x-postforme-key") ||
-        pfmEnv ||
-        "pfm_live_X6AHnibZB1BjEu4j2ef1f4";
+        pfmEnv;
+
+      if (!pfmKey) {
+        return jsonResponse(
+          { error: "Post For Me API-Key nicht konfiguriert (POSTFORME_API_KEY in .env setzen)." },
+          401,
+        );
+      }
 
       if (!body.socialAccountId) {
         return jsonResponse({ error: "socialAccountId fehlt" }, 400);
@@ -320,7 +326,14 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
         request.headers.get("x-postforme-key") ||
         (typeof process !== "undefined" && process.env?.["POSTFORME_API_KEY"]) ||
         (typeof process !== "undefined" && process.env?.["VITE_POSTFORME_API_KEY"]) ||
-        "pfm_live_X6AHnibZB1BjEu4j2ef1f4";
+        "";
+
+      if (!apiKey) {
+        return jsonResponse(
+          { error: "Post For Me API-Key nicht konfiguriert (POSTFORME_API_KEY in .env setzen)." },
+          401,
+        );
+      }
 
       const targetUrl = `https://api.postforme.dev/v1${cleanEndpoint}`;
 

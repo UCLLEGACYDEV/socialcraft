@@ -126,6 +126,7 @@ export function normalizeKey(key: string): string {
     // ignore malformed URI components
   }
   // Strip null bytes and ASCII control characters
+  // eslint-disable-next-line no-control-regex
   clean = clean.replace(/[\x00-\x1f\x7f]/g, "");
   // Collapse duplicate slashes
   clean = clean.replace(/\/+/g, "/");

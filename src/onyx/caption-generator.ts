@@ -36,9 +36,9 @@ export interface CaptionResult {
 export function sanitizeNoGedankenstriche(text: string): string {
   if (!text) return "";
   
-  let cleaned = text
+  const cleaned = text
     // Replace bullet dashes at line start (e.g., "- Punkt", "– Punkt", "— Punkt")
-    .replace(/^[\s]*[–—\-]\s+/gm, "• ")
+    .replace(/^[\s]*[-–—]\s+/gm, "• ")
     // Replace inline Gedankenstriche surrounded by spaces (e.g. "Problem – Lösung" -> "Problem: Lösung" or "Problem | Lösung")
     .replace(/\s+[–—]\s+/g, ": ")
     .replace(/\s+-\s+/g, ": ")

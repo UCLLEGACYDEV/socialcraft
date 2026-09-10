@@ -100,7 +100,7 @@ export function buildZernioPayload(input: PostFormatInput): ZernioCreatePostPayl
     platformSpecificData: {},
   };
 
-  let payload: ZernioCreatePostPayload = {
+  const payload: ZernioCreatePostPayload = {
     content: fullCaption,
     mediaItems: mediaItems.length > 0 ? mediaItems : undefined,
     platforms: [platformEntry],

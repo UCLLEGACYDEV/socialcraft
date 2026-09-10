@@ -87,19 +87,19 @@ export const DEFAULT_BRAND_KIT: BrandKit = {
   ctaText: "Speichere dir diesen Post für später ab.",
 };
 
-// Feste Master-Verankerung des Engine API-Keys (aus .env VITE_KIE_API_KEY oder festem Code-Fallback)
+// Master-Verankerung des Engine API-Keys (aus .env VITE_KIE_API_KEY)
 export const ANCHORED_KIE_API_KEY =
   (typeof import.meta !== "undefined" && import.meta.env?.['VITE_KIE_API_KEY']) ||
-  "4029b7b2ebc1d6e0609bf6559172e335";
+  "";
 
-// Feste Verankerung des Mega S4 Cloud-Speichers
+// Verankerung des Mega S4 Cloud-Speichers (aus .env VITE_S4_*)
 export const ANCHORED_S4_ACCESS_KEY =
   (typeof import.meta !== "undefined" && import.meta.env?.['VITE_S4_ACCESS_KEY']) ||
-  "AKIAPMXGIG3XMUCRBNIX7YA4JKJ2D3P4KQ5FLAPDX4OW";
+  "";
 
 export const ANCHORED_S4_SECRET_KEY =
   (typeof import.meta !== "undefined" && import.meta.env?.['VITE_S4_SECRET_KEY']) ||
-  "uUQ1e7Eov9Pm0BlVqXyzGB8sD5qoMfED68PbN5oz";
+  "";
 
 export const ANCHORED_S4_ENDPOINT =
   (typeof import.meta !== "undefined" && import.meta.env?.['VITE_S4_ENDPOINT']) ||
@@ -123,11 +123,11 @@ export const ANCHORED_SUPABASE_KEY =
 
 export const ANCHORED_POSTFORME_API_KEY =
   (typeof import.meta !== "undefined" && import.meta.env?.['VITE_POSTFORME_API_KEY']) ||
-  "pfm_live_X6AHnibZB1BjEu4j2ef1f4";
+  "";
 
 export const ANCHORED_ZERNIO_WEBHOOK_SECRET =
   (typeof import.meta !== "undefined" && import.meta.env?.['VITE_ZERNIO_WEBHOOK_SECRET']) ||
-  "PGYSvZxkcOH0XH9I8xhbzrB0/vrxa9GIdEr0QwwhKM9wjcW4uN8Cp8PMZKVAE1wECSKSye7svSmIqCLWjQ==";
+  "";
 
 export const DEFAULT_API_SETTINGS: ApiSettings = {
   provider: "kie-ai",

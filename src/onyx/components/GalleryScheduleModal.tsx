@@ -55,7 +55,12 @@ const PLATFORM_COLORS: Record<string, { bg: string; border: string; text: string
   bluesky: { bg: "bg-indigo-600/15", border: "border-indigo-500/40", text: "text-indigo-400", badge: "bg-indigo-600/20 text-indigo-300 border-indigo-500/30" },
 };
 
-export function GalleryScheduleModal({
+export function GalleryScheduleModal(props: GalleryScheduleModalProps) {
+  if (!props.isOpen || !props.item) return null;
+  return <GalleryScheduleModalInner {...props} item={props.item} />;
+}
+
+function GalleryScheduleModalInner({
   isOpen,
   onClose,
   item,
@@ -63,9 +68,7 @@ export function GalleryScheduleModal({
   settings,
   currentUser,
   onScheduled,
-}: GalleryScheduleModalProps) {
-  if (!isOpen || !item) return null;
-
+}: GalleryScheduleModalProps & { item: NonNullable<GalleryScheduleModalProps["item"]> }) {
   // 1. Load Channels & Profiles
   const channels = readLS<SocialChannel[]>(LS.socialChannels, DEFAULT_SOCIAL_CHANNELS);
   const profiles = readLS<BrandProfile[]>(LS.brandProfiles, DEFAULT_BRAND_PROFILES);
