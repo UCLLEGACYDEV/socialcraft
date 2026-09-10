@@ -4,7 +4,7 @@ import {
   parseLocalDatetimeValue,
   formatMetric,
   slidesToOrderedUrls,
-} from "../components/scheduler/scheduler-utils";
+} from "../components/widgets/scheduler-utils";
 import type { SlideContent } from "../types";
 
 describe("scheduler-utils", () => {

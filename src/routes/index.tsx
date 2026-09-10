@@ -3,34 +3,35 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 
-import { CryptoxNavbar } from "@/onyx/components/CryptoxNavbar";
-import { StudioCarouselWorkspace } from "@/onyx/components/StudioCarouselWorkspace";
-import { CarouselViewer } from "@/onyx/components/CarouselViewer";
-import { SeriesQueue } from "@/onyx/components/SeriesQueue";
-import { SettingsModal } from "@/onyx/components/SettingsModal";
-import { BrandKitModal } from "@/onyx/components/BrandKitModal";
-import { SlideEditModal, ModalShell } from "@/onyx/components/SlideEditModal";
 import {
+  AdminDashboard,
   AiCloneView,
+  AuthModal,
+  BrandKitModal,
+  BrandProfileManagerModal,
+  CarouselViewer,
+  CloudGalleryView,
+  CreditUpgradeModal,
+  CryptoxLandingPage,
+  CryptoxNavbar,
+  DatenschutzModal,
   DirectPromptView,
   HistoryView,
   McpModalContent,
+  ModalShell,
+  PostForMeSetupModal,
+  PostSchedulerView,
   PromptGallery,
-} from "@/onyx/components/SimpleViews";
-import { CloudGalleryView } from "@/onyx/components/CloudGalleryView";
-import { PostSchedulerView } from "@/onyx/components/PostSchedulerView";
-import { ViewBoundary } from "@/onyx/components/ViewBoundary";
-import { PostForMeSetupModal } from "@/onyx/components/PostForMeSetupModal";
+  SeriesQueue,
+  SettingsModal,
+  SlideEditModal,
+  StudioCarouselWorkspace,
+  ThirtyDayBatchModal,
+  UserProfileModal,
+  ViewBoundary,
+} from "@/onyx/components";
 import { PostForMeApiClient } from "@/onyx/postforme/client";
-import { ThirtyDayBatchModal } from "@/onyx/components/ThirtyDayBatchModal";
 import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder, saveHistoryToS4, loadHistoryFromS4, makeProjectFolderName, syncCloudIdentityCookie } from "@/onyx/s4-storage";
-import { CryptoxLandingPage } from "@/onyx/components/CryptoxLandingPage";
-import { AdminDashboard } from "@/onyx/components/AdminDashboard";
-import { AuthModal } from "@/onyx/components/AuthModal";
-import { UserProfileModal } from "@/onyx/components/UserProfileModal";
-import { CreditUpgradeModal } from "@/onyx/components/CreditUpgradeModal";
-import { DatenschutzModal } from "@/onyx/components/DatenschutzModal";
-import { BrandProfileManagerModal } from "@/onyx/components/BrandProfileManagerModal";
 import { type User, getStoredCurrentUser, getStoredUsers, saveStoredCurrentUser } from "@/onyx/auth";
 
 import {
