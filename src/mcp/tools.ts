@@ -14,70 +14,42 @@ import {
   updateScheduledPost,
   deleteScheduledPost,
   resolveChannelForPlatform,
+  getJob,
+  getIdempotencyRecord,
+  registerIdempotencyKey,
 } from "./store";
-import type { PostingSlotConfig } from "../onyx/scheduling";
-import type { ScheduledPost, SocialPlatform, ScheduledPostStatus, SlideRole, SeriesJob } from "../onyx/types";
+import { computeNextSlots, type PostingSlotConfig } from "../onyx/scheduling";
+import { sanitizeNoGedankenstriche } from "../onyx/caption-generator";
+import { generateStoryboard } from "../server/story/story-service";
+import { orchestrator } from "../server/jobs/orchestrator";
+import type {
+  StoryBrief,
+  SlideContent,
+  SlideRole,
+  SocialPlatform,
+  ScheduledPost,
+  ScheduledPostStatus,
+  SeriesJob,
+} from "../onyx/types";
+
+export { sanitizeNoGedankenstriche };
 
 /**
- * Filter to strictly remove any Gedankenstriche (–, —, -) and replace with clean typography or emojis
+ * Delegated to computeNextSlots from onyx/scheduling.ts (single source of truth)
  */
-export function sanitizeNoGedankenstriche(text: string): string {
-  if (!text) return "";
-  const cleaned = text
-    .replace(/^[\s]*[-–—]\s+/gm, "• ")
-    .replace(/\s+[–—]\s+/g, ": ")
-    .replace(/\s+-\s+/g, ": ")
-    .replace(/[–—]/g, "");
-  return cleaned.trim();
-}
-
-/**
- * Pure calculation of next free posting slots avoiding collisions with already scheduled posts
- */
-export function calculateNextSlots(
-  config: PostingSlotConfig,
-  count: number,
-  takenTimestamps: number[],
-  options: { startFrom?: Date; minGapMinutes?: number } = {}
-): Date[] {
-  const days = config.days.length ? config.days : [1, 2, 3, 4, 5];
-  const times: number[][] = (config.times.length ? config.times : ["09:00", "13:00", "18:00"])
-    .map((t: string) => t.split(":").map(Number))
-    .filter(([h, m]: number[]) => Number.isFinite(h) && Number.isFinite(m))
-    .sort((a: number[], b: number[]) => a[0] * 60 + a[1] - (b[0] * 60 + b[1]));
-
-  const out: Date[] = [];
-  const soonest = Date.now() + 15 * 60 * 1000;
-  const min = Math.max(soonest, options.startFrom ? options.startFrom.getTime() : 0);
-  const gapMs = Math.max(0, options.minGapMinutes ?? 0) * 60 * 1000;
-  const cursor = new Date(min);
-  cursor.setHours(0, 0, 0, 0);
-
-  for (let dayOffset = 0; dayOffset < 400 && out.length < count; dayOffset++) {
-    const day = new Date(cursor);
-    day.setDate(day.getDate() + dayOffset);
-    if (!days.includes(day.getDay())) continue;
-    for (const [h, m] of times) {
-      if (out.length >= count) break;
-      const slot = new Date(day);
-      slot.setHours(h, m, 0, 0);
-      const ts = slot.getTime();
-      if (ts < min) continue;
-      const last = out[out.length - 1];
-      if (last && ts - last.getTime() < gapMs) continue;
-      const clash =
-        takenTimestamps.some((t) => Math.abs(t - ts) < 5 * 60 * 1000) ||
-        out.some((d) => Math.abs(d.getTime() - ts) < 5 * 60 * 1000);
-      if (clash) continue;
-      out.push(slot);
-    }
-  }
-  return out;
-}
+export const calculateNextSlots = computeNextSlots;
 
 export function registerTools(server: McpServer) {
+  type ToolRegistrar = (
+    name: string,
+    description: string,
+    schema: any,
+    handler: (args: any, extra?: any) => any
+  ) => unknown;
+  const tool = (server as McpServer)["tool"].bind(server) as ToolRegistrar;
+
   // 1. Tool: get_brand_profiles
-  server.tool(
+  tool(
     "get_brand_profiles",
     "Gibt alle konfigurierten Markenprofile (z. B. Socialcraft Hauptbrand, Zitate Tiger etc.) mit Beschreibungen, Farben und Stilrichtungen zurück.",
     {},
@@ -110,7 +82,7 @@ export function registerTools(server: McpServer) {
   );
 
   // 2. Tool: get_social_channels
-  server.tool(
+  tool(
     "get_social_channels",
     "Listet verbundene Social-Media-Kanäle auf (Instagram, TikTok, LinkedIn, Facebook, YouTube etc.), optional gefiltert nach Brand-Profil.",
     {
@@ -149,7 +121,7 @@ export function registerTools(server: McpServer) {
   );
 
   // 3. Tool: get_posting_slots
-  server.tool(
+  tool(
     "get_posting_slots",
     "Berechnet die nächsten freien, kollisionsfreien Posting-Slots basierend auf dem SocialCraft-Zeitplan.",
     {
@@ -209,7 +181,7 @@ export function registerTools(server: McpServer) {
   );
 
   // 4. Tool: get_scheduled_posts
-  server.tool(
+  tool(
     "get_scheduled_posts",
     "Gibt die aktuell geplanten Beiträge zurück, optional gefiltert nach Status, Plattform oder Profil.",
     {
@@ -270,7 +242,7 @@ export function registerTools(server: McpServer) {
   );
 
   // 5. Tool: create_scheduled_post
-  server.tool(
+  tool(
     "create_scheduled_post",
     "Erstellt und plant einen einzelnen Social-Media-Post in SocialCraft. Die Caption wird automatisch bereinigt (keine Gedankenstriche). Wenn kein Datum angegeben ist, wird automatisch der nächste freie Zeitslot gewählt.",
     {
@@ -335,7 +307,7 @@ export function registerTools(server: McpServer) {
       const created = addScheduledPost({
         title: params.title,
         caption: cleanCaption,
-        hashtags: params.hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`)),
+        hashtags: (params.hashtags as string[]).map((h: string) => (h.startsWith("#") ? h : `#${h}`)),
         mediaType: params.mediaType,
         mediaUrls: params.mediaUrls || [],
         channelId,
@@ -375,7 +347,7 @@ export function registerTools(server: McpServer) {
   );
 
   // 6. Tool: batch_preplan_posts
-  server.tool(
+  tool(
     "batch_preplan_posts",
     "Plant eine Serie von Beiträgen (z. B. für 7, 14 oder 30 Tage) vollautomatisch über die nächsten optimalen Zeitslots ein.",
     {
@@ -425,7 +397,7 @@ export function registerTools(server: McpServer) {
         minGapMinutes: 240, // 4 hours gap for batch
       });
 
-      const toCreate: Array<Omit<ScheduledPost, "id" | "createdAt">> = posts.map((p, idx) => {
+      const toCreate: Array<Omit<ScheduledPost, "id" | "createdAt">> = (posts as any[]).map((p: any, idx: number) => {
         const slot = p.scheduledFor || (allocatedSlots[idx] ? allocatedSlots[idx].toISOString() : new Date(Date.now() + (idx + 1) * 86400000).toISOString());
         const cleanCaption = sanitizeNoGedankenstriche(p.caption);
 
@@ -438,7 +410,7 @@ export function registerTools(server: McpServer) {
         return {
           title: p.title,
           caption: cleanCaption,
-          hashtags: p.hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`)),
+          hashtags: (p.hashtags as string[]).map((h: string) => (h.startsWith("#") ? h : `#${h}`)),
           mediaType: p.mediaType,
           mediaUrls: p.mediaUrls || [],
           channelId: chId,
@@ -478,7 +450,7 @@ export function registerTools(server: McpServer) {
   );
 
   // 7. Tool: create_carousel_draft
-  server.tool(
+  tool(
     "create_carousel_draft",
     "Erstellt einen vollständigen Karussell-Entwurf mit Folien, Hooks, Visual-Prompts und kann ihn direkt als Entwurf oder geplanten Post anlegen.",
     {
@@ -533,7 +505,7 @@ export function registerTools(server: McpServer) {
       const post = addScheduledPost({
         title: `Karussell: ${params.topic}`,
         caption: cleanCaption,
-        hashtags: params.hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`)),
+        hashtags: (params.hashtags as string[]).map((h: string) => (h.startsWith("#") ? h : `#${h}`)),
         mediaType: "carousel",
         mediaUrls: [],
         channelId,
@@ -554,7 +526,7 @@ export function registerTools(server: McpServer) {
                 message: `Karussell-Konzept mit ${params.slides.length} Folien erfolgreich angelegt!`,
                 postId: post.id,
                 scheduledFor: post.scheduledFor,
-                slidesOverview: params.slides.map((s) => ({
+                slidesOverview: (params.slides as any[]).map((s: any) => ({
                   slideNumber: s.slideNumber,
                   role: s.role,
                   headline: s.headline,
@@ -571,7 +543,7 @@ export function registerTools(server: McpServer) {
   );
 
   // 8. Tool: plan_and_schedule_carousels
-  server.tool(
+  tool(
     "plan_and_schedule_carousels",
     "Erstellt für mehrere Tage (z. B. 3 Tage) vollständige Karussell-Konzepte mit allen Folien, Visual Prompts, Headlines, Subtexten, Captions (ohne Gedankenstriche) und Hashtags und plant sie vollautomatisch in SocialCraft für die angegebenen Plattformen (Instagram, LinkedIn etc.) an den nächsten freien Terminen ein.",
     {
@@ -649,7 +621,7 @@ export function registerTools(server: McpServer) {
         scheduledPosts: Array<{ id: string; platform: string; scheduledFor: string }>;
       }> = [];
 
-      carousels.forEach((c, idx) => {
+      (carousels as any[]).forEach((c: any, idx: number) => {
         const dayNumber = c.day || idx + 1;
         const assignedSlot =
           c.scheduledFor ||
@@ -660,7 +632,7 @@ export function registerTools(server: McpServer) {
           title: `Karussell Tag ${dayNumber}: ${c.topic}`,
           topic: c.topic,
           audience: c.targetAudience,
-          slides: c.slides.map((s) => ({
+          slides: (c.slides as any[]).map((s: any) => ({
             slideNumber: s.slideNumber,
             role: s.role,
             headline: s.headline,
@@ -675,13 +647,13 @@ export function registerTools(server: McpServer) {
         const cleanCaption = sanitizeNoGedankenstriche(c.caption);
         const channels = getSocialChannels(c.profileId || profileId);
 
-        c.platforms.forEach((plat) => {
+        (c.platforms as any[]).forEach((plat: any) => {
           const targetProfile = c.profileId || profileId;
           const assignedChannel = resolveChannelForPlatform(targetProfile, plat);
           const post = addScheduledPost({
             title: `Karussell (Tag ${dayNumber}): ${c.topic}`,
             caption: cleanCaption,
-            hashtags: c.hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`)),
+            hashtags: (c.hashtags as string[]).map((h: string) => (h.startsWith("#") ? h : `#${h}`)),
             mediaType: "carousel",
             mediaUrls: [],
             channelId: assignedChannel.id,
@@ -734,7 +706,7 @@ export function registerTools(server: McpServer) {
   );
 
   // 9. Tool: create_content_series
-  server.tool(
+  tool(
     "create_content_series",
     "Erstellt einen Mass-Content-Batch (Batch Studio) mit mehreren Karussell-Teilen oder Posts und fügt die Folien direkt in das SocialCraft Batch Studio (Tab 'Batch Studio' / 'bulk') und/oder verbindlich in den Kalender-Planer ein.",
     {
@@ -809,14 +781,14 @@ export function registerTools(server: McpServer) {
 
       const createdSeriesJobs: SeriesJob[] = [];
       if (addToSeriesQueue) {
-        const jobs: SeriesJob[] = parts.map((p) => ({
+        const jobs: SeriesJob[] = (parts as any[]).map((p: any) => ({
           id: `series-job-${Date.now()}-${p.partNumber}-${Math.random().toString(36).slice(2, 6)}`,
           topic: `[${seriesTitle} · Teil ${p.partNumber}/${parts.length}] ${p.partTitle}`,
           audience: targetAudience || "Creator & Unternehmer",
           status: "queued" as const,
           slidesTotal: p.slides.length,
           slidesDone: 0,
-          slides: p.slides.map((s, sIdx) => ({
+          slides: (p.slides as any[]).map((s: any, sIdx: number) => ({
             id: `slide-${Date.now()}-${sIdx}-${Math.random().toString(36).slice(2, 5)}`,
             slideNumber: s.slideNumber,
             role: s.role as SlideRole,
@@ -837,7 +809,7 @@ export function registerTools(server: McpServer) {
       if (scheduleInCalendar) {
         const channels = getSocialChannels(profileId);
 
-        parts.forEach((p, idx) => {
+        (parts as any[]).forEach((p: any, idx: number) => {
           const assignedSlot =
             p.scheduledFor ||
             (allocatedSlots[idx] ? allocatedSlots[idx].toISOString() : new Date(Date.now() + (idx + 1) * 86400000).toISOString());
@@ -848,7 +820,7 @@ export function registerTools(server: McpServer) {
             title: `${seriesTitle} (Teil ${p.partNumber}/${parts.length}): ${p.partTitle}`,
             topic: p.topic,
             audience: targetAudience,
-            slides: p.slides.map((s) => ({
+            slides: (p.slides as any[]).map((s: any) => ({
               slideNumber: s.slideNumber,
               role: s.role,
               headline: s.headline,
@@ -858,14 +830,14 @@ export function registerTools(server: McpServer) {
             profileId: profileId || "profile-default",
           });
 
-          platforms.forEach((plat) => {
+          (platforms as any[]).forEach((plat: any) => {
             const assignedChannel = channelId
               ? channels.find((ch) => ch.id === channelId) || resolveChannelForPlatform(profileId, plat)
               : resolveChannelForPlatform(profileId, plat);
             addScheduledPost({
               title: `[Serie] ${seriesTitle} · Teil ${p.partNumber}/${parts.length}`,
               caption: cleanCaption,
-              hashtags: p.hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`)),
+              hashtags: (p.hashtags as string[]).map((h: string) => (h.startsWith("#") ? h : `#${h}`)),
               mediaType: "carousel",
               mediaUrls: [],
               channelId: assignedChannel.id,
@@ -915,7 +887,7 @@ export function registerTools(server: McpServer) {
   );
 
   // 10. Tool: get_series_queue
-  server.tool(
+  tool(
     "get_series_queue",
     "Gibt alle aktuellen Jobs aus dem SocialCraft Batch Studio (Tab 'Batch Studio' / 'bulk') zurück.",
     {},
@@ -949,7 +921,7 @@ export function registerTools(server: McpServer) {
   );
 
   // 11. Tool: update_scheduled_post
-  server.tool(
+  tool(
     "update_scheduled_post",
     "Aktualisiert einen bereits geplanten Post (z. B. Datum verschieben, Caption anpassen, Status ändern).",
     {
@@ -967,7 +939,7 @@ export function registerTools(server: McpServer) {
         updates.caption = sanitizeNoGedankenstriche(caption);
       }
       if (hashtags !== undefined) {
-        updates.hashtags = hashtags.map((h) => (h.startsWith("#") ? h : `#${h}`));
+        updates.hashtags = (hashtags as string[]).map((h: string) => (h.startsWith("#") ? h : `#${h}`));
       }
 
       const updated = updateScheduledPost(id, updates);
@@ -994,7 +966,7 @@ export function registerTools(server: McpServer) {
   );
 
   // 9. Tool: delete_scheduled_post
-  server.tool(
+  tool(
     "delete_scheduled_post",
     "Löscht oder storniert einen geplanten Beitrag aus SocialCraft.",
     {
@@ -1020,7 +992,7 @@ export function registerTools(server: McpServer) {
   );
 
   // 10. Tool: get_prompt_frameworks
-  server.tool(
+  tool(
     "get_prompt_frameworks",
     "Liefert bewährte SocialCraft-Prompt-Vorlagen für virale Hooks, Karussell-Bögen und KI-Bildprompts (Banana / Kie.ai / Midjourney).",
     {
@@ -1095,6 +1067,311 @@ export function registerTools(server: McpServer) {
           {
             type: "text",
             text: JSON.stringify({ success: true, category, frameworks: selected }, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // 13. Tool: generate_storyboard
+  tool(
+    "generate_storyboard",
+    "Erzeugt ein vollständiges Karussell-Storyboard mit psychologischem Spannungsbogen, Rollen (Hook, Pain, Konzept, Vertiefung, CTA) und Nano-Banana-2 Bildprompts ohne Gedankenstriche.",
+    {
+      topic: z.string().describe("Thema oder Kernbotschaft des Karussells"),
+      content: z.string().optional().describe("Optionale Stichpunkte, Details oder Argumente"),
+      slideCount: z.number().min(2).max(10).default(6).describe("Anzahl Slides (2 bis 10)"),
+      singleImageCount: z.number().min(0).max(10).default(0).optional().describe("Zusätzliche eigenständige Feed-Bilder"),
+      audience: z.string().optional().describe("Zielgruppe (z. B. 'B2B Gründer', 'Agenturen')"),
+      styleId: z.string().optional().describe("Design Style Archetype (z. B. 'ember-ignite', 'swiss-clean-mono')"),
+      hookArchetype: z
+        .enum(["provocative", "storytelling", "data-driven", "step-by-step", "question"])
+        .optional()
+        .describe("Psychologischer Hook-Typ"),
+      customInstructions: z.string().optional().describe("Zusatzwünsche oder Tonalitäts-Vorgaben"),
+    },
+    async (params) => {
+      try {
+        const brief: StoryBrief = {
+          topic: params.topic,
+          content: params.content,
+          slideCount: params.slideCount,
+          singleImageCount: params.singleImageCount,
+          audience: params.audience,
+          styleId: params.styleId,
+          hookArchetype: params.hookArchetype,
+          customInstructions: params.customInstructions,
+        };
+
+        const result = await generateStoryboard(brief, {
+          apiKey: process.env["GEMINI_API_KEY"] || process.env["VITE_GEMINI_API_KEY"],
+        });
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                {
+                  success: true,
+                  storyboard: result,
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      } catch (err: unknown) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({ success: false, error: errorMsg }, null, 2),
+            },
+          ],
+        };
+      }
+    }
+  );
+
+  // 14. Tool: produce_and_schedule
+  tool(
+    "produce_and_schedule",
+    "Das Flagship-Flow-C-Tool: Nimmt ein ausgearbeitetes Storyboard entgegen, legt Entwürfe und Queue-Jobs an, rendert serverseitig alle Folienbilder via Nano-Banana 2, archiviert sie und plant den Post kollisionsfrei in Post for Me ein. Komplett autonom.",
+    {
+      idempotencyKey: z
+        .string()
+        .describe("Eindeutiger Idempotenz-Schlüssel (z. B. Hash aus Thema+Datum) gegen versehentliche Doppelungen"),
+      storyboard: z
+        .object({
+          title: z.string(),
+          caption: z.string(),
+          hashtags: z.array(z.string()),
+          slides: z.array(
+            z.object({
+              slideNumber: z.number(),
+              role: z.string().optional(),
+              headline: z.string(),
+              subtext: z.string().optional(),
+              coreMetaphor: z.string().optional(),
+              visualPrompt: z.string(),
+            })
+          ),
+        })
+        .describe("Das vollständige Storyboard-Objekt"),
+      platforms: z
+        .array(z.string())
+        .default(["instagram"])
+        .describe("Ziel-Plattformen (z. B. ['instagram', 'tiktok', 'linkedin'])"),
+      profileId: z.string().optional().describe("Brand-Profil ID"),
+      scheduleStartFrom: z.string().optional().describe("Frühester Veröffentlichungszeitpunkt (ISO)"),
+      autoRender: z
+        .boolean()
+        .default(true)
+        .describe("Ob die Slides sofort im Hintergrund gerendert werden sollen (empfohlen: true)"),
+      autoPublish: z
+        .boolean()
+        .default(true)
+        .describe("Ob der Post nach dem Rendern automatisch via Post for Me terminiert werden soll"),
+    },
+    async (params) => {
+      try {
+        // 1. Idempotency Check
+        const existingJobId = getIdempotencyRecord(params.idempotencyKey);
+        if (existingJobId) {
+          const existingJob = getJob(existingJobId);
+          return {
+            content: [
+              {
+                type: "text",
+                text: JSON.stringify(
+                  {
+                    success: true,
+                    deduplicated: true,
+                    message: "Job mit diesem idempotencyKey wurde bereits erstellt.",
+                    jobId: existingJobId,
+                    status: existingJob?.status,
+                  },
+                  null,
+                  2
+                ),
+              },
+            ],
+          };
+        }
+
+        const store = getStore();
+        const cleanTitle = sanitizeNoGedankenstriche(params.storyboard.title);
+        const cleanCaption = sanitizeNoGedankenstriche(params.storyboard.caption);
+
+        // 2. Map slides
+        const mappedSlides: SlideContent[] = (params.storyboard.slides as any[]).map((s: any) => ({
+          id: `slide_${Date.now()}_${s.slideNumber}_${Math.random().toString(36).substring(2, 6)}`,
+          slideNumber: s.slideNumber,
+          role: (s.role as SlideRole) || "concept",
+          roleLabel: s.role || "Folie",
+          headline: sanitizeNoGedankenstriche(s.headline),
+          subtext: sanitizeNoGedankenstriche(s.subtext || ""),
+          coreMetaphor: s.coreMetaphor || "3D Metapher",
+          primaryProps: ["Nano-Banana 2", "4:5 Framing"],
+          visualPrompt: s.visualPrompt,
+          renderStatus: "idle",
+          renderProgress: 0,
+        }));
+
+        // 3. Create Carousel Draft
+        const draft = addCarouselDraft({
+          title: cleanTitle,
+          topic: cleanTitle,
+          profileId: params.profileId || "profile-default",
+          slides: mappedSlides.map((s) => ({
+            slideNumber: s.slideNumber,
+            role: s.role,
+            headline: s.headline,
+            subtext: s.subtext,
+            visualPrompt: s.visualPrompt,
+          })),
+        });
+
+        // 4. Create SeriesJob
+        const seriesJobId = `job_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+        batchAddSeriesJobs([
+          {
+            id: seriesJobId,
+            topic: cleanTitle,
+            audience: "Social Audience",
+            status: "queued",
+            slidesTotal: mappedSlides.length,
+            slidesDone: 0,
+            slides: mappedSlides,
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+
+        // 5. Compute Slot
+        const taken = store.scheduledPosts.map((p) => new Date(p.scheduledFor).getTime());
+        const startFromDate = params.scheduleStartFrom ? new Date(params.scheduleStartFrom) : undefined;
+        const [nextSlot] = computeNextSlots(store.postingSlots, 1, taken, {
+          startFrom: startFromDate,
+          minGapMinutes: 180,
+        });
+        const scheduledTime = (nextSlot || new Date(Date.now() + 60 * 60 * 1000)).toISOString();
+
+        // 6. Create Scheduled Posts for each requested platform
+        const createdPostIds: string[] = [];
+        for (const platform of params.platforms) {
+          const channel = resolveChannelForPlatform(params.profileId, platform);
+          const post = addScheduledPost({
+            title: cleanTitle,
+            caption: cleanCaption,
+            hashtags: params.storyboard.hashtags,
+            mediaUrls: [],
+            mediaType: "carousel",
+            channelId: channel.channelId,
+            platform: channel.platform,
+            scheduledFor: scheduledTime,
+            status: "queued",
+            profileId: params.profileId || channel.profileId,
+          });
+          createdPostIds.push(post.id);
+        }
+
+        // 7. Enqueue in Job Orchestrator
+        const orchestratorJob = orchestrator.enqueue({
+          type: "render",
+          refId: seriesJobId,
+          idempotencyKey: params.idempotencyKey,
+          payload: {
+            seriesJobId,
+            postId: createdPostIds[0],
+            slides: mappedSlides,
+            autoPublish: params.autoPublish,
+          },
+        });
+
+        // Register Idempotency
+        registerIdempotencyKey(params.idempotencyKey, orchestratorJob.id);
+
+        // If autoRender is requested, trigger background execution
+        if (params.autoRender) {
+          void orchestrator.executeJob(orchestratorJob.id);
+        }
+
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify(
+                {
+                  success: true,
+                  jobId: orchestratorJob.id,
+                  seriesJobId,
+                  draftId: draft.id,
+                  postIds: createdPostIds,
+                  scheduledFor: scheduledTime,
+                  slidesTotal: mappedSlides.length,
+                  message:
+                    "Storyboard erfolgreich registriert und zur serverseitigen Produktion eingeplant! Polle 'get_job_status' für den Render-Fortschritt.",
+                },
+                null,
+                2
+              ),
+            },
+          ],
+        };
+      } catch (err: unknown) {
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        return {
+          content: [
+            {
+              type: "text",
+              text: JSON.stringify({ success: false, error: errorMsg }, null, 2),
+            },
+          ],
+        };
+      }
+    }
+  );
+
+  // 15. Tool: get_job_status
+  tool(
+    "get_job_status",
+    "Gibt den aktuellen Fortschritt eines Hintergrund-Jobs (Rendering, Slides fertig, Publishing-Status bei Post for Me) zurück.",
+    {
+      jobId: z.string().describe("Die Job-ID aus produce_and_schedule oder die SeriesJob-ID"),
+    },
+    async (params) => {
+      const store = getStore();
+      const job = getJob(params.jobId);
+      const seriesJob =
+        store.seriesQueue.find((s) => s.id === params.jobId || s.id === (job?.refId ?? "")) ||
+        store.seriesQueue.find((s) => s.id === params.jobId);
+
+      const linkedPostId = (job?.payload as Record<string, unknown> | undefined)?.["postId"] as string | undefined;
+      const linkedPost = linkedPostId ? store.scheduledPosts.find((p) => p.id === linkedPostId) : undefined;
+
+      return {
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify(
+              {
+                success: true,
+                jobId: params.jobId,
+                jobStatus: job?.status || seriesJob?.status || "unknown",
+                attempts: job?.attempts || 0,
+                slidesDone: seriesJob?.slidesDone ?? (linkedPost?.mediaUrls?.length || 0),
+                slidesTotal: seriesJob?.slidesTotal ?? (seriesJob?.slides?.length || 0),
+                postStatus: linkedPost?.status,
+                mediaUrls: linkedPost?.mediaUrls || [],
+                postForMeId: linkedPost?.postForMePostId,
+                errorMessage: job?.lastError || seriesJob?.errorMsg || linkedPost?.errorMessage,
+              },
+              null,
+              2
+            ),
           },
         ],
       };

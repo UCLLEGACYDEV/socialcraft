@@ -2053,47 +2053,79 @@ export function PostSchedulerView({
             </DropdownMenu>
           </div>
 
-          {/* Header Action Buttons on the Right */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* 3 Primary Scheduler Sections */}
+          <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-white/10 bg-[#120F17]/90 p-1 shadow-lg">
             <button
               type="button"
-              onClick={() => setActiveTab("insights")}
+              onClick={() => setActiveTab("queue")}
               className={cn(
-                "flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-sm",
-                activeTab === "insights"
-                  ? "bg-white/15 border-white/30 text-white font-bold"
-                  : "bg-white/[0.04] border-white/10 text-zinc-300 hover:bg-white/[0.08] hover:text-white"
+                "flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                activeTab === "queue"
+                  ? "bg-[#FF4D17] text-white shadow-md shadow-orange-500/30"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5"
               )}
             >
-              <BarChart3 className="w-3.5 h-3.5 text-zinc-400" />
-              <span>Insights</span>
+              <CalendarDays className="w-3.5 h-3.5" />
+              <span>Kalender</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/15">
+                {profilePosts.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("composer")}
+              className={cn(
+                "flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
+                activeTab === "composer"
+                  ? "bg-[#FF4D17] text-white shadow-md shadow-orange-500/30"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+              )}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Neuer Beitrag</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab("channels")}
               className={cn(
-                "flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer shadow-sm",
+                "flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer",
                 activeTab === "channels"
-                  ? "bg-[#FF4D17]/20 border-orange-500/50 text-orange-200 font-bold"
-                  : "bg-white/[0.04] border-white/10 text-zinc-300 hover:bg-white/[0.08] hover:text-white"
+                  ? "bg-[#FF4D17] text-white shadow-md shadow-orange-500/30"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5"
               )}
             >
-              <Link2 className="w-3.5 h-3.5 text-orange-400" />
-              <span>Profile verbinden</span>
-              <span className="w-4 h-4 rounded-full bg-white/10 text-[10px] font-mono font-bold flex items-center justify-center text-zinc-200">
+              <Link2 className="w-3.5 h-3.5" />
+              <span>Kanäle</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/15">
                 {profileChannels.length}
               </span>
               {profileChannels.length > 0 && (
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               )}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("insights")}
+              className={cn(
+                "hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer",
+                activeTab === "insights"
+                  ? "bg-white/20 text-white font-bold"
+                  : "text-zinc-400 hover:text-white hover:bg-white/5"
+              )}
+              title="Statistiken & Reichweite"
+            >
+              <BarChart3 className="w-3.5 h-3.5 text-zinc-400" />
+              <span>Insights</span>
             </button>
 
             {isAdmin && openDirectSetup && (
               <button
                 type="button"
                 onClick={openDirectSetup}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold border border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08] hover:text-white transition-all cursor-pointer shadow-sm"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border border-white/10 bg-white/[0.04] text-zinc-300 hover:bg-white/[0.08] hover:text-white transition-all cursor-pointer shadow-sm ml-1"
                 title="Admin Publishing-Engine Setup"
               >
                 <Settings className="w-3.5 h-3.5 text-orange-400" />

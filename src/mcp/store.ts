@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { BrandProfile, ScheduledPost, SocialChannel, ScheduledPostStatus, SocialPlatform, SeriesJob } from "../onyx/types";
+import type { BrandProfile, ScheduledPost, SocialChannel, ScheduledPostStatus, SocialPlatform, SeriesJob, Job } from "../onyx/types";
 import { DEFAULT_BRAND_PROFILES, DEFAULT_SOCIAL_CHANNELS } from "../onyx/defaults";
 import { DEFAULT_POSTING_SLOTS, type PostingSlotConfig } from "../onyx/scheduling";
 export type { PostingSlotConfig } from "../onyx/scheduling";
@@ -29,6 +29,8 @@ export interface SocialCraftStoreData {
   postingSlots: PostingSlotConfig;
   carousels: CarouselDraft[];
   seriesQueue: SeriesJob[];
+  jobs?: Job[];
+  producedKeys?: Record<string, string>;
   deletedPostIds?: string[];
   deletedSeriesIds?: string[];
   updatedAt: string;
@@ -66,6 +68,8 @@ function getInitialStore(): SocialCraftStoreData {
     postingSlots: { ...DEFAULT_POSTING_SLOTS },
     carousels: [],
     seriesQueue: [],
+    jobs: [],
+    producedKeys: {},
     deletedPostIds: [],
     deletedSeriesIds: [],
     updatedAt: new Date().toISOString(),
@@ -88,6 +92,8 @@ export function readStore(): SocialCraftStoreData {
       postingSlots: parsed.postingSlots || { ...DEFAULT_POSTING_SLOTS },
       carousels: parsed.carousels || [],
       seriesQueue: parsed.seriesQueue || [],
+      jobs: parsed.jobs || [],
+      producedKeys: parsed.producedKeys || {},
       deletedPostIds: parsed.deletedPostIds || [],
       deletedSeriesIds: parsed.deletedSeriesIds || [],
       updatedAt: parsed.updatedAt || new Date().toISOString(),
@@ -437,4 +443,68 @@ export function syncStoreWithClient(data: {
 
   writeStore(updated);
   return updated;
+}
+
+// ── Job Queue Operations ──────────────────────────────────────────────
+
+export function enqueueJob(
+  job: Omit<Job, "id" | "createdAt" | "updatedAt" | "attempts"> & { id?: string }
+): Job {
+  const store = readStore();
+  const newJob: Job = {
+    ...job,
+    id: job.id || `job_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+    attempts: 0,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  if (!store.jobs) store.jobs = [];
+  store.jobs.push(newJob);
+  writeStore(store);
+  return newJob;
+}
+
+export function getJob(id: string): Job | null {
+  const store = readStore();
+  return store.jobs?.find((j) => j.id === id) || null;
+}
+
+export function updateJob(id: string, patch: Partial<Job>): Job | null {
+  const store = readStore();
+  if (!store.jobs) store.jobs = [];
+  const idx = store.jobs.findIndex((j) => j.id === id);
+  if (idx === -1) return null;
+
+  store.jobs[idx] = {
+    ...store.jobs[idx]!,
+    ...patch,
+    updatedAt: new Date().toISOString(),
+  };
+  writeStore(store);
+  return store.jobs[idx]!;
+}
+
+export function listJobs(filter?: { status?: string; type?: string }): Job[] {
+  const store = readStore();
+  let list = store.jobs || [];
+  if (filter?.status) {
+    list = list.filter((j) => j.status === filter.status);
+  }
+  if (filter?.type) {
+    list = list.filter((j) => j.type === filter.type);
+  }
+  return list;
+}
+
+export function getIdempotencyRecord(key: string): string | undefined {
+  const store = readStore();
+  return store.producedKeys?.[key];
+}
+
+export function registerIdempotencyKey(key: string, jobId: string): void {
+  const store = readStore();
+  if (!store.producedKeys) store.producedKeys = {};
+  store.producedKeys[key] = jobId;
+  writeStore(store);
 }

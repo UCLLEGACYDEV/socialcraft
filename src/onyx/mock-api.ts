@@ -37,9 +37,39 @@ const METAPHORS = [
   "Monolith im Nebel",
 ];
 
+import { generateStoryboard, type STYLE_PROMPT_MAP } from "./story-service";
+import type { ClonePlacement, StoryboardResult, StoryBrief } from "./types";
+
 export function makeId() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
+}
+
+export async function generateCarouselUnified(params: {
+  slideCount: number;
+  topic?: string;
+  audience?: string;
+  clonePrefix?: string;
+  clonePlacement?: ClonePlacement;
+  styleId?: string;
+  apiKey?: string;
+  hookArchetype?: "provocative" | "storytelling" | "data-driven" | "step-by-step" | "question";
+  customInstructions?: string;
+}): Promise<StoryboardResult> {
+  const brief: StoryBrief = {
+    topic: params.topic || "Disziplin schlägt Motivation",
+    audience: params.audience || "",
+    slideCount: params.slideCount,
+    clonePlacement: params.clonePlacement || "hook_closing",
+    styleId: params.styleId,
+    hookArchetype: params.hookArchetype,
+    customInstructions: params.customInstructions,
+  };
+
+  return generateStoryboard(brief, {
+    apiKey: params.apiKey,
+    clonePrefix: params.clonePrefix,
+  });
 }
 
 export async function mockGenerateCarousel(
@@ -47,47 +77,21 @@ export async function mockGenerateCarousel(
   topic = "Disziplin schlägt Motivation",
   audience = "",
   clonePrefix = "",
-  clonePlacement = "hook_closing",
+  clonePlacement: ClonePlacement = "hook_closing",
+  options?: { apiKey?: string; styleId?: string; hookArchetype?: string; customInstructions?: string }
 ): Promise<SlideContent[]> {
-  await delay(600);
-  return Array.from({ length: slideCount }, (_, i) => {
-    const role = ROLES[i % ROLES.length]!;
-    const metaphor = METAPHORS[i % METAPHORS.length]!;
-    const isFirst = i === 0;
-    const isLast = i === slideCount - 1;
-    const isEven = (i + 1) % 2 === 0;
-
-    const includeClone =
-      Boolean(clonePrefix) &&
-      (clonePlacement === "all_slides" ||
-        (clonePlacement === "hook_closing" && (isFirst || isLast)) ||
-        (clonePlacement === "even_slides" && isEven));
-
-    const visualPromptBase = `Photorealistic 3D ${metaphor.toLowerCase()}, violet rim light (#9333EA), dark background #060509, cinematic, slide ${i + 1} of ${slideCount} — ${topic}`;
-    const visualPrompt = includeClone
-      ? `${clonePrefix.trim()} — featuring ${visualPromptBase}`
-      : visualPromptBase;
-
-    const props = ["Violettes Rimlight", "Dunkler Hintergrund", "Dramatisches Licht"];
-    if (includeClone) {
-      props.unshift("Konsistente AI Persona");
-    }
-
-    return {
-      id: makeId(),
-      slideNumber: i + 1,
-      role,
-      roleLabel: ROLE_LABELS[role],
-      headline: `${topic} — Teil ${i + 1}`,
-      subtext: audience
-        ? `Für ${audience}: Motivation ist ein Gefühl. Ein System funktioniert auch ohne.`
-        : "Motivation ist ein Gefühl. Disziplin ist ein System, das funktioniert.",
-      ...(isFirst ? { badge: "Der Unterschied" } : {}),
-      coreMetaphor: includeClone ? "AI Persona Porträt" : metaphor,
-      primaryProps: props,
-      visualPrompt,
-    } satisfies SlideContent;
+  const res = await generateCarouselUnified({
+    slideCount,
+    topic,
+    audience,
+    clonePrefix,
+    clonePlacement,
+    apiKey: options?.apiKey,
+    styleId: options?.styleId,
+    hookArchetype: options?.hookArchetype as any,
+    customInstructions: options?.customInstructions,
   });
+  return res.carousel.slides;
 }
 
 export interface GenerateImageProgressInfo {

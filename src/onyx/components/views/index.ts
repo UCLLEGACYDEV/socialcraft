@@ -4,6 +4,7 @@ export * from "./CarouselViewer";
 export * from "./CloudGalleryView";
 export * from "./CryptoxLandingPage";
 export * from "./DirectPromptView";
+export * from "./OverviewView";
 export * from "./PostSchedulerView";
 export * from "./PromptHubView";
 export * from "./SeriesQueue";

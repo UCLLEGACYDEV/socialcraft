@@ -840,7 +840,7 @@ export function AiCloneView({
                   Neues Einzelbild mit deinem Klon generieren
                 </h2>
               </div>
-              <span className="text-xs text-zinc-400 font-mono">Nano-Banana 2</span>
+              <span className="text-xs text-emerald-400 font-medium">Beste Qualität</span>
             </div>
 
             {/* Prompt Input Area */}

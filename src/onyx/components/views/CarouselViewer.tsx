@@ -19,6 +19,7 @@ import { SlideInspectModal } from "@/onyx/components/modals/SlideInspectModal";
 import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { GenerationProgress } from "@/onyx/components/widgets/GenerationProgress";
 
 interface CarouselViewerProps {
   slides: SlideContent[];
@@ -171,8 +172,23 @@ export function CarouselViewer({
           </div>
         </div>
 
-        {/* Progress bar when generating or partially done */}
-        {(isGeneratingImages || (done > 0 && done < slides.length)) && (
+        {/* Detailed Progress HUD during generation */}
+        {isGeneratingImages && (
+          <div className="mt-4 pt-3 border-t border-white/10">
+            <GenerationProgress
+              isGenerating={isGeneratingImages}
+              title="Schritt 2: Karussell-Visuals werden gerendert"
+              currentStep={`Generiere Folie ${Math.min(slides.length, done + 1)} von ${slides.length}… (Bereits fertige Bilder bleiben beim Abbrechen erhalten)`}
+              completedItems={done}
+              totalItems={slides.length}
+              estimatedSecondsRemaining={Math.max(1, (slides.length - done) * 4)}
+              onCancel={onCancelGeneration}
+            />
+          </div>
+        )}
+
+        {/* Static progress bar when partially done and not generating */}
+        {!isGeneratingImages && done > 0 && done < slides.length && (
           <div className="mt-3 pt-3 border-t border-white/10">
             <div className="flex items-center justify-between text-[11px] mb-1.5">
               <span className="text-zinc-400 font-medium">

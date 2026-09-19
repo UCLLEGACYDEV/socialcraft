@@ -35,6 +35,7 @@ import type { AiCloneProfile, ApiSettings, BrandKit, BriefValues } from "@/onyx/
 import type { User } from "@/onyx/auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { GenerationProgress } from "@/onyx/components/widgets/GenerationProgress";
 
 interface StudioCarouselWorkspaceProps {
   brief: BriefValues;
@@ -660,6 +661,20 @@ export function StudioCarouselWorkspace({
               In Schritt 1 generiert die KI das vollständige Text-Konzept (Hooks, Folientexte & Visual-Prompts). Du verbrauchst <strong className="text-white font-bold">keine Bild-Credits</strong>. Erst in Schritt 2 entscheidest du nach der Text-Prüfung, ob Visuals gerendert werden ({brief.slideCount} Credits, ~{brief.slideCount * 4}s).
             </p>
           </div>
+
+          {/* ── Progress HUD when generating ────────────────────────── */}
+          {isGenerating && (
+            <div className="pt-2 relative z-10">
+              <GenerationProgress
+                isGenerating={isGenerating}
+                title="Schritt 1: Text-Konzept wird entwickelt"
+                currentStep="Psychologische Hooks, Folienstruktur & Bild-Prompts werden generiert…"
+                completedItems={0}
+                totalItems={brief.slideCount}
+                estimatedSecondsRemaining={4}
+              />
+            </div>
+          )}
 
           {/* ── Primary Action Button ───────────────────────────────── */}
           <div className="pt-2 border-t border-white/[0.08] relative z-10">

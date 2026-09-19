@@ -51,20 +51,25 @@ src/
 │   │   ├── useStudioModals.ts      # Consolidated state dictionary for all 12 modals
 │   │   └── useMcpSync.ts           # Bidirectional sync loop with the MCP store
 │   ├── components/            # Workspace views & UI modules
-│   │   ├── StudioCarouselWorkspace.tsx  # Carousel brief composer
-│   │   ├── CarouselViewer.tsx           # Interactive slide viewer & canvas
-│   │   ├── PostSchedulerView.tsx        # Multi-platform scheduler & calendar
-│   │   ├── CloudGalleryView.tsx         # S4 cloud gallery & history browser
-│   │   ├── AiCloneView.tsx              # KI-Clone persona studio
-│   │   └── SimpleViews.tsx              # PromptGallery, HistoryView, McpModal
+│   │   ├── views/             # Workspace views (StudioCarouselWorkspace, PostSchedulerView, AiCloneView, etc.)
+│   │   ├── modals/            # Studio modals (ThirtyDayBatchModal, BrandKitModal, SettingsModal, etc.)
+│   │   ├── layout/            # Layout shells (CryptoxNavbar, Sidebar, ViewBoundary)
+│   │   └── widgets/           # Sub-components (SlideCard, EngineSelector, scheduler-utils)
 │   ├── postforme/             # Post For Me API integration
 │   │   ├── client.ts          # Typed Post For Me HTTP client (with proxy fallback)
 │   │   └── types.ts           # Post For Me data transfer objects & interfaces
 │   ├── s4-storage.ts          # Client-side S4 cloud storage SDK
-│   ├── defaults.ts            # Default presets and theme configurations
+│   ├── defaults.ts            # Default presets, brand kits, and theme configurations
+│   ├── scheduling.ts          # Unified slot collision calculation (computeNextSlots)
 │   ├── storage.ts             # Local-first typed persistent state hooks
-│   └── types.ts               # Core domain types (Slide, Carousel, BrandKit, etc.)
+│   └── types.ts               # Core domain types (Slide, Carousel, BrandKit, StoryBrief, Job, etc.)
 ├── server/
+│   ├── story/
+│   │   └── story-service.ts   # AI Storyboard & dynamic carousel narrative generator
+│   ├── jobs/
+│   │   ├── orchestrator.ts    # Background job queue, deduplication & pipeline chaining
+│   │   ├── render-worker.ts   # Node-side KIE.AI Nano-Banana 2 slide renderer
+│   │   └── publish-worker.ts  # Automated Post for Me scheduling worker
 │   ├── cloud-api-router.ts    # Unified Nitro/Vite server API router
 │   ├── cloud-storage.ts       # Server-side AWS S3 SDK wrapper for Mega S4
 │   ├── cloud-identity.ts      # Multi-tenant user isolation and path scoping
@@ -73,8 +78,9 @@ src/
 │   ├── index.tsx              # Declarative root orchestrator
 │   └── ...                    # Route declarations (/admin, /terms, etc.)
 └── mcp/                       # Model Context Protocol server & store
-    ├── store.ts               # MCP filesystem persistence
-    └── http-server.ts         # MCP SSE and HTTP bridge
+    ├── store.ts               # MCP filesystem persistence & Job Queue storage
+    ├── tools.ts               # 15 MCP tools (including generate_storyboard, produce_and_schedule, get_job_status)
+    └── http-server.ts         # MCP SSE and Streamable HTTP bridge
 ```
 
 ---

@@ -13,6 +13,7 @@ export type SlideRole =
 export type CarouselLlmProvider = "gemini" | "openai" | "anthropic";
 
 export type TabKey =
+  | "overview"
   | "carousel"
   | "bulk"
   | "direct-prompt"
@@ -238,5 +239,59 @@ export interface AiCloneProfile {
   customPrefix: string;
   placement: ClonePlacement;
   analysisSummary?: string[];
+  updatedAt: string;
+}
+
+export interface StoryBrief {
+  topic: string;
+  content?: string;
+  slideCount: number;
+  singleImageCount?: number;
+  audience?: string;
+  platforms?: SocialPlatform[];
+  styleId?: string;
+  personaId?: string;
+  clonePlacement?: ClonePlacement;
+  profileId?: string;
+  llmProvider?: "gemini" | "openai" | "anthropic";
+  scheduleStartFrom?: string;
+  idempotencyKey?: string;
+  hookArchetype?: "provocative" | "storytelling" | "data-driven" | "step-by-step" | "question";
+  customInstructions?: string;
+}
+
+export interface SingleImageBrief {
+  caption: string;
+  hashtags: string[];
+  visualPrompt: string;
+  headline?: string;
+}
+
+export interface StoryboardResult {
+  carousel: {
+    title: string;
+    caption: string;
+    hashtags: string[];
+    slides: SlideContent[];
+  };
+  singles?: SingleImageBrief[];
+  warnings?: string[];
+  provider?: string;
+}
+
+export type JobType = "story" | "render" | "publish" | "archive";
+export type JobQueueStatus = "queued" | "running" | "done" | "error" | "dead";
+
+export interface Job {
+  id: string;
+  type: JobType;
+  refId: string;
+  status: JobQueueStatus;
+  attempts: number;
+  maxAttempts: number;
+  idempotencyKey?: string;
+  payload: Record<string, unknown>;
+  lastError?: string;
+  createdAt: string;
   updatedAt: string;
 }

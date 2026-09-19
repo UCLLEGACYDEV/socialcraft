@@ -48,7 +48,7 @@ const CREDIT_PACKAGES = [
     features: [
       "1.000 Credits sofort verfügbar",
       "~10 vollständige 7-Slide Karussells",
-      "Nano-Banana 2 Bild-Pipeline",
+      "Optimierte HD-Bildpipeline",
       "Kostenloser 1080×1350 ZIP-Export",
     ],
     highlight: false,
@@ -64,10 +64,10 @@ const CREDIT_PACKAGES = [
     desc: "Das beliebteste Paket für ambitionierte Social Media Creator.",
     features: [
       "5.000 + 500 Bonus = 5.500 Credits",
-      "~50 bis 60 Karussells inkl. KI-Klon",
-      "Priorisierte Nano-Banana 2 Pipeline",
+      "~50 bis 60 Karussells inkl. Persona-Gesicht",
+      "Priorisierte HD-Bildpipeline",
       "Unbegrenzte Entwürfe & ZIP-Exporte",
-      "Konsistente Gesichtsanpassung (KI-Klon)",
+      "Konsistente Personalisierung (Mein Gesicht)",
     ],
     highlight: true,
   },
@@ -84,7 +84,7 @@ const CREDIT_PACKAGES = [
       "20.000 + 3.000 Bonus = 23.000 Credits",
       "~250 Karussells oder Serien-Massenproduktion",
       "Höchste Priorität in der Render-Warteschlange",
-      "Multi-Profil KI-Klon Unterstützung",
+      "Mehrere Gesichter & Profile verwalten",
       "Eigene API-Keys ohne Plattformlimits",
     ],
     highlight: false,
@@ -217,10 +217,10 @@ export function CreditUpgradeModal({
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs flex items-center gap-2">
               <Zap className="h-3.5 w-3.5 text-[#FF6A1F]" />
               <div>
-                <div className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">Engine Status</div>
+                <div className="text-[10px] text-white/40 font-semibold uppercase tracking-wider">System-Status</div>
                 <div className="font-mono font-bold text-white flex items-center gap-1.5">
                   <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-emerald-400">ONYX Ultra Pipeline</span>
+                  <span className="text-emerald-400">KI-Pipeline bereit</span>
                 </div>
               </div>
             </div>
@@ -500,7 +500,7 @@ export function CreditUpgradeModal({
                     <span className="font-mono text-xs font-bold text-cyan-400">15 cr / Folie</span>
                   </div>
                   <p className="text-[11px] text-white/50 mt-1">
-                    Fotorealistisches 4:5 Rendering via Nano-Banana 2 mit Studio-Beleuchtung.
+                    Fotorealistisches 4:5 Rendering mit professioneller Studio-Beleuchtung.
                   </p>
                 </div>
               </div>

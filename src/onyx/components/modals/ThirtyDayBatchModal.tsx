@@ -41,6 +41,7 @@ import { ZernioApiClient } from "@/onyx/zernio/client";
 import { sanitizeNoGedankenstriche, generateViralCaption } from "@/onyx/caption-generator";
 import type { ApiSettings, ScheduledPost, SocialChannel } from "@/onyx/types";
 import { cn } from "@/lib/utils";
+import { GenerationProgress } from "@/onyx/components/widgets/GenerationProgress";
 import { PostForMeApiClient } from "@/onyx/postforme/client";
 import { ANCHORED_POSTFORME_API_KEY } from "@/onyx/defaults";
 import { LS, readLS } from "@/onyx/storage";
@@ -809,6 +810,28 @@ export function ThirtyDayBatchModal({
                     );
                   })}
               </div>
+
+              {/* Live Batch Progress HUD */}
+              {isSchedulingBatch && (
+                <div className="pt-2 pb-1">
+                  <GenerationProgress
+                    isGenerating={isSchedulingBatch}
+                    title="30-Tage Content-Plan wird eingerichtet"
+                    currentStep={
+                      batchProgress
+                        ? `Plane Beitrag ${Math.min(batchProgress.total, batchProgress.done + 1)} von ${batchProgress.total}…`
+                        : "Beiträge werden vorbereitet…"
+                    }
+                    completedItems={batchProgress?.done || 0}
+                    totalItems={batchProgress?.total || 30}
+                    estimatedSecondsRemaining={
+                      batchProgress
+                        ? Math.max(1, (batchProgress.total - batchProgress.done) * 1)
+                        : 20
+                    }
+                  />
+                </div>
+              )}
 
               {/* Final Execution Bar */}
               <div className="pt-3 border-t border-white/[0.08] flex flex-col sm:flex-row sm:items-center justify-between gap-3">

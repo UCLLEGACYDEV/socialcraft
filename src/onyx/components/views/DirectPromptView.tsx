@@ -40,6 +40,7 @@ import {
   DEFAULT_CLONE_PROFILES,
 } from "@/onyx/defaults";
 import { EngineSelector } from "@/onyx/components/widgets/EngineSelector";
+import { GenerationProgress } from "@/onyx/components/widgets/GenerationProgress";
 import { generateImageUnified } from "@/onyx/mock-api";
 import {
   analyzeInspirationAndFuseWithClone,
@@ -706,8 +707,8 @@ export function DirectPromptView({
           </div>
           <p className="text-xs text-zinc-400 mt-1 max-w-2xl">
             {useClone
-              ? "Inspirationsfoto reinwerfen → Die KI analysiert Outfit, Pose & Licht → adaptiert alles auf deinen Klon → rendert das Bild sofort in deinen Cloud-Speicher."
-              : "Freier Prompt-Modus mit modernsten KI-Modellen (Nano-Banana 2, GPT Image etc.), optionalen Referenzfotos und Stapelverarbeitung bis zu 4 Bildern."}
+              ? "Inspirationsfoto hochladen → Stil & Pose werden automatisch auf dein Gesicht übertragen → fertiges Bild direkt in der Galerie."
+              : "Freier Bildgenerator ohne Klon-Bindung. Mit optionalen Referenzfotos und bis zu 4 Bildern gleichzeitig."}
           </p>
         </div>
 
@@ -719,6 +720,64 @@ export function DirectPromptView({
           </div>
         </div>
       </div>
+
+      {/* Generation Progress HUD */}
+      {(isGenerating || isOneClickRunning || isFusing) && (
+        <GenerationProgress
+          isGenerating={isGenerating || isOneClickRunning || isFusing}
+          title={
+            isOneClickRunning
+              ? "1-Click Klon-Flow wird ausgeführt"
+              : directBatchProgress
+              ? "Bilder-Serie wird gerendert"
+              : isFusing
+              ? "Inspiration analysieren"
+              : "Einzelbild wird gerendert"
+          }
+          currentStep={
+            isOneClickRunning
+              ? oneClickStage === "scanning"
+                ? "Inspirations-Bilder analysieren…"
+                : oneClickStage === "fusing"
+                ? `Look auf KI-Klon „${activeClone.name}“ adaptieren…`
+                : oneClickStage === "rendering"
+                ? "KI-Visual rendern (hohe Qualität)…"
+                : oneClickStage === "uploading"
+                ? "In Cloud-Speicher sichern…"
+                : "KI-Generierung läuft…"
+              : directBatchProgress
+              ? `Generiere Bild ${directBatchProgress.current} von ${directBatchProgress.total}…`
+              : isFusing
+              ? (fusionProgress ? fusionProgress.label : "Stil wird analysiert…")
+              : "KI rendert dein Bild in hoher Auflösung…"
+          }
+          completedItems={
+            isOneClickRunning
+              ? (oneClickStage === "scanning" ? 1 : oneClickStage === "fusing" ? 2 : oneClickStage === "rendering" ? 3 : 4)
+              : directBatchProgress
+              ? directBatchProgress.current - 1
+              : isFusing
+              ? (fusionProgress?.step || 1)
+              : 0
+          }
+          totalItems={
+            isOneClickRunning
+              ? 4
+              : directBatchProgress
+              ? directBatchProgress.total
+              : isFusing
+              ? (fusionProgress?.totalSteps || 2)
+              : 1
+          }
+          estimatedSecondsRemaining={
+            isOneClickRunning
+              ? (oneClickStage === "scanning" ? 10 : oneClickStage === "fusing" ? 7 : oneClickStage === "rendering" ? 4 : 1)
+              : directBatchProgress
+              ? Math.max(1, (directBatchProgress.total - (directBatchProgress.current - 1)) * 4)
+              : 4
+          }
+        />
+      )}
 
       {/* SECTION 1: KI-KLON AKTIVIERUNG & AUSWAHL */}
       <div className="cryptox-card relative overflow-hidden p-5 sm:p-6 border border-white/[0.08] transition-all">

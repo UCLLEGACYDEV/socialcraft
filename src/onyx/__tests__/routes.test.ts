@@ -4,6 +4,7 @@ import type { TabKey } from "../types";
 
 describe("Route and Tab Mappings", () => {
   const allTabs: TabKey[] = [
+    "overview",
     "carousel",
     "bulk",
     "direct-prompt",
@@ -28,6 +29,7 @@ describe("Route and Tab Mappings", () => {
   });
 
   it("includes correct expected URLs", () => {
+    expect(TAB_ROUTE_MAP.overview).toBe("/");
     expect(TAB_ROUTE_MAP.scheduler).toBe("/planer");
     expect(TAB_ROUTE_MAP.carousel).toBe("/studio");
     expect(TAB_ROUTE_MAP.bulk).toBe("/serie");

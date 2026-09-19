@@ -91,6 +91,8 @@
   },
   "carousels": [],
   "seriesQueue": [],
+  "jobs": [],
+  "producedKeys": {},
   "deletedPostIds": [
     "post_1788949777918_u836p",
     "post_1788949897813_psyn8",
@@ -103,10 +105,28 @@
     "post_1788952443387_ewqqb",
     "post_1788952443413_9kazq",
     "post_1789029617772_bhco5",
-    "post_1789029617789_2nnez"
+    "post_1789029617789_2nnez",
+    "post_1789778881382_9usy7",
+    "post_1789778881399_bxqme",
+    "post_1789779139979_thkyq",
+    "post_1789779139996_ipk9o",
+    "post_1789779327325_pe9f3",
+    "post_1789779327349_ljicm",
+    "post_1789779398518_j3nik",
+    "post_1789779398539_2ey22",
+    "post_1789779485004_8c44w",
+    "post_1789779485025_6glah",
+    "post_1789780053128_cls3c",
+    "post_1789780053150_1e4fz",
+    "post_1789780267732_kiyl1",
+    "post_1789780267755_8nexw",
+    "post_1789780467578_xvhac",
+    "post_1789780467598_0cttu",
+    "post_1789780691331_sdrkr",
+    "post_1789780691352_ruto9"
   ],
   "deletedSeriesIds": [
     "test-series-1"
   ],
-  "updatedAt": "2026-09-10T08:40:17.793Z"
+  "updatedAt": "2026-09-19T01:18:11.458Z"
 }

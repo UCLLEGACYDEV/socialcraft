@@ -2,6 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import { CalendarDays, Cloud, Compass, Image as ImageIcon, Layers } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 import {
   AdminDashboard,
@@ -19,6 +21,7 @@ import {
   HistoryView,
   McpModalContent,
   ModalShell,
+  OverviewView,
   PostForMeSetupModal,
   PostSchedulerView,
   PromptGallery,
@@ -384,11 +387,16 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
         brief.audience,
         clonePrefix,
         clonePlacement,
+        {
+          apiKey: settings.geminiApiKey || brief.apiKey,
+          styleId: brief.designId,
+          customInstructions: brief.ctaText ? `CTA-Wunsch: ${brief.ctaText}` : undefined,
+        }
       );
       setSlides(next);
       setTopic(brief.topic);
       rememberMotifs(next);
-      toast.success(`${next.length} Prompts erzeugt${brief.useClone ? " (mit KI Clone)" : ""}`);
+      toast.success(`${next.length} Story-Slides erzeugt${brief.useClone ? " (mit KI Clone)" : ""}`);
     } finally {
       setIsGeneratingCarousel(false);
     }
@@ -480,7 +488,7 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
         }
 
         if (realNanoCount > 0) {
-          toast.success(`${realNanoCount} Visuals via Nano-Banana 2 gerendert! 🍌`);
+          toast.success(`${realNanoCount} Visuals erfolgreich in hoher Qualität gerendert! ✨`);
           void refreshCredits();
         } else {
           toast.success("Alle Visuals geladen & in Cloud-Ordner gesichert ☁️");
@@ -532,10 +540,10 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
         });
       }
       if (res.fromRealApi) {
-        toast.success(`Slide ${slide.slideNumber} via Nano-Banana 2 gerendert!`);
+        toast.success(`Folie ${slide.slideNumber} erfolgreich in hoher Qualität gerendert! ✨`);
         void refreshCredits();
       } else {
-        toast.success(`Slide ${slide.slideNumber} neu gerendert`);
+        toast.success(`Folie ${slide.slideNumber} neu gerendert`);
       }
     } catch (err: unknown) {
       setSlideFlag(slideId, { isGeneratingImage: false, renderProgress: 0, renderStatus: "error" });
@@ -1143,7 +1151,30 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
           onOpenBrandProfileManager={() => setShowBrandProfileManager(true)}
         />
 
-        <main className="mx-auto w-full flex-1 p-4 sm:p-6 max-w-[1600px]">
+        <main className="mx-auto w-full flex-1 p-4 sm:p-6 max-w-[1600px] pb-24 md:pb-6">
+          {activeTab === "overview" && (
+            <ViewBoundary name="Studio-Übersicht">
+              <OverviewView
+                currentUser={currentUser}
+                onNavigate={handleTabChange}
+                onOpen30DayBatch={() => setShow30DayBatch(true)}
+                onOpenBrandKit={() => setShowBrandKit(true)}
+                onOpenSettings={() => setShowSettings(true)}
+                onOpenCreditsUpgrade={() => setShowCreditUpgrade(true)}
+                scheduledPosts={scheduledPosts}
+                socialChannels={socialChannels}
+                historyEntries={history}
+                creditStatus={creditStatus}
+                onRefreshCredits={() => void refreshCredits()}
+                onOpenHistoryEntry={(entry) => {
+                  setSlides(entry.slides);
+                  setTopic(entry.topic);
+                  handleTabChange("carousel");
+                }}
+              />
+            </ViewBoundary>
+          )}
+
           {activeTab === "carousel" && (
             <ViewBoundary name="Karussell-Studio" storageKeyToClearOnEmergency={LS.activeSlides}>
               {slides.length === 0 ? (
@@ -1474,6 +1505,36 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
           }}
         />
       )}
+
+      {/* Mobile Bottom Navigation Bar (md:hidden) */}
+      <nav
+        aria-label="Mobile Navigation"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-white/10 bg-[#0C0910]/95 backdrop-blur-2xl px-2 py-2 safe-area-pb shadow-[0_-8px_25px_rgba(0,0,0,0.7)]"
+      >
+        {[
+          { key: "overview" as TabKey, label: "Übersicht", icon: Compass },
+          { key: "carousel" as TabKey, label: "Karussell", icon: Layers },
+          { key: "direct-prompt" as TabKey, label: "Einzelbild", icon: ImageIcon },
+          { key: "scheduler" as TabKey, label: "Planer", icon: CalendarDays },
+          { key: "history" as TabKey, label: "Galerie", icon: Cloud },
+        ].map(({ key, label, icon: Icon }) => {
+          const isActive = activeTab === key;
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => handleTabChange(key)}
+              className={cn(
+                "flex flex-col items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-semibold transition-all cursor-pointer",
+                isActive ? "text-[#FF4D17]" : "text-zinc-400 hover:text-white"
+              )}
+            >
+              <Icon className={cn("h-5 w-5", isActive ? "stroke-[2.5]" : "stroke-[1.8]")} />
+              <span>{label}</span>
+            </button>
+          );
+        })}
+      </nav>
 
       <Toaster />
     </div>

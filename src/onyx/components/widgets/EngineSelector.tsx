@@ -1,4 +1,5 @@
-import { Check, Sparkles, Zap } from "lucide-react";
+import { useState } from "react";
+import { Check, ChevronDown, ChevronUp, Sparkles, SlidersHorizontal, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ImageProvider, KieModel } from "@/onyx/types";
 
@@ -12,57 +13,44 @@ export interface EngineOption {
   badge: string;
 }
 
-export const AVAILABLE_ENGINES: EngineOption[] = [
+export const QUALITY_TIERS: EngineOption[] = [
   {
-    id: "nano-banana-2",
+    id: "balanced",
     provider: "kie-ai",
     kieModel: "nano-banana-2",
-    name: "Nano-Banana 2",
+    name: "Ausgewogen",
     tag: "Empfohlen",
-    desc: "Höchste Fotorealistik & Gesichts-Konsistenz",
-    badge: "🍌 KIE AI",
+    desc: "Optimale Balance aus natürlicher Bildschärfe und schneller Generierung.",
+    badge: "Empfohlen",
   },
   {
-    id: "nano-banana-pro",
+    id: "highest",
     provider: "kie-ai",
     kieModel: "nano-banana-pro",
-    name: "Nano-Banana Pro",
-    tag: "Ultra 8K",
-    desc: "Maximale Detailtiefe & scharfe Texturen",
-    badge: "🍌 KIE Pro",
+    name: "Beste Qualität",
+    tag: "Maximal",
+    desc: "Höchste Detailschärfe und Gesichtsgenauigkeit für finale Posts.",
+    badge: "Ultra-Detail",
   },
   {
-    id: "gpt-image-2-text-to-image",
-    provider: "kie-ai",
-    kieModel: "gpt-image-2-text-to-image",
-    name: "GPT-Image 2",
-    tag: "OpenAI",
-    desc: "OpenAI GPT-Image via KIE API",
-    badge: "🤖 OpenAI",
-  },
-  {
-    id: "flux-pro",
+    id: "fast",
     provider: "ai33-pro",
-    name: "Flux 1.1 Pro",
-    tag: "Editorial",
-    desc: "High-End Magazin & Fashion Look",
-    badge: "⚡ Flux",
-  },
-  {
-    id: "gemini-imagen",
-    provider: "gemini-imagen",
-    name: "Google Imagen 3",
-    tag: "Google Flow",
-    desc: "Google DeepMind Imagen 3 Engine",
-    badge: "💎 Google",
+    name: "Schnell",
+    tag: "Entwurf",
+    desc: "Schnelle Ergebnisse zum schnellen Testen von Motiven und Ideen.",
+    badge: "Turbo",
   },
 ];
+
+// Fallback legacy array for backward compatibility if imported elsewhere
+export const AVAILABLE_ENGINES = QUALITY_TIERS;
 
 interface EngineSelectorProps {
   currentProvider?: ImageProvider;
   currentKieModel?: KieModel;
   onSelectEngine: (engine: EngineOption) => void;
   compact?: boolean;
+  defaultExpanded?: boolean;
 }
 
 export function EngineSelector({
@@ -70,67 +58,100 @@ export function EngineSelector({
   currentKieModel = "nano-banana-2",
   onSelectEngine,
   compact = false,
+  defaultExpanded = false,
 }: EngineSelectorProps) {
-  const isEngineActive = (opt: EngineOption) => {
+  const [expanded, setExpanded] = useState(defaultExpanded);
+
+  const isTierActive = (opt: EngineOption) => {
     if (opt.provider === "kie-ai") {
       return currentProvider === "kie-ai" && currentKieModel === opt.kieModel;
     }
     return currentProvider === opt.provider;
   };
 
+  const activeTier =
+    QUALITY_TIERS.find((t) => isTierActive(t)) ||
+    QUALITY_TIERS[0]; // defaults to Ausgewogen
+
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
-          <Zap className="h-3.5 w-3.5 text-[#FF4D17]" />
-          <span>KI-Engine & Modell wählen:</span>
-        </label>
-        <span className="text-[10px] text-zinc-500">
-          Direkt umschaltbar
-        </span>
+    <div className="rounded-xl border border-white/[0.08] bg-white/[0.02] p-3 space-y-2.5 transition-all">
+      {/* ── Collapsed / Header Bar ───────────────────────────────── */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-orange-500/20 text-[#FF4D17] border border-orange-500/30 shrink-0">
+            <Zap className="h-3.5 w-3.5" />
+          </div>
+          <div className="flex items-center gap-2 truncate">
+            <span className="text-xs font-semibold text-zinc-300">Bildqualität:</span>
+            <span className="text-xs font-bold text-white truncate">{activeTier.name}</span>
+            <span className="rounded-full bg-orange-500/15 border border-orange-500/30 px-2 py-0.2 text-[10px] font-bold text-orange-300">
+              {activeTier.badge}
+            </span>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => setExpanded((prev) => !prev)}
+          className="inline-flex items-center gap-1 text-xs font-semibold text-orange-400 hover:text-white transition-colors cursor-pointer shrink-0"
+        >
+          <span>{expanded ? "Einklappen" : "Andere Qualität wählen"}</span>
+          {expanded ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+        </button>
       </div>
 
-      <div className={cn("grid gap-2", compact ? "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5" : "grid-cols-1 sm:grid-cols-3 lg:grid-cols-5")}>
-        {AVAILABLE_ENGINES.map((opt) => {
-          const active = isEngineActive(opt);
-          return (
-            <button
-              key={opt.id}
-              type="button"
-              onClick={() => onSelectEngine(opt)}
-              className={cn(
-                "relative flex flex-col p-2.5 rounded-xl border text-left transition-all group cursor-pointer",
-                active
-                  ? "bg-[#FF4D17]/15 border-[#FF4D17] shadow-[0_0_20px_rgba(255,77,23,0.25)] ring-1 ring-[#FF4D17]/50"
-                  : "bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.05] hover:border-white/20",
-              )}
-            >
-              <div className="flex items-center justify-between w-full mb-1">
-                <span className="text-[10px] font-mono font-bold text-zinc-400">
-                  {opt.badge}
-                </span>
-                {active ? (
-                  <span className="h-4 w-4 rounded-full bg-[#FF4D17] text-white flex items-center justify-center shrink-0">
-                    <Check className="h-2.5 w-2.5 stroke-[3]" />
-                  </span>
-                ) : (
-                  <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-white/[0.04] text-zinc-400">
-                    {opt.tag}
-                  </span>
-                )}
-              </div>
+      {/* ── Expanded Quality Tiers ───────────────────────────────── */}
+      {expanded && (
+        <div className="pt-2 border-t border-white/[0.06] space-y-2 animate-in fade-in-50 duration-200">
+          <p className="text-[11px] text-zinc-400">
+            Wähle die passende Qualitätsstufe für deine Visuals:
+          </p>
+          <div className={cn("grid gap-2.5", compact ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-1 sm:grid-cols-3")}>
+            {QUALITY_TIERS.map((tier) => {
+              const active = isTierActive(tier);
+              return (
+                <button
+                  key={tier.id}
+                  type="button"
+                  onClick={() => {
+                    onSelectEngine(tier);
+                    setExpanded(false);
+                  }}
+                  className={cn(
+                    "relative flex flex-col p-3 rounded-xl border text-left transition-all group cursor-pointer",
+                    active
+                      ? "bg-[#FF4D17]/15 border-[#FF4D17] shadow-[0_0_20px_rgba(255,77,23,0.25)] ring-1 ring-[#FF4D17]/50"
+                      : "bg-white/[0.02] border-white/[0.08] hover:bg-white/[0.05] hover:border-white/20",
+                  )}
+                >
+                  <div className="flex items-center justify-between w-full mb-1">
+                    <span className="text-xs font-bold text-white group-hover:text-orange-200 transition-colors">
+                      {tier.name}
+                    </span>
+                    {active ? (
+                      <span className="h-4 w-4 rounded-full bg-[#FF4D17] text-white flex items-center justify-center shrink-0">
+                        <Check className="h-2.5 w-2.5 stroke-[3]" />
+                      </span>
+                    ) : (
+                      <span className="text-[9px] font-medium px-1.5 py-0.2 rounded bg-white/[0.05] text-zinc-400">
+                        {tier.tag}
+                      </span>
+                    )}
+                  </div>
 
-              <span className={cn("text-xs font-bold truncate", active ? "text-white" : "text-zinc-300 group-hover:text-white")}>
-                {opt.name}
-              </span>
+                  <p className="text-[11px] text-zinc-400 leading-snug mt-0.5">
+                    {tier.desc}
+                  </p>
 
-              <p className="text-[10px] text-zinc-400 line-clamp-2 mt-0.5 leading-tight">
-                {opt.desc}
-              </p>
-            </button>
-          );
-        })}
-      </div>
+                  <div className="mt-2 pt-1.5 border-t border-white/[0.04] flex items-center justify-between text-[10px] text-zinc-400 font-mono">
+                    <span>{tier.kieModel || tier.provider}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

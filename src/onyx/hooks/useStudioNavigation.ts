@@ -5,6 +5,7 @@ import { LS, usePersistentState } from "@/onyx/storage";
 import type { TabKey } from "@/onyx/types";
 
 export const TAB_ROUTE_MAP: Record<TabKey, string> = {
+  overview: "/",
   carousel: "/studio",
   bulk: "/serie",
   "direct-prompt": "/einzelbild",
@@ -15,6 +16,7 @@ export const TAB_ROUTE_MAP: Record<TabKey, string> = {
 };
 
 export const ROUTE_TAB_MAP: Record<string, TabKey> = {
+  "/": "overview",
   "/studio": "carousel",
   "/serie": "bulk",
   "/einzelbild": "direct-prompt",
@@ -33,12 +35,12 @@ export function useStudioNavigation({ routeTab, initialView }: UseStudioNavigati
   const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredCurrentUser());
   const [currentView, setCurrentView] = usePersistentState<"landing" | "studio" | "admin">(
     "onyx.currentView",
-    initialView || (currentUser || routeTab ? "studio" : "landing"),
+    initialView || "studio",
   );
 
   const [activeTab, setActiveTab] = usePersistentState<TabKey>(
     LS.activeTab,
-    routeTab || "carousel",
+    routeTab || "overview",
   );
 
   // SaaS rule: Authenticated users stay in the Studio workspace; never bounced to marketing landing page
@@ -104,15 +106,11 @@ export function useStudioNavigation({ routeTab, initialView }: UseStudioNavigati
         setCurrentView("studio");
       } else if (path === "/admin") {
         setCurrentView("admin");
-      } else if (path === "/") {
-        if (!currentUser) {
-          setCurrentView("landing");
-        }
       }
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, [currentUser, setActiveTab, setCurrentView]);
+  }, [setActiveTab, setCurrentView]);
 
   const handleTabChange = useCallback(
     (newTab: TabKey) => {

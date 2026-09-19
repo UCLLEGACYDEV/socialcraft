@@ -57,19 +57,20 @@ interface CryptoxNavbarProps {
   onOpenBrandProfileManager?: () => void;
 }
 
-// Group 1: Creation Tools
+// Group 1: Primary Tools
 const CREATION_TABS: { key: TabKey; label: string }[] = [
+  { key: "overview", label: "Übersicht" },
   { key: "carousel", label: "Karussell" },
-  { key: "bulk", label: "Batch Studio" },
   { key: "direct-prompt", label: "Einzelbild" },
   { key: "scheduler", label: "Planer" },
 ];
 
 // Group 2: Library & Workspaces
 const LIBRARY_TABS: { key: TabKey; label: string }[] = [
-  { key: "prompt-gallery", label: "Prompt Hub" },
-  { key: "ai-clone", label: "KI Clone" },
+  { key: "bulk", label: "Content-Serie" },
   { key: "history", label: "Galerie" },
+  { key: "prompt-gallery", label: "Vorlagen" },
+  { key: "ai-clone", label: "Mein Gesicht" },
 ];
 
 export function CryptoxNavbar({
@@ -117,13 +118,13 @@ export function CryptoxNavbar({
         <div className="flex items-center gap-2 sm:gap-3">
           <div
             onClick={() => {
-              onNavigate("carousel");
+              onNavigate("overview");
               if (typeof window !== "undefined") {
                 window.scrollTo({ top: 0, left: 0, behavior: "instant" });
               }
             }}
             className="flex items-center gap-2.5 cursor-pointer select-none group"
-            title="Socialcraft Studio Workspace"
+            title="Socialcraft Studio Übersicht"
           >
             {/* Socialcraft Brand Logo Icon */}
             <div className="relative flex h-9 w-9 items-center justify-center rounded-xl overflow-hidden shadow-[0_0_20px_-2px_rgba(255,77,23,0.5)] transition-transform duration-300 group-hover:scale-105 border border-[#FF4D17]/40 bg-black/60 shrink-0">
@@ -461,7 +462,7 @@ export function CryptoxNavbar({
                 className="flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium text-zinc-300 hover:bg-white/[0.06] hover:text-white cursor-pointer transition-colors"
               >
                 <Palette className="h-4 w-4 text-orange-400" />
-                <span>Brand Kit anpassen</span>
+                <span>Mein Look (Branding)</span>
               </DropdownMenuItem>
 
               <DropdownMenuItem

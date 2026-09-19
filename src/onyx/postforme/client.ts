@@ -152,6 +152,18 @@ export class PostForMeApiClient {
     return media_url;
   }
 
+  /**
+   * Fetches an image from a remote URL (e.g. KIE.AI result) and uploads it to Post for Me S3
+   */
+  async uploadMediaFromUrl(remoteUrl: string, contentType = "image/jpeg"): Promise<string> {
+    const res = await fetch(remoteUrl);
+    if (!res.ok) {
+      throw new Error(`Konnte Remote-Bild nicht abrufen (${res.status}): ${remoteUrl}`);
+    }
+    const blob = await res.blob();
+    return this.uploadMedia(blob, contentType);
+  }
+
   // --- SOCIAL ACCOUNTS ---
 
   /**
