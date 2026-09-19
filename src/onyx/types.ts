@@ -65,7 +65,16 @@ export interface SocialChannel {
   pinterestDefaultLink?: string; // Optional destination URL attached to every pin
 }
 
-export type ScheduledPostStatus = "scheduled" | "queued" | "published" | "draft" | "failed" | "cancelled";
+export type ScheduledPostStatus =
+  | "draft"
+  | "in_review"
+  | "scheduled"
+  | "publishing"
+  | "published"
+  | "failed"
+  | "manual_needed"
+  | "queued"
+  | "cancelled";
 
 export interface ScheduledPost {
   id: string;
@@ -89,6 +98,8 @@ export interface ScheduledPost {
   musicTitle?: string;
   musicArtist?: string;
   profileId?: string; // Links this post to a specific BrandProfile
+  qualityScore?: number; // 0 - 100 quality gate score
+  qualityIssues?: string[]; // Detected warnings / issues
 }
 
 
