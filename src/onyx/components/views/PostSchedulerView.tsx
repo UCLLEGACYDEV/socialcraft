@@ -4605,6 +4605,8 @@ export function PostSchedulerView({
                   const Icon = PLATFORM_ICONS[chan.platform] || Share2;
                   const style = PLATFORM_COLORS[chan.platform] || PLATFORM_COLORS.facebook;
                   const isDisconnecting = disconnectingChannelId === chan.id;
+                  const health = getChannelHealth(chan);
+                  const isReconnecting = connectingPlatform === chan.platform;
 
                   return (
                     <div
@@ -4636,10 +4638,35 @@ export function PostSchedulerView({
                             </div>
                           </div>
 
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                            Aktiv
+                          <span
+                            className={cn(
+                              "text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0",
+                              health.tone === "ok" &&
+                                "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+                              health.tone === "warn" &&
+                                "bg-amber-500/20 text-amber-300 border-amber-500/40",
+                              health.tone === "error" &&
+                                "bg-red-500/20 text-red-300 border-red-500/40",
+                            )}
+                          >
+                            {health.label}
                           </span>
                         </div>
+
+                        {health.hint && (
+                          <div
+                            className={cn(
+                              "rounded-xl border p-2.5 text-[11px] leading-snug flex items-start gap-2",
+                              health.tone === "error"
+                                ? "border-red-500/25 bg-red-500/[0.06] text-red-200"
+                                : "border-amber-500/25 bg-amber-500/[0.06] text-amber-200",
+                            )}
+                          >
+                            <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                            <span>{health.hint}</span>
+                          </div>
+                        )}
+
 
                         {/* Account ID / Business Details */}
                         <div className="bg-black/40 p-3 rounded-xl border border-white/[0.06] space-y-1.5 text-xs font-mono">
@@ -4659,6 +4686,17 @@ export function PostSchedulerView({
                       </div>
 
                       <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2">
+                        {health.tone !== "ok" ? (
+                          <button
+                            type="button"
+                            disabled={isReconnecting}
+                            onClick={() => void handleDirectConnectPlatform(chan.platform)}
+                            className="px-3 py-1.5 rounded-xl bg-orange-500 hover:brightness-110 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-sm disabled:opacity-60"
+                          >
+                            <RefreshCw className={cn("h-3.5 w-3.5", isReconnecting && "animate-spin")} />
+                            <span>{isReconnecting ? "Öffnet Login…" : "Neu verbinden"}</span>
+                          </button>
+                        ) : (
                         <button
                           type="button"
                           onClick={() => {
@@ -4671,6 +4709,7 @@ export function PostSchedulerView({
                           <span>Beitrag planen</span>
                           <ArrowRight className="w-3.5 h-3.5" />
                         </button>
+                        )}
 
                         <button
                           type="button"
@@ -5055,4 +5094,38 @@ export function PostSchedulerView({
       )}
     </div>
   );
+}
+
+// ── Kanal-Gesundheit ──────────────────────────────────────────────
+// Leitet aus den gespeicherten Kanaldaten einen verständlichen Status ab.
+type ChannelHealth = {
+  tone: "ok" | "warn" | "error";
+  label: string;
+  hint?: string;
+};
+
+function getChannelHealth(chan: SocialChannel): ChannelHealth {
+  const linked = Boolean(chan.postForMeAccountId || chan.zernioAccountId || chan.accessToken);
+  if (!linked) {
+    return {
+      tone: "error",
+      label: "Verbindung abgelaufen",
+      hint: "Die Freigabe für diesen Account fehlt oder ist abgelaufen. Bitte neu verbinden.",
+    };
+  }
+  if (chan.platform === "pinterest" && !chan.pinterestBoardId) {
+    return {
+      tone: "warn",
+      label: "Pinnwand fehlt",
+      hint: "Für Pinterest muss eine Pinnwand hinterlegt sein, sonst schlägt die Veröffentlichung fehl.",
+    };
+  }
+  if (!chan.channelId) {
+    return {
+      tone: "warn",
+      label: "Angaben unvollständig",
+      hint: "Diesem Kanal fehlt die Konto-Kennung. Neu verbinden behebt das.",
+    };
+  }
+  return { tone: "ok", label: "Verbunden" };
 }
