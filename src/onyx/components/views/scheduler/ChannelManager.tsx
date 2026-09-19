@@ -123,6 +123,7 @@ export function ChannelManager({
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {channels.map((ch) => {
               const Icon = PLATFORM_ICONS[ch.platform] || Layers;
+              const health = getChannelHealth(ch);
               return (
                 <div
                   key={ch.id}
@@ -139,11 +140,32 @@ export function ChannelManager({
                       </div>
                     </div>
 
-                    <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      Aktiv
+                    <span
+                      className={cn(
+                        "text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 flex items-center gap-1",
+                        health.tone === "ok" && "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+                        health.tone === "warn" && "bg-amber-500/20 text-amber-300 border-amber-500/40",
+                        health.tone === "error" && "bg-red-500/20 text-red-300 border-red-500/40",
+                      )}
+                    >
+                      {health.tone === "ok" && <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />}
+                      {health.label}
                     </span>
                   </div>
+
+                  {health.hint && (
+                    <div
+                      className={cn(
+                        "rounded-xl border p-2.5 text-[11px] leading-snug flex items-start gap-2",
+                        health.tone === "error"
+                          ? "border-red-500/25 bg-red-500/[0.06] text-red-200"
+                          : "border-amber-500/25 bg-amber-500/[0.06] text-amber-200",
+                      )}
+                    >
+                      <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5 text-amber-400" />
+                      <span>{health.hint}</span>
+                    </div>
+                  )}
 
                   <div className="pt-2 border-t border-white/[0.06] flex items-center justify-between">
                     <button
@@ -301,4 +323,38 @@ export function ChannelManager({
       )}
     </div>
   );
+}
+
+// ── Kanal-Gesundheit ──────────────────────────────────────────────
+// Leitet aus den gespeicherten Kanaldaten einen verständlichen Status ab.
+type ChannelHealth = {
+  tone: "ok" | "warn" | "error";
+  label: string;
+  hint?: string;
+};
+
+function getChannelHealth(chan: SocialChannel): ChannelHealth {
+  const linked = Boolean(chan.postForMeAccountId || chan.zernioAccountId || chan.accessToken);
+  if (!linked && !chan.channelId) {
+    return {
+      tone: "error",
+      label: "Verbindung abgelaufen",
+      hint: "Die Freigabe für diesen Account fehlt oder ist abgelaufen. Bitte neu verbinden.",
+    };
+  }
+  if (chan.platform === "pinterest" && !chan.pinterestBoardId) {
+    return {
+      tone: "warn",
+      label: "Pinnwand fehlt",
+      hint: "Für Pinterest muss eine Pinnwand hinterlegt sein, sonst schlägt die Veröffentlichung fehl.",
+    };
+  }
+  if (!chan.channelId && !chan.postForMeAccountId) {
+    return {
+      tone: "warn",
+      label: "Angaben unvollständig",
+      hint: "Diesem Kanal fehlt die Konto-Kennung. Neu verbinden behebt das.",
+    };
+  }
+  return { tone: "ok", label: "Verbunden" };
 }
