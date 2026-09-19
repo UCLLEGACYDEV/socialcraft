@@ -254,6 +254,8 @@ export function StudioRoot({
             socialChannels={socialChannels}
             onSchedulePosts={onSchedulePosts}
             settings={settings}
+            brandKit={brandKit}
+            currentUser={currentUser}
           />
         )}
 
