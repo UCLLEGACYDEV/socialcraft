@@ -5056,3 +5056,37 @@ export function PostSchedulerView({
     </div>
   );
 }
+
+// ── Kanal-Gesundheit ──────────────────────────────────────────────
+// Leitet aus den gespeicherten Kanaldaten einen verständlichen Status ab.
+type ChannelHealth = {
+  tone: "ok" | "warn" | "error";
+  label: string;
+  hint?: string;
+};
+
+function getChannelHealth(chan: SocialChannel): ChannelHealth {
+  const linked = Boolean(chan.postForMeAccountId || chan.zernioAccountId || chan.accessToken);
+  if (!linked) {
+    return {
+      tone: "error",
+      label: "Verbindung abgelaufen",
+      hint: "Die Freigabe für diesen Account fehlt oder ist abgelaufen. Bitte neu verbinden.",
+    };
+  }
+  if (chan.platform === "pinterest" && !chan.pinterestBoardId) {
+    return {
+      tone: "warn",
+      label: "Pinnwand fehlt",
+      hint: "Für Pinterest muss eine Pinnwand hinterlegt sein, sonst schlägt die Veröffentlichung fehl.",
+    };
+  }
+  if (!chan.channelId) {
+    return {
+      tone: "warn",
+      label: "Angaben unvollständig",
+      hint: "Diesem Kanal fehlt die Konto-Kennung. Neu verbinden behebt das.",
+    };
+  }
+  return { tone: "ok", label: "Verbunden" };
+}
