@@ -1083,8 +1083,18 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
       <div className="min-h-screen bg-[#0A080E] text-white">
         <AdminDashboard
           currentUser={currentUser}
-          onNavigateLanding={() => setCurrentView("landing")}
-          onNavigateStudio={() => setCurrentView("studio")}
+          onNavigateLanding={() => {
+            setCurrentView("landing");
+            if (typeof window !== "undefined" && window.location.pathname !== "/willkommen") {
+              window.history.pushState(null, "", "/willkommen");
+            }
+          }}
+          onNavigateStudio={() => {
+            setCurrentView("studio");
+            if (typeof window !== "undefined" && window.location.pathname !== "/") {
+              window.history.pushState(null, "", "/");
+            }
+          }}
           onLogout={handleLogout}
         />
         {showAuthModal && (
