@@ -4686,6 +4686,17 @@ export function PostSchedulerView({
                       </div>
 
                       <div className="pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2">
+                        {health.tone !== "ok" ? (
+                          <button
+                            type="button"
+                            disabled={isReconnecting}
+                            onClick={() => void handleDirectConnectPlatform(chan.platform)}
+                            className="px-3 py-1.5 rounded-xl bg-orange-500 hover:brightness-110 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer transition-all shadow-sm disabled:opacity-60"
+                          >
+                            <RefreshCw className={cn("h-3.5 w-3.5", isReconnecting && "animate-spin")} />
+                            <span>{isReconnecting ? "Öffnet Login…" : "Neu verbinden"}</span>
+                          </button>
+                        ) : (
                         <button
                           type="button"
                           onClick={() => {
