@@ -22,15 +22,15 @@ import {
   Wand2,
   X,
   Zap,
+  ChevronRight,
+  SlidersHorizontal,
+  Info,
+  AlertTriangle,
+  ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { DEFAULT_API_SETTINGS, DEFAULT_CLONE_PROFILES } from "@/onyx/defaults";
 import { generateImageUnified, makeId } from "@/onyx/mock-api";
-import {
-  analyzePersonaPhoto,
-  autoGeneratePersonaProfile,
-  type PersonaAnalysisProgress,
-} from "@/onyx/persona-analyzer";
 import { LS, readLS, usePersistentState } from "@/onyx/storage";
 import type { AiCloneProfile, ApiSettings, ClonePlacement } from "@/onyx/types";
 import type { User as AuthUser } from "@/onyx/auth";
@@ -43,30 +43,42 @@ interface AiCloneViewProps {
   onUseInDirectPrompt?: (clonePrompt: string) => void;
 }
 
-const QUICK_SCENARIOS = [
+const PERSONA_TYPES = [
   {
-    label: "☕ Café & Laptop",
-    prompt: "Sitting in a sleek modern coffee shop, enjoying a cappuccino with an open MacBook, natural window sunlight, relaxed atmosphere",
+    id: "self",
+    title: "Ich selbst (Echte Person)",
+    desc: "Eigene Fotos mit rechtlicher Einwilligung. Perfekt für Personal Branding & Coaches.",
+    icon: User,
   },
   {
-    label: "🎤 Keynote Speaker",
-    prompt: "On a grand keynote stage with a headset microphone, addressing a large audience, dramatic stage spotlights and subtle dark background",
+    id: "synthetic",
+    title: "Synthetische KI-Figur",
+    desc: "Fotorealistische virtuelle Markenbotschafter ohne reale Vorlage.",
+    icon: Sparkles,
   },
   {
-    label: "📸 Dark Studio Portrait",
-    prompt: "High-end editorial studio portrait, dark atmospheric background, warm amber Ember-Rim lighting (#FF4D17) from behind, crisp eye contact",
+    id: "mascot",
+    title: "Maskottchen / Symbolfigur",
+    desc: "Wiederkehrende 3D-Figur, Tier oder Statue (z. B. Marmor-Tiger).",
+    icon: Flame,
+  },
+];
+
+const PLACEMENT_OPTIONS: { id: ClonePlacement; label: string; sub: string }[] = [
+  {
+    id: "hook_closing",
+    label: "Hook & Abschluss (Empfohlen)",
+    sub: "Persona auf Folie 1 und der letzten Folie für maximale Markenbindung.",
   },
   {
-    label: "🌆 Penthouse bei Nacht",
-    prompt: "Standing on a luxury high-rise penthouse balcony at night, city skyline bokeh with glowing lights in the background, elegant evening mood",
+    id: "all_slides",
+    label: "Volle Präsenz",
+    sub: "Auf jeder Folie mit variierender Pose und passender Mimik.",
   },
   {
-    label: "🎙️ Podcast Studio",
-    prompt: "In a professional podcast studio speaking into a Shure SM7B microphone with acoustic foam walls and moody amber neon lighting",
-  },
-  {
-    label: "🏎️ Sportwagen Lifestyle",
-    prompt: "Sitting in the driver seat of a luxury sports car, clean leather interior, golden hour sunset lighting through the windshield",
+    id: "even_slides",
+    label: "Alternierend",
+    sub: "Abwechselnd mit daten- oder grafikbasierten Folien.",
   },
 ];
 
@@ -76,885 +88,541 @@ export function AiCloneView({
   onUseInCarousel,
   onUseInDirectPrompt,
 }: AiCloneViewProps) {
-  // Profiles state
+  // Profiles State
   const [profiles, setProfiles] = usePersistentState<AiCloneProfile[]>(
     LS.cloneProfiles,
     DEFAULT_CLONE_PROFILES,
   );
   const [activeId, setActiveId] = usePersistentState<string>(
     LS.activeCloneId,
-    "",
+    profiles[0]?.id || "",
   );
 
-  // Settings
-  const [settings] = useState<ApiSettings>(() => {
-    return readLS<ApiSettings>(LS.apiSettings, DEFAULT_API_SETTINGS);
-  });
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const [uploadedPhotoUrl, setUploadedPhotoUrl] = useState("");
-  const [showUploadZone, setShowUploadZone] = useState(false);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisProgress, setAnalysisProgress] = useState<PersonaAnalysisProgress | null>(null);
-
-  // Create Modal state
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [createMethod, setCreateMethod] = useState<"photo" | "text">("photo");
-  const [textName, setTextName] = useState("");
-  const [textAge, setTextAge] = useState("28");
-  const [textGender, setTextGender] = useState<"male" | "female" | "diverse">("male");
-  const [textVibe, setTextVibe] = useState("Modern Creator / Tech Leader");
-  const [isTextGenerating, setIsTextGenerating] = useState(false);
-
-  // Single Image Studio state
-  const [singlePrompt, setSinglePrompt] = useState("");
-  const [singleRatio, setSingleRatio] = useState<"4:5" | "1:1">("4:5");
-  const [isGeneratingSingle, setIsGeneratingSingle] = useState(false);
-  const [generatedSingles, setGeneratedSingles] = useState<{
-    id: string;
-    url: string;
-    prompt: string;
-    createdAt: string;
-  }[]>([]);
-
-  // Active Profile resolution
   const activeProfile = useMemo(() => {
-    return profiles.find((p) => p.id === activeId) ?? profiles[0] ?? {
-      id: "clone_default",
-      name: "Mein KI-Klon",
-      isActive: true,
-      genderAge: "Mann, Ende 20",
-      hairFace: "Dunkle strukturierte Haare, gepflegter 3-Tage-Bart",
-      tattoosFeatures: "Reine Haut ohne Unreinheiten",
-      wardrobe: "Schwarzer Merinowolle-Rollkragen",
-      lightingLook: "Studio mit warmem Ember-Rimlight",
-      framingCamera: "85mm Porträt f/1.8",
-      negativePrompt: "Keine Pickel, keine Hautunreinheiten, kein Plastik-Look",
-      customPrefix: "Photorealistic editorial portrait of persona",
-      referenceImages: [],
-      placement: "all_slides" as ClonePlacement,
-      analysisSummary: ["Gesichtszüge & Bart synchronisiert", "Ember-Rimlight aktiv"],
-    };
+    return profiles.find((p) => p.id === activeId) || profiles[0];
   }, [profiles, activeId]);
 
-  useEffect(() => {
-    if (!activeId && profiles.length > 0 && profiles[0]) {
-      setActiveId(profiles[0].id);
-    }
-  }, [profiles, activeId, setActiveId]);
+  // Modal: Neue Persona anlegen
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [personaType, setPersonaType] = useState<"self" | "synthetic" | "mascot">("self");
+  const [consentGiven, setConsentGiven] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newRole, setNewRole] = useState("Founder & Tech Creator");
+  const [newWardrobe, setNewWardrobe] = useState("Matter schwarzer Rollkragenpullover");
+  const [newFeatures, setNewFeatures] = useState("Klassische Brille mit feinem Titanrahmen");
+  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Handle Photo File Upload
-  const handlePhotoSelect = (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Bitte wähle eine gültige Bilddatei (JPG, PNG, WebP).");
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const result = e.target?.result as string;
-      if (result) {
-        setUploadedPhotoUrl(result);
-        setShowUploadZone(true);
-        toast.success("Foto geladen! Klicke jetzt auf „Foto komplett analysieren“.");
-      }
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // Run Auto Text Synthesis (without photo)
-  const handleAutoTextCreate = async () => {
-    if (!textName.trim()) {
-      toast.error("Bitte gib einen Namen für deinen Klon ein.");
-      return;
-    }
-
-    setIsTextGenerating(true);
-    try {
-      const result = await autoGeneratePersonaProfile({
-        name: textName.trim(),
-        age: textAge,
-        gender: textGender,
-        vibe: textVibe,
-      }, {
-        apiKey: settings.kieApiKey,
-      });
-
-      const cloneId = makeId();
-      const newProfile: AiCloneProfile = {
-        id: cloneId,
-        name: textName.trim(),
-        isActive: true,
-        genderAge: result.genderAge,
-        hairFace: result.hairFace,
-        tattoosFeatures: result.tattoosFeatures,
-        wardrobe: result.wardrobe,
-        lightingLook: result.lightingLook,
-        framingCamera: result.framingCamera,
-        negativePrompt: result.negativePrompt,
-        customPrefix: result.customPrefix,
-        referenceImages: [],
-        placement: "all_slides",
-        analysisSummary: result.analysisSummary,
-        updatedAt: new Date().toISOString(),
-      };
-
-      setProfiles((prev) => [
-        newProfile,
-        ...prev.map((p) => ({ ...p, isActive: false })),
-      ]);
-      setActiveId(cloneId);
-      setShowCreateModal(false);
-      setTextName("");
-
-      toast.success(`KI-Klon „${textName.trim()}“ erfolgreich generiert & aktiviert! 🎉`);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Fehler bei der Klon-Generierung";
-      toast.error(msg);
-    } finally {
-      setIsTextGenerating(false);
-    }
-  };
-
-  // Run AI Vision Analysis on uploaded photo
-  const handleAnalyzePhoto = async () => {
-    if (!uploadedPhotoUrl) {
-      toast.error("Bitte lade zuerst ein Foto hoch.");
-      return;
-    }
-
-    setIsAnalyzing(true);
-    setAnalysisProgress({
-      step: 1,
-      totalSteps: 5,
-      label: "Starte Gesichtsgeometrie- & Identitäts-Scan…",
-      percent: 15,
-    });
-
-    try {
-      const result = await analyzePersonaPhoto(uploadedPhotoUrl, {
-        apiKey: settings.kieApiKey,
-        onProgress: (p) => setAnalysisProgress(p),
-      });
-
-      const cloneId = makeId();
-      const finalName = textName.trim() || result.detectedNameSuggestion || "Mein KI-Klon";
-
-      const newProfile: AiCloneProfile = {
-        id: cloneId,
-        name: finalName,
-        isActive: true,
-        avatarUrl: uploadedPhotoUrl,
-        referenceImages: [uploadedPhotoUrl],
-        genderAge: result.genderAge,
-        hairFace: result.hairFace,
-        tattoosFeatures: result.tattoosFeatures,
-        wardrobe: result.wardrobe,
-        lightingLook: result.lightingLook,
-        framingCamera: result.framingCamera,
-        negativePrompt: result.negativePrompt,
-        customPrefix: result.customPrefix,
-        placement: "all_slides",
-        analysisSummary: result.analysisSummary,
-        updatedAt: new Date().toISOString(),
-      };
-
-      // Set active & update profiles
-      setProfiles((prev) => [
-        newProfile,
-        ...prev.map((p) => ({ ...p, isActive: false })),
-      ]);
-      setActiveId(cloneId);
-      setShowCreateModal(false);
-      setUploadedPhotoUrl("");
-      setTextName("");
-
-      toast.success(`KI-Klon für „${finalName}“ erfolgreich aus Foto erstellt & aktiviert! 🎉`, {
-        description: "Gesichtszüge, Bart, Haare & Lichtkonzept wurden vollständig synthetisiert.",
-      });
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Fehler bei der Foto-Analyse";
-      toast.error(`Analyse-Fehler: ${msg}`);
-    } finally {
-      setIsAnalyzing(false);
-      setAnalysisProgress(null);
-    }
-  };
-
-  // Generate Single Image of the Clone
-  const handleGenerateSingle = async () => {
-    if (!singlePrompt.trim()) {
-      toast.error("Bitte gib eine Szene oder Situation für deinen Klon ein.");
-      return;
-    }
-
-    setIsGeneratingSingle(true);
-    const fullPrompt = `${activeProfile.customPrefix} — ${singlePrompt.trim()}`;
-
-    try {
-      const res = await generateImageUnified({
-        slideNumber: 1,
-        prompt: fullPrompt,
-        settings,
-        aspectRatio: singleRatio,
-        referenceImages: activeProfile.referenceImages && activeProfile.referenceImages.length > 0
-          ? activeProfile.referenceImages
-          : activeProfile.avatarUrl ? [activeProfile.avatarUrl] : undefined,
-      });
-
-      const newImg = {
-        id: makeId(),
-        url: res.imageUrl,
-        prompt: singlePrompt,
-        createdAt: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
-
-      setGeneratedSingles((prev) => [newImg, ...prev]);
-      onDeductCredits?.(1);
-
-      toast.success("Einzelbild mit deinem KI-Klon erfolgreich generiert! 🚀");
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Fehler beim Rendern";
-      toast.error(msg);
-    } finally {
-      setIsGeneratingSingle(false);
-    }
-  };
-
-  // Switch Active Status
-  const handleToggleActive = () => {
-    const nextStatus = !activeProfile.isActive;
+  const handleSelectActive = (id: string) => {
+    setActiveId(id);
     setProfiles((prev) =>
-      prev.map((p) => (p.id === activeProfile.id ? { ...p, isActive: nextStatus } : p)),
+      prev.map((p) => ({
+        ...p,
+        isActive: p.id === id,
+      })),
     );
-    toast.info(
-      nextStatus
-        ? `Persona „${activeProfile.name}“ für alle Karussell-Slides aktiviert!`
-        : `Persona „${activeProfile.name}“ deaktiviert.`,
-    );
+    toast.success("Aktive Persona umgestellt!");
   };
 
-  // Delete Clone Profile
-  const handleDeleteProfile = (id: string) => {
+  const handleUpdatePlacement = (placement: ClonePlacement) => {
+    if (!activeProfile) return;
+    setProfiles((prev) =>
+      prev.map((p) => (p.id === activeProfile.id ? { ...p, placement } : p)),
+    );
+    toast.success("Platzierungsmodus aktualisiert!");
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    Array.from(files).forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        if (typeof ev.target?.result === "string") {
+          setUploadedPhotos((prev) => [...prev, ev.target!.result as string].slice(0, 8));
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleCreatePersona = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (personaType === "self" && !consentGiven) {
+      toast.error("Bitte bestätige die rechtliche Einwilligung zur Nutzung der Fotos.");
+      return;
+    }
+    if (!newName.trim()) {
+      toast.error("Bitte gib einen Namen für die Persona an.");
+      return;
+    }
+
+    const defaultAvatar =
+      uploadedPhotos[0] ||
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=80";
+
+    const newProfile: AiCloneProfile = {
+      id: `clone_${Date.now()}`,
+      name: newName.trim(),
+      role: newRole.trim(),
+      isActive: true,
+      avatarUrl: defaultAvatar,
+      referenceImages: uploadedPhotos.length > 0 ? uploadedPhotos : [defaultAvatar],
+      genderAge: "28 Jahre alt, professioneller Look",
+      hairFace: "Scharfe Gesichtszüge, gepflegtes Haar, direkter Blickkontakt",
+      tattoosFeatures: newFeatures,
+      wardrobe: newWardrobe,
+      lightingLook: "Studio-Kantenlicht mit dezentem warmen Amber-Rimlight",
+      framingCamera: "Kinomäßig 85mm Porträt-Objektiv, weiche Tiefenschärfe",
+      negativePrompt: "Keine Verzerrungen, keine Gesichtsveränderungen, kein Plastik-Look",
+      customPrefix: `${newName.trim()}, ${newFeatures}, ${newWardrobe}`,
+      placement: "hook_closing",
+      updatedAt: new Date().toISOString(),
+    };
+
+    setProfiles((prev) => [newProfile, ...prev]);
+    setActiveId(newProfile.id);
+    setShowCreateModal(false);
+    setUploadedPhotos([]);
+    setNewName("");
+    setConsentGiven(false);
+    toast.success(`Persona „${newProfile.name}“ erfolgreich angelegt & verankert! 🎉`);
+  };
+
+  const handleDeleteProfile = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     if (profiles.length <= 1) {
-      toast.error("Mindestens ein Profil muss erhalten bleiben.");
+      toast.warning("Mindestens eine Persona muss erhalten bleiben.");
       return;
     }
     const filtered = profiles.filter((p) => p.id !== id);
     setProfiles(filtered);
-    if (activeId === id && filtered[0]) {
-      setActiveId(filtered[0].id);
+    if (activeId === id) {
+      setActiveId(filtered[0]?.id || "");
     }
-    toast.success("Profil gelöscht.");
+    toast.info("Persona gelöscht.");
   };
 
   return (
-    <div className="space-y-6">
-      {/* ── Top Header & Active Clone Banner ──────────────────────── */}
-      <div className="cryptox-card relative overflow-hidden space-y-5 p-6 sm:p-7 border border-white/[0.08]">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2.5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-orange-500/20 text-orange-400 shadow-[0_0_15px_-4px_rgba(255,77,23,0.5)]">
-                <UserCheck className="h-4 w-4" />
-              </span>
-              <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
-                KI-Klon Studio &amp; Persona
-              </h1>
-              <span
-                className={cn(
-                  "rounded-full px-3 py-0.5 text-xs font-semibold border",
-                  activeProfile.isActive
-                    ? "border-orange-500/50 bg-orange-500/15 text-orange-400 shadow-[0_0_15px_-3px_rgba(255,77,23,0.5)]"
-                    : "border-white/[0.08] bg-white/[0.03] text-zinc-400",
-                )}
-              >
-                {activeProfile.isActive ? "Aktiviert für Karussells" : "Inaktiv"}
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl leading-relaxed">
-              Erstelle deinen persönlichen Klon per <strong>Foto-Upload</strong> oder <strong>Texteingabe</strong>.
-              Verwende ihn sofort für <strong>Karussell-Slides</strong> oder für <strong>neue Einzelbilder</strong>.
-            </p>
+    <div className="space-y-6 max-w-[1440px] mx-auto pb-16 animate-in fade-in-50 duration-300">
+      {/* ── Header ──────────────────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-5">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="flex h-2 w-2 rounded-full bg-[#FF4D17] animate-pulse" />
+            <span className="text-[11px] font-bold uppercase tracking-widest text-[#FF4D17]">
+              Baustein 2 · Persona-Studio
+            </span>
           </div>
-
-          {/* Quick Actions */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            <button
-              type="button"
-              onClick={handleToggleActive}
-              className={cn(
-                "inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all cursor-pointer",
-                activeProfile.isActive
-                  ? "cryptox-orange-btn !py-2 !px-4 text-xs font-semibold"
-                  : "border border-white/[0.1] bg-white/[0.03] text-zinc-300 hover:bg-white/[0.08] hover:text-white",
-              )}
-            >
-              <UserCheck className="h-3.5 w-3.5" />
-              <span>{activeProfile.isActive ? "Klon aktiv (AN)" : "Klon aktivieren"}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setShowCreateModal(true);
-              }}
-              className="inline-flex items-center gap-1.5 rounded-full border border-[#FF4D17]/40 bg-[#FF4D17]/15 px-4 py-2 text-xs font-semibold text-orange-300 transition-colors hover:bg-[#FF4D17]/30 hover:text-white cursor-pointer shadow-sm"
-            >
-              <Plus className="h-3.5 w-3.5 text-orange-400" />
-              <span>+ Neuen Klon erstellen</span>
-            </button>
-          </div>
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white font-sans mt-1">
+            Mein Gesicht & Bildidentität
+          </h1>
+          <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
+            Konsistente Gesichter über alle Folien hinweg – technisch abgesichert durch
+            Referenzanker und Ähnlichkeitskontrolle.
+          </p>
         </div>
 
-        {/* ── Profiles Switcher ───────────────────────────────────── */}
-        <div className="pt-3 border-t border-white/[0.08] flex items-center justify-between gap-3 overflow-x-auto">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-zinc-400 shrink-0">Profile:</span>
-            {profiles.map((p) => {
-              const isSelected = p.id === activeProfile.id;
-              return (
-                <button
-                  key={p.id}
-                  type="button"
-                  onClick={() => setActiveId(p.id)}
-                  className={cn(
-                    "flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-medium transition-all shrink-0 cursor-pointer",
-                    isSelected
-                      ? "border-orange-500/80 bg-orange-500/15 text-orange-400 font-semibold shadow-[0_0_15px_-4px_rgba(255,77,23,0.4)]"
-                      : "border-white/[0.08] bg-white/[0.02] text-zinc-400 hover:border-white/[0.16] hover:text-zinc-200",
-                  )}
-                >
-                  {p.avatarUrl ? (
+        <button
+          type="button"
+          onClick={() => setShowCreateModal(true)}
+          className="cryptox-orange-btn !py-2.5 !px-5 text-xs font-bold flex items-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(255,77,23,0.3)] self-start sm:self-auto"
+        >
+          <Plus className="h-4 w-4" />
+          <span>Neue Persona anlegen</span>
+        </button>
+      </div>
+
+      {/* ── Persona-Karten Schnellleiste ────────────────────────────── */}
+      <div className="space-y-2">
+        <h3 className="text-xs font-black uppercase tracking-wider text-zinc-400">
+          Gespeicherte Personas ({profiles.length})
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {profiles.map((p) => {
+            const isCurrent = p.id === activeProfile?.id;
+            return (
+              <div
+                key={p.id}
+                onClick={() => handleSelectActive(p.id)}
+                className={cn(
+                  "p-4 rounded-2xl border transition-all cursor-pointer flex items-center justify-between gap-3 relative group",
+                  isCurrent
+                    ? "border-[#FF4D17] bg-[#FF4D17]/[0.08] shadow-[0_0_20px_rgba(255,77,23,0.15)]"
+                    : "border-white/[0.06] bg-black/40 hover:bg-white/[0.03] hover:border-white/15",
+                )}
+              >
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="relative h-12 w-12 rounded-xl overflow-hidden border border-white/10 bg-black shrink-0">
                     <img
-                      src={p.avatarUrl}
-                      alt=""
-                      className="h-4 w-4 rounded-full object-cover border border-white/20"
+                      src={p.avatarUrl || p.referenceImages[0]}
+                      alt={p.name}
+                      className="h-full w-full object-cover"
                     />
-                  ) : (
-                    <User className="h-3.5 w-3.5 opacity-60" />
-                  )}
-                  <span>{p.name}</span>
-                  {p.isActive && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-orange-400 animate-pulse" />
-                  )}
-                </button>
-              );
-            })}
+                    {isCurrent && (
+                      <span className="absolute bottom-1 right-1 h-2.5 w-2.5 rounded-full bg-[#FF4D17] ring-2 ring-black" />
+                    )}
+                  </div>
+                  <div className="min-w-0">
+                    <h4 className="text-xs font-bold text-white truncate">{p.name}</h4>
+                    <p className="text-[10px] text-zinc-400 truncate">{p.role}</p>
+                    <span className="text-[9px] font-mono text-emerald-400 font-semibold mt-0.5 block">
+                      ≥95% Ähnlichkeitsanker
+                    </span>
+                  </div>
+                </div>
 
-            <button
-              type="button"
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center gap-1 text-xs text-orange-400 hover:text-orange-300 px-2 py-1 rounded-lg border border-dashed border-orange-500/40 hover:bg-orange-500/10 cursor-pointer shrink-0 ml-1"
-            >
-              <Plus className="h-3 w-3" /> Neuer Klon
-            </button>
-          </div>
-
-          {profiles.length > 1 && (
-            <button
-              type="button"
-              onClick={() => handleDeleteProfile(activeProfile.id)}
-              className="text-xs text-zinc-400 hover:text-destructive flex items-center gap-1 shrink-0 px-2.5 py-1 rounded-lg hover:bg-destructive/10 cursor-pointer"
-              title="Aktives Profil löschen"
-            >
-              <Trash2 className="h-3 w-3" /> Löschen
-            </button>
-          )}
+                <div className="flex items-center gap-1">
+                  {profiles.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteProfile(p.id, e)}
+                      className="p-1.5 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
+                      title="Löschen"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* Hidden File Input */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        onChange={(e) => {
-          const file = e.target.files?.[0];
-          if (file) handlePhotoSelect(file);
-        }}
-      />
-
-      {/* ── KLON ERSTELLEN MODAL (FOTO ODER TEXT) ─────────────────── */}
-      {showCreateModal && (
-        <div className="p-6 rounded-3xl border border-[#FF4D17]/50 bg-gradient-to-b from-[#181322] via-[#110F17] to-[#0A0810] space-y-5 shadow-2xl animate-in fade-in duration-300">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-2xl bg-gradient-to-tr from-[#FF4D17] to-amber-500 text-white flex items-center justify-center font-bold shadow-[0_0_20px_rgba(255,77,23,0.4)]">
-                <Sparkles className="h-5 w-5" />
+      {/* ── Detailansicht der aktiven Persona ───────────────────────── */}
+      {activeProfile && (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pt-2">
+          {/* Linke Spalte: Character Sheet & Referenz-Bilder (7 Spalten) */}
+          <div className="lg:col-span-7 space-y-5">
+            <div className="rounded-3xl border border-white/[0.08] bg-black/40 backdrop-blur-xl p-5 sm:p-6 space-y-4">
+              <div className="flex items-center justify-between border-b border-white/[0.06] pb-3">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-4 w-4 text-emerald-400" />
+                  <h3 className="text-sm font-bold text-white">
+                    Character Sheet & Referenzanker (4 Ansichten)
+                  </h3>
+                </div>
+                <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full font-bold">
+                  Anker aktiv
+                </span>
               </div>
-              <div>
-                <h3 className="text-base font-bold text-white flex items-center gap-2">
-                  <span>Neuen KI-Klon erstellen</span>
-                  <span className="rounded bg-[#FF4D17]/20 text-[#FF4D17] border border-[#FF4D17]/40 text-[10px] px-2 py-0.5 font-bold uppercase tracking-wider">
-                    Automatisch
-                  </span>
-                </h3>
-                <p className="text-xs text-zinc-400">
-                  Wähle, wie du deinen Klon erstellen möchtest: Per Foto-Analyse oder per schneller Texteingabe.
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              onClick={() => {
-                setShowCreateModal(false);
-                setUploadedPhotoUrl("");
-              }}
-              className="text-zinc-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 cursor-pointer"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
 
-          {/* Creation Method Tabs */}
-          <div className="flex items-center gap-2 p-1 rounded-xl bg-white/[0.03] border border-white/[0.08]">
-            <button
-              type="button"
-              onClick={() => setCreateMethod("photo")}
-              className={cn(
-                "flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer",
-                createMethod === "photo"
-                  ? "bg-gradient-to-r from-[#FF4D17] to-amber-500 text-white shadow-md"
-                  : "text-zinc-400 hover:text-white",
-              )}
-            >
-              <Camera className="h-3.5 w-3.5" />
-              <span>📸 Foto reinwerfen &amp; analysieren (Empfohlen)</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setCreateMethod("text")}
-              className={cn(
-                "flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer",
-                createMethod === "text"
-                  ? "bg-gradient-to-r from-[#FF4D17] to-amber-500 text-white shadow-md"
-                  : "text-zinc-400 hover:text-white",
-              )}
-            >
-              <Wand2 className="h-3.5 w-3.5" />
-              <span>⚡ Ohne Foto (Name, Alter &amp; Geschlecht)</span>
-            </button>
-          </div>
-
-          {/* TAB 1: FOTO ANALYSE */}
-          {createMethod === "photo" && (
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center pt-2">
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={(e) => {
-                  e.preventDefault();
-                  const file = e.dataTransfer.files?.[0];
-                  if (file) handlePhotoSelect(file);
-                }}
-                className={cn(
-                  "md:col-span-7 relative flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 text-center transition-all cursor-pointer min-h-[200px]",
-                  uploadedPhotoUrl
-                    ? "border-[#FF4D17]/80 bg-black/40"
-                    : "border-white/20 bg-white/[0.02] hover:border-orange-500/50 hover:bg-white/[0.04]",
-                )}
-              >
-                {uploadedPhotoUrl ? (
-                  <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
-                    <div className="relative h-28 w-24 shrink-0 overflow-hidden rounded-xl border border-white/20 shadow-lg">
-                      <img src={uploadedPhotoUrl} alt="Vorschau" className="h-full w-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end justify-center p-1.5">
-                        <span className="text-[10px] font-bold text-emerald-400">Foto bereit ✓</span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {["Frontal", "Halbprofil", "Dreiviertel", "Halbfigur"].map((viewLabel, idx) => {
+                  const img =
+                    activeProfile.referenceImages[idx] ||
+                    activeProfile.avatarUrl ||
+                    activeProfile.referenceImages[0];
+                  return (
+                    <div
+                      key={idx}
+                      className="rounded-2xl border border-white/10 bg-black/60 overflow-hidden space-y-1.5 p-1.5"
+                    >
+                      <div className="relative aspect-[4/5] rounded-xl overflow-hidden bg-black">
+                        <img
+                          src={img}
+                          alt={viewLabel}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
-                    </div>
-                    <div className="text-left space-y-1">
-                      <p className="text-sm font-bold text-white">Foto ausgewählt</p>
-                      <p className="text-xs text-zinc-400">
-                        Klicke hier zum Ändern oder starte rechts die Analyse.
-                      </p>
-                      <span className="inline-block text-[11px] text-orange-400 font-semibold underline">
-                        Anderes Foto wählen
+                      <span className="text-[10px] font-bold text-zinc-400 block text-center uppercase tracking-wider">
+                        {viewLabel}
                       </span>
                     </div>
-                  </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center gap-2.5">
-                    <div className="h-11 w-11 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-orange-400 shadow-md">
-                      <Upload className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-white">Foto hier hineinziehen oder klicken</p>
-                      <p className="text-xs text-zinc-400">Porträt, Selfie oder Studio-Foto (JPG, PNG)</p>
-                    </div>
-                  </div>
-                )}
+                  );
+                })}
               </div>
 
-              <div className="md:col-span-5 space-y-3.5">
-                <div>
-                  <label className="block text-xs font-bold text-zinc-300 mb-1">
-                    Name der Person:
-                  </label>
-                  <input
-                    type="text"
-                    value={textName}
-                    onChange={(e) => setTextName(e.target.value)}
-                    placeholder="z. B. Alex"
-                    className="field-input text-xs w-full"
-                  />
-                </div>
-
-                {isAnalyzing && analysisProgress && (
-                  <div className="p-3 rounded-xl bg-black/60 border border-[#FF4D17]/40 space-y-1.5">
-                    <div className="flex justify-between text-xs text-white">
-                      <span className="flex items-center gap-1.5 font-medium truncate max-w-[180px]">
-                        <Sparkles className="h-3.5 w-3.5 text-[#FF4D17] animate-pulse shrink-0" />
-                        {analysisProgress.label}
-                      </span>
-                      <span className="font-mono font-bold text-[#FF4D17]">{analysisProgress.percent}%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-[#FF4D17] to-amber-400 transition-all duration-300"
-                        style={{ width: `${analysisProgress.percent}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={handleAnalyzePhoto}
-                  disabled={!uploadedPhotoUrl || isAnalyzing}
-                  className="w-full cryptox-orange-btn !py-2.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,77,23,0.4)] disabled:opacity-40 cursor-pointer"
-                >
-                  {isAnalyzing ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>KI analysiert Person…</span>
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4" />
-                      <span>Foto analysieren &amp; Klon aktivieren</span>
-                    </>
-                  )}
-                </button>
+              <div className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-3 text-[11px] text-zinc-400 flex items-start gap-2 leading-relaxed">
+                <Info className="h-4 w-4 text-[#FF4D17] shrink-0 mt-0.5" />
+                <span>
+                  Jedes neu gerenderte Bild wird automatisch gegen dieses Character Sheet verglichen.
+                  Bei Abweichungen greift ein automatischer Reroll vor der Freigabe.
+                </span>
               </div>
             </div>
-          )}
 
-          {/* TAB 2: SCHNELLE TEXT-SYNTHESE */}
-          {createMethod === "text" && (
-            <div className="space-y-4 pt-2">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
-                <div>
-                  <label className="text-xs font-bold text-zinc-300 block mb-1">
-                    1. Name:
-                  </label>
-                  <input
-                    type="text"
-                    value={textName}
-                    onChange={(e) => setTextName(e.target.value)}
-                    placeholder="z. B. Alex"
-                    className="field-input text-xs w-full"
-                  />
+            {/* Feste Merkmale & Signatur-Look */}
+            <div className="rounded-3xl border border-white/[0.08] bg-black/40 backdrop-blur-xl p-5 sm:p-6 space-y-4">
+              <h3 className="text-sm font-bold text-white border-b border-white/[0.06] pb-3">
+                Feste Signatur-Merkmale dieser Persona
+              </h3>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
+                    Garderobe & Kleidung
+                  </span>
+                  <p className="text-zinc-200 font-medium">{activeProfile.wardrobe}</p>
                 </div>
 
-                <div>
-                  <label className="text-xs font-bold text-zinc-300 block mb-1">
-                    2. Alter:
-                  </label>
-                  <input
-                    type="text"
-                    value={textAge}
-                    onChange={(e) => setTextAge(e.target.value)}
-                    placeholder="z. B. 28"
-                    className="field-input text-xs w-full"
-                  />
+                <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
+                    Physische Merkmale & Accessoires
+                  </span>
+                  <p className="text-zinc-200 font-medium">
+                    {activeProfile.tattoosFeatures || "Keine auffälligen Merkmale"}
+                  </p>
                 </div>
 
-                <div>
-                  <label className="text-xs font-bold text-zinc-300 block mb-1">
-                    3. Geschlecht:
-                  </label>
-                  <div className="grid grid-cols-3 gap-1">
-                    {(["male", "female", "diverse"] as const).map((g) => (
-                      <button
-                        key={g}
-                        type="button"
-                        onClick={() => setTextGender(g)}
-                        className={cn(
-                          "py-1.5 rounded-lg text-xs font-bold border transition-all text-center cursor-pointer",
-                          textGender === g
-                            ? "border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF6A1F]"
-                            : "border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white",
-                        )}
-                      >
-                        {g === "male" ? "Mann" : g === "female" ? "Frau" : "Divers"}
-                      </button>
-                    ))}
-                  </div>
+                <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
+                    Kamera & Tiefenschärfe
+                  </span>
+                  <p className="text-zinc-200 font-medium">{activeProfile.framingCamera}</p>
+                </div>
+
+                <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
+                    Beleuchtung & Atmosphäre
+                  </span>
+                  <p className="text-zinc-200 font-medium">{activeProfile.lightingLook}</p>
                 </div>
               </div>
-
-              <div>
-                <label className="text-xs font-bold text-zinc-300 block mb-1">
-                  4. Stil-Vibe (Optional):
-                </label>
-                <input
-                  type="text"
-                  value={textVibe}
-                  onChange={(e) => setTextVibe(e.target.value)}
-                  placeholder="z. B. Modern Tech Founder, Executive, Fashion..."
-                  className="field-input text-xs w-full"
-                />
-              </div>
-
-              <button
-                type="button"
-                onClick={handleAutoTextCreate}
-                disabled={isTextGenerating || !textName.trim()}
-                className="w-full cryptox-orange-btn !py-2.5 text-xs sm:text-sm font-bold flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(255,77,23,0.4)] disabled:opacity-40 cursor-pointer"
-              >
-                {isTextGenerating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>KI generiert Klon-Profil…</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4" />
-                    <span>Klon per KI erstellen</span>
-                  </>
-                )}
-              </button>
             </div>
-          )}
+          </div>
+
+          {/* Rechte Spalte: Platzierungsmodus & 1-Klick Übergaben (5 Spalten) */}
+          <div className="lg:col-span-5 space-y-5 lg:sticky lg:top-20">
+            {/* Platzierungsmodi */}
+            <div className="rounded-3xl border border-white/[0.08] bg-black/40 backdrop-blur-xl p-5 space-y-4">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 border-b border-white/[0.06] pb-3">
+                Standard-Platzierungsmodus
+              </h3>
+
+              <div className="space-y-2">
+                {PLACEMENT_OPTIONS.map((opt) => {
+                  const isSel = activeProfile.placement === opt.id;
+                  return (
+                    <div
+                      key={opt.id}
+                      onClick={() => handleUpdatePlacement(opt.id)}
+                      className={cn(
+                        "p-3.5 rounded-2xl border transition-all cursor-pointer space-y-1 text-left",
+                        isSel
+                          ? "border-[#FF4D17] bg-[#FF4D17]/10"
+                          : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]",
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-white">{opt.label}</span>
+                        {isSel && <Check className="h-3.5 w-3.5 text-[#FF4D17]" />}
+                      </div>
+                      <p className="text-[11px] text-zinc-400 leading-relaxed">{opt.sub}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Quick Actions Card */}
+            <div className="rounded-3xl border border-white/[0.08] bg-black/40 backdrop-blur-xl p-5 space-y-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+                Persona direkt verwenden
+              </h3>
+
+              <div className="space-y-2">
+                {onUseInCarousel && (
+                  <button
+                    type="button"
+                    onClick={onUseInCarousel}
+                    className="w-full py-3 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-bold text-white transition-all flex items-center justify-between group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Layers className="h-4 w-4 text-[#FF4D17]" />
+                      <span>Im Karussell-Studio einbinden</span>
+                    </div>
+                    <ArrowRight className="h-3.5 w-3.5 text-zinc-500 group-hover:text-white transition-colors" />
+                  </button>
+                )}
+
+                {onUseInDirectPrompt && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onUseInDirectPrompt(
+                        `Editorial-Porträt von ${activeProfile.name}, ${activeProfile.wardrobe}, ${activeProfile.lightingLook}`,
+                      )
+                    }
+                    className="w-full py-3 px-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-xs font-bold text-white transition-all flex items-center justify-between group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4 text-blue-400" />
+                      <span>Als Einzelbild generieren</span>
+                    </div>
+                    <ArrowRight className="h-3.5 w-3.5 text-zinc-500 group-hover:text-white transition-colors" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
-      {/* ── MAIN 2-COLUMN CLONE STUDIO ────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* ── LEFT COLUMN: AKTIVER KLON DNA CARD (5 Cols) ───────────── */}
-        <div className="lg:col-span-5 space-y-5">
-          <div className="cryptox-card-elevated p-6 space-y-5 border border-white/[0.08]">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
-              <div className="flex items-center gap-3">
-                <div className="relative h-14 w-12 shrink-0 overflow-hidden rounded-xl border border-orange-500/50 shadow-md">
-                  {activeProfile.avatarUrl || activeProfile.referenceImages?.[0] ? (
-                    <img
-                      src={activeProfile.avatarUrl || activeProfile.referenceImages[0]}
-                      alt={activeProfile.name}
-                      className="h-full w-full object-cover"
+      {/* ── Modal: Neue Persona anlegen (DSGVO & Anker-Workflow) ─────── */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl animate-in fade-in-50">
+          <div className="relative w-full max-w-lg rounded-3xl border border-white/15 bg-[#0C0910] p-6 sm:p-7 space-y-5 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+              <div>
+                <h3 className="text-base font-black text-white">Neue Persona verankern</h3>
+                <p className="text-xs text-zinc-400">
+                  Stabile Bildidentität für konsistenten Social-Media-Content
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCreateModal(false)}
+                className="p-1.5 rounded-xl text-zinc-400 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreatePersona} className="space-y-4">
+              {/* Persona Typ */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-300 block">Persona-Typ:</label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {PERSONA_TYPES.map((pt) => {
+                    const isSel = personaType === pt.id;
+                    return (
+                      <button
+                        key={pt.id}
+                        type="button"
+                        onClick={() => setPersonaType(pt.id as any)}
+                        className={cn(
+                          "p-2.5 rounded-xl border text-left transition-all cursor-pointer space-y-1",
+                          isSel
+                            ? "border-[#FF4D17] bg-[#FF4D17]/10"
+                            : "border-white/[0.06] bg-white/[0.02]",
+                        )}
+                      >
+                        <span className="text-xs font-bold text-white block">{pt.title}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Name & Rolle */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-zinc-300 block">Name:</label>
+                  <input
+                    type="text"
+                    required
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
+                    placeholder="z. B. Alex Miller"
+                    className="w-full rounded-xl border border-white/15 bg-black/60 px-3 py-2 text-xs text-white outline-none focus:border-[#FF4D17]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="text-xs font-semibold text-zinc-300 block">Position / Rolle:</label>
+                  <input
+                    type="text"
+                    value={newRole}
+                    onChange={(e) => setNewRole(e.target.value)}
+                    placeholder="z. B. Founder & Host"
+                    className="w-full rounded-xl border border-white/15 bg-black/60 px-3 py-2 text-xs text-white outline-none focus:border-[#FF4D17]"
+                  />
+                </div>
+              </div>
+
+              {/* Signatur Styling */}
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-zinc-300 block">
+                  Signatur-Kleidung / Styling:
+                </label>
+                <input
+                  type="text"
+                  value={newWardrobe}
+                  onChange={(e) => setNewWardrobe(e.target.value)}
+                  placeholder="z. B. Matter schwarzer Rollkragenpullover oder Oversize Blazer"
+                  className="w-full rounded-xl border border-white/15 bg-black/60 px-3 py-2 text-xs text-white outline-none focus:border-[#FF4D17]"
+                />
+              </div>
+
+              {/* Referenzfotos Upload */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-zinc-300">
+                    Referenzfotos (3 bis 8 Bilder):
+                  </label>
+                  <span className="text-[10px] text-zinc-400 font-mono">
+                    {uploadedPhotos.length} / 8 ausgewählt
+                  </span>
+                </div>
+
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="rounded-2xl border-2 border-dashed border-white/15 bg-white/[0.02] hover:bg-white/[0.04] p-4 text-center transition-all cursor-pointer"
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                  <Upload className="h-5 w-5 mx-auto text-[#FF4D17] mb-1" />
+                  <p className="text-xs font-bold text-white">Fotos auswählen</p>
+                  <p className="text-[10px] text-zinc-400">Frontal, Profil, gutes Tageslicht</p>
+                </div>
+
+                {uploadedPhotos.length > 0 && (
+                  <div className="grid grid-cols-4 gap-2 pt-1">
+                    {uploadedPhotos.map((url, i) => (
+                      <div key={i} className="aspect-square rounded-xl overflow-hidden border border-white/10 bg-black">
+                        <img src={url} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Rechtliche Einwilligung nach DSGVO (Pflicht bei Typ 'self') */}
+              {personaType === "self" && (
+                <div className="rounded-2xl border border-orange-500/30 bg-orange-500/[0.06] p-3.5 space-y-2">
+                  <label className="flex items-start gap-2.5 cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={consentGiven}
+                      onChange={(e) => setConsentGiven(e.target.checked)}
+                      className="mt-0.5 rounded border-white/20 text-[#FF4D17] focus:ring-0"
                     />
-                  ) : (
-                    <div className="h-full w-full bg-orange-500/20 flex items-center justify-center font-bold text-orange-400 text-lg">
-                      {activeProfile.name[0]}
-                    </div>
-                  )}
+                    <span className="text-xs text-orange-200 leading-snug">
+                      Ich bestätige ausdrücklich, dass ich die abgebildete Person bin oder deren
+                      rechtsgültige Einwilligung zur Nutzung der Fotos für KI-Generierungen besitze
+                      (DSGVO Kap. 13.3).
+                    </span>
+                  </label>
                 </div>
-                <div>
-                  <h2 className="text-base font-bold text-white tracking-tight">{activeProfile.name}</h2>
-                  <p className="text-xs text-orange-400 font-semibold">{activeProfile.genderAge}</p>
-                </div>
-              </div>
+              )}
 
-              <span className="rounded-full bg-emerald-500/15 border border-emerald-500/30 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 flex items-center gap-1">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                Klon Bereit
-              </span>
-            </div>
-
-            {/* Extracted Details */}
-            <div className="space-y-3 text-xs">
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Gesicht &amp; Bart</span>
-                <p className="text-zinc-200 font-medium">{activeProfile.hairFace}</p>
-              </div>
-
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Haut &amp; Signatur</span>
-                <p className="text-zinc-200 font-medium">{activeProfile.tattoosFeatures}</p>
-              </div>
-
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Garderobe</span>
-                <p className="text-zinc-200 font-medium">{activeProfile.wardrobe}</p>
-              </div>
-
-              <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Licht &amp; Kamera</span>
-                <p className="text-zinc-200 font-medium">{activeProfile.lightingLook} · {activeProfile.framingCamera}</p>
-              </div>
-            </div>
-
-            {/* Master Prompt Snippet */}
-            <div className="space-y-1.5 pt-2 border-t border-white/[0.08]">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Master-Prompt</span>
+              <div className="pt-3 border-t border-white/10 flex justify-end gap-2.5">
                 <button
                   type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(activeProfile.customPrefix);
-                    toast.success("Master-Prompt kopiert!");
-                  }}
-                  className="text-[11px] text-orange-400 hover:text-white flex items-center gap-1 cursor-pointer"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-400 hover:text-white"
                 >
-                  <Copy className="h-3 w-3" /> Kopieren
+                  Abbrechen
+                </button>
+                <button
+                  type="submit"
+                  className="cryptox-orange-btn !py-2 !px-5 text-xs font-bold shadow-[0_0_20px_rgba(255,77,23,0.35)] cursor-pointer"
+                >
+                  Persona anlegen & verankern
                 </button>
               </div>
-              <div className="p-2.5 rounded-xl bg-black/50 border border-white/10 font-mono text-[11px] text-zinc-300 max-h-[85px] overflow-y-auto leading-relaxed">
-                {activeProfile.customPrefix}
-              </div>
-            </div>
-
-            {/* Carousel Activation Bridge */}
-            <div className="pt-3 border-t border-white/[0.08] space-y-2">
-              <button
-                type="button"
-                onClick={() => {
-                  if (onUseInCarousel) {
-                    onUseInCarousel();
-                  } else {
-                    toast.success("Klon im Karussell Studio ausgewählt!");
-                  }
-                }}
-                className="w-full cryptox-orange-btn !py-2.5 text-xs font-bold flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(255,77,23,0.3)] cursor-pointer"
-              >
-                <Layers className="h-3.5 w-3.5" />
-                <span>Neues Karussell mit {activeProfile.name} erstellen</span>
-              </button>
-            </div>
+            </form>
           </div>
         </div>
-
-        {/* ── RIGHT COLUMN: NEUE BILDER GENERIEREN (7 Cols) ─────────── */}
-        <div className="lg:col-span-7 space-y-6">
-          {/* Single Image Generator Card */}
-          <div className="cryptox-card p-6 sm:p-7 space-y-5 border border-white/[0.08]">
-            <div className="flex items-center justify-between border-b border-white/[0.08] pb-3">
-              <div className="flex items-center gap-2.5">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-orange-500/20 text-orange-400">
-                  <Wand2 className="h-4 w-4" />
-                </span>
-                <h2 className="text-base font-bold text-white tracking-tight">
-                  Neues Einzelbild mit deinem Klon generieren
-                </h2>
-              </div>
-              <span className="text-xs text-emerald-400 font-medium">Beste Qualität</span>
-            </div>
-
-            {/* Prompt Input Area */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-zinc-300 block">
-                Was soll dein Klon tun? Wo soll er sein?
-              </label>
-              <textarea
-                rows={3}
-                value={singlePrompt}
-                onChange={(e) => setSinglePrompt(e.target.value)}
-                placeholder="z. B. Im Café mit Laptop, trinken Cappuccino, modernes Fensterlicht..."
-                className="field-input text-xs sm:text-sm leading-relaxed font-sans w-full"
-              />
-            </div>
-
-            {/* Quick Scenario Suggestions */}
-            <div className="space-y-1.5">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                Beliebte Szenarien (1-Klick Vorschlag):
-              </span>
-              <div className="flex flex-wrap gap-1.5">
-                {QUICK_SCENARIOS.map((sc) => (
-                  <button
-                    key={sc.label}
-                    type="button"
-                    onClick={() => setSinglePrompt(sc.prompt)}
-                    className="px-2.5 py-1 rounded-lg border border-white/10 bg-white/[0.02] text-xs text-zinc-300 hover:text-white hover:border-orange-500/40 hover:bg-orange-500/10 transition-colors cursor-pointer"
-                  >
-                    {sc.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Aspect Ratio & Generate Button */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-white/[0.08]">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-zinc-400 font-semibold mr-1">Format:</span>
-                {(["4:5", "1:1"] as const).map((r) => (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => setSingleRatio(r)}
-                    className={cn(
-                      "px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer",
-                      singleRatio === r
-                        ? "border-[#FF4D17] bg-[#FF4D17]/20 text-[#FF6A1F]"
-                        : "border-white/10 bg-white/[0.02] text-zinc-400 hover:text-white",
-                    )}
-                  >
-                    {r === "4:5" ? "4:5 (Instagram Portrait)" : "1:1 (Quadrat)"}
-                  </button>
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleGenerateSingle}
-                disabled={isGeneratingSingle || !singlePrompt.trim()}
-                className="cryptox-orange-btn !py-2.5 !px-5 text-xs font-bold flex items-center gap-2 shadow-[0_0_20px_rgba(255,77,23,0.4)] disabled:opacity-40 cursor-pointer"
-              >
-                {isGeneratingSingle ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span>Rendere Klon-Einzelbild…</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4" />
-                    <span>Einzelbild jetzt generieren</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Generated Single Images Gallery */}
-          {generatedSingles.length > 0 && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold text-white">
-                  Kürzlich generierte Einzelbilder ({generatedSingles.length})
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
-                {generatedSingles.map((img) => (
-                  <div
-                    key={img.id}
-                    className="group relative overflow-hidden rounded-2xl border border-white/10 bg-black/50 shadow-md aspect-4/5"
-                  >
-                    <img src={img.url} alt="" className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-3">
-                      <p className="text-[10px] text-zinc-200 line-clamp-2 mb-2 font-medium">
-                        {img.prompt}
-                      </p>
-                      <div className="flex gap-1.5">
-                        <a
-                          href={img.url}
-                          download={`klon_${img.id}.jpg`}
-                          className="flex-1 py-1 px-2 rounded-lg bg-white/20 hover:bg-white/30 text-white text-[10px] font-bold text-center flex items-center justify-center gap-1"
-                        >
-                          <Download className="h-3 w-3" /> Download
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

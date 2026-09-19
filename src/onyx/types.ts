@@ -237,6 +237,7 @@ export type ClonePlacement = "hook_closing" | "all_slides" | "even_slides" | "cu
 export interface AiCloneProfile {
   id: string;
   name: string;
+  role?: string;
   isActive: boolean;
   avatarUrl?: string;
   referenceImages: string[];
