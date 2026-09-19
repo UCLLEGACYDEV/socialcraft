@@ -38,8 +38,9 @@ export function useStudioNavigation({ routeTab, initialView }: UseStudioNavigati
   useEffect(() => {
     setCurrentUser(getStoredCurrentUser());
   }, []);
-  const [currentView, setCurrentView] = usePersistentState<"landing" | "studio" | "admin">(
-    "onyx.currentView",
+  // The view is decided by the URL (one source of truth per route), never by a
+  // persisted value — that caused "/" to flip between landing and studio on load.
+  const [currentView, setCurrentView] = useState<"landing" | "studio" | "admin">(
     initialView || "studio",
   );
 
@@ -48,12 +49,12 @@ export function useStudioNavigation({ routeTab, initialView }: UseStudioNavigati
     routeTab || "overview",
   );
 
-  // SaaS rule: Authenticated users stay in the Studio workspace; never bounced to marketing landing page
+  // Signed-in users never sit on the marketing page of a studio route
   useEffect(() => {
-    if ((currentUser || routeTab) && currentView === "landing") {
+    if (routeTab && currentView === "landing") {
       setCurrentView("studio");
     }
-  }, [currentUser, routeTab, currentView, setCurrentView]);
+  }, [routeTab, currentView, setCurrentView]);
 
   useEffect(() => {
     if (initialView) {
