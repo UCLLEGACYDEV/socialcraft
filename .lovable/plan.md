@@ -61,3 +61,7 @@ Keine Schönfärberei. Das Produkt kann viel, aber es erklärt sich nicht. Ein n
 ## Reihenfolge
 
 Phase 1 zuerst (größte Wirkung, geringstes Risiko), danach Phase 2 und 3. Phase 4 und 5 sind eigene, größere Schritte.
+
+## Vorab zu beheben
+
+Der aktuelle Stand baut nicht durch: `src/mcp/tools.ts` erzeugt zehn TypeScript-Fehler (TS2589, "Type instantiation is excessively deep") bei jedem `server.tool(...)`-Aufruf — verursacht durch die Typ-Ableitung des MCP-SDK über die Zod-Schemas. Fix: in `registerTools` eine lockere lokale Typ-Sicht auf `server.tool` verwenden (`const tool = (server as McpServer)["tool"].bind(server) as (...args: any[]) => unknown;`) und alle Registrierungen darüber laufen lassen. Verhalten bleibt identisch. Das passiert als erster Schritt, vor Phase 1.
