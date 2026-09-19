@@ -1120,8 +1120,8 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
           onNavigateAdmin={handleOpenAdmin}
           onNavigateLanding={() => {
             setCurrentView("landing");
-            if (typeof window !== "undefined" && window.location.pathname !== "/") {
-              window.history.pushState(null, "", "/");
+            if (typeof window !== "undefined" && window.location.pathname !== "/willkommen") {
+              window.history.pushState(null, "", "/willkommen");
             }
           }}
           currentUser={currentUser}
