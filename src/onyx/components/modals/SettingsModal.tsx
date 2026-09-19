@@ -21,7 +21,7 @@ import { fetchKieCredits, type KieCreditResult } from "@/onyx/kie-api";
 import { testCloudConnection, ensureUserS4Folder } from "@/onyx/s4-storage";
 import { getStoredCurrentUser } from "@/onyx/auth";
 import { ZernioApiClient } from "@/onyx/zernio/client";
-import { McpModalContent } from "@/onyx/components/views/SimpleViews";
+import { McpModalContent } from "./McpModalContent";
 import type { ApiSettings, ImageProvider } from "@/onyx/types";
 import { cn } from "@/lib/utils";
 

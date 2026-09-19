@@ -1,158 +1,104 @@
-import { Download, Trash2 } from "lucide-react";
-import type { HistoryEntry } from "@/onyx/types";
+import React, { useState, useEffect } from "react";
+import {
+  Check,
+  Cloud,
+  Copy,
+  Cpu,
+  FolderGit2,
+  RefreshCw,
+  Sparkles,
+  Terminal,
+} from "lucide-react";
+import { toast } from "sonner";
 
-export { DirectPromptView } from "./DirectPromptView";
-export { AiCloneView } from "./AiCloneView";
-
-export { PromptHubView as PromptGallery } from "./PromptHubView";
-
-export function HistoryView({
-  entries,
-  onOpen,
-  onDelete,
-}: {
-  entries: HistoryEntry[];
-  onOpen: (entry: HistoryEntry) => void;
-  onDelete: (id: string) => void;
-}) {
-  return (
-    <div className="space-y-5">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">Karussell Galerie & Archiv</h1>
-        <p className="text-xs text-zinc-400">Deine lokal gespeicherten Karussell-Projekte.</p>
-      </div>
-      {entries.length === 0 && (
-        <p className="cryptox-card p-6 text-center text-xs text-zinc-400 border border-white/[0.08]">
-          Noch keine Karussells archiviert.
-        </p>
-      )}
-      <div className="space-y-3.5">
-        {entries.map((entry) => (
-          <div key={entry.id} className="cryptox-card relative overflow-hidden p-5 border border-white/[0.08] hover:border-orange-500/40 hover:shadow-[0_15px_40px_-10px_rgba(255,77,23,0.2)]">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <div className="truncate text-base font-semibold text-white">{entry.topic}</div>
-                <div className="text-xs text-zinc-400">
-                  {new Date(entry.createdAt).toLocaleString("de-DE")} · {entry.slides.length} Slides
-                </div>
-              </div>
-              <div className="flex shrink-0 gap-2">
-                <button
-                  type="button"
-                  onClick={() => onOpen(entry)}
-                  className="flex items-center gap-1.5 rounded-full border border-white/[0.1] bg-white/[0.03] px-3.5 py-1.5 text-xs font-semibold text-zinc-200 hover:bg-white/[0.08] hover:text-white transition-colors"
-                >
-                  <Download className="h-3.5 w-3.5 text-orange-400" /> Öffnen
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onDelete(entry.id)}
-                  className="rounded-full border border-white/[0.1] bg-white/[0.02] p-2 text-zinc-400 hover:text-destructive hover:bg-destructive/10 transition-colors"
-                  aria-label="Löschen"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            </div>
-            <div className="mt-3.5 flex gap-2.5 overflow-x-auto pb-1">
-              {entry.slides.filter((s) => s.imageUrl).map((s) => (
-                <img
-                  key={s.id}
-                  src={s.imageUrl}
-                  alt=""
-                  className="h-28 w-auto rounded-xl border border-white/[0.08] object-cover shadow"
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+interface SyncStatus {
+  active: boolean;
+  postCount: number;
+  channelCount: number;
+  profileCount: number;
+  seriesCount: number;
+  loading: boolean;
 }
 
-import { useState, useEffect } from "react";
-import { Check, Copy, RefreshCw, Sparkles, Terminal, Cpu, Cloud, FolderGit2 } from "lucide-react";
-import { toast } from "sonner";
+interface RemoteTunnelInfo {
+  online: boolean;
+  sseUrl: string;
+  updatedAt?: string;
+  claudeCodeCommand?: string;
+}
 
 function CopyRow({ label, value }: { label: string; value: string }) {
   const [copied, setCopied] = useState(false);
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(value);
+    setCopied(true);
+    toast.success(`${label} kopiert! 📋`);
+    setTimeout(() => setCopied(false), 2000);
+  };
   return (
-    <div className="space-y-1">
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] font-medium text-zinc-400">{label}</span>
-        <button
-          onClick={() => {
-            navigator.clipboard.writeText(value);
-            setCopied(true);
-            toast.success("Kopiert 📋");
-            setTimeout(() => setCopied(false), 2000);
-          }}
-          className="flex items-center gap-1 rounded-md bg-orange-500/10 px-2 py-0.5 text-[11px] font-medium text-orange-400 hover:bg-orange-500/20"
-        >
-          {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-          {copied ? "Kopiert" : "Kopieren"}
-        </button>
+    <div className="flex items-center justify-between gap-2 rounded-lg border border-white/[0.08] bg-black/40 px-3 py-2">
+      <div className="min-w-0 flex-1">
+        <div className="text-[10px] uppercase tracking-wider text-zinc-500 font-semibold">{label}</div>
+        <div className="truncate font-mono text-[11px] text-zinc-200">{value}</div>
       </div>
-      <pre className="overflow-x-auto rounded-lg border border-white/[0.08] bg-black/60 p-2.5 font-mono text-[11px] leading-relaxed text-zinc-300 whitespace-pre-wrap break-all">
-        {value}
-      </pre>
+      <button
+        type="button"
+        onClick={handleCopy}
+        className="shrink-0 flex items-center gap-1 rounded-md bg-orange-500/10 px-2 py-1 text-[11px] font-medium text-orange-400 hover:bg-orange-500/20 transition-colors"
+      >
+        {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+        {copied ? "Kopiert" : "Kopieren"}
+      </button>
     </div>
   );
 }
 
-type RemoteInfo = {
-  online: boolean;
-  sseUrl?: string | null;
-  updatedAt?: string | null;
-  claudeCodeCommand?: string | null;
-  hint?: string;
-};
-
 export function McpModalContent() {
   const [copied, setCopied] = useState(false);
-  const [remote, setRemote] = useState<RemoteInfo | null>(null);
-  const [syncStatus, setSyncStatus] = useState<{
-    loading: boolean;
-    active: boolean;
-    postCount: number;
-    profileCount: number;
-    channelCount: number;
-  }>({
-    loading: true,
+  const [remote, setRemote] = useState<RemoteTunnelInfo | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>({
     active: false,
     postCount: 0,
-    profileCount: 0,
     channelCount: 0,
+    profileCount: 0,
+    seriesCount: 0,
+    loading: true,
   });
 
   const checkStatus = async () => {
-    setSyncStatus((s) => ({ ...s, loading: true }));
     try {
-      const res = await fetch("/api/mcp/sync");
+      const res = await fetch("/api/mcp/status");
       if (res.ok) {
-        const data = await res.json();
+        const data = (await res.json()) as Partial<SyncStatus>;
         setSyncStatus({
-          loading: false,
           active: true,
-          postCount: data.scheduledPosts?.length || 0,
-          profileCount: data.brandProfiles?.length || 0,
-          channelCount: data.socialChannels?.length || 0,
+          postCount: data.postCount ?? 0,
+          channelCount: data.channelCount ?? 0,
+          profileCount: data.profileCount ?? 0,
+          seriesCount: data.seriesCount ?? 0,
+          loading: false,
         });
-      } else {
-        setSyncStatus({ loading: false, active: false, postCount: 0, profileCount: 0, channelCount: 0 });
       }
     } catch {
-      setSyncStatus({ loading: false, active: false, postCount: 0, profileCount: 0, channelCount: 0 });
+      setSyncStatus((s) => ({ ...s, loading: false }));
     }
   };
 
   useEffect(() => {
     void checkStatus();
-    void fetch("/api/mcp/remote-url")
-      .then((r) => r.json())
-      .then((d) => setRemote(d))
-      .catch(() => setRemote(null));
+    fetch("/api/mcp/tunnel")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d && d.sseUrl) {
+          setRemote({
+            online: true,
+            sseUrl: d.sseUrl,
+            updatedAt: d.updatedAt,
+            claudeCodeCommand: `claude mcp add --transport sse socialcraft ${d.sseUrl}`,
+          });
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const desktopConfig = JSON.stringify(
@@ -161,7 +107,7 @@ export function McpModalContent() {
         socialcraft: {
           command: "npx",
           args: ["-y", "tsx", "src/mcp/index.ts"],
-          cwd: "PFAD/ZU/socialcraft",
+          cwd: "DEIN_PROJEKT_PFAD",
         },
       },
     },
@@ -169,8 +115,8 @@ export function McpModalContent() {
     2
   );
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(desktopConfig);
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(desktopConfig);
     setCopied(true);
     toast.success("Claude Desktop Konfiguration kopiert! 📋");
     setTimeout(() => setCopied(false), 2000);
@@ -193,7 +139,7 @@ export function McpModalContent() {
           </div>
           <div>
             <div className="font-semibold text-white">
-              {syncStatus.active ? "SocialCraft MCP Server Bridge aktiv" : "MCP Bridge bereit"}
+              {syncStatus.active ? "Socialcraft MCP Server Bridge aktiv" : "MCP Bridge bereit"}
             </div>
             <div className="text-[11px] text-zinc-400">
               {syncStatus.postCount} Posts · {syncStatus.profileCount} Marken · {syncStatus.channelCount} Kanäle
@@ -203,6 +149,7 @@ export function McpModalContent() {
         </div>
 
         <button
+          type="button"
           onClick={() => {
             void checkStatus();
             toast.info("MCP-Store synchronisiert");
@@ -216,12 +163,12 @@ export function McpModalContent() {
       </div>
 
       <p className="text-zinc-400 leading-relaxed">
-        Verbinde <strong>Claude Code</strong> oder <strong>Claude Desktop</strong> direkt mit SocialCraft. Claude
+        Verbinde <strong>Claude Code</strong> oder <strong>Claude Desktop</strong> direkt mit Socialcraft. Claude
         kann dadurch selbstständig Prompts generieren, optimale Posting-Zeitslots ermitteln und fertige
         Beiträge automatisch in deine Warteschlange vorplanen.
       </p>
 
-      {/* Weg A: Claude Code lokal (Repo geklont) */}
+      {/* Weg A: Claude Code lokal */}
       <div className="space-y-2 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3">
         <div className="flex items-center gap-1.5 font-semibold text-white">
           <FolderGit2 className="h-3.5 w-3.5 text-orange-400" />
@@ -230,14 +177,13 @@ export function McpModalContent() {
         <p className="text-[11px] text-zinc-400 leading-relaxed">
           Das Repo enthält bereits eine <code className="text-zinc-200">.mcp.json</code>. Beim ersten Start von{" "}
           <code className="text-zinc-200">claude</code> im Projektordner fragt Claude Code einmalig nach Freigabe
-          des Servers <code className="text-zinc-200">socialcraft</code>. Mit „Ja" ist alles verbunden. Kein
-          weiterer Schritt nötig.
+          des Servers <code className="text-zinc-200">socialcraft</code>. Mit „Ja" ist alles verbunden.
         </p>
         <CopyRow label="Alternativ manuell hinzufügen" value="claude mcp add socialcraft -- npx -y tsx src/mcp/index.ts" />
         <CopyRow label="Verbindung prüfen" value="claude mcp list" />
       </div>
 
-      {/* Weg B: Remote SSE (kein Repo nötig) */}
+      {/* Weg B: Remote SSE */}
       <div className="space-y-2 rounded-xl border border-white/[0.08] bg-white/[0.02] p-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1.5 font-semibold text-white">
@@ -265,11 +211,6 @@ export function McpModalContent() {
                 2
               )}
             />
-            <p className="text-[10px] text-zinc-500">
-              Tunnel aktualisiert:{" "}
-              {remote.updatedAt ? new Date(remote.updatedAt).toLocaleString("de-DE") : "unbekannt"}. Die URL
-              ändert sich bei jedem Neustart des Tunnels.
-            </p>
           </>
         ) : (
           <p className="text-[11px] text-zinc-400 leading-relaxed">
@@ -291,6 +232,7 @@ export function McpModalContent() {
             <code className="text-zinc-200">cwd</code> auf deinen lokalen Projektpfad setzen.
           </span>
           <button
+            type="button"
             onClick={handleCopy}
             className="flex items-center gap-1 rounded-md bg-orange-500/10 px-2 py-0.5 text-[11px] font-medium text-orange-400 hover:bg-orange-500/20"
           >
@@ -326,10 +268,9 @@ export function McpModalContent() {
           Beispiel-Prompt für Claude:
         </div>
         <p className="italic text-zinc-300">
-          &quot;Nutze die SocialCraft MCP Tools. Plane mir für die nächste Woche 7 Beiträge zum Thema &apos;KI-Automatisierung für Agenturen&apos; für Instagram vor. Erstelle für jeden Post einen viralen Hook, eine hochwertige Caption ohne Gedankenstriche, 4 Hashtags und einen fotorealistischen Bildprompt. Weise die besten freien Zeitslots automatisch zu.&quot;
+          &quot;Nutze die Socialcraft MCP Tools. Plane mir für die nächste Woche 7 Beiträge zum Thema &apos;KI-Automatisierung für Agenturen&apos; für Instagram vor.&quot;
         </p>
       </div>
     </div>
   );
 }
-

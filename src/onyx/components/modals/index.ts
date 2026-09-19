@@ -13,3 +13,4 @@ export * from "./SlideInspectModal";
 export * from "./ThirtyDayBatchModal";
 export * from "./TikTokMusicLibraryModal";
 export * from "./UserProfileModal";
+export * from "./McpModalContent";

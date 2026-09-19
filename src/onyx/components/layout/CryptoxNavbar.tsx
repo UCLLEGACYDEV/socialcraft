@@ -57,20 +57,13 @@ interface CryptoxNavbarProps {
   onOpenBrandProfileManager?: () => void;
 }
 
-// Group 1: Primary Tools
-const CREATION_TABS: { key: TabKey; label: string }[] = [
-  { key: "overview", label: "Übersicht" },
-  { key: "carousel", label: "Karussell" },
-  { key: "direct-prompt", label: "Einzelbild" },
-  { key: "scheduler", label: "Planer" },
-];
-
-// Group 2: Library & Workspaces
-const LIBRARY_TABS: { key: TabKey; label: string }[] = [
+// Streamlined Primary Studio Tabs
+const STUDIO_NAV_TABS: { key: TabKey; label: string }[] = [
+  { key: "carousel", label: "Studio" },
   { key: "bulk", label: "Content-Serie" },
+  { key: "scheduler", label: "Planer" },
   { key: "history", label: "Galerie" },
-  { key: "prompt-gallery", label: "Vorlagen" },
-  { key: "ai-clone", label: "Mein Gesicht" },
+  { key: "ai-clone", label: "Mein Setup" },
 ];
 
 export function CryptoxNavbar({
@@ -149,54 +142,26 @@ export function CryptoxNavbar({
           </div>
         </div>
 
-        {/* ── Center: Grouped Studio Navigation ────────────────────── */}
-        <nav className="hidden md:flex items-center rounded-full border border-white/10 bg-[#120F17]/90 p-1 shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-          {/* Creation Group */}
-          <div className="flex items-center gap-0.5">
-            {CREATION_TABS.map((tab) => {
-              const isActive = activeTab === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => onNavigate(tab.key)}
-                  className={cn(
-                    "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer",
-                    isActive
-                      ? "bg-[#FF4D17] text-white shadow-[0_0_18px_-2px_#FF4D17]"
-                      : "text-zinc-400 hover:text-white hover:bg-white/[0.06]",
-                  )}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Elegant Divider */}
-          <div className="h-3.5 w-[1px] bg-white/15 mx-1.5" />
-
-          {/* Library / Workspace Group */}
-          <div className="flex items-center gap-0.5">
-            {LIBRARY_TABS.map((tab) => {
-              const isActive = activeTab === tab.key;
-              return (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => onNavigate(tab.key)}
-                  className={cn(
-                    "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer",
-                    isActive
-                      ? "bg-[#FF4D17] text-white shadow-[0_0_18px_-2px_#FF4D17]"
-                      : "text-zinc-400 hover:text-white hover:bg-white/[0.06]",
-                  )}
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+        {/* ── Center: Streamlined Studio Navigation ────────────────── */}
+        <nav className="hidden md:flex items-center gap-1 rounded-full border border-white/10 bg-[#120F17]/90 p-1 shadow-[0_16px_40px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
+          {STUDIO_NAV_TABS.map((tab) => {
+            const isActive = activeTab === tab.key;
+            return (
+              <button
+                key={tab.key}
+                type="button"
+                onClick={() => onNavigate(tab.key)}
+                className={cn(
+                  "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer",
+                  isActive
+                    ? "bg-[#FF4D17] text-white shadow-[0_0_18px_-2px_#FF4D17]"
+                    : "text-zinc-400 hover:text-white hover:bg-white/[0.06]",
+                )}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </nav>
 
         {/* ── Right: Consolidated Actions & User Hub ───────────────── */}
@@ -519,7 +484,7 @@ export function CryptoxNavbar({
         aria-label="Mobile Hauptnavigation"
         className="flex md:hidden items-center gap-1.5 overflow-x-auto no-scrollbar pt-2 pb-1 px-1 border-t border-white/[0.06] mt-2"
       >
-        {[...CREATION_TABS, ...LIBRARY_TABS].map((tab) => {
+        {STUDIO_NAV_TABS.map((tab) => {
           const isActive = activeTab === tab.key;
           return (
             <button

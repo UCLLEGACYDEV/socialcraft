@@ -7,31 +7,14 @@ import { cn } from "@/lib/utils";
 
 import {
   AdminDashboard,
-  AiCloneView,
   AuthModal,
-  BrandKitModal,
-  BrandProfileManagerModal,
-  CarouselViewer,
-  CloudGalleryView,
   CreditUpgradeModal,
   CryptoxLandingPage,
-  CryptoxNavbar,
   DatenschutzModal,
-  DirectPromptView,
-  HistoryView,
-  McpModalContent,
-  ModalShell,
-  OverviewView,
-  PostForMeSetupModal,
-  PostSchedulerView,
-  PromptGallery,
-  SeriesQueue,
-  SettingsModal,
   SlideEditModal,
-  StudioCarouselWorkspace,
+  StudioRoot,
   ThirtyDayBatchModal,
   UserProfileModal,
-  ViewBoundary,
 } from "@/onyx/components";
 import { PostForMeApiClient } from "@/onyx/postforme/client";
 import { saveImageToS4, saveCarouselToS4, ensureUserS4Folder, saveHistoryToS4, loadHistoryFromS4, makeProjectFolderName, syncCloudIdentityCookie } from "@/onyx/s4-storage";
@@ -1120,340 +1103,88 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
   }
 
   return (
-    <div className="min-h-screen bg-[#060509] text-foreground relative overflow-x-hidden selection:bg-[#FF4D17] selection:text-white">
-      {/* Subtle modern dark workspace background */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[70rem] h-[35rem] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,77,23,0.08)_0%,transparent_70%)] blur-[100px]" />
-        <div className="absolute top-[50%] -right-40 w-[35rem] h-[35rem] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(255,90,20,0.04)_0%,transparent_70%)] blur-[100px]" />
-      </div>
-
-      <div className="relative z-10 flex min-h-screen flex-col">
-        {/* Floating Top Navbar */}
-        <CryptoxNavbar
-          activeTab={activeTab}
-          onNavigate={handleTabChange}
-          onNavigateAdmin={handleOpenAdmin}
-          onNavigateLanding={() => {
-            setCurrentView("landing");
-            if (typeof window !== "undefined" && window.location.pathname !== "/willkommen") {
-              window.history.pushState(null, "", "/willkommen");
-            }
-          }}
-          currentUser={currentUser}
-          onOpenAuth={(mode) => {
-            setAuthModalMode(mode);
-            setShowAuthModal(true);
-          }}
-          onOpenProfile={() => setShowProfileModal(true)}
-          onLogout={handleLogout}
-          creditStatus={creditStatus}
-          onRefreshCredits={() => void refreshCredits()}
-          onOpenCreditsUpgrade={() => setShowCreditUpgrade(true)}
-          onOpenBrandKit={() => setShowBrandKit(true)}
-          onOpenSettings={() => setShowSettings(true)}
-          onOpenMcp={() => setShowMcp(true)}
-          onOpenDatenschutz={() => setShowDatenschutz(true)}
-          onOpenPostForMeSetup={() => setShowPostForMeSetup(true)}
-          onOpenZernioSetup={() => setShowPostForMeSetup(true)}
-          onOpen30DayBatch={() => setShow30DayBatch(true)}
-          onNavigateScheduler={(subTab) => {
-            setSchedulerSubTab(subTab);
-            handleTabChange("scheduler");
-          }}
-          brandProfiles={brandProfiles}
-          activeProfileId={activeBrandProfileId}
-          onSelectProfile={setActiveBrandProfileId}
-          onOpenBrandProfileManager={() => setShowBrandProfileManager(true)}
-        />
-
-        <main className="mx-auto w-full flex-1 p-4 sm:p-6 max-w-[1600px] pb-24 md:pb-6">
-          {activeTab === "overview" && (
-            <ViewBoundary name="Studio-Übersicht">
-              <OverviewView
-                currentUser={currentUser}
-                onNavigate={handleTabChange}
-                onOpen30DayBatch={() => setShow30DayBatch(true)}
-                onOpenBrandKit={() => setShowBrandKit(true)}
-                onOpenSettings={() => setShowSettings(true)}
-                onOpenCreditsUpgrade={() => setShowCreditUpgrade(true)}
-                scheduledPosts={scheduledPosts}
-                socialChannels={socialChannels}
-                historyEntries={history}
-                creditStatus={creditStatus}
-                onRefreshCredits={() => void refreshCredits()}
-                onOpenHistoryEntry={(entry) => {
-                  setSlides(entry.slides);
-                  setTopic(entry.topic);
-                  handleTabChange("carousel");
-                }}
-              />
-            </ViewBoundary>
-          )}
-
-          {activeTab === "carousel" && (
-            <ViewBoundary name="Karussell-Studio" storageKeyToClearOnEmergency={LS.activeSlides}>
-              {slides.length === 0 ? (
-                <StudioCarouselWorkspace
-                  brief={brief}
-                  onChangeBrief={patchBrief}
-                  onSubmit={() => void generateCarousel()}
-                  isGenerating={isGeneratingCarousel}
-                  settings={settings}
-                  onChangeSettings={patchSettings}
-                  brandKit={brandKit}
-                  onChangeBrandKit={patchBrandKit}
-                  activeClone={activeClone}
-                  onOpenCloneStudio={() => handleTabChange("ai-clone")}
-                  onOpenPromptHub={() => handleTabChange("prompt-gallery")}
-                  onOpenBrandKit={() => setShowBrandKit(true)}
-                  onOpenSettings={() => setShowSettings(true)}
-                  currentUser={currentUser}
-                />
-              ) : (
-                <div className="pt-4">
-                  <CarouselViewer
-                    slides={slides}
-                    topic={topic}
-                    isGeneratingImages={isGeneratingImages}
-                    onGenerateImages={() => void generateAllImages()}
-                    onCancelGeneration={() => abortRef.current?.abort()}
-                    onRerollImage={(id) => void rerollImage(id)}
-                    onEditSlide={(id) => setEditing({ slideId: id })}
-                    onDownloadSingle={(id, withOverlay) => {
-                      const slide = slides.find((s) => s.id === id);
-                      if (slide) void downloadSlide(slide, brandKit, withOverlay);
-                    }}
-                    onExportZip={(withOverlay) => void exportZip(withOverlay)}
-                    onSaveToCloud={() => void saveCarouselToCloud()}
-                    onSchedulePost={() => handleTabChange("scheduler")}
-                    onReset={resetCarousel}
-                    settings={settings}
-                    brandKit={brandKit}
-                    onUpdateSlides={setSlides}
-                    onAddSlide={handleAddSlide}
-                  />
-                </div>
-              )}
-            </ViewBoundary>
-          )}
-
-          {activeTab === "bulk" && (
-            <ViewBoundary name="Serien-Warteschlange" storageKeyToClearOnEmergency={LS.seriesQueue}>
-              <SeriesQueue
-                queue={queue}
-                isRunning={isRunningQueue}
-                onAddJobs={addJobs}
-                onRunQueue={() => void runQueue()}
-                onStopQueue={cancelAllQueue}
-                onDeleteJob={(id) => {
-                  setQueue((prev) => prev.filter((j) => j.id !== id));
-                  setDeletedSeriesIds((prev) => Array.from(new Set([...prev, id])));
-                  fetch(`/api/mcp/series/${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {});
-                }}
-                onClearQueue={() => {
-                  setQueue((prev) => {
-                    const ids = prev.map((j) => j.id);
-                    if (ids.length > 0) {
-                      setDeletedSeriesIds((old) => Array.from(new Set([...old, ...ids])));
-                    }
-                    return [];
-                  });
-                  fetch("/api/mcp/series?all=true", { method: "DELETE" }).catch(() => {});
-                }}
-                onRenameJob={(id, value) => updateJob(id, { topic: value })}
-                onEditSlide={(jobId, slideId) => setEditing({ jobId, slideId })}
-                onRerollSlide={(jobId, slideId) => void runSingleJobSlide(jobId, slideId)}
-                onDownloadSlide={(jobId, slideId) => void downloadFromJob(jobId, slideId)}
-                onStartSlide={(jobId, slideId) => void runSingleJobSlide(jobId, slideId)}
-                onCancelSlide={(jobId, slideId) => cancelJobSlide(jobId, slideId)}
-                onRunSelectedSlides={(jobId, slideIds) => void runSelectedJobSlides(jobId, slideIds)}
-                onCancelJobSlides={(jobId) => cancelJobSlides(jobId)}
-                onSaveJobToCloud={(jobId) => void saveJobToCloud(jobId)}
-                onOpen30DayBatch={() => setShow30DayBatch(true)}
-                settings={settings}
-                onChangeSettings={patchSettings}
-              />
-            </ViewBoundary>
-          )}
-
-          {activeTab === "direct-prompt" && (
-            <ViewBoundary name="Direkt-Prompt Einzelbild" storageKeyToClearOnEmergency="onyx.directPrompt">
-              <DirectPromptView
-                initialPrompt={directPrompt}
-                currentUser={currentUser}
-                onNavigateToClone={() => handleTabChange("ai-clone")}
-                onUseInCarousel={(imageUrl, promptText) => {
-                  patchBrief({ topic: promptText });
-                  handleTabChange("carousel");
-                  toast.success("Einzelbild ins Karussell übertragen!");
-                }}
-                onDeductCredits={(amt) => {
-                  if (currentUser) {
-                    const updated = Math.max(0, (currentUser.credits ?? 0) - amt);
-                    setCurrentUser((prev) => (prev ? { ...prev, credits: updated } : null));
-                  }
-                  void refreshCredits();
-                }}
-              />
-            </ViewBoundary>
-          )}
-          {activeTab === "scheduler" && (
-            <ViewBoundary name="Post-Planer & Kalender" storageKeyToClearOnEmergency={LS.scheduledPosts}>
-              <PostSchedulerView
-                channels={socialChannels}
-                onUpdateChannels={setSocialChannels}
-                posts={scheduledPosts}
-                onUpdatePosts={handleUpdateScheduledPosts}
-                currentSlides={slides}
-                historyEntries={history}
-                initialScheduledItem={schedulerInitialItem}
-                onNavigateToCarousel={() => handleTabChange("carousel")}
-                settings={settings}
-                currentUser={currentUser}
-                initialTab={schedulerSubTab}
-                onOpenPostForMeSetup={currentUser?.role === "admin" ? () => setShowPostForMeSetup(true) : undefined}
-                onOpenZernioSetup={currentUser?.role === "admin" ? () => setShowPostForMeSetup(true) : undefined}
-                onOpen30DayBatch={() => setShow30DayBatch(true)}
-                brandProfiles={brandProfiles}
-                activeProfileId={activeBrandProfileId}
-                onSelectProfile={setActiveBrandProfileId}
-                onUpdateBrandProfiles={setBrandProfiles}
-                onOpenBrandProfileManager={() => setShowBrandProfileManager(true)}
-              />
-            </ViewBoundary>
-          )}
-          {activeTab === "ai-clone" && (
-            <ViewBoundary name="KI-Klon Persona">
-              <AiCloneView
-                currentUser={currentUser}
-                onDeductCredits={(amt) => {
-                  if (currentUser) {
-                    const updated = Math.max(0, (currentUser.credits ?? 0) - amt);
-                    setCurrentUser((prev) => (prev ? { ...prev, credits: updated } : null));
-                  }
-                  void refreshCredits();
-                }}
-                onUseInCarousel={() => {
-                  patchBrief({ useClone: true });
-                  handleTabChange("carousel");
-                  toast.success("KI Clone für Karussell aktiviert!");
-                }}
-                onUseInDirectPrompt={(clonePrompt) => {
-                  setDirectPrompt(clonePrompt);
-                  handleTabChange("direct-prompt");
-                  toast.success("KI Clone ins Einzelbild übertragen!");
-                }}
-              />
-            </ViewBoundary>
-          )}
-          {activeTab === "prompt-gallery" && (
-            <ViewBoundary name="Prompt-Bibliothek">
-              <PromptGallery
-                onUseInCarousel={(promptText, title) => {
-                  patchBrief({ topic: `${title}: ${promptText}` });
-                  handleTabChange("carousel");
-                  toast.success("Prompt ins Karussell übertragen!");
-                }}
-                onUseInDirectPrompt={(promptText) => {
-                  setDirectPrompt(promptText);
-                  handleTabChange("direct-prompt");
-                  toast.success("Prompt ins Einzelbild übertragen!");
-                }}
-              />
-            </ViewBoundary>
-          )}
-          {activeTab === "history" && (
-            <ViewBoundary name="Cloud-Galerie & Verlauf" storageKeyToClearOnEmergency={LS.history}>
-              <CloudGalleryView
-                currentUser={currentUser}
-                historyEntries={history}
-                onOpenHistory={(entry) => {
-                  setSlides(entry.slides);
-                  setTopic(entry.topic);
-                  handleTabChange("carousel");
-                }}
-                onDeleteHistory={(id) => setHistory((prev) => prev.filter((e) => e.id !== id))}
-                onUseInCarousel={(imageUrl, prompt) => {
-                  patchBrief({ topic: prompt });
-                  handleTabChange("carousel");
-                  toast.success("Bild ins Karussell geladen!");
-                }}
-                onUseInDirectPrompt={(prompt) => {
-                  setDirectPrompt(prompt);
-                  handleTabChange("direct-prompt");
-                  toast.success("Prompt ins Einzelbild übernommen!");
-                }}
-                onScheduleItem={(item) => {
-                  setSchedulerInitialItem(item);
-                  handleTabChange("scheduler");
-                  toast.success(`Projekt „${item.title}“ im Planer geöffnet! 📅`);
-                }}
-                onNavigateToScheduler={() => handleTabChange("scheduler")}
-              />
-            </ViewBoundary>
-          )}
-        </main>
-
-        {/* Studio Security & Privacy Footer */}
-        <footer className="mt-auto border-t border-white/[0.06] bg-black/40 backdrop-blur-md px-6 py-4">
-          <div className="mx-auto flex max-w-[1550px] flex-col sm:flex-row items-center justify-between gap-3 text-xs text-zinc-500">
-            <div className="flex items-center gap-2">
-              <span className="flex h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
-              <span className="text-zinc-400">Socialcraft Security Shield v2.4 • TLS 256-Bit verschlüsselt</span>
-            </div>
-            <div className="flex items-center gap-4">
-              <button
-                type="button"
-                onClick={() => setShowDatenschutz(true)}
-                className="text-zinc-400 hover:text-white transition-colors cursor-pointer underline-offset-4 hover:underline"
-              >
-                Datenschutz & Sicherheit (DSGVO)
-              </button>
-              <span>•</span>
-              <span className="text-zinc-500">Zero-Tracking & Anti-Hacking Hardening</span>
-            </div>
-          </div>
-        </footer>
-      </div>
-
-      {showSettings && (
-        <SettingsModal
-          settings={settings}
-          onChange={patchSettings}
-          onClose={() => setShowSettings(false)}
-          motifCount={motifs.length}
-          onClearMotifs={() => {
-            setMotifs([]);
-            toast.success("Motiv-Cache geleert");
-          }}
-        />
-      )}
-      {showBrandKit && (
-        <BrandKitModal
-          brandKit={brandKit}
-          onChange={patchBrandKit}
-          onClose={() => setShowBrandKit(false)}
-        />
-      )}
-      <PostForMeSetupModal
-        isOpen={showPostForMeSetup && currentUser?.role === "admin"}
-        onClose={() => setShowPostForMeSetup(false)}
+    <>
+      <StudioRoot
+        currentTab={activeTab}
+        onNavigateTab={handleTabChange}
+        onNavigateLanding={() => {
+          setCurrentView("landing");
+          if (typeof window !== "undefined" && window.location.pathname !== "/willkommen") {
+            window.history.pushState(null, "", "/willkommen");
+          }
+        }}
+        onNavigateAdmin={handleOpenAdmin}
+        currentUser={currentUser}
+        onOpenAuth={(mode) => {
+          setAuthModalMode(mode);
+          setShowAuthModal(true);
+        }}
+        onLogout={handleLogout}
+        creditStatus={creditStatus}
+        onRefreshCredits={() => void refreshCredits()}
+        onOpenCreditsUpgrade={() => setShowCreditUpgrade(true)}
+        brandKit={brandKit}
+        onChangeBrandKit={patchBrandKit}
         settings={settings}
         onChangeSettings={patchSettings}
-        channels={socialChannels}
-        onUpdateChannels={setSocialChannels}
-        onComplete={() => setActiveTab("scheduler")}
+        activeClone={activeClone}
+        brandProfiles={brandProfiles}
+        activeBrandProfileId={activeBrandProfileId}
+        onSelectBrandProfile={setActiveBrandProfileId}
+        onUpdateBrandProfiles={setBrandProfiles}
+        brief={brief}
+        onChangeBrief={patchBrief}
+        slides={slides}
+        onUpdateSlide={setSlideFlag}
+        onGenerateStoryboard={() => generateCarousel()}
+        isGeneratingStoryboard={isGeneratingCarousel}
+        onRenderImages={() => generateAllImages()}
+        isRenderingImages={isGeneratingImages}
+        onResetCarousel={resetCarousel}
+        onExportZip={(withOverlay) => exportZip(withOverlay)}
+        onRerollImage={(id) => rerollImage(id)}
+        queue={queue}
+        isRunningQueue={isRunningQueue}
+        onAddJobs={addJobs}
+        onRunQueue={() => runQueue()}
+        onStopQueue={cancelAllQueue}
+        onDeleteJob={(id) => {
+          setQueue((prev) => prev.filter((j) => j.id !== id));
+          setDeletedSeriesIds((prev) => Array.from(new Set([...prev, id])));
+          fetch(`/api/mcp/series/${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {});
+        }}
+        onClearQueue={() => {
+          setQueue((prev) => {
+            const ids = prev.map((j) => j.id);
+            if (ids.length > 0) {
+              setDeletedSeriesIds((old) => Array.from(new Set([...old, ...ids])));
+            }
+            return [];
+          });
+          fetch("/api/mcp/series?all=true", { method: "DELETE" }).catch(() => {});
+        }}
+        onRenameJob={(id, value) => updateJob(id, { topic: value })}
+        onEditJobSlide={(jobId, slideId) => setEditing({ jobId, slideId })}
+        onRerollJobSlide={(jobId, slideId) => runSingleJobSlide(jobId, slideId)}
+        onDownloadJobSlide={(jobId, slideId) => downloadFromJob(jobId, slideId)}
+        onStartJobSlide={(jobId, slideId) => runSingleJobSlide(jobId, slideId)}
+        onCancelJobSlide={(jobId, slideId) => cancelJobSlide(jobId, slideId)}
+        onRunSelectedJobSlides={(jobId, slideIds) => runSelectedJobSlides(jobId, slideIds)}
+        onCancelJobSlides={(jobId) => cancelJobSlides(jobId)}
+        onSaveJobToCloud={(jobId) => saveJobToCloud(jobId)}
+        onOpen30DayBatch={() => setShow30DayBatch(true)}
+        scheduledPosts={scheduledPosts}
+        onUpdateScheduledPosts={handleUpdateScheduledPosts}
+        socialChannels={socialChannels}
+        onUpdateSocialChannels={setSocialChannels}
+        schedulerSubTab={schedulerSubTab}
+        history={history}
+        onSelectHistoryEntry={(entry) => {
+          setSlides(entry.slides);
+          setTopic(entry.topic);
+        }}
       />
-      <BrandProfileManagerModal
-        isOpen={showBrandProfileManager}
-        onClose={() => setShowBrandProfileManager(false)}
-        profiles={brandProfiles}
-        activeProfileId={activeBrandProfileId}
-        onSelectProfile={setActiveBrandProfileId}
-        onUpdateProfiles={setBrandProfiles}
-        channels={socialChannels}
-        isAdmin={currentUser?.role === "admin"}
-      />
+
       <ThirtyDayBatchModal
         isOpen={show30DayBatch}
         onClose={() => setShow30DayBatch(false)}
@@ -1463,11 +1194,6 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
         onUpdatePosts={handleUpdateScheduledPosts}
         existingPosts={scheduledPosts}
       />
-      {showMcp && (
-        <ModalShell title="Claude MCP Verbindung" onClose={() => setShowMcp(false)} maxHeight="70vh">
-          <McpModalContent />
-        </ModalShell>
-      )}
       {editingSlide && (
         <SlideEditModal
           slide={editingSlide}
@@ -1500,7 +1226,6 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
           onRefreshCredits={() => void refreshCredits()}
         />
       )}
-
       {showProfileModal && currentUser && (
         <UserProfileModal
           user={currentUser}
@@ -1509,7 +1234,6 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
           onLogout={handleLogout}
         />
       )}
-
       {showDatenschutz && (
         <DatenschutzModal
           onClose={() => setShowDatenschutz(false)}
@@ -1520,39 +1244,8 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
           }}
         />
       )}
-
-      {/* Mobile Bottom Navigation Bar (md:hidden) */}
-      <nav
-        aria-label="Mobile Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around border-t border-white/10 bg-[#0C0910]/95 backdrop-blur-2xl px-2 py-2 safe-area-pb shadow-[0_-8px_25px_rgba(0,0,0,0.7)]"
-      >
-        {[
-          { key: "overview" as TabKey, label: "Übersicht", icon: Compass },
-          { key: "carousel" as TabKey, label: "Karussell", icon: Layers },
-          { key: "direct-prompt" as TabKey, label: "Einzelbild", icon: ImageIcon },
-          { key: "scheduler" as TabKey, label: "Planer", icon: CalendarDays },
-          { key: "history" as TabKey, label: "Galerie", icon: Cloud },
-        ].map(({ key, label, icon: Icon }) => {
-          const isActive = activeTab === key;
-          return (
-            <button
-              key={key}
-              type="button"
-              onClick={() => handleTabChange(key)}
-              className={cn(
-                "flex flex-col items-center gap-1 px-2.5 py-1 rounded-xl text-[10px] font-semibold transition-all cursor-pointer",
-                isActive ? "text-[#FF4D17]" : "text-zinc-400 hover:text-white"
-              )}
-            >
-              <Icon className={cn("h-5 w-5", isActive ? "stroke-[2.5]" : "stroke-[1.8]")} />
-              <span>{label}</span>
-            </button>
-          );
-        })}
-      </nav>
-
       <Toaster />
-    </div>
+    </>
   );
 }
 

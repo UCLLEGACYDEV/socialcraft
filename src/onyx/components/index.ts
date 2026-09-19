@@ -6,3 +6,4 @@ export * from "./layout";
 export * from "./modals";
 export * from "./views";
 export * from "./widgets";
+export * from "./studio/StudioRoot";

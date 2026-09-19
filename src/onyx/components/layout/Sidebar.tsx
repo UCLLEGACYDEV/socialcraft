@@ -32,34 +32,14 @@ export interface NavGroup {
 
 export const NAV_GROUPS: NavGroup[] = [
   {
-    id: "create",
-    label: "Erstellen",
+    id: "main",
+    label: "Hauptmenü",
     items: [
-      { key: "carousel", label: "Karussell", icon: Layers, badge: "Neu" },
-      { key: "direct-prompt", label: "Einzelbild", icon: ImageIcon },
-      { key: "bulk", label: "Content-Serie", icon: ListVideo },
-      { key: "prompt-gallery", label: "Ideen & Vorlagen", icon: Sparkles },
-    ],
-  },
-  {
-    id: "schedule",
-    label: "Planen",
-    items: [
-      { key: "scheduler", label: "Kalender & Posts", icon: Calendar },
-    ],
-  },
-  {
-    id: "content",
-    label: "Meine Inhalte",
-    items: [
+      { key: "carousel", label: "Studio (Erstellen)", icon: Sparkles, badge: "Pipeline" },
+      { key: "bulk", label: "Content-Serie", icon: ListVideo, badge: "Autopilot" },
+      { key: "scheduler", label: "Planer & Kalender", icon: Calendar },
       { key: "history", label: "Cloud-Galerie", icon: GalleryVerticalEnd },
-    ],
-  },
-  {
-    id: "style",
-    label: "Mein Stil",
-    items: [
-      { key: "ai-clone", label: "Mein Gesicht", icon: UserCheck },
+      { key: "ai-clone", label: "Mein Look & Setup", icon: UserCheck },
     ],
   },
 ];
