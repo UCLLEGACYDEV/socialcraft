@@ -47,6 +47,91 @@ interface ChatStudioViewProps {
   onExportZip: () => void;
   brandKit: BrandKit;
   settings: ApiSettings;
+  onChangeSettings?: (patch: Partial<ApiSettings>) => void;
+}
+
+async function callGeminiForHooksAndOutline(
+  topic: string,
+  apiKey: string,
+  slideCount: number,
+): Promise<{
+  replyText: string;
+  hookOptions: { id: string; archetype: string; label: string; hook: string }[];
+  suggestedOutline: string[];
+} | null> {
+  const cleanKey = apiKey.trim();
+  if (!cleanKey) return null;
+
+  const models = ["gemini-1.5-flash", "gemini-2.0-flash", "gemini-1.5-pro"];
+  const systemPrompt = `Du bist ein Social-Media-Karussell-Experte für virale Hochformat-Karussells (4:5).
+Aufgabe: Analysiere das Thema und erstelle 3 extrem starke, psychologische Hook-Ideen und eine ${slideCount}-teilige Folien-Gliederung.
+Thema: "${topic}"
+
+Antworte STRIKT als valides JSON in exakt dieser Struktur:
+{
+  "replyText": "1 treffender, motivierender Satz zur Themenwahl",
+  "hookOptions": [
+    {
+      "id": "hook-1",
+      "archetype": "Provokant",
+      "label": "Scroll-Stopper",
+      "hook": "Erster Hook..."
+    },
+    {
+      "id": "hook-2",
+      "archetype": "Case Study",
+      "label": "Erfahrungsbericht",
+      "hook": "Zweiter Hook..."
+    },
+    {
+      "id": "hook-3",
+      "archetype": "Zahlen & Fakten",
+      "label": "Autoritäts-Hook",
+      "hook": "Dritter Hook..."
+    }
+  ],
+  "suggestedOutline": [
+    "Folie 1: Hook & Aufhänger",
+    "Folie 2: Der typische Fehler",
+    "Folie 3: Der Perspektivenwechsel",
+    "Folie 4: Schritt 1",
+    "Folie 5: Schritt 2",
+    "Folie 6: Key Takeaway",
+    "Folie 7: Speichern & CTA"
+  ]
+}`;
+
+  for (const model of models) {
+    try {
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(cleanKey)}`;
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: systemPrompt }] }],
+          generationConfig: {
+            temperature: 0.7,
+            topP: 0.95,
+            maxOutputTokens: 2048,
+            responseMimeType: "application/json",
+          },
+        }),
+      });
+
+      if (!res.ok) continue;
+      const data = await res.json();
+      const raw = data.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!raw) continue;
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.hookOptions) && parsed.hookOptions.length > 0) {
+        return parsed;
+      }
+    } catch {
+      continue;
+    }
+  }
+
+  return null;
 }
 
 const INSPIRATION_PILLS = [
@@ -69,22 +154,48 @@ export function ChatStudioView({
   onReset,
   onExportZip,
   brandKit,
+  settings,
+  onChangeSettings,
 }: ChatStudioViewProps) {
   const [inputText, setInputText] = useState("");
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: "msg-init",
-      sender: "assistant",
-      text: "Hi! Worüber möchtest du heute ein Karussell erstellen? Schreib mir einfach dein Thema, ein Problem deiner Zielgruppe oder deinen Gedanken — ich erstelle es für dich!\n\n💡 Tipp: Du kannst auch einen fertigen Prompt-Block von Claude oder ChatGPT direkt hier reinkopieren!",
-      createdAt: new Date().toISOString(),
-    },
-  ]);
+  const [isAskingAi, setIsAskingAi] = useState(false);
+  const [showKeyModal, setShowKeyModal] = useState(false);
+  const [tempApiKey, setTempApiKey] = useState(settings.geminiApiKey || "");
+
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("onyx.chatStudioMessages");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
+      } catch {}
+    }
+    return [
+      {
+        id: "msg-init",
+        sender: "assistant",
+        text: "Hi! Worüber möchtest du heute ein Karussell erstellen? Schreib mir einfach dein Thema, ein Problem deiner Zielgruppe oder deinen Gedanken — ich erstelle es für dich!\n\n💡 Tipp: Du kannst auch einen fertigen Prompt-Block von Claude oder ChatGPT direkt hier reinkopieren!",
+        createdAt: new Date().toISOString(),
+      },
+    ];
+  });
 
   const chatBottomRef = useRef<HTMLDivElement>(null);
 
+  // 100% Local-First Storage (Zero Supabase DB costs!)
+  useEffect(() => {
+    try {
+      if (messages.length > 0) {
+        localStorage.setItem("onyx.chatStudioMessages", JSON.stringify(messages));
+      }
+    } catch {}
+  }, [messages]);
+
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, isGeneratingStoryboard]);
+  }, [messages, isGeneratingStoryboard, isAskingAi]);
 
   const handleSendMessage = (textToSend?: string) => {
     const text = (textToSend || inputText).trim();
@@ -142,7 +253,7 @@ export function ChatStudioView({
       return;
     }
 
-    // 2. Add normal user message
+    // 2. Add user message
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
       sender: "user",
@@ -150,14 +261,89 @@ export function ChatStudioView({
       createdAt: new Date().toISOString(),
     };
 
-    // Update brief topic
     onChangeBrief({ topic: text });
+    setInputText("");
 
-    // 3. Generate simulated intelligent AI response with 3 hook options
+    // 3. If Gemini API key is configured, call Gemini LIVE
+    if (settings?.geminiApiKey?.trim()) {
+      setIsAskingAi(true);
+      setMessages((prev) => [...prev, userMsg]);
+
+      void (async () => {
+        try {
+          const geminiRes = await callGeminiForHooksAndOutline(
+            text,
+            settings.geminiApiKey,
+            brief.slideCount || 7,
+          );
+
+          if (geminiRes) {
+            const botMsg: ChatMessage = {
+              id: `assistant-${Date.now() + 1}`,
+              sender: "assistant",
+              text: geminiRes.replyText || `Starkes Thema! Für "${text}" habe ich live 3 virale Hook-Ansätze generiert:`,
+              topic: text,
+              hookOptions: geminiRes.hookOptions,
+              suggestedOutline: geminiRes.suggestedOutline,
+              readyForGeneration: true,
+              createdAt: new Date().toISOString(),
+            };
+            setMessages((prev) => [...prev, botMsg]);
+            return;
+          }
+        } catch (err) {
+          console.warn("Gemini call error:", err);
+        } finally {
+          setIsAskingAi(false);
+        }
+
+        // Fallback if Gemini failed
+        const fallbackMsg: ChatMessage = {
+          id: `assistant-${Date.now() + 1}`,
+          sender: "assistant",
+          text: `Starkes Thema! Für "${text}" habe ich 3 virale Hook-Ansätze entwickelt. Welcher gefällt dir am besten?`,
+          topic: text,
+          hookOptions: [
+            {
+              id: "hook-1",
+              archetype: "Provokant",
+              label: "Scroll-Stopper",
+              hook: `Hör auf damit: Die meisten machen diesen fatalen Fehler bei "${text}".`,
+            },
+            {
+              id: "hook-2",
+              archetype: "Case Study",
+              label: "Erfahrungsbericht",
+              hook: `Wie wir das Problem mit "${text}" in unter 30 Tagen gelöst haben:`,
+            },
+            {
+              id: "hook-3",
+              archetype: "Zahlen & Fakten",
+              label: "Autoritäts-Hook",
+              hook: `94% übersehen diesen einen Hebel für "${text}". Hier ist der Beweis:`,
+            },
+          ],
+          suggestedOutline: [
+            "Folie 1: Hook & Aufhänger",
+            "Folie 2: Der typische Fehler",
+            "Folie 3: Der Perspektivenwechsel",
+            "Folie 4-5: Die 2 wichtigsten Schritte",
+            "Folie 6: Zusammenfassung & Key Takeaway",
+            "Folie 7: Speichern & Handeln (CTA)",
+          ],
+          readyForGeneration: true,
+          createdAt: new Date().toISOString(),
+        };
+        setMessages((prev) => [...prev, fallbackMsg]);
+      })();
+      return;
+    }
+
+    // 4. Default algorithmic response when no Gemini key is provided
     const botMsg: ChatMessage = {
       id: `assistant-${Date.now() + 1}`,
       sender: "assistant",
-      text: `Starkes Thema! Für "${text}" habe ich 3 virale Hook-Ansätze entwickelt. Welcher gefällt dir am besten?`,
+      text: `Starkes Thema! Für "${text}" habe ich 3 virale Hook-Ansätze entwickelt. Welcher gefällt dir am besten?\n\n💡 Tipp: Hinterlege oben deinen Gemini API-Key, um Live-KI-Antworten direkt von Google Gemini zu erhalten!`,
       topic: text,
       hookOptions: [
         {
@@ -192,7 +378,6 @@ export function ChatStudioView({
     };
 
     setMessages((prev) => [...prev, userMsg, botMsg]);
-    setInputText("");
   };
 
   const handleSelectHook = (hookText: string) => {
@@ -215,8 +400,10 @@ export function ChatStudioView({
     ]);
   };
 
+  const hasGemini = Boolean(settings?.geminiApiKey?.trim());
+
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] max-h-[900px] rounded-3xl border border-white/10 bg-[#0C0912]/80 backdrop-blur-2xl overflow-hidden shadow-2xl">
+    <div className="flex flex-col h-[calc(100vh-140px)] max-h-[900px] rounded-3xl border border-white/10 bg-[#0C0912]/80 backdrop-blur-2xl overflow-hidden shadow-2xl relative">
       {/* ── Chat Header ─────────────────────────────────────────────── */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-white/[0.08] bg-black/40">
         <div className="flex items-center gap-3">
@@ -238,6 +425,25 @@ export function ChatStudioView({
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Gemini API Key Trigger Badge */}
+          <button
+            type="button"
+            onClick={() => {
+              setTempApiKey(settings.geminiApiKey || "");
+              setShowKeyModal(true);
+            }}
+            className={cn(
+              "flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer",
+              hasGemini
+                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20"
+                : "bg-amber-500/10 border-amber-500/30 text-amber-300 hover:bg-amber-500/20",
+            )}
+            title="Gemini API Key verwalten"
+          >
+            <Sparkles className="h-3.5 w-3.5" />
+            <span>{hasGemini ? "Gemini Live aktiv" : "Gemini verbinden"}</span>
+          </button>
+
           <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-xl p-1 text-xs">
             <span className="text-zinc-400 px-2">Länge:</span>
             {[4, 7, 10].map((num) => (
@@ -261,6 +467,7 @@ export function ChatStudioView({
             type="button"
             onClick={() => {
               onReset();
+              localStorage.removeItem("onyx.chatStudioMessages");
               setMessages([
                 {
                   id: "msg-init",
@@ -463,6 +670,18 @@ export function ChatStudioView({
           </div>
         )}
 
+        {isAskingAi && (
+          <div className="flex gap-3 max-w-2xl animate-in fade-in-50">
+            <div className="h-8 w-8 rounded-full shrink-0 flex items-center justify-center text-xs font-bold shadow-md bg-[#FF4D17]/20 border border-[#FF4D17]/40 text-[#FF6A1F]">
+              <Sparkles className="h-4 w-4 animate-spin" />
+            </div>
+            <div className="rounded-2xl p-4 text-sm leading-relaxed bg-white/[0.04] border border-white/10 text-zinc-300 flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-[#FF6A1F] animate-spin" />
+              <span>Gemini analysiert dein Thema und generiert virale Hooks...</span>
+            </div>
+          </div>
+        )}
+
         <div ref={chatBottomRef} />
       </div>
 
@@ -516,6 +735,82 @@ export function ChatStudioView({
           </button>
         </div>
       </div>
+
+      {/* ── Gemini Key Setup Modal ────────────────────────────────────── */}
+      {showKeyModal && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in-50"
+          onClick={() => setShowKeyModal(false)}
+        >
+          <div
+            className="relative w-full max-w-md rounded-3xl border border-white/15 bg-[#0D0B14] p-6 shadow-2xl space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-[#FF4D17]" />
+                <h3 className="text-base font-bold text-white">Google Gemini API-Key</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowKeyModal(false)}
+                className="text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-zinc-400 leading-relaxed">
+              Mit deinem Gemini API-Key antwortet der Chat Studio Assistent in Echtzeit mit maßgeschneiderten Hooks und Gliederungen direkt von Google Gemini.
+            </p>
+
+            <div className="space-y-1.5">
+              <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 block">
+                API-Key (Google AI Studio)
+              </label>
+              <input
+                type="password"
+                value={tempApiKey}
+                onChange={(e) => setTempApiKey(e.target.value)}
+                placeholder="AIzaSy..."
+                className="w-full rounded-xl border border-white/15 bg-black/50 p-3 text-xs font-mono text-white focus:border-[#FF4D17] focus:outline-none"
+              />
+              <p className="text-[10px] text-zinc-500">
+                Kostenlosen Key erstellen auf{" "}
+                <a
+                  href="https://aistudio.google.com/apikey"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-[#FF6A1F] hover:underline"
+                >
+                  aistudio.google.com/apikey
+                </a>
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowKeyModal(false)}
+                className="px-4 py-2 rounded-xl text-xs font-medium text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onChangeSettings?.({ geminiApiKey: tempApiKey.trim() });
+                  setShowKeyModal(false);
+                  toast.success("Gemini API-Key erfolgreich gespeichert! 🟢");
+                }}
+                className="px-5 py-2 rounded-xl bg-[#FF4D17] hover:bg-[#FF6A1F] text-xs font-bold text-white shadow-lg shadow-orange-500/20 transition-all cursor-pointer"
+              >
+                Speichern
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

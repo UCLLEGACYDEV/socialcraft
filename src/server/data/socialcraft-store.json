@@ -165,7 +165,9 @@
     "post_1789785763317_3z55a",
     "post_1789785763345_2kl1l",
     "post_1789786031987_u8bvg",
-    "post_1789786032009_hrdvz"
+    "post_1789786032009_hrdvz",
+    "post_1789786712360_10vhp",
+    "post_1789786712393_1pr3r"
   ],
   "deletedSeriesIds": [
     "test-series-1",
@@ -179,5 +181,5 @@
     "series-job-1788951644039-6-g4ba",
     "series-job-1788951644039-7-3y4o"
   ],
-  "updatedAt": "2026-09-19T02:47:12.125Z"
+  "updatedAt": "2026-09-19T02:58:32.545Z"
 }

@@ -245,6 +245,7 @@ export function StudioRoot({
             onExportZip={() => onExportZip(true)}
             brandKit={brandKit}
             settings={settings}
+            onChangeSettings={onChangeSettings}
           />
         )}
 
@@ -264,6 +265,10 @@ export function StudioRoot({
           <FlowAutomationCanvas
             socialChannels={socialChannels}
             onSchedulePost={onSchedulePost}
+            settings={settings}
+            onChangeSettings={onChangeSettings}
+            brandKit={brandKit}
+            currentUser={currentUser}
           />
         )}
       </main>
