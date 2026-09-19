@@ -1028,7 +1028,12 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
             setAuthModalMode(mode);
             setShowAuthModal(true);
           }}
-          onNavigateStudio={() => setCurrentView("studio")}
+          onNavigateStudio={() => {
+            setCurrentView("studio");
+            if (typeof window !== "undefined" && window.location.pathname !== "/") {
+              window.history.pushState(null, "", "/");
+            }
+          }}
           onNavigateAdmin={handleOpenAdmin}
           onOpenCreditsUpgrade={() => setShowCreditUpgrade(true)}
           onLogout={handleLogout}
