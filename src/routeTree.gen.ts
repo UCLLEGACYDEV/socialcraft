@@ -21,6 +21,7 @@ import { Route as PromptsRouteImport } from './routes/prompts'
 import { Route as SerieRouteImport } from './routes/serie'
 import { Route as StudioRouteImport } from './routes/studio'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as WillkommenRouteImport } from './routes/willkommen'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -82,6 +83,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WillkommenRoute = WillkommenRouteImport.update({
+  id: '/willkommen',
+  path: '/willkommen',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +102,7 @@ export interface FileRoutesByFullPath {
   '/serie': typeof SerieRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
+  '/willkommen': typeof WillkommenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/serie': typeof SerieRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
+  '/willkommen': typeof WillkommenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -125,6 +133,7 @@ export interface FileRoutesById {
   '/serie': typeof SerieRoute
   '/studio': typeof StudioRoute
   '/terms': typeof TermsRoute
+  '/willkommen': typeof WillkommenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/serie'
     | '/studio'
     | '/terms'
+    | '/willkommen'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -155,6 +165,7 @@ export interface FileRouteTypes {
     | '/serie'
     | '/studio'
     | '/terms'
+    | '/willkommen'
   id:
     | '__root__'
     | '/'
@@ -169,6 +180,7 @@ export interface FileRouteTypes {
     | '/serie'
     | '/studio'
     | '/terms'
+    | '/willkommen'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -184,6 +196,7 @@ export interface RootRouteChildren {
   SerieRoute: typeof SerieRoute
   StudioRoute: typeof StudioRoute
   TermsRoute: typeof TermsRoute
+  WillkommenRoute: typeof WillkommenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -272,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/willkommen': {
+      id: '/willkommen'
+      path: '/willkommen'
+      fullPath: '/willkommen'
+      preLoaderRoute: typeof WillkommenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -288,6 +308,7 @@ const rootRouteChildren: RootRouteChildren = {
   SerieRoute: SerieRoute,
   StudioRoute: StudioRoute,
   TermsRoute: TermsRoute,
+  WillkommenRoute: WillkommenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

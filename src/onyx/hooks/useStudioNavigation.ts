@@ -32,9 +32,15 @@ export interface UseStudioNavigationOptions {
 }
 
 export function useStudioNavigation({ routeTab, initialView }: UseStudioNavigationOptions = {}) {
-  const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredCurrentUser());
-  const [currentView, setCurrentView] = usePersistentState<"landing" | "studio" | "admin">(
-    "onyx.currentView",
+  // Session lives in browser storage — read it after mount so SSR and the first
+  // client render produce identical markup (no hydration mismatch).
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  useEffect(() => {
+    setCurrentUser(getStoredCurrentUser());
+  }, []);
+  // The view is decided by the URL (one source of truth per route), never by a
+  // persisted value — that caused "/" to flip between landing and studio on load.
+  const [currentView, setCurrentView] = useState<"landing" | "studio" | "admin">(
     initialView || "studio",
   );
 
@@ -43,12 +49,12 @@ export function useStudioNavigation({ routeTab, initialView }: UseStudioNavigati
     routeTab || "overview",
   );
 
-  // SaaS rule: Authenticated users stay in the Studio workspace; never bounced to marketing landing page
+  // Signed-in users never sit on the marketing page of a studio route
   useEffect(() => {
-    if ((currentUser || routeTab) && currentView === "landing") {
+    if (routeTab && currentView === "landing") {
       setCurrentView("studio");
     }
-  }, [currentUser, routeTab, currentView, setCurrentView]);
+  }, [routeTab, currentView, setCurrentView]);
 
   useEffect(() => {
     if (initialView) {
@@ -92,6 +98,8 @@ export function useStudioNavigation({ routeTab, initialView }: UseStudioNavigati
         setCurrentView("studio");
       } else if (path === "/admin") {
         setCurrentView("admin");
+      } else if (path === "/willkommen") {
+        setCurrentView("landing");
       }
     }
   }, [routeTab, setActiveTab, setCurrentView]);
@@ -106,6 +114,8 @@ export function useStudioNavigation({ routeTab, initialView }: UseStudioNavigati
         setCurrentView("studio");
       } else if (path === "/admin") {
         setCurrentView("admin");
+      } else if (path === "/willkommen") {
+        setCurrentView("landing");
       }
     };
     window.addEventListener("popstate", handlePopState);
@@ -127,8 +137,8 @@ export function useStudioNavigation({ routeTab, initialView }: UseStudioNavigati
     saveStoredCurrentUser(null);
     setCurrentUser(null);
     setCurrentView("landing");
-    if (typeof window !== "undefined" && window.location.pathname !== "/") {
-      window.history.pushState(null, "", "/");
+    if (typeof window !== "undefined" && window.location.pathname !== "/willkommen") {
+      window.history.pushState(null, "", "/willkommen");
     }
     toast.info("Erfolgreich abgemeldet.");
   }, [setCurrentView]);
