@@ -19,6 +19,8 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { BriefValues, SlideContent, BrandKit, ApiSettings } from "@/onyx/types";
+import { parseBlock } from "@/onyx/parse-prompt-block";
+import { getSlideRoleSequence } from "@/onyx/story-service";
 
 interface ChatMessage {
   id: string;
@@ -35,6 +37,7 @@ interface ChatStudioViewProps {
   brief: BriefValues;
   onChangeBrief: (patch: Partial<BriefValues>) => void;
   slides: SlideContent[];
+  onSetSlides?: (slides: SlideContent[]) => void;
   onUpdateSlide: (id: string, patch: Partial<SlideContent>) => void;
   onGenerateStoryboard: () => Promise<void>;
   isGeneratingStoryboard: boolean;
@@ -57,6 +60,7 @@ export function ChatStudioView({
   brief,
   onChangeBrief,
   slides,
+  onSetSlides,
   onUpdateSlide,
   onGenerateStoryboard,
   isGeneratingStoryboard,
@@ -71,7 +75,7 @@ export function ChatStudioView({
     {
       id: "msg-init",
       sender: "assistant",
-      text: "Hi! Worüber möchtest du heute ein Karussell erstellen? Schreib mir einfach dein Thema, ein Problem deiner Zielgruppe oder deinen Gedanken — ich strukturiere es für dich!",
+      text: "Hi! Worüber möchtest du heute ein Karussell erstellen? Schreib mir einfach dein Thema, ein Problem deiner Zielgruppe oder deinen Gedanken — ich erstelle es für dich!\n\n💡 Tipp: Du kannst auch einen fertigen Prompt-Block von Claude oder ChatGPT direkt hier reinkopieren!",
       createdAt: new Date().toISOString(),
     },
   ]);
@@ -86,7 +90,59 @@ export function ChatStudioView({
     const text = (textToSend || inputText).trim();
     if (!text) return;
 
-    // 1. Add user message
+    // 1. Check if user pasted a structured Claude or Markdown carousel block
+    const detectedCarousels = parseBlock(text);
+    if (detectedCarousels.length > 0 && detectedCarousels.some((c) => c.slides.length > 0)) {
+      const c = detectedCarousels[0];
+      const roleSequence = getSlideRoleSequence(c.slides.length);
+      const newSlides: SlideContent[] = c.slides.map((s, idx) => {
+        return {
+          id: `slide-${Date.now()}-${idx}`,
+          slideNumber: s.slideNumber || idx + 1,
+          role: roleSequence[idx] || (idx === 0 ? "hook" : idx === c.slides.length - 1 ? "closing" : "concept"),
+          roleLabel: s.title || `Folie ${idx + 1}`,
+          headline: s.headline || s.title,
+          subtext: s.subtext || "",
+          badge: s.slideNumber === 1 ? "KOMMUNIKATION" : `FEHLER 0${idx}`,
+          visualPrompt: s.prompt || "",
+          coreMetaphor: s.headline || c.title || "",
+          primaryProps: [],
+          renderStatus: "idle",
+        };
+      });
+
+      if (onSetSlides) {
+        onSetSlides(newSlides);
+      }
+      onChangeBrief({
+        topic: c.title,
+        slideCount: c.slides.length,
+      });
+
+      const userMsg: ChatMessage = {
+        id: `user-${Date.now()}`,
+        sender: "user",
+        text: text.length > 250 ? `${text.slice(0, 180)}...\n\n[📋 Claude-Prompt-Block mit ${c.slides.length} Slides erkannt]` : text,
+        createdAt: new Date().toISOString(),
+      };
+
+      const botMsg: ChatMessage = {
+        id: `assistant-${Date.now() + 1}`,
+        sender: "assistant",
+        text: `🚀 Perfekt! Ich habe dein fertiges Claude-Karussell erkannt: "${c.title}" mit ${c.slides.length} Folien!\n\nAlle Folientexte und 3D-Bildprompts wurden direkt in dein Karussell geladen. Du kannst die Folien unten in der Vorschau bearbeiten oder direkt auf "Bilder rendern" klicken!`,
+        topic: c.title,
+        suggestedOutline: c.slides.map((s) => `${s.title}: ${s.headline}`),
+        readyForGeneration: false,
+        createdAt: new Date().toISOString(),
+      };
+
+      setMessages((prev) => [...prev, userMsg, botMsg]);
+      setInputText("");
+      toast.success(`${c.slides.length} Folien aus Claude-Prompt erfolgreich importiert! 🎉`);
+      return;
+    }
+
+    // 2. Add normal user message
     const userMsg: ChatMessage = {
       id: `user-${Date.now()}`,
       sender: "user",
@@ -97,7 +153,7 @@ export function ChatStudioView({
     // Update brief topic
     onChangeBrief({ topic: text });
 
-    // 2. Generate simulated intelligent AI response with 3 hook options
+    // 3. Generate simulated intelligent AI response with 3 hook options
     const botMsg: ChatMessage = {
       id: `assistant-${Date.now() + 1}`,
       sender: "assistant",

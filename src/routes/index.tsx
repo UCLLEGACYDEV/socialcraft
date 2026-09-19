@@ -1128,6 +1128,7 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
         brief={brief}
         onChangeBrief={patchBrief}
         slides={slides}
+        onSetSlides={setSlides}
         onUpdateSlide={setSlideFlag}
         onGenerateStoryboard={() => generateCarousel()}
         isGeneratingStoryboard={isGeneratingCarousel}

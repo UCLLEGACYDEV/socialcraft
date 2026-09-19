@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { ScheduledPost, SocialChannel, ApiSettings } from "@/onyx/types";
+import { parseBlock } from "@/onyx/parse-prompt-block";
 
 interface ParsedBatchPost {
   id: string;
@@ -30,6 +31,61 @@ interface BatchStudioViewProps {
   onSchedulePosts: (posts: ScheduledPost[]) => void;
   settings: ApiSettings;
 }
+
+const EXAMPLE_CLAUDE_CAROUSEL = `Für dieses Karussell kürzere Subtexte, wie gewünscht (ein knapper Satz statt 2 bis 3). Setup bleibt: Deutsch, kein Handle, Hochformat 4:5, CTA "folge für mehr". 7 Slides: Hook, 5 Fehler, Closing.
+
+**Slide 1 – Hook/Cover**
+Prompt:
+"Ultra-detailed cinematic 3D render, vertical 4:5, 1080x1350px social media carousel graphic, dark near-black background (#0A0A10) with soft deep-purple glow (#4C1D95 → #6D28D9) and faint grid lines and soft circular bokeh shapes, a classical marble bust with five thin fracture lines radiating outward from the mouth, each fracture releasing a faint wisp of purple light, dramatic studio lighting, purple rim light (#8B5CF6–#A78BFA) tracing the jaw, positioned right of center.
+Bold display headline text reading 'KOMMUNIKATION' in a small rounded purple pill badge, below it huge headline 'WARUM DEINE GESPRÄCHE IMMER WIEDER KIPPEN'.
+Below the headline, a short subtext reading 'Diese 5 Fehler machen fast jeder, oft ohne es zu merken.'.
+Swipe indicator text reading 'Swipe weiter →'.
+No handle text, no watermark, no logo."
+
+**Slide 2 – Fehler 01**
+Prompt:
+"Ultra-detailed cinematic 3D render, vertical 4:5, 1080x1350px social media carousel graphic, dark near-black background (#0A0A10) with soft deep-purple glow, two marble profiles facing each other.
+Bold display headline text reading 'FEHLER 01' in a small rounded purple pill badge, below it huge headline 'STÄNDIG UNTERBRECHEN'.
+Below the headline, a short subtext reading 'Wer ständig dazwischenredet, signalisiert, dass die eigene Meinung wichtiger ist als die Antwort.'.
+Swipe indicator text reading 'Swipe weiter →'."
+
+**Slide 3 – Fehler 02**
+Prompt:
+"Ultra-detailed cinematic 3D render, vertical 4:5, 1080x1350px social media carousel graphic, dark near-black background (#0A0A10), a marble profile bust with small polished chrome word shapes flying toward its ear.
+Bold display headline text reading 'FEHLER 02' in a small rounded purple pill badge, below it huge headline 'ZUHÖREN UM ZU ANTWORTEN'.
+Below the headline, a short subtext reading 'Wenn im Kopf schon die eigene Erwiderung läuft, kommt das Gesagte gar nicht mehr wirklich an.'."
+
+**Slide 4 – Fehler 03**
+Prompt:
+"Ultra-detailed cinematic 3D render, vertical 4:5, 1080x1350px social media carousel graphic, a marble figure standing on a small pedestal under a harsh spotlight.
+Bold display headline text reading 'FEHLER 03' in a small rounded purple pill badge, below it huge headline 'KRITIK VOR ANDEREN'.
+Below the headline, a short subtext reading 'Öffentliche Kritik löst selten Einsicht aus, meistens nur Scham und Rückzug.'."
+
+**Slide 5 – Fehler 04**
+Prompt:
+"Ultra-detailed cinematic 3D render, vertical 4:5, 1080x1350px social media carousel graphic, a marble mouth carved shut beneath a thin layer of stone.
+Bold display headline text reading 'FEHLER 04' in a small rounded purple pill badge, below it huge headline 'SCHWEIGEN STATT ANSPRECHEN'.
+Below the headline, a short subtext reading 'Unausgesprochenes verschwindet nicht, es sammelt sich nur leise an.'."
+
+**Slide 6 – Fehler 05**
+Prompt:
+"Ultra-detailed cinematic 3D render, vertical 4:5, 1080x1350px social media carousel graphic, a marble face with a faint calm smile carved on its surface.
+Bold display headline text reading 'FEHLER 05' in a small rounded purple pill badge, below it huge headline 'SARKASMUS STATT EHRLICHKEIT'.
+Below the headline, a short subtext reading 'Hinter jedem spitzen Kommentar steckt meistens ein echtes Anliegen, das nie direkt ausgesprochen wird.'."
+
+**Slide 7 – Closing/CTA**
+Prompt:
+"Ultra-detailed cinematic 3D render, vertical 4:5, 1080x1350px social media carousel graphic, a small path of smooth marble stones each glowing faintly purple.
+Huge headline reading 'KLEINE ÄNDERUNG GROSSE WIRKUNG'.
+Below the headline, a short subtext reading 'Häng dir einfach den einen Fehler ab, den du am ehesten bei dir wiedererkennst.'.
+A small rounded purple pill button reading 'folge für mehr'."
+
+**Caption-Vorschlag:**
+Diese Fehler machen fast alle, ohne es zu merken.
+
+Welcher Fehler passiert dir am häufigsten? Schreib die Nummer in die Kommentare.
+
+#kommunikation #beziehungstipps #achtsamkeit #selbstreflexion #zwischenmenschlich #mentalhealth`;
 
 const EXAMPLE_CLAUDE_BLOCK = `### Post 1: Die 3 größten Fehler bei B2B-Sales
 Die meisten Vertriebler pitchen zu früh, statt die wahren Schmerzpunkte zu diagnostizieren. 
@@ -73,13 +129,49 @@ export function BatchStudioView({
       return;
     }
 
-    // Split on separators like '---', '### Post', or numbered blocks
+    const now = new Date();
+
+    // 1. Try structured carousel parsing first (exact Claude / ChatGPT format)
+    const structuredCarousels = parseBlock(text);
+    if (structuredCarousels.length > 0 && structuredCarousels.some((c) => c.slides.length > 0)) {
+      const results: ParsedBatchPost[] = structuredCarousels.map((c, idx) => {
+        const postDate = new Date(now.getTime() + (idx + 1) * 86400000);
+        postDate.setHours(9, 0, 0, 0);
+
+        const hashtags = c.caption
+          ? c.caption.match(/#\w+/g) || ["#Socialcraft", "#Karussell"]
+          : ["#Socialcraft", "#Karussell"];
+
+        const captionClean = c.caption
+          ? c.caption.replace(/#\w+/g, "").trim()
+          : c.slides[0]?.subtext || c.title;
+
+        return {
+          id: `batch-${Date.now()}-${idx}`,
+          title: c.title || `Karussell ${idx + 1}`,
+          caption: captionClean,
+          hashtags,
+          slideCount: c.slides.length || 7,
+          scheduledForDay: postDate.toLocaleDateString("de-DE", {
+            weekday: "short",
+            day: "2-digit",
+            month: "short",
+          }),
+        };
+      });
+
+      setParsedPosts(results);
+      setIsScheduled(false);
+      toast.success(`${results.length} vollständige Karussells aus Claude-Format extrahiert! 🎉`);
+      return;
+    }
+
+    // 2. Fallback to generic chunk split
     const chunks = text
       .split(/(?:---+|(?=###\s*Post|\bPost\s*\d+:?))/i)
       .map((c) => c.trim())
       .filter((c) => c.length > 20);
 
-    const now = new Date();
     const results: ParsedBatchPost[] = chunks.map((chunk, idx) => {
       const lines = chunk.split("\n").map((l) => l.trim()).filter(Boolean);
       const titleLine = lines[0]?.replace(/^#+\s*/, "").replace(/^Post\s*\d+:?\s*/i, "") || `Post ${idx + 1}`;
@@ -90,7 +182,6 @@ export function BatchStudioView({
         ? hashtagLine.replace(/^hashtags:\s*/i, "").split(/\s+/).filter((t) => t.startsWith("#"))
         : ["#Socialcraft", "#BatchContent"];
 
-      // Distribute 1 post per day into the future (starting tomorrow at 09:00)
       const postDate = new Date(now.getTime() + (idx + 1) * 86400000);
       postDate.setHours(9, 0, 0, 0);
 
@@ -161,17 +252,30 @@ export function BatchStudioView({
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => {
-            setRawTextBlock(EXAMPLE_CLAUDE_BLOCK);
-            handleParseBlock(EXAMPLE_CLAUDE_BLOCK);
-          }}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-200 transition-all cursor-pointer whitespace-nowrap"
-        >
-          <FileText className="h-3.5 w-3.5 text-[#FF6A1F]" />
-          <span>Claude-Beispiel laden</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              setRawTextBlock(EXAMPLE_CLAUDE_CAROUSEL);
+              handleParseBlock(EXAMPLE_CLAUDE_CAROUSEL);
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-[#FF4D17]/30 bg-[#FF4D17]/10 hover:bg-[#FF4D17]/20 text-xs font-semibold text-white transition-all cursor-pointer whitespace-nowrap"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-[#FF4D17]" />
+            <span>7-Slide Karussell laden</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setRawTextBlock(EXAMPLE_CLAUDE_BLOCK);
+              handleParseBlock(EXAMPLE_CLAUDE_BLOCK);
+            }}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-semibold text-zinc-300 hover:text-white transition-all cursor-pointer whitespace-nowrap"
+          >
+            <FileText className="h-3.5 w-3.5 text-zinc-400" />
+            <span>3-Post Serie</span>
+          </button>
+        </div>
       </div>
 
       {/* ── Block Input Card ────────────────────────────────────────── */}

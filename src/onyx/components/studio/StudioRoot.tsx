@@ -48,6 +48,7 @@ export interface StudioRootProps {
   brief: BriefValues;
   onChangeBrief: (patch: Partial<BriefValues>) => void;
   slides: SlideContent[];
+  onSetSlides?: (slides: SlideContent[]) => void;
   onUpdateSlide: (id: string, patch: Partial<SlideContent>) => void;
   onGenerateStoryboard: () => Promise<void>;
   isGeneratingStoryboard: boolean;
@@ -79,6 +80,7 @@ export function StudioRoot({
   brief,
   onChangeBrief,
   slides,
+  onSetSlides,
   onUpdateSlide,
   onGenerateStoryboard,
   isGeneratingStoryboard,
@@ -233,6 +235,7 @@ export function StudioRoot({
             brief={brief}
             onChangeBrief={onChangeBrief}
             slides={slides}
+            onSetSlides={onSetSlides}
             onUpdateSlide={onUpdateSlide}
             onGenerateStoryboard={onGenerateStoryboard}
             isGeneratingStoryboard={isGeneratingStoryboard}
