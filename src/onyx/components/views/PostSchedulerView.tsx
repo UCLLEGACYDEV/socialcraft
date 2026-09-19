@@ -4605,6 +4605,8 @@ export function PostSchedulerView({
                   const Icon = PLATFORM_ICONS[chan.platform] || Share2;
                   const style = PLATFORM_COLORS[chan.platform] || PLATFORM_COLORS.facebook;
                   const isDisconnecting = disconnectingChannelId === chan.id;
+                  const health = getChannelHealth(chan);
+                  const isReconnecting = connectingPlatform === chan.platform;
 
                   return (
                     <div
