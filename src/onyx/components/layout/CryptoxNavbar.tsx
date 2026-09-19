@@ -78,7 +78,7 @@ export function CryptoxNavbar({
   onNavigate,
   onNavigateLanding,
   onNavigateAdmin,
-  currentUser,
+  currentUser: currentUserProp,
   onOpenAuth,
   onOpenProfile,
   onLogout,
