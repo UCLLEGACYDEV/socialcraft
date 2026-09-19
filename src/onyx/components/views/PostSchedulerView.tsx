@@ -4638,10 +4638,35 @@ export function PostSchedulerView({
                             </div>
                           </div>
 
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
-                            Aktiv
+                          <span
+                            className={cn(
+                              "text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0",
+                              health.tone === "ok" &&
+                                "bg-emerald-500/20 text-emerald-300 border-emerald-500/40",
+                              health.tone === "warn" &&
+                                "bg-amber-500/20 text-amber-300 border-amber-500/40",
+                              health.tone === "error" &&
+                                "bg-red-500/20 text-red-300 border-red-500/40",
+                            )}
+                          >
+                            {health.label}
                           </span>
                         </div>
+
+                        {health.hint && (
+                          <div
+                            className={cn(
+                              "rounded-xl border p-2.5 text-[11px] leading-snug flex items-start gap-2",
+                              health.tone === "error"
+                                ? "border-red-500/25 bg-red-500/[0.06] text-red-200"
+                                : "border-amber-500/25 bg-amber-500/[0.06] text-amber-200",
+                            )}
+                          >
+                            <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                            <span>{health.hint}</span>
+                          </div>
+                        )}
+
 
                         {/* Account ID / Business Details */}
                         <div className="bg-black/40 p-3 rounded-xl border border-white/[0.06] space-y-1.5 text-xs font-mono">
