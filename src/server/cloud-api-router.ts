@@ -29,6 +29,7 @@ import {
 import fs from "node:fs";
 import path from "node:path";
 import { config, getErrorMessage } from "../lib/config";
+import { defaultAiProvider } from "./providers/ai-provider";
 
 interface WebhookPayload {
   event?: string;
@@ -403,9 +404,54 @@ export async function handleCloudApiRequest(request: Request): Promise<Response 
     }
   }
 
-  // 0.1 AI Engine Proxy (Server-side API key protection for KIE.AI / Nano-Banana)
+  // 0.1 AI Engine Proxy (Server-side API key protection for Gemini & KIE.AI)
   if (endpoint.startsWith("ai/")) {
     const aiSub = endpoint.replace(/^ai\/?/, "");
+
+    // 0.1A Structured Carousel Content Generation (Bundles Topic, Brand-Kit & KI-Skills)
+    if (aiSub === "generate-content" && request.method === "POST") {
+      try {
+        const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+        const rawApiKey = (body["apiKey"] as string) || request.headers.get("x-gemini-key") || "";
+        const result = await defaultAiProvider.generateContent({
+          topic: String(body["topic"] || ""),
+          audience: body["audience"] ? String(body["audience"]) : undefined,
+          slideCount: body["slideCount"] ? Number(body["slideCount"]) : 7,
+          aspectRatio: body["aspectRatio"] as any,
+          brandKit: body["brandKit"] as any,
+          skill: body["skill"] as any,
+          customInstructions: body["customInstructions"] ? String(body["customInstructions"]) : undefined,
+          apiKey: rawApiKey,
+          model: body["model"] ? String(body["model"]) : undefined,
+        });
+        return jsonResponse({ success: true, ...result });
+      } catch (err: unknown) {
+        return jsonResponse({ success: false, error: getErrorMessage(err) }, 500);
+      }
+    }
+
+    // 0.1B Single-Slide Prompt Reroll
+    if (aiSub === "reroll-slide-prompt" && request.method === "POST") {
+      try {
+        const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+        const rawApiKey = (body["apiKey"] as string) || request.headers.get("x-gemini-key") || "";
+        const result = await defaultAiProvider.rerollSlidePrompt({
+          topic: String(body["topic"] || ""),
+          slideNumber: Number(body["slideNumber"] || 1),
+          slideCount: Number(body["slideCount"] || 7),
+          currentHeadline: body["currentHeadline"] ? String(body["currentHeadline"]) : undefined,
+          currentPrompt: body["currentPrompt"] ? String(body["currentPrompt"]) : undefined,
+          role: body["role"] ? String(body["role"]) : undefined,
+          brandKit: body["brandKit"] as any,
+          skill: body["skill"] as any,
+          apiKey: rawApiKey,
+        });
+        return jsonResponse({ success: true, ...result });
+      } catch (err: unknown) {
+        return jsonResponse({ success: false, error: getErrorMessage(err) }, 500);
+      }
+    }
+
     const serverKieKey =
       (typeof process !== "undefined" &&
         (process.env?.["KIE_API_KEY"] || process.env?.["VITE_KIE_API_KEY"])) ||

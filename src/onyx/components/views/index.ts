@@ -7,3 +7,4 @@ export * from "./ProfileAndSetupView";
 export * from "./SeriesQueue";
 export * from "./SocialcraftParallaxHero";
 export * from "./StudioPipelineView";
+export * from "./BrandKitAndSkillsView";

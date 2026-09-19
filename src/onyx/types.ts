@@ -120,14 +120,35 @@ export interface SlideContent {
   renderStatus?: "idle" | "rendering" | "done" | "error" | "cancelled" | undefined;
 }
 
+export interface AiSkill {
+  id: string;
+  name: string;
+  description: string;
+  icon?: string;
+  systemPrompt: string;
+  tone: string;
+  targetAudience?: string;
+  forbiddenWords?: string[];
+  ctaStyle?: string;
+  isPreset?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface BrandKit {
+  id?: string;
+  name?: string;
   handle: string;
   showHandle: boolean;
+  logoUrl?: string;
   accentStyle: string;
   accentColorHex: string;
+  primaryColorHex?: string;
+  backgroundColorHex?: string;
   fontFamily: string;
-  aspectRatio: "4:5" | "1:1";
+  aspectRatio: "4:5" | "1:1" | "9:16";
   ctaText: string;
+  isDefault?: boolean;
 }
 
 export type ImageProvider =
@@ -194,6 +215,17 @@ export interface BriefValues {
   provider: CarouselLlmProvider;
   apiKey: string;
   useClone?: boolean;
+  skillId?: string;
+  aspectRatio?: "4:5" | "1:1" | "9:16";
+}
+
+export interface StructuredCarouselResponse {
+  title: string;
+  caption: string;
+  hashtags: string[];
+  slides: SlideContent[];
+  provider?: string;
+  skillUsed?: string;
 }
 
 export interface HistoryEntry {
@@ -262,6 +294,7 @@ export interface StoryBrief {
   audience?: string;
   platforms?: SocialPlatform[];
   styleId?: string;
+  designId?: string;
   personaId?: string;
   clonePlacement?: ClonePlacement;
   profileId?: string;
@@ -270,6 +303,7 @@ export interface StoryBrief {
   idempotencyKey?: string;
   hookArchetype?: "provocative" | "storytelling" | "data-driven" | "step-by-step" | "question";
   customInstructions?: string;
+  ctaText?: string;
 }
 
 export interface SingleImageBrief {

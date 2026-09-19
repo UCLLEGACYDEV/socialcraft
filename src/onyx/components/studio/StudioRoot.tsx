@@ -7,9 +7,12 @@ import {
   MessageSquare,
   Workflow,
   RefreshCw,
+  Palette,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 import type {
+  AiSkill,
   BrandKit,
   BriefValues,
   CreditStatus,
@@ -19,7 +22,11 @@ import type {
   ScheduledPost,
 } from "@/onyx/types";
 import type { User } from "@/onyx/auth";
+import { LS, usePersistentState } from "@/onyx/storage";
+import { DEFAULT_AI_SKILLS } from "@/onyx/defaults";
 
+import { ModernStudioDashboard } from "./ModernStudioDashboard";
+import { BrandKitAndSkillsView } from "../views/BrandKitAndSkillsView";
 import { ChatStudioView } from "./ChatStudioView";
 import { BatchStudioView } from "./BatchStudioView";
 import { FlowAutomationCanvas } from "./FlowAutomationCanvas";
@@ -91,9 +98,17 @@ export function StudioRoot({
   socialChannels = [],
   onSchedulePosts = () => {},
   onSchedulePost = () => {},
+  onRerollImage,
 }: StudioRootProps) {
-  const [activeMode, setActiveMode] = useState<"chat" | "batch" | "flow">("chat");
+  const [activeMode, setActiveMode] = useState<"generator" | "brand-skills" | "chat" | "batch" | "flow">("generator");
   const [showSetupModal, setShowSetupModal] = useState(false);
+
+  // Persistent AI Skills & active selection
+  const [skills, setSkills] = usePersistentState<AiSkill[]>(LS.skills, DEFAULT_AI_SKILLS);
+  const [activeSkillId, setActiveSkillId] = usePersistentState<string>(
+    LS.activeSkillId,
+    DEFAULT_AI_SKILLS[0]?.id || "skill-b2b-authority"
+  );
 
   return (
     <div className="min-h-screen bg-[#07050A] text-white flex flex-col selection:bg-[#FF4D17] selection:text-white">
@@ -127,7 +142,7 @@ export function StudioRoot({
                   Socialcraft
                 </span>
                 <span className="rounded bg-[#FF4D17]/15 border border-[#FF4D17]/30 px-1.5 py-0.5 text-[9px] font-bold text-[#FF6A1F] uppercase tracking-wider">
-                  Studio
+                  SaaS Studio
                 </span>
               </div>
             </button>
@@ -142,16 +157,44 @@ export function StudioRoot({
             </button>
           </div>
 
-          {/* ── 3-Way Mode Switcher (Chat | Batch | Flow) ─────────────── */}
-          <nav className="flex items-center gap-1 rounded-full border border-white/10 bg-[#120F17]/90 p-1 shadow-lg backdrop-blur-2xl">
+          {/* ── SaaS Mode Switcher (Creator Studio | Brand & Skills | Chat | Batch | Flow) ── */}
+          <nav className="flex items-center gap-1 rounded-full border border-white/10 bg-[#120F17]/90 p-1 shadow-lg backdrop-blur-2xl overflow-x-auto max-w-full">
+            <button
+              type="button"
+              onClick={() => setActiveMode("generator")}
+              className={cn(
+                "flex items-center gap-1.5 rounded-full px-3 sm:px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap",
+                activeMode === "generator"
+                  ? "bg-[#FF4D17] text-white shadow-[0_0_18px_-2px_#FF4D17]"
+                  : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+              )}
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>Creator Studio</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveMode("brand-skills")}
+              className={cn(
+                "flex items-center gap-1.5 rounded-full px-3 sm:px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap",
+                activeMode === "brand-skills"
+                  ? "bg-[#FF4D17] text-white shadow-[0_0_18px_-2px_#FF4D17]"
+                  : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
+              )}
+            >
+              <Palette className="h-3.5 w-3.5" />
+              <span>Brand-Kit & Skills</span>
+            </button>
+
             <button
               type="button"
               onClick={() => setActiveMode("chat")}
               className={cn(
-                "flex items-center gap-1.5 rounded-full px-3.5 sm:px-4 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer",
+                "flex items-center gap-1.5 rounded-full px-3 sm:px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap",
                 activeMode === "chat"
                   ? "bg-[#FF4D17] text-white shadow-[0_0_18px_-2px_#FF4D17]"
-                  : "text-zinc-400 hover:text-white hover:bg-white/[0.06]",
+                  : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
               )}
             >
               <MessageSquare className="h-3.5 w-3.5" />
@@ -162,10 +205,10 @@ export function StudioRoot({
               type="button"
               onClick={() => setActiveMode("batch")}
               className={cn(
-                "flex items-center gap-1.5 rounded-full px-3.5 sm:px-4 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer",
+                "hidden sm:flex items-center gap-1.5 rounded-full px-3 sm:px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap",
                 activeMode === "batch"
                   ? "bg-[#FF4D17] text-white shadow-[0_0_18px_-2px_#FF4D17]"
-                  : "text-zinc-400 hover:text-white hover:bg-white/[0.06]",
+                  : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
               )}
             >
               <Layers className="h-3.5 w-3.5" />
@@ -176,14 +219,14 @@ export function StudioRoot({
               type="button"
               onClick={() => setActiveMode("flow")}
               className={cn(
-                "flex items-center gap-1.5 rounded-full px-3.5 sm:px-4 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer",
+                "hidden md:flex items-center gap-1.5 rounded-full px-3 sm:px-3.5 py-1.5 text-xs font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap",
                 activeMode === "flow"
                   ? "bg-[#FF4D17] text-white shadow-[0_0_18px_-2px_#FF4D17]"
-                  : "text-zinc-400 hover:text-white hover:bg-white/[0.06]",
+                  : "text-zinc-400 hover:text-white hover:bg-white/[0.06]"
               )}
             >
               <Workflow className="h-3.5 w-3.5" />
-              <span>Flow Automation</span>
+              <span>Flow Canvas</span>
             </button>
           </nav>
 
@@ -191,9 +234,9 @@ export function StudioRoot({
           <div className="flex items-center gap-2.5">
             <button
               type="button"
-              onClick={() => setShowSetupModal(true)}
+              onClick={() => setActiveMode("brand-skills")}
               className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-semibold text-zinc-300 hover:text-white hover:border-white/20 transition-all cursor-pointer"
-              title="API-Schlüssel & Brand-Setup bearbeiten"
+              title="Brand-Kit & KI-Skills bearbeiten"
             >
               <Key className="h-3.5 w-3.5 text-[#FF6A1F]" />
               <span className="hidden sm:inline">Setup & Keys</span>
@@ -209,7 +252,7 @@ export function StudioRoot({
               <RefreshCw
                 className={cn(
                   "h-3 w-3 text-zinc-400 hover:text-white",
-                  creditStatus?.loading && "animate-spin",
+                  creditStatus?.loading && "animate-spin"
                 )}
               />
             </button>
@@ -229,7 +272,66 @@ export function StudioRoot({
 
       {/* ── Main Studio Workspace ────────────────────────────────────── */}
       <main className="relative z-10 flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        {/* Mode 1: Chat Studio (ChatGPT-Style für Karussells) */}
+        {/* Mode 1: Creator Studio (SaaS Dashboard für Karussells) */}
+        {activeMode === "generator" && (
+          <ModernStudioDashboard
+            brief={brief}
+            onChangeBrief={onChangeBrief}
+            brandKit={brandKit}
+            onChangeBrandKit={onChangeBrandKit}
+            skills={skills}
+            activeSkillId={activeSkillId}
+            onSelectSkill={setActiveSkillId}
+            settings={settings}
+            onChangeSettings={onChangeSettings}
+            slides={slides}
+            onSetSlides={onSetSlides}
+            onUpdateSlide={onUpdateSlide}
+            onRenderAllImages={onRenderImages}
+            isRenderingImages={isRenderingImages}
+            onRerollImage={onRerollImage}
+            onReset={onResetCarousel}
+            onExportZip={() => onExportZip(true)}
+            onSchedulePost={({ title, imageUrls, caption, hashtags }) => {
+              const scheduledFor = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+              const primaryChannel = socialChannels[0];
+              onSchedulePost({
+                id: `post-${Date.now()}`,
+                title,
+                caption,
+                hashtags,
+                mediaUrls: imageUrls,
+                mediaType: imageUrls.length > 1 ? "carousel" : "image",
+                channelId: primaryChannel?.id || "ig-main-account",
+                platform: primaryChannel?.platform || "instagram",
+                scheduledFor,
+                status: "scheduled",
+                createdAt: new Date().toISOString(),
+              });
+              toast.success("Post erfolgreich für morgen eingeplant! 📅", {
+                description: "Im Post-Planer kannst du das Veröffentlichungsdatum anpassen.",
+              });
+            }}
+            onNavigateToSettings={() => setActiveMode("brand-skills")}
+          />
+        )}
+
+        {/* Mode 2: Brand-Kit & KI-Skills Manager */}
+        {activeMode === "brand-skills" && (
+          <BrandKitAndSkillsView
+            brandKit={brandKit}
+            onChangeBrandKit={onChangeBrandKit}
+            skills={skills}
+            onSetSkills={setSkills}
+            activeSkillId={activeSkillId}
+            onSelectActiveSkill={setActiveSkillId}
+            settings={settings}
+            onChangeSettings={onChangeSettings}
+            onBackToStudio={() => setActiveMode("generator")}
+          />
+        )}
+
+        {/* Mode 3: Chat Studio (ChatGPT-Style für Karussells) */}
         {activeMode === "chat" && (
           <ChatStudioView
             brief={brief}
@@ -249,7 +351,7 @@ export function StudioRoot({
           />
         )}
 
-        {/* Mode 2: Batch Studio (Claude-Block & 1-Klick Planer) */}
+        {/* Mode 4: Batch Studio (Claude-Block & 1-Klick Planer) */}
         {activeMode === "batch" && (
           <BatchStudioView
             socialChannels={socialChannels}
@@ -260,7 +362,7 @@ export function StudioRoot({
           />
         )}
 
-        {/* Mode 3: Flow Automation (n8n-Style Node Canvas) */}
+        {/* Mode 5: Flow Automation (n8n-Style Node Canvas) */}
         {activeMode === "flow" && (
           <FlowAutomationCanvas
             socialChannels={socialChannels}

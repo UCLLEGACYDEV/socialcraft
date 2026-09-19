@@ -106,7 +106,7 @@ export interface GenerateImageParams {
   prompt?: string | undefined;
   settings?: ApiSettings | undefined;
   referenceImages?: string[] | undefined;
-  aspectRatio?: "4:5" | "1:1" | undefined;
+  aspectRatio?: "4:5" | "1:1" | "9:16" | undefined;
   signal?: AbortSignal | undefined;
   onProgress?: ((info: GenerateImageProgressInfo) => void) | undefined;
 }

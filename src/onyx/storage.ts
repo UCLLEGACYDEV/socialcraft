@@ -29,6 +29,8 @@ export const LS = {
   removedAccountIds: "onyx_removed_account_ids",
   deletedPostIds: "onyx_deleted_post_ids",
   deletedSeriesIds: "onyx_deleted_series_ids",
+  skills: "onyx_ai_skills",
+  activeSkillId: "onyx_active_skill_id",
 } as const;
 
 export function readLS<T>(key: string, fallback: T): T {

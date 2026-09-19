@@ -1,4 +1,55 @@
-import type { AiCloneProfile, ApiSettings, BrandKit, BrandProfile, BriefValues, SocialChannel } from "./types";
+import type { AiCloneProfile, AiSkill, ApiSettings, BrandKit, BrandProfile, BriefValues, SocialChannel } from "./types";
+
+export const DEFAULT_AI_SKILLS: AiSkill[] = [
+  {
+    id: "skill-b2b-authority",
+    name: "B2B Autorität & Thought Leader",
+    description: "Etabliert tiefe Branchenexpertise durch psychologische Argumentation, Fakten und klare Business-Frameworks.",
+    icon: "ShieldCheck",
+    systemPrompt: "Du bist ein führender B2B-Stratege und Executive Coach. Schreibe mit hoher Autorität und messbaren Resultaten. Vermeide Floskeln wie 'in der heutigen Zeit'. Nutze das PAS-Framework (Problem, Agitation, Solution) und hebe die geschäftliche Rendite hervor.",
+    tone: "Autoritär, Sachlich, Messbar",
+    targetAudience: "Unternehmer, Geschäftsführer & B2B-Entscheider",
+    forbiddenWords: ["bahnbrechend", "game-changer", "in der heutigen digitalen Welt", "revolutionär"],
+    ctaStyle: "Speichere dir diese Analyse für deine nächste Strategie-Session.",
+    isPreset: true,
+  },
+  {
+    id: "skill-viral-hook",
+    name: "Viral Hook Master",
+    description: "Maximaler Scroll-Stopp auf Folie 1. Fokussiert auf unkonventionelle Denkweisen und das Aufdecken verbreiteter Mythen.",
+    icon: "Flame",
+    systemPrompt: "Du bist ein Meister viralen Wachstums. Folie 1 MUSS den Scroll sofort stoppen durch kontraintuitive Thesen ('Warum 94% falsch liegen bei...'). Schreibe extrem prägnant in mundgerechten Sätzen.",
+    tone: "Provokant, Direkt, Aufweckend",
+    targetAudience: "Ambitionierte Creator, Gründer & Selbstständige",
+    forbiddenWords: ["zusammenfassend", "im Folgenden", "Gedankenstrich", "–"],
+    ctaStyle: "Teile diesen Post mit jemandem, der diesen Fehler nicht mehr machen darf.",
+    isPreset: true,
+  },
+  {
+    id: "skill-storytelling",
+    name: "Story & Case-Study Coach",
+    description: "Verpackt Methoden in eine nachvollziehbare Heldenreise vom Pain Point bis zum Durchbruch.",
+    icon: "MessageSquareQuote",
+    systemPrompt: "Verpacke die Thematik in eine fesselnde Fallstudie oder narrative Reise. Zeige das reale Problem, den Wendepunkt und die 3 Schlüsselerkenntnisse, die den Erfolg brachten.",
+    tone: "Inspirierend, Authentisch, Empathisch",
+    targetAudience: "Experten, Coaches & Dienstleister",
+    forbiddenWords: ["blablabla", "super einfach", "kinderleicht"],
+    ctaStyle: "Schreib mir deine größte Hürde in die Kommentare.",
+    isPreset: true,
+  },
+  {
+    id: "skill-minimal-educator",
+    name: "Minimalistischer Educator",
+    description: "Komplexe Sachverhalte in maximal 1 Satz pro Folie mit hoher Dwell-Time und maximalen Saves.",
+    icon: "Sparkles",
+    systemPrompt: "Maximale Einfachheit (Micro-Learning). 1 Gedanke pro Folie. Keine überladenen Texte. Jeder Schritt muss sofort in 10 Minuten umsetzbar sein.",
+    tone: "Klar, Ruhig, Didaktisch",
+    targetAudience: "Wissbegierige Fachkräfte & Lernende",
+    forbiddenWords: ["kompliziert", "theoretisch"],
+    ctaStyle: "Speichere dir dieses Spickzettel-Karussell ab 📌",
+    isPreset: true,
+  },
+];
 
 export const DEFAULT_BRAND_PROFILES: BrandProfile[] = [
   {
@@ -78,13 +129,18 @@ export const DEFAULT_SOCIAL_CHANNELS: SocialChannel[] = [
 ];
 
 export const DEFAULT_BRAND_KIT: BrandKit = {
+  name: "Socialcraft Brandkit",
   handle: "@dein.name",
   showHandle: true,
+  logoUrl: "/images/socialcraft-logo.png",
   accentStyle: "ember-ignite",
   accentColorHex: "#F04A20",
+  primaryColorHex: "#FF4D17",
+  backgroundColorHex: "#0A0705",
   fontFamily: "Plus Jakarta Sans",
   aspectRatio: "4:5",
-  ctaText: "Speichere dir diesen Post für später ab.",
+  ctaText: "Speichere dir diesen Post für später ab 📌",
+  isDefault: true,
 };
 
 import { config } from "../lib/config";
