@@ -133,8 +133,8 @@ export function useStudioNavigation({ routeTab, initialView }: UseStudioNavigati
     saveStoredCurrentUser(null);
     setCurrentUser(null);
     setCurrentView("landing");
-    if (typeof window !== "undefined" && window.location.pathname !== "/") {
-      window.history.pushState(null, "", "/");
+    if (typeof window !== "undefined" && window.location.pathname !== "/willkommen") {
+      window.history.pushState(null, "", "/willkommen");
     }
     toast.info("Erfolgreich abgemeldet.");
   }, [setCurrentView]);
