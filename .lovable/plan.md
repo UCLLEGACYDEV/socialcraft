@@ -1,67 +1,98 @@
-# Ehrliche Analyse: Was die Plattform zu kompliziert macht — und wie wir sie aufräumen
+# Grundanalyse & Neuaufbau: Socialcraft ONYX Studio 2.0
 
-Keine Schönfärberei. Das Produkt kann viel, aber es erklärt sich nicht. Ein neuer Nutzer weiß nach 30 Sekunden nicht, was er zuerst tun soll.
+Ehrlich, ohne Beschönigung. Danach ein kompletter Aufbauplan, so als würden wir bei null starten — nur mit dem Vorteil, dass die wertvollen Teile schon existieren und übernommen werden.
 
-## Was wirklich schlecht ist
+## Teil 1 — Was heute wirklich los ist
 
-1. **Sieben gleichwertige Bereiche in der Seitenleiste** (Karussell, Batch Studio, Einzelbild, AI Clone, Prompt Hub, Galerie, Planer). Alle wirken gleich wichtig. Es gibt keinen Startpunkt, kein "Hier beginnen".
-2. **Fachbegriffe, die niemand außerhalb des Teams versteht**: "Batch Studio", "Prompt Hub", "AI Clone", "Claude MCP", "Brand Kit", "Studio Engine", "Slides", "Serie", "Klon". Das ist Entwickler-Sprache in der Nutzeroberfläche.
-3. **Einstellungen als Hürde vor dem ersten Erfolg**: Der Nutzer muss Schlüssel, Modelle, Speicher-Einstellungen und Profile verstehen, bevor überhaupt ein Bild entsteht. Das ist die größte Absprungstelle.
-4. **Fünf KI-Engines zur Auswahl mit Beschreibungen wie "Ultra 8K" und "Editorial"** — der Nutzer hat keine Grundlage, sich zu entscheiden, und trifft trotzdem eine Pflichtentscheidung.
-5. **Der Planer ist ein Monster** (über 5.000 Zeilen in einer Ansicht). Kanäle, Profile, Zeitplanung, Texte, Musik, Vorschau, Warteschlange — alles in einem Bildschirm.
-6. **Zu viele Fenster über Fenster**: Einstellungen, Markenprofile, Brand Kit, Planung, Schnellplanung, 30-Tage-Batch, Musik, Konto. Man verliert die Orientierung, wo man gerade ist.
-7. **Kein Fortschrittsgefühl**: Generierung dauert lange, aber es ist unklar, wie lange, was es kostet und ob man weggehen darf.
-8. **Mobil unbrauchbar** in mehreren Bereichen: feste Seitenleiste, breite Tabellen und Planer-Spalten.
-9. **Landingpage und Studio widersprechen sich** — der erste Bildschirm flackert beim Laden, weil zwei verschiedene Startseiten-Varianten existieren.
+**Zahlen (gemessen, nicht geschätzt)**
+- Der Planer ist eine einzige Datei mit 5.058 Zeilen. Einzelbild 2.057. Galerie 1.424. Die Startseite 1.546.
+- Acht gleichrangige Bereiche, dazu 14 Fenster-Dialoge. Kein Bereich ist als Einstieg markiert.
+- Zwei konkurrierende Startseiten (neue Übersicht und alte Landingpage). Daher flackert der Start und es gibt beim Laden einen Anzeigefehler.
+- Anmeldung läuft heute über den Browserspeicher: Nutzer, Rollen, sogar Admin-Rechte liegen lokal. Wer sich auskennt, macht sich in Sekunden zum Admin. Das ist der ernsteste Punkt.
+- Zugangsschlüssel (Bildgenerierung, Veröffentlichung) werden teilweise im Browser gehalten statt sicher auf dem Server.
 
-## Was gut ist (und bleibt)
+**Was den Nutzer konkret abschreckt**
+1. Kein klarer Startpunkt: sieben bis acht Menüpunkte wirken gleich wichtig.
+2. Insider-Sprache: Batch Studio, Prompt Hub, AI Clone, Brand Kit, MCP, Engine, Slides.
+3. Einrichtung vor dem ersten Erfolg: Schlüssel, Modelle, Speicher, Profile — bevor ein einziges Bild entsteht.
+4. Fünf KI-Engines zur Pflichtauswahl, ohne Entscheidungsgrundlage.
+5. Warten ohne Information: keine Restzeit, keine Kostenangabe, kein Abbrechen.
+6. Fenster über Fenster, man verliert die Orientierung.
+7. Auf dem Handy in mehreren Bereichen unbrauchbar.
+8. Technische Fehlermeldungen statt verständlicher Hinweise.
 
-- Die Bildgenerierung selbst und die Serien-Logik funktionieren und sind stark.
-- Privater Cloud-Ordner pro Nutzer, nichts wird zwischen Nutzern vermischt.
-- Konsistente dunkle Optik mit Orange-Akzent, wirkt hochwertig.
-- Alles auf Deutsch, Planung inklusive Mehrkanal-Veröffentlichung.
+**Was gut ist und definitiv bleibt**
+- Bildgenerierung und Serien-Logik: stark und funktionieren.
+- Privater Cloud-Ordner je Nutzer, Projektordner mit lesbaren Titeln.
+- Mehrkanal-Veröffentlichung inklusive Zeitplanung.
+- Dunkle Optik mit Orange — wirkt hochwertig, bleibt.
+- Durchgehend Deutsch.
 
-## Der Umbau
+**Antwort auf deine Kernfrage:** Kein Wegwerfen. Ein Wegwerfen kostet Monate und du verlierst genau die Teile, die funktionieren. Richtig ist: **neue Hülle, neues Fundament bei Konten und Sicherheit, bewährte Motoren übernehmen.** Das Ergebnis fühlt sich für den Nutzer wie eine komplett neue Plattform an.
 
-### Phase 1 — Erster Eindruck und Sprache
-- Neue Startseite im Studio: drei große Karten "Karussell erstellen", "Einzelnes Bild", "30 Tage Content" statt sieben gleichwertiger Menüpunkte.
-- Seitenleiste auf vier Hauptpunkte reduzieren: **Erstellen, Planen, Meine Inhalte, Mein Stil**. Alles andere wandert darunter oder in die Einstellungen.
-- Umbenennen in Klartext: Batch Studio → "Content-Serie", Prompt Hub → "Ideen & Vorlagen", AI Clone → "Mein Gesicht", Brand Kit → "Mein Look", Claude MCP → in Einstellungen verschieben.
-- Landingpage-Doppelung entfernen, damit der Start nicht mehr flackert.
+## Teil 2 — Die Plattform, als würden wir heute anfangen
 
-### Phase 2 — Sofort loslegen können
-- Erste Generierung ohne jede Einrichtung: sinnvolle Voreinstellungen, Schlüssel-Abfrage erst wenn nötig, mit klarer Erklärung warum.
-- Engine-Auswahl standardmäßig ausblenden. Voreinstellung "Empfohlen", darunter ein kleiner Link "Andere Qualität wählen" mit einfacher Sprache (Schnell / Ausgewogen / Beste Qualität).
-- Kurzer Einstieg beim ersten Besuch: drei Schritte, überspringbar.
+**Leitsatz:** Ein Nutzer kommt rein, tippt sein Thema, bekommt Bilder, plant sie ein. Alles andere ist optional und versteckt.
 
-### Phase 3 — Warten verständlich machen
-- Einheitliche Fortschrittsanzeige: welcher Schritt läuft, wie viele Bilder fertig sind, grobe Restzeit, Abbrechen-Knopf.
-- Vor dem Start ein Satz: "Erstellt 8 Bilder, dauert ca. 2 Minuten."
-- Fehler in normaler Sprache mit konkretem nächsten Schritt statt technischer Meldungen.
+**Vier Bereiche statt acht**
+```text
+Erstellen   -> Karussell | Einzelbild | 30-Tage-Serie (ein Bereich, drei Startknöpfe)
+Planen      -> Kalender | Neuer Beitrag | Kanäle
+Meine Inhalte -> alles Erstellte als Raster, nach Projekt
+Mein Stil   -> Look, Gesicht, Vorlagen, Zielgruppe
+```
+Alles Technische (Schlüssel, Speicher, Modelle, MCP) wandert in Einstellungen.
 
-### Phase 4 — Planer entzerren
-- Planer in drei klar getrennte Bereiche: **Kalender**, **Neuer Beitrag**, **Kanäle**. Nicht mehr alles gleichzeitig.
-- Kanalverbindung als eigener, ruhiger Bereich mit Status pro Konto (verbunden / abgelaufen / Problem) und einem Knopf zum Reparieren.
+**Neue Sprache**
+Batch Studio -> Content-Serie · Prompt Hub -> Ideen & Vorlagen · AI Clone -> Mein Gesicht · Brand Kit -> Mein Look · Engine -> Qualität (Schnell / Ausgewogen / Beste) · Slides -> Bilder.
 
-### Phase 5 — Mobil und Details
-- Seitenleiste wird auf kleinen Bildschirmen zur unteren Leiste, Planer-Spalten stapeln sich.
-- Tastatur- und Kontrastprüfung über alle Hauptbildschirme.
-- Große Dateien (Planer, Galerie, Einzelbild) in kleinere Teile zerlegen, damit Fehler nicht ganze Seiten lahmlegen.
+**Der eine Hauptweg**
+```text
+Thema eingeben -> Vorschau der Idee -> "8 Bilder, ca. 2 Min., X Credits"
+   -> Fortschritt mit Abbrechen -> Ergebnis-Raster -> Speichern | Herunterladen | Einplanen
+```
+Keine Pflichteinstellung vorher. Voreinstellungen greifen, Feinschliff ist aufklappbar.
 
-## Technische Hinweise
+## Teil 3 — Konten & Daten neu
 
-- `src/onyx/components/layout/Sidebar.tsx`: Navigation von 7 auf 4 Einträge, Rest in Untergruppen; Labels neu.
-- `src/routes/index.tsx` (1.485 Zeilen): Tab-Schalter bleibt, neue `overview`-Ansicht als Standard; Doppelrendering mit `CryptoxLandingPage.tsx` auflösen (Ursache des Hydration-Mismatch).
-- `PostSchedulerView.tsx` (5.026 Zeilen) in `SchedulerCalendar`, `PostComposer`, `ChannelManager` aufteilen; Logik unverändert übernehmen.
-- `EngineSelector.tsx`: Standard eingeklappt, Qualitätsstufen statt Modellnamen, Modellnamen nur als Kleintext.
-- Gemeinsame `GenerationProgress`-Komponente für Karussell, Serie und Einzelbild.
-- `SettingsModal.tsx` in Abschnitte gliedern: Zugang, Qualität, Speicher, Erweitert.
-- Keine Änderung an Generierungs-, Upload- oder Planungslogik in Phase 1–3; das sind reine Oberflächen- und Struktur-Arbeiten.
+Echte Anmeldung statt Browserspeicher:
+- Registrierung/Anmeldung per E-Mail, Sitzung serverseitig geprüft.
+- Rollen (Nutzer/Admin) in einer eigenen Rollentabelle, nie im Profil, nie im Browser. Admin-Bereich prüft die Rolle auf dem Server.
+- Credits und Nutzung serverseitig geführt, nicht mehr manipulierbar.
+- Private Cloud-Ordner bleiben, aber der Zugriff wird gegen die geprüfte Sitzung gehalten, nicht gegen eine vom Browser gelieferte Kennung.
+- Alle Fremd-Schlüssel (Bildgenerierung, Veröffentlichung, Speicher) ausschließlich auf dem Server.
+
+## Teil 4 — Umsetzung in Etappen
+
+**Etappe 0 — Stabilität (Basis)**
+Doppelte Startseite auflösen, Anzeigefehler beim Laden beheben, Fehlergrenzen pro Bereich, damit ein Fehler nie die ganze Seite schwarz macht.
+
+**Etappe 1 — Neues Gerüst und Sprache**
+Vier Bereiche, neue Startseite mit drei großen Karten, alle Bezeichnungen in Klartext, Handy-Navigation als untere Leiste.
+
+**Etappe 2 — Erstellen ohne Hürden**
+Qualität statt Modellnamen, Voreinstellungen greifen sofort, Kosten- und Zeitansage vor dem Start, einheitliche Fortschrittsanzeige mit Abbrechen, verständliche Fehlermeldungen.
+
+**Etappe 3 — Konten & Sicherheit**
+Echte Anmeldung, Rollentabelle, serverseitige Credits, geschützte Cloud-Zugriffe, Schlüssel vom Browser auf den Server.
+
+**Etappe 4 — Planer entzerren**
+Die 5.058-Zeilen-Ansicht wird in Kalender, Beitrags-Editor und Kanalverwaltung geteilt. Kanäle bekommen Statusanzeige (verbunden / abgelaufen / Problem) mit Reparatur-Knopf. Logik bleibt unverändert.
+
+**Etappe 5 — Inhalte & Feinschliff**
+Galerie als Projektraster mit Cover, Suche und Stapelaktionen. Handy-Optimierung überall, Tastatur- und Kontrastprüfung, große Dateien in kleinere Teile zerlegt.
+
+## Teil 5 — Technische Hinweise
+
+- Routen bleiben TanStack-Dateirouten; je Bereich eine eigene Route mit eigenen Seiten-Metadaten.
+- `CryptoxLandingPage.tsx` vs. `routes/index.tsx`: eine Quelle für „/", die andere entfällt. Das behebt den Hydration-Mismatch.
+- `PostSchedulerView.tsx` (5.058) -> `SchedulerCalendar`, `PostComposer`, `ChannelManager`; `DirectPromptView.tsx` (2.057) und `CloudGalleryView.tsx` (1.424) analog zerlegen.
+- Auth: `src/onyx/auth.ts` (localStorage-Rollen) wird durch serverseitige Sitzung ersetzt; Admin-Prüfung ausschließlich serverseitig, Rollen in separater Tabelle mit RLS.
+- Cloud-Zugriff in `cloud-api-router.ts` an die geprüfte Sitzung binden statt an Client-Kennung.
+- Gemeinsame Bausteine: `GenerationProgress`, `CostEstimate`, `EmptyState`, `ErrorNotice`.
+- Optik: dunkel + Orange bleibt, aber als Token-Set in `src/styles.css` konsolidiert; weniger Ränder, mehr Weißraum, eine Kartenform statt fünf.
+- Keine Änderung an der Generierungs-, Upload- und Planungslogik in Etappe 0–2.
 
 ## Reihenfolge
 
-Phase 1 zuerst (größte Wirkung, geringstes Risiko), danach Phase 2 und 3. Phase 4 und 5 sind eigene, größere Schritte.
-
-## Vorab zu beheben
-
-Der aktuelle Stand baut nicht durch: `src/mcp/tools.ts` erzeugt zehn TypeScript-Fehler (TS2589, "Type instantiation is excessively deep") bei jedem `server.tool(...)`-Aufruf — verursacht durch die Typ-Ableitung des MCP-SDK über die Zod-Schemas. Fix: in `registerTools` eine lockere lokale Typ-Sicht auf `server.tool` verwenden (`const tool = (server as McpServer)["tool"].bind(server) as (...args: any[]) => unknown;`) und alle Registrierungen darüber laufen lassen. Verhalten bleibt identisch. Das passiert als erster Schritt, vor Phase 1.
+0 -> 1 -> 2 sind schnell und haben die größte Wirkung. 3 ist der wichtigste Sicherheitsschritt. 4 und 5 sind eigene größere Blöcke.
