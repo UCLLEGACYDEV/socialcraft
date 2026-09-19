@@ -98,6 +98,8 @@ export function useStudioNavigation({ routeTab, initialView }: UseStudioNavigati
         setCurrentView("studio");
       } else if (path === "/admin") {
         setCurrentView("admin");
+      } else if (path === "/willkommen") {
+        setCurrentView("landing");
       }
     }
   }, [routeTab, setActiveTab, setCurrentView]);
