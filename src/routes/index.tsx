@@ -1105,8 +1105,6 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
   return (
     <>
       <StudioRoot
-        currentTab={activeTab}
-        onNavigateTab={handleTabChange}
         onNavigateLanding={() => {
           setCurrentView("landing");
           if (typeof window !== "undefined" && window.location.pathname !== "/willkommen") {
@@ -1122,16 +1120,11 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
         onLogout={handleLogout}
         creditStatus={creditStatus}
         onRefreshCredits={() => void refreshCredits()}
-        onOpenCreditsUpgrade={() => setShowCreditUpgrade(true)}
         brandKit={brandKit}
         onChangeBrandKit={patchBrandKit}
         settings={settings}
         onChangeSettings={patchSettings}
         activeClone={activeClone}
-        brandProfiles={brandProfiles}
-        activeBrandProfileId={activeBrandProfileId}
-        onSelectBrandProfile={setActiveBrandProfileId}
-        onUpdateBrandProfiles={setBrandProfiles}
         brief={brief}
         onChangeBrief={patchBrief}
         slides={slides}
@@ -1143,46 +1136,6 @@ export function OnyxStudio({ routeTab, initialView }: OnyxStudioProps = {}) {
         onResetCarousel={resetCarousel}
         onExportZip={(withOverlay) => exportZip(withOverlay)}
         onRerollImage={(id) => rerollImage(id)}
-        queue={queue}
-        isRunningQueue={isRunningQueue}
-        onAddJobs={addJobs}
-        onRunQueue={() => runQueue()}
-        onStopQueue={cancelAllQueue}
-        onDeleteJob={(id) => {
-          setQueue((prev) => prev.filter((j) => j.id !== id));
-          setDeletedSeriesIds((prev) => Array.from(new Set([...prev, id])));
-          fetch(`/api/mcp/series/${encodeURIComponent(id)}`, { method: "DELETE" }).catch(() => {});
-        }}
-        onClearQueue={() => {
-          setQueue((prev) => {
-            const ids = prev.map((j) => j.id);
-            if (ids.length > 0) {
-              setDeletedSeriesIds((old) => Array.from(new Set([...old, ...ids])));
-            }
-            return [];
-          });
-          fetch("/api/mcp/series?all=true", { method: "DELETE" }).catch(() => {});
-        }}
-        onRenameJob={(id, value) => updateJob(id, { topic: value })}
-        onEditJobSlide={(jobId, slideId) => setEditing({ jobId, slideId })}
-        onRerollJobSlide={(jobId, slideId) => runSingleJobSlide(jobId, slideId)}
-        onDownloadJobSlide={(jobId, slideId) => downloadFromJob(jobId, slideId)}
-        onStartJobSlide={(jobId, slideId) => runSingleJobSlide(jobId, slideId)}
-        onCancelJobSlide={(jobId, slideId) => cancelJobSlide(jobId, slideId)}
-        onRunSelectedJobSlides={(jobId, slideIds) => runSelectedJobSlides(jobId, slideIds)}
-        onCancelJobSlides={(jobId) => cancelJobSlides(jobId)}
-        onSaveJobToCloud={(jobId) => saveJobToCloud(jobId)}
-        onOpen30DayBatch={() => setShow30DayBatch(true)}
-        scheduledPosts={scheduledPosts}
-        onUpdateScheduledPosts={handleUpdateScheduledPosts}
-        socialChannels={socialChannels}
-        onUpdateSocialChannels={setSocialChannels}
-        schedulerSubTab={schedulerSubTab}
-        history={history}
-        onSelectHistoryEntry={(entry) => {
-          setSlides(entry.slides);
-          setTopic(entry.topic);
-        }}
       />
 
       <ThirtyDayBatchModal
