@@ -32,7 +32,12 @@ export interface UseStudioNavigationOptions {
 }
 
 export function useStudioNavigation({ routeTab, initialView }: UseStudioNavigationOptions = {}) {
-  const [currentUser, setCurrentUser] = useState<User | null>(() => getStoredCurrentUser());
+  // Session lives in browser storage — read it after mount so SSR and the first
+  // client render produce identical markup (no hydration mismatch).
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  useEffect(() => {
+    setCurrentUser(getStoredCurrentUser());
+  }, []);
   const [currentView, setCurrentView] = usePersistentState<"landing" | "studio" | "admin">(
     "onyx.currentView",
     initialView || "studio",
