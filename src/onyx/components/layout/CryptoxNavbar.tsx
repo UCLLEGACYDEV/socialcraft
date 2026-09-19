@@ -97,11 +97,15 @@ export function CryptoxNavbar({
   onSelectProfile,
   onOpenBrandProfileManager,
 }: CryptoxNavbarProps) {
-  const isAdmin = currentUser?.role === "admin";
   const activeBrand = brandProfiles?.find((p) => p.id === activeProfileId) || brandProfiles?.[0];
 
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => setHydrated(true), []);
+
+  // Session comes from browser storage: render the signed-out shell until hydration
+  // so server and client markup match exactly.
+  const currentUser = hydrated ? currentUserProp ?? null : null;
+  const isAdmin = currentUser?.role === "admin";
 
   // Clean credit count without noisy provider text
   const resolvedCreditDisplay = creditStatus?.kie.success
